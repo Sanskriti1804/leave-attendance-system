@@ -1,0 +1,53 @@
+# Dependencies
+node_modules/
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# IDE / editor
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Backend (Node / Express)
+backend/node_modules/
+backend/.env
+backend/.env.*
+!backend/.env.example
+backend/logs/
+backend/*.log
+backend/dist/
+backend/coverage/
+
+# Build / coverage
+dist/
+build/
+coverage/
+.cache/
+
+# Expo / React Native
+.expo/
+web-build/
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+.metro-health-check*
+expo-env.d.ts
+*.tsbuildinfo

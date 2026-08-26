@@ -1,0 +1,30 @@
+{
+  "expo": {
+    "name": "leave-attendance",
+    "slug": "leave-attendance",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "leave-attendance",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "backgroundColor": "#FFFFFF"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.maxstarter.leaveattendance"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#FFFFFF"
+      },
+      "package": "com.maxstarter.leaveattendance"
+    },
+    "plugins": [
+      "expo-router"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}

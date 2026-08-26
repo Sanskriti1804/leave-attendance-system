@@ -1,0 +1,8 @@
+{
+  "appName": "leave-attendance",
+  "expoSdk": "54",
+  "login": true,
+  "home": true,
+  "navigation": true,
+  "authentication": true
+}
