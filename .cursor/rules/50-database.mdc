@@ -1,0 +1,27 @@
+---
+description: Proposed database rules — no invented schema
+globs: backend/**/*,supabase/**/*
+alwaysApply: false
+---
+
+# Database
+
+There is **no database in the repo**. The schema in `documentation/database/` is a **Proposed** blueprint, not confirmed BRD.
+
+## Hard constraints from product
+
+- Do not create `leave_balances`, overtime tables, multi-tenant `org_id`, department tables, or multiple punches per day.
+- One attendance row per employee per `work_date` is technical integrity, not signed duplicate-punch UX policy.
+- Confirmed timezone for dashboards/reports/notifications: EST (IANA `America/New_York` is TD-03).
+- Store instants as timestamptz UTC; civil dates as `date`. Do not trust device clock as authoritative (Proposed TZ-01 / BR-21).
+
+## Migrations
+
+- Schema changes require migrations. Do not edit applied migration files in place.
+- No destructive production rollback — add a forward migration.
+- Destructive changes, table/column deletion, and irreversible migrations need human approval.
+
+## Integrity
+
+- Use transactions when leave status, attendance derivation, documents, notifications, and audit must stay consistent (INT-01, INT-03, BR-12).
+- Parameterized queries only. Preserve foreign keys and CHECKs from the approved schema.

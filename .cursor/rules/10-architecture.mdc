@@ -1,0 +1,27 @@
+---
+description: Actual architecture of this repo — preserve it
+alwaysApply: true
+---
+
+# Architecture
+
+This is not a modular monolith, MVC app, or clean-architecture template. Do not impose those layers.
+
+## What exists
+
+- `mobile/` — Expo SDK 54 + Expo Router 6 (file routes under `mobile/app/`). Mock auth. Placeholder Home/Profile/Settings. No domain screens.
+- `backend/` — Express 5 CommonJS declared in `package.json`. No server entry file, no routes, no database client.
+- No `supabase/` directory. No web frontend.
+
+## What must not happen without an approved ADR
+
+- Replacing Expo with a web app (engineering pack called mobile out of scope; the repo is mobile — keep Expo). See `documentation/decisions/ADR-0005-expo-mobile-vs-web-pack.md`.
+- Migrating backend to TypeScript or adding Nest/Fastify/ORMs. See ADR-0001.
+- Introducing leave-balance, overtime, payroll, SSO, Teams/Slack, or multi-tenant `org_id`.
+- Manager-in-app leave approval (Confirmed: approval is outside the app). See ADR-0004.
+
+## Proposed target (unsigned)
+
+Express API `/api/v1` → Supabase Auth + PostgreSQL + Storage. Modules named in the pack (`auth`, `employees`, `leave`, `attendance`, `calendar`, `documents`, `notifications`, `reports`, `audit`, `config`) are a blueprint, not existing folders.
+
+When adding backend code, start from Express in `backend/` without extra frameworks. Put domain rules on the server.

@@ -1,0 +1,25 @@
+---
+description: Testing reporting and strategy for this repo
+alwaysApply: true
+---
+
+# Testing
+
+No test runner exists (backend script exits 1; mobile has no Jest/Detox). Choosing a framework is a **Pending Decision**. Do not add a runner unless the task is to add tests.
+
+## Completion bar
+
+Never claim done without reporting: tests executed, passed, failed, skipped, remaining risks. If tests cannot run, say why.
+
+## When tests exist, cover at least
+
+- `guest_admin` writes → 403
+- Employee cannot read another employee’s leave/attendance
+- Employee cannot GET medical documents
+- Leave overlap (once blocking statuses are signed)
+- Medical required when medical leave exceeds two days (MED-12 still Open)
+- Check-out without check-in / double punch according to the **signed** punch policy
+- Approved leave marks attendance On Leave (INT-01); do not silently overwrite existing punches (INT-03)
+- Do not invent a stored “Unauthorized Absence” status
+
+Manual verification of mobile flows is acceptable until a UI test stack exists.

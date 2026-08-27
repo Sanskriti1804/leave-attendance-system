@@ -1,0 +1,28 @@
+---
+description: Core workflow for every AI coding task in this repository
+alwaysApply: true
+---
+
+# Core workflow
+
+READ `AGENTS.md` → READ `memory.md` → READ relevant `documentation/` → INSPECT code → UNDERSTAND current state → PLAN → IDENTIFY security / database / API impact → ASK APPROVAL when required → IMPLEMENT the smallest change → TEST → REVIEW DIFF → UPDATE documentation → UPDATE `memory.md` → REPORT changes and remaining risks.
+
+Never modify the codebase blindly. Do not invent requirements. Preserve Confirmed vs Proposed vs Open Question labels.
+
+## Minimal change and reuse
+
+- Prefer existing modules, components, routes, and naming.
+- Do not rewrite, migrate frameworks, or add dependencies unless required and approved.
+- Keep diffs scoped to the task.
+
+## Approval
+
+Required before: destructive DB changes; deleting production data; schema deletion; breaking APIs; authn/authz model changes; production config; major dependency replacement; architecture changes; irreversible migrations.
+
+Not required for ordinary isolated implementation.
+
+## After every completed change
+
+- Report tests executed / passed / failed / skipped / remaining risks (or why tests could not run).
+- Update the matching file under `documentation/`.
+- Update `memory.md` when architecture, API, DB, security, UI, bugs, debt, or decisions changed.

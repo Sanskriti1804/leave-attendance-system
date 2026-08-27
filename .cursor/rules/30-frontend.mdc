@@ -1,0 +1,31 @@
+---
+description: Expo mobile conventions, assets, and UI states
+globs: mobile/**/*
+alwaysApply: false
+---
+
+# Frontend (Expo)
+
+Stack: Expo Router file routes in `mobile/app/`, TypeScript, theme tokens in `mobile/src/maxstarter/theme/`, shared UI in `mobile/components/`, services in `mobile/services/`.
+
+## Reuse
+
+- Extend existing `Button`, `Input`, `AppIcon` before adding primitives.
+- Use theme colors/spacing/typography. Do not hardcode a second palette.
+- Put API calls in `mobile/services/`, not inside screen files once a real backend exists.
+- Auth is currently mock in `mobile/services/auth.ts`. Wire it; do not add a second auth module.
+
+## MaxStarter ownership
+
+Do not hand-edit `mobile/src/maxstarter/` or `MAXSTARTER:BEGIN/END` regions; change `mobile/public/design.md` and run `npm run apply-maxstarter`. Business screens go outside those regions.
+
+## Assets
+
+Search `mobile/public/` and `mobile/src/maxstarter/assets.ts` before adding files. Reuse `logo.png`. No absolute local machine paths. No random external brand assets.
+
+## UI
+
+- Handle loading, empty, error, and disabled states.
+- Stakeholder note: disable check-in when already in, disable check-out when not in or already out — until punch policy is signed.
+- Do not build leave-balance or overtime UI.
+- Do not add a separate web app without ADR-0005 approval.

@@ -1,0 +1,29 @@
+---
+description: Project-specific security controls for leave and attendance
+alwaysApply: true
+---
+
+# Security
+
+## Confirmed
+
+- Email/password authentication shall exist (AUTH-10). Values (TTL, provisioning) are not defined.
+- Employees access only their own leave/attendance (AUTH-02, AUTH-03, BR-13).
+- HR/Admin has org-wide access (AUTH-04, BR-14). `guest_admin` is read-only (AUTH-08/09).
+- Employees must not GET medical documents (MED-09).
+- Every change belongs in an audit log (BR-12).
+- Uploads limited to PDF, JPG, JPEG, PNG (BR-06).
+
+## Always enforce
+
+- Never hardcode secrets. Never commit service-role keys. Use env vars; keep `.env` gitignored.
+- Never log passwords, tokens, OTPs, or medical bytes/filenames at info level.
+- Validate all external input. Enforce authorization **server-side**. Never trust client-provided role, employee id, or ownership.
+- Do not expose whether another employee exists: Proposed convention is 404 (not 403) for employee access to another’s UUID — requires confirmation before coding as policy.
+- Rate-limit login and check-in when those endpoints exist (Proposed).
+
+## Approval
+
+Authentication model, authorization/RBAC, and production secret/config changes require human approval.
+
+Details: `documentation/security/model.md`.

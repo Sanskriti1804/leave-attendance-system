@@ -1,0 +1,28 @@
+---
+description: Express backend conventions for this repo
+globs: backend/**/*
+alwaysApply: false
+---
+
+# Backend
+
+Existing: Express 5, CommonJS, dotenv, nodemon. **No server file yet.** Add `index.js` (or the approved entry) without Nest, Fastify, or extra ORMs.
+
+Business rules live in Express, not only in the client and not only in RLS.
+
+## Do not implement without a signed requirement
+
+- Leave balances / accruals
+- Overtime, payroll, SSO, Teams/Slack
+- Manager leave-approve API (manager approval is outside the app)
+- Invented statuses such as “Unauthorized Absence”
+
+## When implementing APIs
+
+Treat `documentation/api/` as **Proposed**. Do not invent fields.
+
+Suggested HTTP mapping from the pack (unsigned): 200 GET/PATCH, 201 create, 204 logout/delete, 401 unauthenticated, 403 forbidden, 404 unknown/foreign resource (TD), 409 overlap/duplicate/version, 422 validation, 429 rate limit.
+
+Idempotency-Key on leave submit and punches is Proposed. Use transactions when leave approval also writes attendance and audit.
+
+`guest_admin` must not mutate. Employees must not PATCH attendance days (BR-10). HR direct PATCH vs request-only is an unresolved conflict (ADR-0007) — do not silently pick one.

@@ -1,0 +1,25 @@
+---
+description: How to maintain documentation and memory.md
+alwaysApply: true
+---
+
+# Documentation
+
+Permanent truth is `documentation/` plus `memory.md`. Do not cite `ai-input/` as the live source of truth.
+
+## After a completed change, update
+
+- The matching `documentation/features/*.md`
+- `documentation/api/*` if endpoints changed
+- `documentation/database/*` if schema changed
+- `documentation/architecture/*` or `documentation/security/*` if those changed
+- An ADR under `documentation/decisions/` for material architecture, security, database, auth, or dependency decisions
+- `memory.md` for phase, stack, feature status, API/DB/security/UI decisions, bugs, debt, pending work
+
+## Rules
+
+- Keep Confirmed / Proposed / Open Question labels honest.
+- Do not invent fields or endpoints in docs to match speculative code.
+- Do not fabricate ADR “Approved By”.
+- `docs/` at repo root is empty legacy; do not treat it as the OS.
+- Record Change History on feature files when behavior changes.
