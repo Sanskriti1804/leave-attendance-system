@@ -17,12 +17,13 @@ There is **no** CI/CD, application Dockerfile, or hosting config. Local PostgreS
 
 - Postgres (local): from repo root, `docker compose up -d` then `docker compose ps`. Stop with `docker compose stop`. See commands in Change History below.
 - Mobile: `cd mobile && npm start` (Expo). Use Expo Go matching SDK 54.
-- Backend: no start script and no `index.js`; cannot run a server yet. Prisma expects `DATABASE_URL` in `backend/.env` matching Compose.
+- Backend: from `backend/`, `npm start` (`tsx src/index.ts`, default port 3000). Requires `DATABASE_URL` in `backend/.env` matching Compose. Department and employee routes are live; other modules are still placeholders.
 
 ## Change History
 
 | Date | Change |
 | --- | --- |
+| 2026-09-01 | `npm start` for Express; department and employee APIs on `/api/v1`. |
 | 2026-09-01 | Added root `docker-compose.yml` for PostgreSQL 16 (`leave_management` / `app_user`). Credentials via `.env`, not YAML. Prisma schema and backend source unchanged. |
 
 ## Operational jobs (Proposed)

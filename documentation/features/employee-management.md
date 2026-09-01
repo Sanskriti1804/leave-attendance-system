@@ -2,7 +2,7 @@
 
 ## Status
 
-Confirmed EMP-01–04, EMP-06. **Not implemented.**
+Confirmed EMP-01–04, EMP-06. **HTTP create/list/get/patch implemented** against Prisma `Employee` / `Department`. Authz, audit, and Auth provisioning are not implemented.
 
 ## Purpose
 
@@ -16,9 +16,11 @@ Admin mutates. Guest admin may list/get (Proposed). Employees may get self (Prop
 
 Create/update/deactivate employees. Fields confirmed in BRD: name; department/team; reporting manager shown on leave form. Employees **may have no department and no manager**.
 
-## Out of Scope
+## Out of Scope (pack)
 
-Department entity/table. Teams as first-class records. Multi-company.
+Department as a signed BRD entity. Teams as first-class records. Multi-company.
+
+The **Prisma schema already has `Department`**, and employees require `departmentId`, so department APIs exist as engineering, not as a signed BRD table.
 
 ## Business Rules
 
@@ -28,7 +30,7 @@ Department entity/table. Teams as first-class records. Multi-company.
 
 ## API Endpoints
 
-Proposed: `GET/POST /employees`, `GET/PATCH /employees/{id}`. See `documentation/api/auth-and-employees.md`.
+Implemented (Proposed contract, Prisma IDs): `GET/POST /api/v1/employees`, `GET/PATCH /api/v1/employees/{id}`. Departments: `GET/POST /api/v1/departments`, `GET/PATCH /api/v1/departments/{id}` because the live schema requires `departmentId`. See `documentation/api/auth-and-employees.md`.
 
 ## Database Impact
 
@@ -48,4 +50,5 @@ Provisioning method (invite vs temp password).
 
 ## Change History
 
+2026-09-01 — Implemented department and employee Express APIs (Prisma integer IDs; no RBAC/audit yet).
 2026-08-27 — Extracted from source documentation.

@@ -9,7 +9,7 @@ Describes **what exists in the repository** and separately the **Proposed** engi
 ```text
 leave-attendance-system/
   mobile/          Expo SDK 54 app (UI shell)
-  backend/         Express + Prisma (no live HTTP APIs yet)
+  backend/         Express + Prisma (`/api/v1` departments & employees)
     src/
       index.ts, app.ts, env.ts, logger.ts
       generated/prisma/     Prisma client output
@@ -20,7 +20,7 @@ leave-attendance-system/
   documentation/   this OS
 ```
 
-Domain route/service/repository files exist as **structural placeholders** (not implemented). Prisma schema exists; no applied migrations. See [ADR-0008](../decisions/ADR-0008-three-backend-modules.md).
+Domain route/service/repository files exist; **departments and employees are implemented**. Other features are structural placeholders. Prisma schema and init migration exist. See [ADR-0008](../decisions/ADR-0008-three-backend-modules.md).
 
 ```mermaid
 flowchart LR
@@ -38,7 +38,7 @@ flowchart LR
 
 - Navigation: Expo Router stack + tabs. See `documentation/ui/current-mobile.md`.
 - Auth: client mock; tokens not stored; tabs not guarded.
-- Prisma schema present; no applied migrations. HTTP APIs not implemented.
+- Prisma schema + init migration. HTTP APIs implemented for departments and employees only (`/api/v1`). Other domain routes remain placeholders.
 
 ## Proposed target (unsigned)
 

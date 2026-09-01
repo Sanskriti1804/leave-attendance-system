@@ -1,6 +1,19 @@
 # Auth, employees, org, documents (Proposed)
 
-None of these endpoints exist in code. Bodies listed only where the pack specified them.
+Auth, leave types, org, and documents are not implemented. **Department and employee HTTP APIs are implemented** under `/api/v1` against `backend/prisma/schema.prisma` (integer IDs, not pack UUIDs). Role checks (A/G/self) are **not** enforced yet — AUTH-10 is still Open.
+
+Bodies listed only where the pack specified them, plus fields required by the Prisma models.
+
+## Departments (not in the pack inventory; required by Prisma `Department`)
+
+| Method | Path | Purpose | Auth |
+| --- | --- | --- | --- |
+| GET | `/departments` | List (`page`, `pageSize`, `includeObsolete`) | unimplemented |
+| POST | `/departments` | `{departmentName}` → 201 | unimplemented |
+| GET | `/departments/{id}` | Get | unimplemented |
+| PATCH | `/departments/{id}` | `{departmentName?, obsolete?}` | unimplemented |
+
+Soft-obsolete via PATCH. No DELETE. Default list omits `obsolete: true`. Pagination default 20, max 100 (Proposed; unconfirmed).
 
 ## Auth
 
@@ -19,10 +32,12 @@ Security: rate-limit login (Proposed). Do not log passwords.
 
 | Method | Path | Purpose | Auth |
 | --- | --- | --- | --- |
-| GET | `/employees` | List (`department`, `isActive`, page) | A G |
-| POST | `/employees` | Provision Auth + users + employees | A |
-| GET | `/employees/{id}` | Get | A G or self |
-| PATCH | `/employees/{id}` | Update/deactivate | A |
+| GET | `/employees` | List (`department` = departmentId, `isActive`, `page`, `pageSize`) | A G (not enforced) |
+| POST | `/employees` | Create employee; hashes `password` into `passwordHash`; no Auth user table | A (not enforced) |
+| GET | `/employees/{id}` | Get | A G or self (not enforced) |
+| PATCH | `/employees/{id}` | Update/deactivate (`obsolete`, `status`) | A (not enforced) |
+
+Employee JSON never includes `passwordHash`. `isActive=true` maps to `obsolete=false`. Prisma requires `departmentId` (pack said department nullable). `role` is `employee` \| `admin` \| `guest_admin`. `status` defaults to `ACTIVE`. Duplicate email → 409 `EMAIL_IN_USE`. Password min length 8 is a **TD** (AUTH-10 provisioning Open).
 
 ## Leave types
 
