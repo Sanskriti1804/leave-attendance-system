@@ -5,6 +5,8 @@ import pinoHttp from "pino-http";
 import { logger } from "./logger.js";
 import departmentRouter from "./modules/shared/departments/route.js";
 import employeeRouter from "./modules/shared/employees/route.js";
+import holidayRouter from "./modules/shared/holidays/route.js";
+import organisationSettingsRouter from "./modules/shared/organisation-settings/route.js";
 import { errorMiddleware, notFoundMiddleware } from "./modules/shared/middlewares/error.middleware.js";
 
 export function createApp() {
@@ -16,6 +18,8 @@ export function createApp() {
 
   app.use("/api/v1/departments", departmentRouter);
   app.use("/api/v1/employees", employeeRouter);
+  app.use("/api/v1/holidays", holidayRouter);
+  app.use("/api/v1/org-settings", organisationSettingsRouter);
 
   app.use(notFoundMiddleware);
   app.use(errorMiddleware);

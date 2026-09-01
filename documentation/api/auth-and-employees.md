@@ -1,6 +1,6 @@
 # Auth, employees, org, documents (Proposed)
 
-Auth, leave types, org, and documents are not implemented. **Department and employee HTTP APIs are implemented** under `/api/v1` against `backend/prisma/schema.prisma` (integer IDs, not pack UUIDs). Role checks (A/G/self) are **not** enforced yet — AUTH-10 is still Open.
+Auth, leave types, and documents are not implemented. **Department, employee, holiday, and organisation-settings HTTP APIs are implemented** under `/api/v1` against `backend/prisma/schema.prisma` (integer IDs, not pack UUIDs). Role checks (A/G/self) are **not** enforced yet — AUTH-10 is still Open.
 
 Bodies listed only where the pack specified them, plus fields required by the Prisma models.
 
@@ -50,13 +50,17 @@ Employee JSON never includes `passwordHash`. `isActive=true` maps to `obsolete=f
 
 ## Org settings and holidays
 
+Implemented (no JWT/RBAC). Holidays use Prisma `Holiday` (`holidayId`, `holidayName`, `holidayDate` UNIQUE). POST body is pack `{date, name}`. Duplicate date → 409 `CONFLICT`. DELETE → 204.
+
+Org settings use Prisma `ConfigurationSetting` key-value (`settingCategory` = `organisation`), not a pack `org_settings` table. GET returns defaults when keys are missing (`timezone` `America/New_York`, `graceMinutes` 0, `medicalDocOptional1To2Days` true, `medicalDocExceedsDays` 2, `maxAdvanceDays` 4 TD). `workStart`/`workEnd` are `HH:MM` or null. `weeklyOffDow` is ISO 1–7. Leave day-count is **not** applied here.
+
 | Method | Path | Purpose | Auth |
 | --- | --- | --- | --- |
-| GET | `/org-settings` | Policy/hours | * |
-| PATCH | `/org-settings` | Configure | A |
-| GET | `/holidays` | List `from`,`to` | * |
-| POST | `/holidays` | `{date, name}` | A |
-| DELETE | `/holidays/{id}` | Remove | A |
+| GET | `/org-settings` | Policy/hours | unimplemented |
+| PATCH | `/org-settings` | Configure | unimplemented |
+| GET | `/holidays` | List `from`,`to` | unimplemented |
+| POST | `/holidays` | `{date, name}` → 201 | unimplemented |
+| DELETE | `/holidays/{id}` | Remove → 204 | unimplemented |
 
 ## Documents
 

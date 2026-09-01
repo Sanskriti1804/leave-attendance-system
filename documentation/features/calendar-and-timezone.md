@@ -2,7 +2,7 @@
 
 ## Status
 
-Holidays/weekly offs CAL-01–03, CAL-07 Confirmed. TZ-04 EST Confirmed. TZ-01 authoritative clock Proposed. Working-hours section in the refinement is **empty**. **Not implemented.**
+Holidays/weekly offs CAL-01–03, CAL-07 Confirmed. TZ-04 EST Confirmed. TZ-01 authoritative clock Proposed. Working-hours section in the refinement is **empty**. **HTTP implemented** for `/api/v1/holidays` and `/api/v1/org-settings` (no authz; leave day-count not wired).
 
 ## Purpose
 
@@ -25,11 +25,11 @@ CAL-07: holidays/weekly offs **do not** sandwich-fill as leave. BR-08: include/e
 
 ## API Endpoints
 
-Proposed: `GET/PATCH /org-settings`, `GET/POST /holidays`, `DELETE /holidays/{id}`.
+Implemented (Proposed contract): `GET/PATCH /org-settings`, `GET/POST /holidays`, `DELETE /holidays/{id}`. Integer `holidayId`. No JWT.
 
 ## Database Impact
 
-Proposed `org_settings` (single row), `public_holidays`.
+Live Prisma: `Holiday`, `ConfigurationSetting` (category `organisation`). Pack `org_settings` / `public_holidays` not added.
 
 ## Open Questions
 
@@ -37,4 +37,5 @@ Section 13 working hours/shifts empty; BRD §8 cited later without a filled refi
 
 ## Change History
 
+2026-09-01 — Holiday and organisation-settings HTTP APIs.
 2026-08-27 — Extracted from source documentation.
