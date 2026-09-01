@@ -10,7 +10,7 @@ This is not a modular monolith, MVC app, or clean-architecture template. Do not 
 ## What exists
 
 - `mobile/` — Expo SDK 54 + Expo Router 6 (file routes under `mobile/app/`). Mock auth. Placeholder Home/Profile/Settings. No domain screens.
-- `backend/` — Express 5 CommonJS declared in `package.json`. No server entry file, no routes, no database client.
+- `backend/` — Express + TypeScript placeholders. Source lives in `backend/src/modules/` as three modules: `leave-management`, `attendance-management`, `shared`. Prisma schema exists; no applied migrations. HTTP APIs are not implemented.
 - No `supabase/` directory. No web frontend.
 
 ## What must not happen without an approved ADR
@@ -22,6 +22,4 @@ This is not a modular monolith, MVC app, or clean-architecture template. Do not 
 
 ## Proposed target (unsigned)
 
-Express API `/api/v1` → Supabase Auth + PostgreSQL + Storage. Modules named in the pack (`auth`, `employees`, `leave`, `attendance`, `calendar`, `documents`, `notifications`, `reports`, `audit`, `config`) are a blueprint, not existing folders.
-
-When adding backend code, start from Express in `backend/` without extra frameworks. Put domain rules on the server.
+Express API `/api/v1` → PostgreSQL via Prisma (schema present). Put new code in the matching module under `backend/src/modules/`. Leave and attendance must not import each other; use `shared/integrations`. Do not add Nest/Fastify. Put domain rules on the server.

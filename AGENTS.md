@@ -20,7 +20,7 @@ Do not implement from memory of other projects. This is a Leave Application & At
 
 ## Architecture
 
-- Preserve the existing stack: Expo SDK 54 mobile app in `mobile/`, Express 5 (CommonJS) stub in `backend/`.
+- Preserve the existing stack: Expo SDK 54 mobile app in `mobile/`, Express + Prisma in `backend/`. Backend domain code belongs in `backend/src/modules/` (`leave-management`, `attendance-management`, `shared`).
 - Do not replace Expo with a web app, migrate backend to TypeScript, add frameworks, or restructure modules unless an ADR is approved.
 - Reuse existing screens, components, theme tokens, and services before creating new ones.
 - Business rules belong on the server, not only in the client.

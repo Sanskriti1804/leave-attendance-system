@@ -8,10 +8,19 @@ Describes **what exists in the repository** and separately the **Proposed** engi
 
 ```text
 leave-attendance-system/
-  mobile/     Expo SDK 54 app (UI shell)
-  backend/    Express 5 package.json only (no server)
+  mobile/          Expo SDK 54 app (UI shell)
+  backend/         Express + Prisma (no live HTTP APIs yet)
+    src/
+      index.ts, app.ts, env.ts, logger.ts
+      generated/prisma/     Prisma client output
+      modules/
+        leave-management/
+        attendance-management/
+        shared/
   documentation/   this OS
 ```
+
+Domain route/service/repository files exist as **structural placeholders** (not implemented). Prisma schema exists; no applied migrations. See [ADR-0008](../decisions/ADR-0008-three-backend-modules.md).
 
 ```mermaid
 flowchart LR
@@ -21,15 +30,15 @@ flowchart LR
     Tabs[Home Profile Settings]
     Splash --> Login --> Tabs
   end
-  subgraph stub [Declared only]
-    ExpressPkg[Express package.json]
+  subgraph stub [Placeholders]
+    Modules[Three backend modules]
   end
-  Login -.->|"no HTTP"| ExpressPkg
+  Login -.->|"no HTTP"| Modules
 ```
 
 - Navigation: Expo Router stack + tabs. See `documentation/ui/current-mobile.md`.
 - Auth: client mock; tokens not stored; tabs not guarded.
-- Database, storage, real API: absent.
+- Prisma schema present; no applied migrations. HTTP APIs not implemented.
 
 ## Proposed target (unsigned)
 
@@ -39,9 +48,15 @@ Base path `/api/v1`. Private bucket `leave-documents`. Environments: separate Su
 
 **Conflict:** the pack described a web client and called mobile apps out of scope. This repository’s only UI is Expo. Keep Expo until ADR-0005 is approved otherwise.
 
-## Module boundaries (Proposed names, not existing folders)
+## Module boundaries
 
-`auth`, `employees`, `leave`, `attendance`, `calendar`, `documents`, `notifications`, `reports`, `audit`, `config`.
+**In repo (folder layout, ADR-0008):**
+
+- `leave-management` — leave types, policies, applications, documents.
+- `attendance-management` — attendance, attendance corrections.
+- `shared` — auth, employees, departments, holidays, organisation settings, notifications, audit, reports, health, database, middleware, types, utilities, leave–attendance integration.
+
+Pack names (`auth`, `employees`, `leave`, `attendance`, `calendar`, `documents`, `notifications`, `reports`, `audit`, `config`) map into those three modules. They are not separate top-level packages.
 
 Do not add leave-balance, overtime, or payroll modules.
 

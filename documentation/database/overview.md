@@ -2,7 +2,7 @@
 
 **Entire schema is Proposed** (implementation pack). Concepts such as employees, leave applications, punches, documents, audit are implied by Confirmed BRD IDs; table/column lists are not signed.
 
-There is **no database in the repository**.
+There is **no applied migration**. Prisma models live at `backend/prisma/schema.prisma` (not signed BRD). The lists below remain the pack blueprint and may not match that file.
 
 ## Conventions (Proposed)
 

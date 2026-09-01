@@ -28,7 +28,7 @@ Source requirements were **not yet business-confirmed**. Later schema and API se
 | Area | Current repo | Documentation |
 | --- | --- | --- |
 | Mobile | Expo shell, mock auth | `ui/current-mobile.md` |
-| Backend | Express package only | `architecture/overview.md` |
+| Backend | Three-module folder scaffold (placeholders) | `architecture/overview.md`, ADR-0008 |
 | API / DB | Not implemented | `api/`, `database/` (**Proposed**) |
 
 ## Contents
@@ -41,7 +41,7 @@ Source requirements were **not yet business-confirmed**. Later schema and API se
 - [UI](ui/current-mobile.md)
 - [Testing](testing/strategy.md)
 - [Deployment](deployment/environments.md)
-- [Decisions](decisions/ADR-0001-express-supabase-stack.md)
+- [Decisions](decisions/ADR-0001-express-supabase-stack.md) (through [ADR-0008](decisions/ADR-0008-three-backend-modules.md))
 - [Out of scope](features/out-of-scope.md)
 
 Empty `docs/` at the repository root is unused legacy. Do not treat `ai-input/` as live truth after this transfer.

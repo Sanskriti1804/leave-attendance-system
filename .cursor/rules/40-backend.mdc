@@ -6,7 +6,7 @@ alwaysApply: false
 
 # Backend
 
-Existing: Express 5, CommonJS, dotenv, nodemon. **No server file yet.** Add `index.js` (or the approved entry) without Nest, Fastify, or extra ORMs.
+Existing: Express + TypeScript under `backend/src/`. Entry `index.ts` and `app.ts` are placeholders. Feature code lives in `backend/src/modules/{leave-management,attendance-management,shared}`. Per resource: `route.ts`, `controller.ts`, `service.ts`, `repository.ts`, `validation.ts`. Do not add Nest or Fastify.
 
 Business rules live in Express, not only in the client and not only in RLS.
 

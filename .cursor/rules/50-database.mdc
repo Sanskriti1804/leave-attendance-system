@@ -6,7 +6,7 @@ alwaysApply: false
 
 # Database
 
-There is **no database in the repo**. The schema in `documentation/database/` is a **Proposed** blueprint, not confirmed BRD.
+There is **no applied migration**. Prisma schema lives at `backend/prisma/schema.prisma`. The schema in `documentation/database/` is still a **Proposed** blueprint and may differ from the Prisma file. Do not invent extra tables.
 
 ## Hard constraints from product
 
