@@ -15,46 +15,46 @@ model Department {
 }
 
 model Employee {
-  employeeId   Int      @id @default(autoincrement())
-  firstName    String   @db.VarChar(25)
-  lastName     String?  @db.VarChar(25)
-  email        String   @unique @db.VarChar(100)
-  passwordHash String   @db.VarChar(100)
+  employeeId   Int       @id @default(autoincrement())
+  firstName    String    @db.VarChar(25)
+  lastName     String?   @db.VarChar(25)
+  email        String    @unique @db.VarChar(100)
+  passwordHash String    @db.VarChar(100)
   departmentId Int
   role         String
   managerId    Int?
   joiningDate  DateTime? @db.Date
   createdAt    DateTime  @default(now())
   status       String
-  obsolete     Boolean  @default(false)
+  obsolete     Boolean   @default(false)
 
   department   Department @relation(fields: [departmentId], references: [departmentId])
-  manager      Employee? @relation("EmployeeManager", fields: [managerId], references: [employeeId])
+  manager      Employee?  @relation("EmployeeManager", fields: [managerId], references: [employeeId])
   subordinates Employee[] @relation("EmployeeManager")
 
-  attendance             Attendance[]
-  attendanceCorrections  AttendanceCorrection[]
-  leaveApplications      LeaveApplication[]
-  notifications          Notification[]
-  auditLogs              AuditLog[]
-  reviewedLeaves         LeaveApplication[] @relation("LeaveReviewer")
-  reviewedCorrections    AttendanceCorrection[] @relation("CorrectionReviewer")
-  uploadedDocuments      LeaveDocument[]
+  attendance            Attendance[]
+  attendanceCorrections AttendanceCorrection[]
+  leaveApplications     LeaveApplication[]
+  notifications         Notification[]
+  auditLogs             AuditLog[]
+  reviewedLeaves        LeaveApplication[]     @relation("LeaveReviewer")
+  reviewedCorrections   AttendanceCorrection[] @relation("CorrectionReviewer")
+  uploadedDocuments     LeaveDocument[]
 }
 
 model Attendance {
-  attendanceId   Int      @id @default(autoincrement())
+  attendanceId   Int       @id @default(autoincrement())
   employeeId     Int
-  attendanceDate DateTime @db.Date
+  attendanceDate DateTime  @db.Date
   checkIn        DateTime?
   checkOut       DateTime?
-  status         String   @db.VarChar(30)
-  lateMinutes    Int      @default(0)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  status         String    @db.VarChar(30)
+  lateMinutes    Int       @default(0)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 
-  employee       Employee @relation(fields: [employeeId], references: [employeeId])
-  corrections    AttendanceCorrection[]
+  employee    Employee               @relation(fields: [employeeId], references: [employeeId])
+  corrections AttendanceCorrection[]
 
   @@unique([employeeId, attendanceDate])
   @@index([employeeId])
@@ -62,24 +62,24 @@ model Attendance {
 }
 
 model AttendanceCorrection {
-  correctionId        Int      @id @default(autoincrement())
-  employeeId          Int
-  attendanceId        Int
-  correctionDate      DateTime @db.Date
-  correctionType      String   @db.VarChar(50)
-  correctLoginTime    DateTime?
-  correctLogoutTime   DateTime?
-  reason              String
-  supportingDocument  String?
-  status              String   @default("PENDING") @db.VarChar(30)
-  reviewedBy          Int?
-  hrComments          String?
-  createdAt           DateTime @default(now())
-  reviewedAt          DateTime?
+  correctionId       Int       @id @default(autoincrement())
+  employeeId         Int
+  attendanceId       Int
+  correctionDate     DateTime  @db.Date
+  correctionType     String    @db.VarChar(50)
+  correctLoginTime   DateTime?
+  correctLogoutTime  DateTime?
+  reason             String
+  supportingDocument String?
+  status             String    @default("PENDING") @db.VarChar(30)
+  reviewedBy         Int?
+  hrComments         String?
+  createdAt          DateTime  @default(now())
+  reviewedAt         DateTime?
 
-  employee   Employee    @relation(fields: [employeeId], references: [employeeId])
-  attendance Attendance  @relation(fields: [attendanceId], references: [attendanceId])
-  reviewer   Employee?   @relation("CorrectionReviewer", fields: [reviewedBy], references: [employeeId])
+  employee   Employee   @relation(fields: [employeeId], references: [employeeId])
+  attendance Attendance @relation(fields: [attendanceId], references: [attendanceId])
+  reviewer   Employee?  @relation("CorrectionReviewer", fields: [reviewedBy], references: [employeeId])
 }
 
 model LeaveType {
@@ -91,37 +91,37 @@ model LeaveType {
   createdAt               DateTime @default(now())
   updatedAt               DateTime @updatedAt
 
-  leaveApplications       LeaveApplication[]
-  policies                LeavePolicy[]
+  leaveApplications LeaveApplication[]
+  policies          LeavePolicy[]
 }
 
 model LeavePolicy {
-  policyId                Int      @id @default(autoincrement())
-  leaveTypeId             Int
+  policyId                 Int      @id @default(autoincrement())
+  leaveTypeId              Int
   medicalDocumentAfterDays Int?
-  includeWeekends         Boolean  @default(false)
-  includeHolidays         Boolean  @default(false)
-  maxDays                 Decimal? @db.Decimal(5, 2)
-  obsolete                Boolean  @default(false)
+  includeWeekends          Boolean  @default(false)
+  includeHolidays          Boolean  @default(false)
+  maxDays                  Decimal? @db.Decimal(5, 2)
+  obsolete                 Boolean  @default(false)
 
   leaveType LeaveType @relation(fields: [leaveTypeId], references: [leaveTypeId])
 }
 
 model LeaveApplication {
-  leaveId       Int      @id @default(autoincrement())
-  employeeId    Int
-  leaveTypeId   Int
-  startDate     DateTime @db.Date
-  endDate       DateTime @db.Date
-  durationType  String   @db.VarChar(30)
-  halfDayType   String?  @db.VarChar(30)
-  numberOfDays  Decimal  @db.Decimal(5, 2)
-  reason        String
-  status        String   @default("DRAFT") @db.VarChar(30)
-  hrComments    String?
-  reviewedBy    Int?
-  reviewedAt    DateTime?
-  createdAt     DateTime @default(now())
+  leaveId      Int       @id @default(autoincrement())
+  employeeId   Int
+  leaveTypeId  Int
+  startDate    DateTime  @db.Date
+  endDate      DateTime  @db.Date
+  durationType String    @db.VarChar(30)
+  halfDayType  String?   @db.VarChar(30)
+  numberOfDays Decimal   @db.Decimal(5, 2)
+  reason       String
+  status       String    @default("DRAFT") @db.VarChar(30)
+  hrComments   String?
+  reviewedBy   Int?
+  reviewedAt   DateTime?
+  createdAt    DateTime  @default(now())
 
   employee Employee @relation(fields: [employeeId], references: [employeeId])
 
@@ -129,20 +129,20 @@ model LeaveApplication {
 
   reviewer Employee? @relation("LeaveReviewer", fields: [reviewedBy], references: [employeeId])
 
-  documents     LeaveDocument[]
+  documents LeaveDocument[]
 
   @@index([employeeId])
   @@index([status])
 }
 
 model LeaveDocument {
-  documentId   Int      @id @default(autoincrement())
-  leaveId      Int
-  fileName     String   @db.VarChar(50)
-  filePath     String
-  fileType     String   @db.VarChar(10)
-  uploadedBy   Int
-  uploadedAt   DateTime @default(now())
+  documentId Int      @id @default(autoincrement())
+  leaveId    Int
+  fileName   String   @db.VarChar(50)
+  filePath   String
+  fileType   String   @db.VarChar(10)
+  uploadedBy Int
+  uploadedAt DateTime @default(now())
 
   leave    LeaveApplication @relation(fields: [leaveId], references: [leaveId], onDelete: Cascade)
   uploader Employee         @relation(fields: [uploadedBy], references: [employeeId])
@@ -163,14 +163,14 @@ model Notification {
 }
 
 model AuditLog {
-  auditId     Int      @id @default(autoincrement())
-  userId      Int
-  action      String   @db.VarChar(50)
-  entityType  String   @db.VarChar(100)
-  entityId    Int?
-  oldValue    Json?
-  newValue    Json?
-  createdAt   DateTime @default(now())
+  auditId    Int      @id @default(autoincrement())
+  userId     Int
+  action     String   @db.VarChar(50)
+  entityType String   @db.VarChar(100)
+  entityId   Int?
+  oldValue   Json?
+  newValue   Json?
+  createdAt  DateTime @default(now())
 
   user Employee @relation(fields: [userId], references: [employeeId])
 

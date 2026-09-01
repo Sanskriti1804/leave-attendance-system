@@ -1,0 +1,35 @@
+# Local PostgreSQL for the Leave & Attendance API (Prisma 7 + Node).
+# Copy `.env.example` to `.env` before `docker compose up`.
+# Credentials are not stored in this file.
+
+name: leave-attendance-system
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: leave-attendance-postgres
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - leave_attendance_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  leave_attendance_postgres_data:

@@ -2,7 +2,7 @@
 
 ## Facts
 
-There is **no** CI/CD, Dockerfile, or hosting config in the repository. The source pipeline listed CI/CD and Deployment but did not specify a host, cloud, or pipeline.
+There is **no** CI/CD, application Dockerfile, or hosting config. Local PostgreSQL 16 is defined in root `docker-compose.yml` (named volume, bind `127.0.0.1:5432`). Copy `.env.example` → `.env` and `backend/.env.example` → `backend/.env`. Do not commit those files. The source pipeline listed CI/CD and Deployment but did not specify a host, cloud, or pipeline.
 
 ## Proposed (unsigned engineering pack)
 
@@ -15,8 +15,15 @@ There is **no** CI/CD, Dockerfile, or hosting config in the repository. The sour
 
 ## Existing app run (implemented)
 
+- Postgres (local): from repo root, `docker compose up -d` then `docker compose ps`. Stop with `docker compose stop`. See commands in Change History below.
 - Mobile: `cd mobile && npm start` (Expo). Use Expo Go matching SDK 54.
-- Backend: no start script and no `index.js`; cannot run a server yet.
+- Backend: no start script and no `index.js`; cannot run a server yet. Prisma expects `DATABASE_URL` in `backend/.env` matching Compose.
+
+## Change History
+
+| Date | Change |
+| --- | --- |
+| 2026-09-01 | Added root `docker-compose.yml` for PostgreSQL 16 (`leave_management` / `app_user`). Credentials via `.env`, not YAML. Prisma schema and backend source unchanged. |
 
 ## Operational jobs (Proposed)
 
