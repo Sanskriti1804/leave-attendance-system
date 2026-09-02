@@ -1,23 +1,16 @@
-import type { NextFunction, Request, Response } from "express";
+import type { Request, Response } from "express";
+import { asyncHandler } from "../middlewares/async-handler.js";
 import * as organisationSettingsService from "./service.js";
 import type { UpdateOrganisationSettingsBody } from "./validation.js";
 
-export async function get(_req: Request, res: Response, next: NextFunction): Promise<void> {
-  try {
-    const settings = await organisationSettingsService.getOrganisationSettings();
-    res.status(200).json(settings);
-  } catch (err) {
-    next(err);
-  }
-}
+export const get = asyncHandler(async (_req: Request, res: Response): Promise<void> => {
+  const settings = await organisationSettingsService.getOrganisationSettings();
+  res.status(200).json(settings);
+});
 
-export async function update(req: Request, res: Response, next: NextFunction): Promise<void> {
-  try {
-    const settings = await organisationSettingsService.updateOrganisationSettings(
-      req.body as UpdateOrganisationSettingsBody,
-    );
-    res.status(200).json(settings);
-  } catch (err) {
-    next(err);
-  }
-}
+export const update = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+  const settings = await organisationSettingsService.updateOrganisationSettings(
+    req.body as UpdateOrganisationSettingsBody,
+  );
+  res.status(200).json(settings);
+});

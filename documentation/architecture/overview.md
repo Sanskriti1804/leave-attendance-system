@@ -65,3 +65,12 @@ Do not add leave-balance, overtime, or payroll modules.
 - Single organization timezone; no `org_id` multi-tenant in v1.
 - Manager leave approval is **outside** the application (BR-15). No manager-approve API.
 - Complex rules belong in Express, not only in the browser and not only in RLS.
+
+## HTTP errors (implemented)
+
+All JSON errors come from `backend/src/modules/shared/middlewares/error.middleware.ts`, registered last in `app.ts` (after `notFoundMiddleware`). Envelope: `{ error: { code, message, details? } }`.
+
+- Services throw `HttpError` (404/409/422). Controllers use `asyncHandler` and do not write error bodies.
+- Zod failures from `validate` are `ZodError` → 422 `VALIDATION_ERROR`.
+- Prisma `P2002` → 409 (`EMAIL_IN_USE` or `CONFLICT`); `P2003` → 422; `P2025` → 404.
+- Invalid JSON body → 400 `INVALID_JSON`. Unknown errors → 500 `INTERNAL_ERROR` (logged; no stack in the response).

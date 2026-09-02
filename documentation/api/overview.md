@@ -9,6 +9,10 @@
 - `Idempotency-Key` on leave submit and punches — Proposed
 - Optimistic concurrency `rowVersion` / `If-Match` — **requires confirmation**
 
+## Error envelope (implemented)
+
+`errorMiddleware` is the last Express middleware. Shape: `{ "error": { "code": "...", "message": "...", "details"?: ... } }`. Unknown routes go through `notFoundMiddleware` → same handler (404 `NOT_FOUND`). Validation (Zod) is 422, not a per-route `res.status`.
+
 ## HTTP (Proposed)
 
 200 GET/PATCH, 201 create, 204 logout/delete, 400 bad JSON, 401 token, 403 forbidden, 404 unknown id, 409 overlap/transition/duplicate/version, 422 validation, 429 rate limit.

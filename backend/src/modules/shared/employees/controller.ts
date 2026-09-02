@@ -1,42 +1,27 @@
-import type { NextFunction, Request, Response } from "express";
+import type { Request, Response } from "express";
+import { asyncHandler } from "../middlewares/async-handler.js";
 import * as employeeService from "./service.js";
 import type { CreateEmployeeBody, ListEmployeesQuery, UpdateEmployeeBody } from "./validation.js";
 
-export async function list(_req: Request, res: Response, next: NextFunction): Promise<void> {
-  try {
-    const result = await employeeService.listEmployees(res.locals.query as ListEmployeesQuery);
-    res.status(200).json(result);
-  } catch (err) {
-    next(err);
-  }
-}
+export const list = asyncHandler(async (_req: Request, res: Response): Promise<void> => {
+  const result = await employeeService.listEmployees(res.locals.query as ListEmployeesQuery);
+  res.status(200).json(result);
+});
 
-export async function getById(_req: Request, res: Response, next: NextFunction): Promise<void> {
-  try {
-    const employee = await employeeService.getEmployee(Number(res.locals.params.id));
-    res.status(200).json(employee);
-  } catch (err) {
-    next(err);
-  }
-}
+export const getById = asyncHandler(async (_req: Request, res: Response): Promise<void> => {
+  const employee = await employeeService.getEmployee(Number(res.locals.params.id));
+  res.status(200).json(employee);
+});
 
-export async function create(req: Request, res: Response, next: NextFunction): Promise<void> {
-  try {
-    const employee = await employeeService.createEmployee(req.body as CreateEmployeeBody);
-    res.status(201).json(employee);
-  } catch (err) {
-    next(err);
-  }
-}
+export const create = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+  const employee = await employeeService.createEmployee(req.body as CreateEmployeeBody);
+  res.status(201).json(employee);
+});
 
-export async function update(req: Request, res: Response, next: NextFunction): Promise<void> {
-  try {
-    const employee = await employeeService.updateEmployee(
-      Number(res.locals.params.id),
-      req.body as UpdateEmployeeBody,
-    );
-    res.status(200).json(employee);
-  } catch (err) {
-    next(err);
-  }
-}
+export const update = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+  const employee = await employeeService.updateEmployee(
+    Number(res.locals.params.id),
+    req.body as UpdateEmployeeBody,
+  );
+  res.status(200).json(employee);
+});

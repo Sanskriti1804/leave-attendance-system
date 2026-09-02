@@ -1,6 +1,6 @@
 # Auth, employees, org, documents (Proposed)
 
-Auth, leave types, and documents are not implemented. **Department, employee, holiday, and organisation-settings HTTP APIs are implemented** under `/api/v1` against `backend/prisma/schema.prisma` (integer IDs, not pack UUIDs). Role checks (A/G/self) are **not** enforced yet — AUTH-10 is still Open.
+Auth, leave types, and documents are not implemented. **Department, employee, holiday, and organisation-settings HTTP APIs are implemented** under `/api/v1` against `backend/prisma/schema.prisma` (integer IDs, not pack UUIDs). Role checks (A/G/self) are **not** enforced yet — AUTH-10 is still Open. Error JSON is produced only by `errorMiddleware` (see [overview](overview.md)).
 
 Bodies listed only where the pack specified them, plus fields required by the Prisma models.
 

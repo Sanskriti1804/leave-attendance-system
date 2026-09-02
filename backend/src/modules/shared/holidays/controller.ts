@@ -1,30 +1,19 @@
-import type { NextFunction, Request, Response } from "express";
+import type { Request, Response } from "express";
+import { asyncHandler } from "../middlewares/async-handler.js";
 import * as holidayService from "./service.js";
 import type { CreateHolidayBody, ListHolidaysQuery } from "./validation.js";
 
-export async function list(_req: Request, res: Response, next: NextFunction): Promise<void> {
-  try {
-    const result = await holidayService.listHolidays(res.locals.query as ListHolidaysQuery);
-    res.status(200).json(result);
-  } catch (err) {
-    next(err);
-  }
-}
+export const list = asyncHandler(async (_req: Request, res: Response): Promise<void> => {
+  const result = await holidayService.listHolidays(res.locals.query as ListHolidaysQuery);
+  res.status(200).json(result);
+});
 
-export async function create(req: Request, res: Response, next: NextFunction): Promise<void> {
-  try {
-    const holiday = await holidayService.createHoliday(req.body as CreateHolidayBody);
-    res.status(201).json(holiday);
-  } catch (err) {
-    next(err);
-  }
-}
+export const create = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+  const holiday = await holidayService.createHoliday(req.body as CreateHolidayBody);
+  res.status(201).json(holiday);
+});
 
-export async function remove(_req: Request, res: Response, next: NextFunction): Promise<void> {
-  try {
-    await holidayService.deleteHoliday(Number(res.locals.params.id));
-    res.status(204).send();
-  } catch (err) {
-    next(err);
-  }
-}
+export const remove = asyncHandler(async (_req: Request, res: Response): Promise<void> => {
+  await holidayService.deleteHoliday(Number(res.locals.params.id));
+  res.status(204).send();
+});
