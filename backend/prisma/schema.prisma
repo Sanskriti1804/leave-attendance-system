@@ -40,6 +40,8 @@ model Employee {
   reviewedLeaves        LeaveApplication[]     @relation("LeaveReviewer")
   reviewedCorrections   AttendanceCorrection[] @relation("CorrectionReviewer")
   uploadedDocuments     LeaveDocument[]
+  refreshTokens         RefreshToken[]
+  passwordResetTokens   PasswordResetToken[]
 }
 
 model Attendance {
@@ -191,4 +193,35 @@ model ConfigurationSetting {
   settingType     String @db.VarChar(20)
 
   @@unique([settingCategory, settingKey])
+}
+
+model RefreshToken {
+  refreshTokenId Int      @id @default(autoincrement())
+  employeeId     Int
+  tokenHash      String   @db.VarChar(255)
+  family         String   @db.VarChar(100)
+  isRevoked      Boolean  @default(false)
+  expiresAt      DateTime
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  employee Employee @relation(fields: [employeeId], references: [employeeId], onDelete: Cascade)
+
+  @@index([tokenHash])
+  @@index([employeeId])
+  @@index([family])
+}
+
+model PasswordResetToken {
+  resetTokenId Int      @id @default(autoincrement())
+  employeeId   Int
+  tokenHash    String   @db.VarChar(255)
+  isUsed       Boolean  @default(false)
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+
+  employee Employee @relation(fields: [employeeId], references: [employeeId], onDelete: Cascade)
+
+  @@index([tokenHash])
+  @@index([employeeId])
 }
