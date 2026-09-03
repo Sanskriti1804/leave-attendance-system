@@ -1,7 +1,7 @@
-import bcrypt from "bcrypt";
 import { findDepartmentById } from "../departments/repository.js";
 import { HttpError } from "../utils/http-error.js";
 import { fromCivilDate, toCivilDate } from "../utils/dates.js";
+import { hashPassword } from "../utils/security.js";
 import * as employeeRepository from "./repository.js";
 import type { EmployeePublic } from "./repository.js";
 import type { CreateEmployeeBody, ListEmployeesQuery, UpdateEmployeeBody } from "./validation.js";
@@ -75,7 +75,7 @@ export async function createEmployee(body: CreateEmployeeBody) {
     await assertManagerExists(body.managerId);
   }
 
-  const passwordHash = await bcrypt.hash(body.password, BCRYPT_ROUNDS);
+  const passwordHash = await hashPassword(body.password);
   const created = await employeeRepository.createEmployee({
     firstName: body.firstName,
     lastName: body.lastName ?? null,
@@ -110,7 +110,7 @@ export async function updateEmployee(employeeId: number, body: UpdateEmployeeBod
   }
 
   const passwordHash =
-    body.password !== undefined ? await bcrypt.hash(body.password, BCRYPT_ROUNDS) : undefined;
+    body.password !== undefined ? await hashPassword(body.password) : undefined;
 
   const data: Parameters<typeof employeeRepository.updateEmployee>[1] = {
     firstName: body.firstName,

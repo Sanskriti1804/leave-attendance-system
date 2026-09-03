@@ -3,6 +3,7 @@ import express from "express";
 import helmet from "helmet";
 import pinoHttp from "pino-http";
 import { logger } from "./logger.js";
+import authRouter from "./modules/shared/auth/route.js";
 import departmentRouter from "./modules/shared/departments/route.js";
 import employeeRouter from "./modules/shared/employees/route.js";
 import holidayRouter from "./modules/shared/holidays/route.js";
@@ -16,6 +17,7 @@ export function createApp() {
   app.use(express.json({ limit: "1mb" }));
   app.use(pinoHttp({ logger }));
 
+  app.use("/api/v1/auth", authRouter);
   app.use("/api/v1/departments", departmentRouter);
   app.use("/api/v1/employees", employeeRouter);
   app.use("/api/v1/holidays", holidayRouter);

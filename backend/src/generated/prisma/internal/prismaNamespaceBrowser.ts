@@ -62,7 +62,9 @@ export const ModelName = {
   Notification: 'Notification',
   AuditLog: 'AuditLog',
   Holiday: 'Holiday',
-  ConfigurationSetting: 'ConfigurationSetting'
+  ConfigurationSetting: 'ConfigurationSetting',
+  RefreshToken: 'RefreshToken',
+  PasswordResetToken: 'PasswordResetToken'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -247,6 +249,32 @@ export const ConfigurationSettingScalarFieldEnum = {
 } as const
 
 export type ConfigurationSettingScalarFieldEnum = (typeof ConfigurationSettingScalarFieldEnum)[keyof typeof ConfigurationSettingScalarFieldEnum]
+
+
+export const RefreshTokenScalarFieldEnum = {
+  refreshTokenId: 'refreshTokenId',
+  employeeId: 'employeeId',
+  tokenHash: 'tokenHash',
+  family: 'family',
+  isRevoked: 'isRevoked',
+  expiresAt: 'expiresAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type RefreshTokenScalarFieldEnum = (typeof RefreshTokenScalarFieldEnum)[keyof typeof RefreshTokenScalarFieldEnum]
+
+
+export const PasswordResetTokenScalarFieldEnum = {
+  resetTokenId: 'resetTokenId',
+  employeeId: 'employeeId',
+  tokenHash: 'tokenHash',
+  isUsed: 'isUsed',
+  expiresAt: 'expiresAt',
+  createdAt: 'createdAt'
+} as const
+
+export type PasswordResetTokenScalarFieldEnum = (typeof PasswordResetTokenScalarFieldEnum)[keyof typeof PasswordResetTokenScalarFieldEnum]
 
 
 export const SortOrder = {

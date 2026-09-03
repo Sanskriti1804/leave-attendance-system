@@ -77,3 +77,13 @@ export type Holiday = Prisma.HolidayModel
  * 
  */
 export type ConfigurationSetting = Prisma.ConfigurationSettingModel
+/**
+ * Model RefreshToken
+ * 
+ */
+export type RefreshToken = Prisma.RefreshTokenModel
+/**
+ * Model PasswordResetToken
+ * 
+ */
+export type PasswordResetToken = Prisma.PasswordResetTokenModel
