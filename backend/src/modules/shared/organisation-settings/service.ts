@@ -25,7 +25,7 @@ const DEFAULTS: OrganisationSettings = {
   leaveCountExcludesHolidays: false,
   medicalDocOptional1To2Days: true,
   medicalDocExceedsDays: 2,
-  maxAdvanceDays: 4,
+  maxAdvanceDays: 14,
 };
 
 type SettingType = "string" | "number" | "boolean" | "json";

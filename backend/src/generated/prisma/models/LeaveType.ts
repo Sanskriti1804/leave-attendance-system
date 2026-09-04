@@ -39,6 +39,7 @@ export type LeaveTypeMinAggregateOutputType = {
   name: string | null
   description: string | null
   requiresMedicalDocument: boolean | null
+  allowedSex: string | null
   obsolete: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -49,6 +50,7 @@ export type LeaveTypeMaxAggregateOutputType = {
   name: string | null
   description: string | null
   requiresMedicalDocument: boolean | null
+  allowedSex: string | null
   obsolete: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -59,6 +61,7 @@ export type LeaveTypeCountAggregateOutputType = {
   name: number
   description: number
   requiresMedicalDocument: number
+  allowedSex: number
   obsolete: number
   createdAt: number
   updatedAt: number
@@ -79,6 +82,7 @@ export type LeaveTypeMinAggregateInputType = {
   name?: true
   description?: true
   requiresMedicalDocument?: true
+  allowedSex?: true
   obsolete?: true
   createdAt?: true
   updatedAt?: true
@@ -89,6 +93,7 @@ export type LeaveTypeMaxAggregateInputType = {
   name?: true
   description?: true
   requiresMedicalDocument?: true
+  allowedSex?: true
   obsolete?: true
   createdAt?: true
   updatedAt?: true
@@ -99,6 +104,7 @@ export type LeaveTypeCountAggregateInputType = {
   name?: true
   description?: true
   requiresMedicalDocument?: true
+  allowedSex?: true
   obsolete?: true
   createdAt?: true
   updatedAt?: true
@@ -196,6 +202,7 @@ export type LeaveTypeGroupByOutputType = {
   name: string
   description: string | null
   requiresMedicalDocument: boolean
+  allowedSex: string | null
   obsolete: boolean
   createdAt: Date
   updatedAt: Date
@@ -229,6 +236,7 @@ export type LeaveTypeWhereInput = {
   name?: Prisma.StringFilter<"LeaveType"> | string
   description?: Prisma.StringNullableFilter<"LeaveType"> | string | null
   requiresMedicalDocument?: Prisma.BoolFilter<"LeaveType"> | boolean
+  allowedSex?: Prisma.StringNullableFilter<"LeaveType"> | string | null
   obsolete?: Prisma.BoolFilter<"LeaveType"> | boolean
   createdAt?: Prisma.DateTimeFilter<"LeaveType"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"LeaveType"> | Date | string
@@ -241,6 +249,7 @@ export type LeaveTypeOrderByWithRelationInput = {
   name?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   requiresMedicalDocument?: Prisma.SortOrder
+  allowedSex?: Prisma.SortOrderInput | Prisma.SortOrder
   obsolete?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -256,6 +265,7 @@ export type LeaveTypeWhereUniqueInput = Prisma.AtLeast<{
   name?: Prisma.StringFilter<"LeaveType"> | string
   description?: Prisma.StringNullableFilter<"LeaveType"> | string | null
   requiresMedicalDocument?: Prisma.BoolFilter<"LeaveType"> | boolean
+  allowedSex?: Prisma.StringNullableFilter<"LeaveType"> | string | null
   obsolete?: Prisma.BoolFilter<"LeaveType"> | boolean
   createdAt?: Prisma.DateTimeFilter<"LeaveType"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"LeaveType"> | Date | string
@@ -268,6 +278,7 @@ export type LeaveTypeOrderByWithAggregationInput = {
   name?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   requiresMedicalDocument?: Prisma.SortOrder
+  allowedSex?: Prisma.SortOrderInput | Prisma.SortOrder
   obsolete?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -286,6 +297,7 @@ export type LeaveTypeScalarWhereWithAggregatesInput = {
   name?: Prisma.StringWithAggregatesFilter<"LeaveType"> | string
   description?: Prisma.StringNullableWithAggregatesFilter<"LeaveType"> | string | null
   requiresMedicalDocument?: Prisma.BoolWithAggregatesFilter<"LeaveType"> | boolean
+  allowedSex?: Prisma.StringNullableWithAggregatesFilter<"LeaveType"> | string | null
   obsolete?: Prisma.BoolWithAggregatesFilter<"LeaveType"> | boolean
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"LeaveType"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"LeaveType"> | Date | string
@@ -295,6 +307,7 @@ export type LeaveTypeCreateInput = {
   name: string
   description?: string | null
   requiresMedicalDocument?: boolean
+  allowedSex?: string | null
   obsolete?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -307,6 +320,7 @@ export type LeaveTypeUncheckedCreateInput = {
   name: string
   description?: string | null
   requiresMedicalDocument?: boolean
+  allowedSex?: string | null
   obsolete?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -318,6 +332,7 @@ export type LeaveTypeUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requiresMedicalDocument?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  allowedSex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -330,6 +345,7 @@ export type LeaveTypeUncheckedUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requiresMedicalDocument?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  allowedSex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -342,6 +358,7 @@ export type LeaveTypeCreateManyInput = {
   name: string
   description?: string | null
   requiresMedicalDocument?: boolean
+  allowedSex?: string | null
   obsolete?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -351,6 +368,7 @@ export type LeaveTypeUpdateManyMutationInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requiresMedicalDocument?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  allowedSex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -361,6 +379,7 @@ export type LeaveTypeUncheckedUpdateManyInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requiresMedicalDocument?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  allowedSex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -371,6 +390,7 @@ export type LeaveTypeCountOrderByAggregateInput = {
   name?: Prisma.SortOrder
   description?: Prisma.SortOrder
   requiresMedicalDocument?: Prisma.SortOrder
+  allowedSex?: Prisma.SortOrder
   obsolete?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -385,6 +405,7 @@ export type LeaveTypeMaxOrderByAggregateInput = {
   name?: Prisma.SortOrder
   description?: Prisma.SortOrder
   requiresMedicalDocument?: Prisma.SortOrder
+  allowedSex?: Prisma.SortOrder
   obsolete?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -395,6 +416,7 @@ export type LeaveTypeMinOrderByAggregateInput = {
   name?: Prisma.SortOrder
   description?: Prisma.SortOrder
   requiresMedicalDocument?: Prisma.SortOrder
+  allowedSex?: Prisma.SortOrder
   obsolete?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -441,6 +463,7 @@ export type LeaveTypeCreateWithoutPoliciesInput = {
   name: string
   description?: string | null
   requiresMedicalDocument?: boolean
+  allowedSex?: string | null
   obsolete?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -452,6 +475,7 @@ export type LeaveTypeUncheckedCreateWithoutPoliciesInput = {
   name: string
   description?: string | null
   requiresMedicalDocument?: boolean
+  allowedSex?: string | null
   obsolete?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -478,6 +502,7 @@ export type LeaveTypeUpdateWithoutPoliciesInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requiresMedicalDocument?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  allowedSex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -489,6 +514,7 @@ export type LeaveTypeUncheckedUpdateWithoutPoliciesInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requiresMedicalDocument?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  allowedSex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -499,6 +525,7 @@ export type LeaveTypeCreateWithoutLeaveApplicationsInput = {
   name: string
   description?: string | null
   requiresMedicalDocument?: boolean
+  allowedSex?: string | null
   obsolete?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -510,6 +537,7 @@ export type LeaveTypeUncheckedCreateWithoutLeaveApplicationsInput = {
   name: string
   description?: string | null
   requiresMedicalDocument?: boolean
+  allowedSex?: string | null
   obsolete?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -536,6 +564,7 @@ export type LeaveTypeUpdateWithoutLeaveApplicationsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requiresMedicalDocument?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  allowedSex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -547,6 +576,7 @@ export type LeaveTypeUncheckedUpdateWithoutLeaveApplicationsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requiresMedicalDocument?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  allowedSex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -598,6 +628,7 @@ export type LeaveTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   name?: boolean
   description?: boolean
   requiresMedicalDocument?: boolean
+  allowedSex?: boolean
   obsolete?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -611,6 +642,7 @@ export type LeaveTypeSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ext
   name?: boolean
   description?: boolean
   requiresMedicalDocument?: boolean
+  allowedSex?: boolean
   obsolete?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -621,6 +653,7 @@ export type LeaveTypeSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
   name?: boolean
   description?: boolean
   requiresMedicalDocument?: boolean
+  allowedSex?: boolean
   obsolete?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -631,12 +664,13 @@ export type LeaveTypeSelectScalar = {
   name?: boolean
   description?: boolean
   requiresMedicalDocument?: boolean
+  allowedSex?: boolean
   obsolete?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type LeaveTypeOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"leaveTypeId" | "name" | "description" | "requiresMedicalDocument" | "obsolete" | "createdAt" | "updatedAt", ExtArgs["result"]["leaveType"]>
+export type LeaveTypeOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"leaveTypeId" | "name" | "description" | "requiresMedicalDocument" | "allowedSex" | "obsolete" | "createdAt" | "updatedAt", ExtArgs["result"]["leaveType"]>
 export type LeaveTypeInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   leaveApplications?: boolean | Prisma.LeaveType$leaveApplicationsArgs<ExtArgs>
   policies?: boolean | Prisma.LeaveType$policiesArgs<ExtArgs>
@@ -656,6 +690,7 @@ export type $LeaveTypePayload<ExtArgs extends runtime.Types.Extensions.InternalA
     name: string
     description: string | null
     requiresMedicalDocument: boolean
+    allowedSex: string | null
     obsolete: boolean
     createdAt: Date
     updatedAt: Date
@@ -1088,6 +1123,7 @@ export interface LeaveTypeFieldRefs {
   readonly name: Prisma.FieldRef<"LeaveType", 'String'>
   readonly description: Prisma.FieldRef<"LeaveType", 'String'>
   readonly requiresMedicalDocument: Prisma.FieldRef<"LeaveType", 'Boolean'>
+  readonly allowedSex: Prisma.FieldRef<"LeaveType", 'String'>
   readonly obsolete: Prisma.FieldRef<"LeaveType", 'Boolean'>
   readonly createdAt: Prisma.FieldRef<"LeaveType", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"LeaveType", 'DateTime'>

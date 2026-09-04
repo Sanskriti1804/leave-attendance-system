@@ -27,6 +27,7 @@ model Employee {
   createdAt    DateTime  @default(now())
   status       String
   obsolete     Boolean   @default(false)
+  sex          String?   @db.VarChar(10)
 
   department   Department @relation(fields: [departmentId], references: [departmentId])
   manager      Employee?  @relation("EmployeeManager", fields: [managerId], references: [employeeId])
@@ -38,8 +39,10 @@ model Employee {
   notifications         Notification[]
   auditLogs             AuditLog[]
   reviewedLeaves        LeaveApplication[]     @relation("LeaveReviewer")
+  reportingManagerLeaves LeaveApplication[]    @relation("LeaveReportingManager")
   reviewedCorrections   AttendanceCorrection[] @relation("CorrectionReviewer")
   uploadedDocuments     LeaveDocument[]
+  leaveStatusChanges    LeaveStatusHistory[]   @relation("LeaveStatusChangedBy")
   refreshTokens         RefreshToken[]
   passwordResetTokens   PasswordResetToken[]
 }
@@ -89,6 +92,7 @@ model LeaveType {
   name                    String   @db.VarChar(50)
   description             String?
   requiresMedicalDocument Boolean  @default(false)
+  allowedSex              String?  @db.VarChar(10)
   obsolete                Boolean  @default(false)
   createdAt               DateTime @default(now())
   updatedAt               DateTime @updatedAt
@@ -110,40 +114,75 @@ model LeavePolicy {
 }
 
 model LeaveApplication {
-  leaveId      Int       @id @default(autoincrement())
-  employeeId   Int
-  leaveTypeId  Int
-  startDate    DateTime  @db.Date
-  endDate      DateTime  @db.Date
-  durationType String    @db.VarChar(30)
-  halfDayType  String?   @db.VarChar(30)
-  numberOfDays Decimal   @db.Decimal(5, 2)
-  reason       String
-  status       String    @default("DRAFT") @db.VarChar(30)
-  hrComments   String?
-  reviewedBy   Int?
-  reviewedAt   DateTime?
-  createdAt    DateTime  @default(now())
+  leaveId                    Int       @id @default(autoincrement())
+  employeeId                 Int
+  leaveTypeId                Int
+  startDate                  DateTime  @db.Date
+  endDate                    DateTime  @db.Date
+  durationType               String    @db.VarChar(30)
+  halfDayType                String?   @db.VarChar(30)
+  numberOfDays               Decimal   @db.Decimal(5, 2)
+  reason                     String
+  status                     String    @default("DRAFT") @db.VarChar(30)
+  hrComments                 String?
+  reviewedBy                 Int?
+  reviewedAt                 DateTime?
+  reportingManagerEmployeeId Int?
+  managerApprovalStatus      String?   @db.VarChar(30)
+  managerReviewedAt          DateTime?
+  managerComments            String?
+  createdAt                  DateTime  @default(now())
+  updatedAt                  DateTime  @updatedAt
 
-  employee Employee @relation(fields: [employeeId], references: [employeeId])
-
-  leaveType LeaveType @relation(fields: [leaveTypeId], references: [leaveTypeId])
-
-  reviewer Employee? @relation("LeaveReviewer", fields: [reviewedBy], references: [employeeId])
-
-  documents LeaveDocument[]
+  employee           Employee  @relation(fields: [employeeId], references: [employeeId])
+  leaveType          LeaveType @relation(fields: [leaveTypeId], references: [leaveTypeId])
+  reviewer           Employee? @relation("LeaveReviewer", fields: [reviewedBy], references: [employeeId])
+  reportingManager   Employee? @relation("LeaveReportingManager", fields: [reportingManagerEmployeeId], references: [employeeId])
+  documents          LeaveDocument[]
+  dateSelections     LeaveDateSelection[]
+  statusHistory      LeaveStatusHistory[]
 
   @@index([employeeId])
   @@index([status])
 }
 
+model LeaveDateSelection {
+  selectionId Int      @id @default(autoincrement())
+  leaveId     Int
+  leaveDate   DateTime @db.Date
+  session     String   @db.VarChar(30)
+  unit        Decimal  @db.Decimal(3, 1)
+
+  leave LeaveApplication @relation(fields: [leaveId], references: [leaveId], onDelete: Cascade)
+
+  @@unique([leaveId, leaveDate])
+  @@index([leaveDate])
+}
+
+model LeaveStatusHistory {
+  historyId   Int      @id @default(autoincrement())
+  leaveId     Int
+  changedById Int?
+  oldStatus   String?  @db.VarChar(30)
+  newStatus   String   @db.VarChar(30)
+  reason      String?
+  changedAt   DateTime @default(now())
+
+  leave     LeaveApplication @relation(fields: [leaveId], references: [leaveId], onDelete: Cascade)
+  changedBy Employee?        @relation("LeaveStatusChangedBy", fields: [changedById], references: [employeeId])
+
+  @@index([leaveId])
+}
+
 model LeaveDocument {
   documentId Int      @id @default(autoincrement())
   leaveId    Int
-  fileName   String   @db.VarChar(50)
-  filePath   String
-  fileType   String   @db.VarChar(10)
-  uploadedBy Int
+  fileName    String   @db.VarChar(50)
+  filePath    String
+  fileType    String   @db.VarChar(10)
+  contentType String   @db.VarChar(100)
+  fileSize    Int
+  uploadedBy  Int
   uploadedAt DateTime @default(now())
 
   leave    LeaveApplication @relation(fields: [leaveId], references: [leaveId], onDelete: Cascade)

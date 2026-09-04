@@ -21,6 +21,7 @@ function toEmployeeResponse(employee: EmployeePublic) {
     createdAt: employee.createdAt.toISOString(),
     status: employee.status,
     obsolete: employee.obsolete,
+    sex: employee.sex,
   };
 }
 
@@ -84,6 +85,7 @@ export async function createEmployee(body: CreateEmployeeBody) {
     role: body.role,
     joiningDate: body.joiningDate ? fromCivilDate(body.joiningDate) : null,
     status: body.status ?? "ACTIVE",
+    sex: body.sex ?? null,
     department: { connect: { departmentId: body.departmentId } },
     ...(body.managerId != null
       ? { manager: { connect: { employeeId: body.managerId } } }
@@ -119,6 +121,7 @@ export async function updateEmployee(employeeId: number, body: UpdateEmployeeBod
     role: body.role,
     status: body.status,
     obsolete: body.obsolete,
+    sex: body.sex,
     passwordHash,
     joiningDate:
       body.joiningDate === undefined

@@ -85,7 +85,25 @@ async function main() {
     }
   }
 
+  await ensureCasualLeaveType();
+
   console.log("Seeding completed successfully.");
+}
+
+async function ensureCasualLeaveType() {
+  const existing = await prisma.leaveType.findFirst({
+    where: { name: "Casual" },
+  });
+  if (!existing) {
+    await prisma.leaveType.create({
+      data: {
+        name: "Casual",
+        description: "Casual leave",
+        requiresMedicalDocument: false,
+      },
+    });
+    console.log("Created LeaveType: Casual");
+  }
 }
 
 main()

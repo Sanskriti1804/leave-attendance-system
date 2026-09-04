@@ -53,6 +53,16 @@ export type LeavePolicy = Prisma.LeavePolicyModel
  */
 export type LeaveApplication = Prisma.LeaveApplicationModel
 /**
+ * Model LeaveDateSelection
+ * 
+ */
+export type LeaveDateSelection = Prisma.LeaveDateSelectionModel
+/**
+ * Model LeaveStatusHistory
+ * 
+ */
+export type LeaveStatusHistory = Prisma.LeaveStatusHistoryModel
+/**
  * Model LeaveDocument
  * 
  */

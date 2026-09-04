@@ -58,6 +58,8 @@ export const ModelName = {
   LeaveType: 'LeaveType',
   LeavePolicy: 'LeavePolicy',
   LeaveApplication: 'LeaveApplication',
+  LeaveDateSelection: 'LeaveDateSelection',
+  LeaveStatusHistory: 'LeaveStatusHistory',
   LeaveDocument: 'LeaveDocument',
   Notification: 'Notification',
   AuditLog: 'AuditLog',
@@ -104,7 +106,8 @@ export const EmployeeScalarFieldEnum = {
   joiningDate: 'joiningDate',
   createdAt: 'createdAt',
   status: 'status',
-  obsolete: 'obsolete'
+  obsolete: 'obsolete',
+  sex: 'sex'
 } as const
 
 export type EmployeeScalarFieldEnum = (typeof EmployeeScalarFieldEnum)[keyof typeof EmployeeScalarFieldEnum]
@@ -150,6 +153,7 @@ export const LeaveTypeScalarFieldEnum = {
   name: 'name',
   description: 'description',
   requiresMedicalDocument: 'requiresMedicalDocument',
+  allowedSex: 'allowedSex',
   obsolete: 'obsolete',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -185,10 +189,39 @@ export const LeaveApplicationScalarFieldEnum = {
   hrComments: 'hrComments',
   reviewedBy: 'reviewedBy',
   reviewedAt: 'reviewedAt',
-  createdAt: 'createdAt'
+  reportingManagerEmployeeId: 'reportingManagerEmployeeId',
+  managerApprovalStatus: 'managerApprovalStatus',
+  managerReviewedAt: 'managerReviewedAt',
+  managerComments: 'managerComments',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 } as const
 
 export type LeaveApplicationScalarFieldEnum = (typeof LeaveApplicationScalarFieldEnum)[keyof typeof LeaveApplicationScalarFieldEnum]
+
+
+export const LeaveDateSelectionScalarFieldEnum = {
+  selectionId: 'selectionId',
+  leaveId: 'leaveId',
+  leaveDate: 'leaveDate',
+  session: 'session',
+  unit: 'unit'
+} as const
+
+export type LeaveDateSelectionScalarFieldEnum = (typeof LeaveDateSelectionScalarFieldEnum)[keyof typeof LeaveDateSelectionScalarFieldEnum]
+
+
+export const LeaveStatusHistoryScalarFieldEnum = {
+  historyId: 'historyId',
+  leaveId: 'leaveId',
+  changedById: 'changedById',
+  oldStatus: 'oldStatus',
+  newStatus: 'newStatus',
+  reason: 'reason',
+  changedAt: 'changedAt'
+} as const
+
+export type LeaveStatusHistoryScalarFieldEnum = (typeof LeaveStatusHistoryScalarFieldEnum)[keyof typeof LeaveStatusHistoryScalarFieldEnum]
 
 
 export const LeaveDocumentScalarFieldEnum = {
@@ -197,6 +230,8 @@ export const LeaveDocumentScalarFieldEnum = {
   fileName: 'fileName',
   filePath: 'filePath',
   fileType: 'fileType',
+  contentType: 'contentType',
+  fileSize: 'fileSize',
   uploadedBy: 'uploadedBy',
   uploadedAt: 'uploadedAt'
 } as const

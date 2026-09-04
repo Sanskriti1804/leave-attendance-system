@@ -32,6 +32,7 @@ export type LeaveApplicationAvgAggregateOutputType = {
   leaveTypeId: number | null
   numberOfDays: runtime.Decimal | null
   reviewedBy: number | null
+  reportingManagerEmployeeId: number | null
 }
 
 export type LeaveApplicationSumAggregateOutputType = {
@@ -40,6 +41,7 @@ export type LeaveApplicationSumAggregateOutputType = {
   leaveTypeId: number | null
   numberOfDays: runtime.Decimal | null
   reviewedBy: number | null
+  reportingManagerEmployeeId: number | null
 }
 
 export type LeaveApplicationMinAggregateOutputType = {
@@ -56,7 +58,12 @@ export type LeaveApplicationMinAggregateOutputType = {
   hrComments: string | null
   reviewedBy: number | null
   reviewedAt: Date | null
+  reportingManagerEmployeeId: number | null
+  managerApprovalStatus: string | null
+  managerReviewedAt: Date | null
+  managerComments: string | null
   createdAt: Date | null
+  updatedAt: Date | null
 }
 
 export type LeaveApplicationMaxAggregateOutputType = {
@@ -73,7 +80,12 @@ export type LeaveApplicationMaxAggregateOutputType = {
   hrComments: string | null
   reviewedBy: number | null
   reviewedAt: Date | null
+  reportingManagerEmployeeId: number | null
+  managerApprovalStatus: string | null
+  managerReviewedAt: Date | null
+  managerComments: string | null
   createdAt: Date | null
+  updatedAt: Date | null
 }
 
 export type LeaveApplicationCountAggregateOutputType = {
@@ -90,7 +102,12 @@ export type LeaveApplicationCountAggregateOutputType = {
   hrComments: number
   reviewedBy: number
   reviewedAt: number
+  reportingManagerEmployeeId: number
+  managerApprovalStatus: number
+  managerReviewedAt: number
+  managerComments: number
   createdAt: number
+  updatedAt: number
   _all: number
 }
 
@@ -101,6 +118,7 @@ export type LeaveApplicationAvgAggregateInputType = {
   leaveTypeId?: true
   numberOfDays?: true
   reviewedBy?: true
+  reportingManagerEmployeeId?: true
 }
 
 export type LeaveApplicationSumAggregateInputType = {
@@ -109,6 +127,7 @@ export type LeaveApplicationSumAggregateInputType = {
   leaveTypeId?: true
   numberOfDays?: true
   reviewedBy?: true
+  reportingManagerEmployeeId?: true
 }
 
 export type LeaveApplicationMinAggregateInputType = {
@@ -125,7 +144,12 @@ export type LeaveApplicationMinAggregateInputType = {
   hrComments?: true
   reviewedBy?: true
   reviewedAt?: true
+  reportingManagerEmployeeId?: true
+  managerApprovalStatus?: true
+  managerReviewedAt?: true
+  managerComments?: true
   createdAt?: true
+  updatedAt?: true
 }
 
 export type LeaveApplicationMaxAggregateInputType = {
@@ -142,7 +166,12 @@ export type LeaveApplicationMaxAggregateInputType = {
   hrComments?: true
   reviewedBy?: true
   reviewedAt?: true
+  reportingManagerEmployeeId?: true
+  managerApprovalStatus?: true
+  managerReviewedAt?: true
+  managerComments?: true
   createdAt?: true
+  updatedAt?: true
 }
 
 export type LeaveApplicationCountAggregateInputType = {
@@ -159,7 +188,12 @@ export type LeaveApplicationCountAggregateInputType = {
   hrComments?: true
   reviewedBy?: true
   reviewedAt?: true
+  reportingManagerEmployeeId?: true
+  managerApprovalStatus?: true
+  managerReviewedAt?: true
+  managerComments?: true
   createdAt?: true
+  updatedAt?: true
   _all?: true
 }
 
@@ -263,7 +297,12 @@ export type LeaveApplicationGroupByOutputType = {
   hrComments: string | null
   reviewedBy: number | null
   reviewedAt: Date | null
+  reportingManagerEmployeeId: number | null
+  managerApprovalStatus: string | null
+  managerReviewedAt: Date | null
+  managerComments: string | null
   createdAt: Date
+  updatedAt: Date
   _count: LeaveApplicationCountAggregateOutputType | null
   _avg: LeaveApplicationAvgAggregateOutputType | null
   _sum: LeaveApplicationSumAggregateOutputType | null
@@ -303,11 +342,19 @@ export type LeaveApplicationWhereInput = {
   hrComments?: Prisma.StringNullableFilter<"LeaveApplication"> | string | null
   reviewedBy?: Prisma.IntNullableFilter<"LeaveApplication"> | number | null
   reviewedAt?: Prisma.DateTimeNullableFilter<"LeaveApplication"> | Date | string | null
+  reportingManagerEmployeeId?: Prisma.IntNullableFilter<"LeaveApplication"> | number | null
+  managerApprovalStatus?: Prisma.StringNullableFilter<"LeaveApplication"> | string | null
+  managerReviewedAt?: Prisma.DateTimeNullableFilter<"LeaveApplication"> | Date | string | null
+  managerComments?: Prisma.StringNullableFilter<"LeaveApplication"> | string | null
   createdAt?: Prisma.DateTimeFilter<"LeaveApplication"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"LeaveApplication"> | Date | string
   employee?: Prisma.XOR<Prisma.EmployeeScalarRelationFilter, Prisma.EmployeeWhereInput>
   leaveType?: Prisma.XOR<Prisma.LeaveTypeScalarRelationFilter, Prisma.LeaveTypeWhereInput>
   reviewer?: Prisma.XOR<Prisma.EmployeeNullableScalarRelationFilter, Prisma.EmployeeWhereInput> | null
+  reportingManager?: Prisma.XOR<Prisma.EmployeeNullableScalarRelationFilter, Prisma.EmployeeWhereInput> | null
   documents?: Prisma.LeaveDocumentListRelationFilter
+  dateSelections?: Prisma.LeaveDateSelectionListRelationFilter
+  statusHistory?: Prisma.LeaveStatusHistoryListRelationFilter
 }
 
 export type LeaveApplicationOrderByWithRelationInput = {
@@ -324,11 +371,19 @@ export type LeaveApplicationOrderByWithRelationInput = {
   hrComments?: Prisma.SortOrderInput | Prisma.SortOrder
   reviewedBy?: Prisma.SortOrderInput | Prisma.SortOrder
   reviewedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  reportingManagerEmployeeId?: Prisma.SortOrderInput | Prisma.SortOrder
+  managerApprovalStatus?: Prisma.SortOrderInput | Prisma.SortOrder
+  managerReviewedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  managerComments?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
   employee?: Prisma.EmployeeOrderByWithRelationInput
   leaveType?: Prisma.LeaveTypeOrderByWithRelationInput
   reviewer?: Prisma.EmployeeOrderByWithRelationInput
+  reportingManager?: Prisma.EmployeeOrderByWithRelationInput
   documents?: Prisma.LeaveDocumentOrderByRelationAggregateInput
+  dateSelections?: Prisma.LeaveDateSelectionOrderByRelationAggregateInput
+  statusHistory?: Prisma.LeaveStatusHistoryOrderByRelationAggregateInput
 }
 
 export type LeaveApplicationWhereUniqueInput = Prisma.AtLeast<{
@@ -348,11 +403,19 @@ export type LeaveApplicationWhereUniqueInput = Prisma.AtLeast<{
   hrComments?: Prisma.StringNullableFilter<"LeaveApplication"> | string | null
   reviewedBy?: Prisma.IntNullableFilter<"LeaveApplication"> | number | null
   reviewedAt?: Prisma.DateTimeNullableFilter<"LeaveApplication"> | Date | string | null
+  reportingManagerEmployeeId?: Prisma.IntNullableFilter<"LeaveApplication"> | number | null
+  managerApprovalStatus?: Prisma.StringNullableFilter<"LeaveApplication"> | string | null
+  managerReviewedAt?: Prisma.DateTimeNullableFilter<"LeaveApplication"> | Date | string | null
+  managerComments?: Prisma.StringNullableFilter<"LeaveApplication"> | string | null
   createdAt?: Prisma.DateTimeFilter<"LeaveApplication"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"LeaveApplication"> | Date | string
   employee?: Prisma.XOR<Prisma.EmployeeScalarRelationFilter, Prisma.EmployeeWhereInput>
   leaveType?: Prisma.XOR<Prisma.LeaveTypeScalarRelationFilter, Prisma.LeaveTypeWhereInput>
   reviewer?: Prisma.XOR<Prisma.EmployeeNullableScalarRelationFilter, Prisma.EmployeeWhereInput> | null
+  reportingManager?: Prisma.XOR<Prisma.EmployeeNullableScalarRelationFilter, Prisma.EmployeeWhereInput> | null
   documents?: Prisma.LeaveDocumentListRelationFilter
+  dateSelections?: Prisma.LeaveDateSelectionListRelationFilter
+  statusHistory?: Prisma.LeaveStatusHistoryListRelationFilter
 }, "leaveId">
 
 export type LeaveApplicationOrderByWithAggregationInput = {
@@ -369,7 +432,12 @@ export type LeaveApplicationOrderByWithAggregationInput = {
   hrComments?: Prisma.SortOrderInput | Prisma.SortOrder
   reviewedBy?: Prisma.SortOrderInput | Prisma.SortOrder
   reviewedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  reportingManagerEmployeeId?: Prisma.SortOrderInput | Prisma.SortOrder
+  managerApprovalStatus?: Prisma.SortOrderInput | Prisma.SortOrder
+  managerReviewedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  managerComments?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
   _count?: Prisma.LeaveApplicationCountOrderByAggregateInput
   _avg?: Prisma.LeaveApplicationAvgOrderByAggregateInput
   _max?: Prisma.LeaveApplicationMaxOrderByAggregateInput
@@ -394,7 +462,12 @@ export type LeaveApplicationScalarWhereWithAggregatesInput = {
   hrComments?: Prisma.StringNullableWithAggregatesFilter<"LeaveApplication"> | string | null
   reviewedBy?: Prisma.IntNullableWithAggregatesFilter<"LeaveApplication"> | number | null
   reviewedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"LeaveApplication"> | Date | string | null
+  reportingManagerEmployeeId?: Prisma.IntNullableWithAggregatesFilter<"LeaveApplication"> | number | null
+  managerApprovalStatus?: Prisma.StringNullableWithAggregatesFilter<"LeaveApplication"> | string | null
+  managerReviewedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"LeaveApplication"> | Date | string | null
+  managerComments?: Prisma.StringNullableWithAggregatesFilter<"LeaveApplication"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"LeaveApplication"> | Date | string
+  updatedAt?: Prisma.DateTimeWithAggregatesFilter<"LeaveApplication"> | Date | string
 }
 
 export type LeaveApplicationCreateInput = {
@@ -407,11 +480,18 @@ export type LeaveApplicationCreateInput = {
   status?: string
   hrComments?: string | null
   reviewedAt?: Date | string | null
+  managerApprovalStatus?: string | null
+  managerReviewedAt?: Date | string | null
+  managerComments?: string | null
   createdAt?: Date | string
+  updatedAt?: Date | string
   employee: Prisma.EmployeeCreateNestedOneWithoutLeaveApplicationsInput
   leaveType: Prisma.LeaveTypeCreateNestedOneWithoutLeaveApplicationsInput
   reviewer?: Prisma.EmployeeCreateNestedOneWithoutReviewedLeavesInput
+  reportingManager?: Prisma.EmployeeCreateNestedOneWithoutReportingManagerLeavesInput
   documents?: Prisma.LeaveDocumentCreateNestedManyWithoutLeaveInput
+  dateSelections?: Prisma.LeaveDateSelectionCreateNestedManyWithoutLeaveInput
+  statusHistory?: Prisma.LeaveStatusHistoryCreateNestedManyWithoutLeaveInput
 }
 
 export type LeaveApplicationUncheckedCreateInput = {
@@ -428,8 +508,15 @@ export type LeaveApplicationUncheckedCreateInput = {
   hrComments?: string | null
   reviewedBy?: number | null
   reviewedAt?: Date | string | null
+  reportingManagerEmployeeId?: number | null
+  managerApprovalStatus?: string | null
+  managerReviewedAt?: Date | string | null
+  managerComments?: string | null
   createdAt?: Date | string
+  updatedAt?: Date | string
   documents?: Prisma.LeaveDocumentUncheckedCreateNestedManyWithoutLeaveInput
+  dateSelections?: Prisma.LeaveDateSelectionUncheckedCreateNestedManyWithoutLeaveInput
+  statusHistory?: Prisma.LeaveStatusHistoryUncheckedCreateNestedManyWithoutLeaveInput
 }
 
 export type LeaveApplicationUpdateInput = {
@@ -442,11 +529,18 @@ export type LeaveApplicationUpdateInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   hrComments?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  managerApprovalStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  managerReviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  managerComments?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   employee?: Prisma.EmployeeUpdateOneRequiredWithoutLeaveApplicationsNestedInput
   leaveType?: Prisma.LeaveTypeUpdateOneRequiredWithoutLeaveApplicationsNestedInput
   reviewer?: Prisma.EmployeeUpdateOneWithoutReviewedLeavesNestedInput
+  reportingManager?: Prisma.EmployeeUpdateOneWithoutReportingManagerLeavesNestedInput
   documents?: Prisma.LeaveDocumentUpdateManyWithoutLeaveNestedInput
+  dateSelections?: Prisma.LeaveDateSelectionUpdateManyWithoutLeaveNestedInput
+  statusHistory?: Prisma.LeaveStatusHistoryUpdateManyWithoutLeaveNestedInput
 }
 
 export type LeaveApplicationUncheckedUpdateInput = {
@@ -463,8 +557,15 @@ export type LeaveApplicationUncheckedUpdateInput = {
   hrComments?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reviewedBy?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reportingManagerEmployeeId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  managerApprovalStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  managerReviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  managerComments?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   documents?: Prisma.LeaveDocumentUncheckedUpdateManyWithoutLeaveNestedInput
+  dateSelections?: Prisma.LeaveDateSelectionUncheckedUpdateManyWithoutLeaveNestedInput
+  statusHistory?: Prisma.LeaveStatusHistoryUncheckedUpdateManyWithoutLeaveNestedInput
 }
 
 export type LeaveApplicationCreateManyInput = {
@@ -481,7 +582,12 @@ export type LeaveApplicationCreateManyInput = {
   hrComments?: string | null
   reviewedBy?: number | null
   reviewedAt?: Date | string | null
+  reportingManagerEmployeeId?: number | null
+  managerApprovalStatus?: string | null
+  managerReviewedAt?: Date | string | null
+  managerComments?: string | null
   createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type LeaveApplicationUpdateManyMutationInput = {
@@ -494,7 +600,11 @@ export type LeaveApplicationUpdateManyMutationInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   hrComments?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  managerApprovalStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  managerReviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  managerComments?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type LeaveApplicationUncheckedUpdateManyInput = {
@@ -511,7 +621,12 @@ export type LeaveApplicationUncheckedUpdateManyInput = {
   hrComments?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reviewedBy?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reportingManagerEmployeeId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  managerApprovalStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  managerReviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  managerComments?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type LeaveApplicationListRelationFilter = {
@@ -538,7 +653,12 @@ export type LeaveApplicationCountOrderByAggregateInput = {
   hrComments?: Prisma.SortOrder
   reviewedBy?: Prisma.SortOrder
   reviewedAt?: Prisma.SortOrder
+  reportingManagerEmployeeId?: Prisma.SortOrder
+  managerApprovalStatus?: Prisma.SortOrder
+  managerReviewedAt?: Prisma.SortOrder
+  managerComments?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type LeaveApplicationAvgOrderByAggregateInput = {
@@ -547,6 +667,7 @@ export type LeaveApplicationAvgOrderByAggregateInput = {
   leaveTypeId?: Prisma.SortOrder
   numberOfDays?: Prisma.SortOrder
   reviewedBy?: Prisma.SortOrder
+  reportingManagerEmployeeId?: Prisma.SortOrder
 }
 
 export type LeaveApplicationMaxOrderByAggregateInput = {
@@ -563,7 +684,12 @@ export type LeaveApplicationMaxOrderByAggregateInput = {
   hrComments?: Prisma.SortOrder
   reviewedBy?: Prisma.SortOrder
   reviewedAt?: Prisma.SortOrder
+  reportingManagerEmployeeId?: Prisma.SortOrder
+  managerApprovalStatus?: Prisma.SortOrder
+  managerReviewedAt?: Prisma.SortOrder
+  managerComments?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type LeaveApplicationMinOrderByAggregateInput = {
@@ -580,7 +706,12 @@ export type LeaveApplicationMinOrderByAggregateInput = {
   hrComments?: Prisma.SortOrder
   reviewedBy?: Prisma.SortOrder
   reviewedAt?: Prisma.SortOrder
+  reportingManagerEmployeeId?: Prisma.SortOrder
+  managerApprovalStatus?: Prisma.SortOrder
+  managerReviewedAt?: Prisma.SortOrder
+  managerComments?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type LeaveApplicationSumOrderByAggregateInput = {
@@ -589,6 +720,7 @@ export type LeaveApplicationSumOrderByAggregateInput = {
   leaveTypeId?: Prisma.SortOrder
   numberOfDays?: Prisma.SortOrder
   reviewedBy?: Prisma.SortOrder
+  reportingManagerEmployeeId?: Prisma.SortOrder
 }
 
 export type LeaveApplicationScalarRelationFilter = {
@@ -610,6 +742,13 @@ export type LeaveApplicationCreateNestedManyWithoutReviewerInput = {
   connect?: Prisma.LeaveApplicationWhereUniqueInput | Prisma.LeaveApplicationWhereUniqueInput[]
 }
 
+export type LeaveApplicationCreateNestedManyWithoutReportingManagerInput = {
+  create?: Prisma.XOR<Prisma.LeaveApplicationCreateWithoutReportingManagerInput, Prisma.LeaveApplicationUncheckedCreateWithoutReportingManagerInput> | Prisma.LeaveApplicationCreateWithoutReportingManagerInput[] | Prisma.LeaveApplicationUncheckedCreateWithoutReportingManagerInput[]
+  connectOrCreate?: Prisma.LeaveApplicationCreateOrConnectWithoutReportingManagerInput | Prisma.LeaveApplicationCreateOrConnectWithoutReportingManagerInput[]
+  createMany?: Prisma.LeaveApplicationCreateManyReportingManagerInputEnvelope
+  connect?: Prisma.LeaveApplicationWhereUniqueInput | Prisma.LeaveApplicationWhereUniqueInput[]
+}
+
 export type LeaveApplicationUncheckedCreateNestedManyWithoutEmployeeInput = {
   create?: Prisma.XOR<Prisma.LeaveApplicationCreateWithoutEmployeeInput, Prisma.LeaveApplicationUncheckedCreateWithoutEmployeeInput> | Prisma.LeaveApplicationCreateWithoutEmployeeInput[] | Prisma.LeaveApplicationUncheckedCreateWithoutEmployeeInput[]
   connectOrCreate?: Prisma.LeaveApplicationCreateOrConnectWithoutEmployeeInput | Prisma.LeaveApplicationCreateOrConnectWithoutEmployeeInput[]
@@ -621,6 +760,13 @@ export type LeaveApplicationUncheckedCreateNestedManyWithoutReviewerInput = {
   create?: Prisma.XOR<Prisma.LeaveApplicationCreateWithoutReviewerInput, Prisma.LeaveApplicationUncheckedCreateWithoutReviewerInput> | Prisma.LeaveApplicationCreateWithoutReviewerInput[] | Prisma.LeaveApplicationUncheckedCreateWithoutReviewerInput[]
   connectOrCreate?: Prisma.LeaveApplicationCreateOrConnectWithoutReviewerInput | Prisma.LeaveApplicationCreateOrConnectWithoutReviewerInput[]
   createMany?: Prisma.LeaveApplicationCreateManyReviewerInputEnvelope
+  connect?: Prisma.LeaveApplicationWhereUniqueInput | Prisma.LeaveApplicationWhereUniqueInput[]
+}
+
+export type LeaveApplicationUncheckedCreateNestedManyWithoutReportingManagerInput = {
+  create?: Prisma.XOR<Prisma.LeaveApplicationCreateWithoutReportingManagerInput, Prisma.LeaveApplicationUncheckedCreateWithoutReportingManagerInput> | Prisma.LeaveApplicationCreateWithoutReportingManagerInput[] | Prisma.LeaveApplicationUncheckedCreateWithoutReportingManagerInput[]
+  connectOrCreate?: Prisma.LeaveApplicationCreateOrConnectWithoutReportingManagerInput | Prisma.LeaveApplicationCreateOrConnectWithoutReportingManagerInput[]
+  createMany?: Prisma.LeaveApplicationCreateManyReportingManagerInputEnvelope
   connect?: Prisma.LeaveApplicationWhereUniqueInput | Prisma.LeaveApplicationWhereUniqueInput[]
 }
 
@@ -652,6 +798,20 @@ export type LeaveApplicationUpdateManyWithoutReviewerNestedInput = {
   deleteMany?: Prisma.LeaveApplicationScalarWhereInput | Prisma.LeaveApplicationScalarWhereInput[]
 }
 
+export type LeaveApplicationUpdateManyWithoutReportingManagerNestedInput = {
+  create?: Prisma.XOR<Prisma.LeaveApplicationCreateWithoutReportingManagerInput, Prisma.LeaveApplicationUncheckedCreateWithoutReportingManagerInput> | Prisma.LeaveApplicationCreateWithoutReportingManagerInput[] | Prisma.LeaveApplicationUncheckedCreateWithoutReportingManagerInput[]
+  connectOrCreate?: Prisma.LeaveApplicationCreateOrConnectWithoutReportingManagerInput | Prisma.LeaveApplicationCreateOrConnectWithoutReportingManagerInput[]
+  upsert?: Prisma.LeaveApplicationUpsertWithWhereUniqueWithoutReportingManagerInput | Prisma.LeaveApplicationUpsertWithWhereUniqueWithoutReportingManagerInput[]
+  createMany?: Prisma.LeaveApplicationCreateManyReportingManagerInputEnvelope
+  set?: Prisma.LeaveApplicationWhereUniqueInput | Prisma.LeaveApplicationWhereUniqueInput[]
+  disconnect?: Prisma.LeaveApplicationWhereUniqueInput | Prisma.LeaveApplicationWhereUniqueInput[]
+  delete?: Prisma.LeaveApplicationWhereUniqueInput | Prisma.LeaveApplicationWhereUniqueInput[]
+  connect?: Prisma.LeaveApplicationWhereUniqueInput | Prisma.LeaveApplicationWhereUniqueInput[]
+  update?: Prisma.LeaveApplicationUpdateWithWhereUniqueWithoutReportingManagerInput | Prisma.LeaveApplicationUpdateWithWhereUniqueWithoutReportingManagerInput[]
+  updateMany?: Prisma.LeaveApplicationUpdateManyWithWhereWithoutReportingManagerInput | Prisma.LeaveApplicationUpdateManyWithWhereWithoutReportingManagerInput[]
+  deleteMany?: Prisma.LeaveApplicationScalarWhereInput | Prisma.LeaveApplicationScalarWhereInput[]
+}
+
 export type LeaveApplicationUncheckedUpdateManyWithoutEmployeeNestedInput = {
   create?: Prisma.XOR<Prisma.LeaveApplicationCreateWithoutEmployeeInput, Prisma.LeaveApplicationUncheckedCreateWithoutEmployeeInput> | Prisma.LeaveApplicationCreateWithoutEmployeeInput[] | Prisma.LeaveApplicationUncheckedCreateWithoutEmployeeInput[]
   connectOrCreate?: Prisma.LeaveApplicationCreateOrConnectWithoutEmployeeInput | Prisma.LeaveApplicationCreateOrConnectWithoutEmployeeInput[]
@@ -677,6 +837,20 @@ export type LeaveApplicationUncheckedUpdateManyWithoutReviewerNestedInput = {
   connect?: Prisma.LeaveApplicationWhereUniqueInput | Prisma.LeaveApplicationWhereUniqueInput[]
   update?: Prisma.LeaveApplicationUpdateWithWhereUniqueWithoutReviewerInput | Prisma.LeaveApplicationUpdateWithWhereUniqueWithoutReviewerInput[]
   updateMany?: Prisma.LeaveApplicationUpdateManyWithWhereWithoutReviewerInput | Prisma.LeaveApplicationUpdateManyWithWhereWithoutReviewerInput[]
+  deleteMany?: Prisma.LeaveApplicationScalarWhereInput | Prisma.LeaveApplicationScalarWhereInput[]
+}
+
+export type LeaveApplicationUncheckedUpdateManyWithoutReportingManagerNestedInput = {
+  create?: Prisma.XOR<Prisma.LeaveApplicationCreateWithoutReportingManagerInput, Prisma.LeaveApplicationUncheckedCreateWithoutReportingManagerInput> | Prisma.LeaveApplicationCreateWithoutReportingManagerInput[] | Prisma.LeaveApplicationUncheckedCreateWithoutReportingManagerInput[]
+  connectOrCreate?: Prisma.LeaveApplicationCreateOrConnectWithoutReportingManagerInput | Prisma.LeaveApplicationCreateOrConnectWithoutReportingManagerInput[]
+  upsert?: Prisma.LeaveApplicationUpsertWithWhereUniqueWithoutReportingManagerInput | Prisma.LeaveApplicationUpsertWithWhereUniqueWithoutReportingManagerInput[]
+  createMany?: Prisma.LeaveApplicationCreateManyReportingManagerInputEnvelope
+  set?: Prisma.LeaveApplicationWhereUniqueInput | Prisma.LeaveApplicationWhereUniqueInput[]
+  disconnect?: Prisma.LeaveApplicationWhereUniqueInput | Prisma.LeaveApplicationWhereUniqueInput[]
+  delete?: Prisma.LeaveApplicationWhereUniqueInput | Prisma.LeaveApplicationWhereUniqueInput[]
+  connect?: Prisma.LeaveApplicationWhereUniqueInput | Prisma.LeaveApplicationWhereUniqueInput[]
+  update?: Prisma.LeaveApplicationUpdateWithWhereUniqueWithoutReportingManagerInput | Prisma.LeaveApplicationUpdateWithWhereUniqueWithoutReportingManagerInput[]
+  updateMany?: Prisma.LeaveApplicationUpdateManyWithWhereWithoutReportingManagerInput | Prisma.LeaveApplicationUpdateManyWithWhereWithoutReportingManagerInput[]
   deleteMany?: Prisma.LeaveApplicationScalarWhereInput | Prisma.LeaveApplicationScalarWhereInput[]
 }
 
@@ -730,6 +904,34 @@ export type DecimalFieldUpdateOperationsInput = {
   divide?: runtime.Decimal | runtime.DecimalJsLike | number | string
 }
 
+export type LeaveApplicationCreateNestedOneWithoutDateSelectionsInput = {
+  create?: Prisma.XOR<Prisma.LeaveApplicationCreateWithoutDateSelectionsInput, Prisma.LeaveApplicationUncheckedCreateWithoutDateSelectionsInput>
+  connectOrCreate?: Prisma.LeaveApplicationCreateOrConnectWithoutDateSelectionsInput
+  connect?: Prisma.LeaveApplicationWhereUniqueInput
+}
+
+export type LeaveApplicationUpdateOneRequiredWithoutDateSelectionsNestedInput = {
+  create?: Prisma.XOR<Prisma.LeaveApplicationCreateWithoutDateSelectionsInput, Prisma.LeaveApplicationUncheckedCreateWithoutDateSelectionsInput>
+  connectOrCreate?: Prisma.LeaveApplicationCreateOrConnectWithoutDateSelectionsInput
+  upsert?: Prisma.LeaveApplicationUpsertWithoutDateSelectionsInput
+  connect?: Prisma.LeaveApplicationWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.LeaveApplicationUpdateToOneWithWhereWithoutDateSelectionsInput, Prisma.LeaveApplicationUpdateWithoutDateSelectionsInput>, Prisma.LeaveApplicationUncheckedUpdateWithoutDateSelectionsInput>
+}
+
+export type LeaveApplicationCreateNestedOneWithoutStatusHistoryInput = {
+  create?: Prisma.XOR<Prisma.LeaveApplicationCreateWithoutStatusHistoryInput, Prisma.LeaveApplicationUncheckedCreateWithoutStatusHistoryInput>
+  connectOrCreate?: Prisma.LeaveApplicationCreateOrConnectWithoutStatusHistoryInput
+  connect?: Prisma.LeaveApplicationWhereUniqueInput
+}
+
+export type LeaveApplicationUpdateOneRequiredWithoutStatusHistoryNestedInput = {
+  create?: Prisma.XOR<Prisma.LeaveApplicationCreateWithoutStatusHistoryInput, Prisma.LeaveApplicationUncheckedCreateWithoutStatusHistoryInput>
+  connectOrCreate?: Prisma.LeaveApplicationCreateOrConnectWithoutStatusHistoryInput
+  upsert?: Prisma.LeaveApplicationUpsertWithoutStatusHistoryInput
+  connect?: Prisma.LeaveApplicationWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.LeaveApplicationUpdateToOneWithWhereWithoutStatusHistoryInput, Prisma.LeaveApplicationUpdateWithoutStatusHistoryInput>, Prisma.LeaveApplicationUncheckedUpdateWithoutStatusHistoryInput>
+}
+
 export type LeaveApplicationCreateNestedOneWithoutDocumentsInput = {
   create?: Prisma.XOR<Prisma.LeaveApplicationCreateWithoutDocumentsInput, Prisma.LeaveApplicationUncheckedCreateWithoutDocumentsInput>
   connectOrCreate?: Prisma.LeaveApplicationCreateOrConnectWithoutDocumentsInput
@@ -754,10 +956,17 @@ export type LeaveApplicationCreateWithoutEmployeeInput = {
   status?: string
   hrComments?: string | null
   reviewedAt?: Date | string | null
+  managerApprovalStatus?: string | null
+  managerReviewedAt?: Date | string | null
+  managerComments?: string | null
   createdAt?: Date | string
+  updatedAt?: Date | string
   leaveType: Prisma.LeaveTypeCreateNestedOneWithoutLeaveApplicationsInput
   reviewer?: Prisma.EmployeeCreateNestedOneWithoutReviewedLeavesInput
+  reportingManager?: Prisma.EmployeeCreateNestedOneWithoutReportingManagerLeavesInput
   documents?: Prisma.LeaveDocumentCreateNestedManyWithoutLeaveInput
+  dateSelections?: Prisma.LeaveDateSelectionCreateNestedManyWithoutLeaveInput
+  statusHistory?: Prisma.LeaveStatusHistoryCreateNestedManyWithoutLeaveInput
 }
 
 export type LeaveApplicationUncheckedCreateWithoutEmployeeInput = {
@@ -773,8 +982,15 @@ export type LeaveApplicationUncheckedCreateWithoutEmployeeInput = {
   hrComments?: string | null
   reviewedBy?: number | null
   reviewedAt?: Date | string | null
+  reportingManagerEmployeeId?: number | null
+  managerApprovalStatus?: string | null
+  managerReviewedAt?: Date | string | null
+  managerComments?: string | null
   createdAt?: Date | string
+  updatedAt?: Date | string
   documents?: Prisma.LeaveDocumentUncheckedCreateNestedManyWithoutLeaveInput
+  dateSelections?: Prisma.LeaveDateSelectionUncheckedCreateNestedManyWithoutLeaveInput
+  statusHistory?: Prisma.LeaveStatusHistoryUncheckedCreateNestedManyWithoutLeaveInput
 }
 
 export type LeaveApplicationCreateOrConnectWithoutEmployeeInput = {
@@ -797,10 +1013,17 @@ export type LeaveApplicationCreateWithoutReviewerInput = {
   status?: string
   hrComments?: string | null
   reviewedAt?: Date | string | null
+  managerApprovalStatus?: string | null
+  managerReviewedAt?: Date | string | null
+  managerComments?: string | null
   createdAt?: Date | string
+  updatedAt?: Date | string
   employee: Prisma.EmployeeCreateNestedOneWithoutLeaveApplicationsInput
   leaveType: Prisma.LeaveTypeCreateNestedOneWithoutLeaveApplicationsInput
+  reportingManager?: Prisma.EmployeeCreateNestedOneWithoutReportingManagerLeavesInput
   documents?: Prisma.LeaveDocumentCreateNestedManyWithoutLeaveInput
+  dateSelections?: Prisma.LeaveDateSelectionCreateNestedManyWithoutLeaveInput
+  statusHistory?: Prisma.LeaveStatusHistoryCreateNestedManyWithoutLeaveInput
 }
 
 export type LeaveApplicationUncheckedCreateWithoutReviewerInput = {
@@ -816,8 +1039,15 @@ export type LeaveApplicationUncheckedCreateWithoutReviewerInput = {
   status?: string
   hrComments?: string | null
   reviewedAt?: Date | string | null
+  reportingManagerEmployeeId?: number | null
+  managerApprovalStatus?: string | null
+  managerReviewedAt?: Date | string | null
+  managerComments?: string | null
   createdAt?: Date | string
+  updatedAt?: Date | string
   documents?: Prisma.LeaveDocumentUncheckedCreateNestedManyWithoutLeaveInput
+  dateSelections?: Prisma.LeaveDateSelectionUncheckedCreateNestedManyWithoutLeaveInput
+  statusHistory?: Prisma.LeaveStatusHistoryUncheckedCreateNestedManyWithoutLeaveInput
 }
 
 export type LeaveApplicationCreateOrConnectWithoutReviewerInput = {
@@ -827,6 +1057,63 @@ export type LeaveApplicationCreateOrConnectWithoutReviewerInput = {
 
 export type LeaveApplicationCreateManyReviewerInputEnvelope = {
   data: Prisma.LeaveApplicationCreateManyReviewerInput | Prisma.LeaveApplicationCreateManyReviewerInput[]
+  skipDuplicates?: boolean
+}
+
+export type LeaveApplicationCreateWithoutReportingManagerInput = {
+  startDate: Date | string
+  endDate: Date | string
+  durationType: string
+  halfDayType?: string | null
+  numberOfDays: runtime.Decimal | runtime.DecimalJsLike | number | string
+  reason: string
+  status?: string
+  hrComments?: string | null
+  reviewedAt?: Date | string | null
+  managerApprovalStatus?: string | null
+  managerReviewedAt?: Date | string | null
+  managerComments?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  employee: Prisma.EmployeeCreateNestedOneWithoutLeaveApplicationsInput
+  leaveType: Prisma.LeaveTypeCreateNestedOneWithoutLeaveApplicationsInput
+  reviewer?: Prisma.EmployeeCreateNestedOneWithoutReviewedLeavesInput
+  documents?: Prisma.LeaveDocumentCreateNestedManyWithoutLeaveInput
+  dateSelections?: Prisma.LeaveDateSelectionCreateNestedManyWithoutLeaveInput
+  statusHistory?: Prisma.LeaveStatusHistoryCreateNestedManyWithoutLeaveInput
+}
+
+export type LeaveApplicationUncheckedCreateWithoutReportingManagerInput = {
+  leaveId?: number
+  employeeId: number
+  leaveTypeId: number
+  startDate: Date | string
+  endDate: Date | string
+  durationType: string
+  halfDayType?: string | null
+  numberOfDays: runtime.Decimal | runtime.DecimalJsLike | number | string
+  reason: string
+  status?: string
+  hrComments?: string | null
+  reviewedBy?: number | null
+  reviewedAt?: Date | string | null
+  managerApprovalStatus?: string | null
+  managerReviewedAt?: Date | string | null
+  managerComments?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  documents?: Prisma.LeaveDocumentUncheckedCreateNestedManyWithoutLeaveInput
+  dateSelections?: Prisma.LeaveDateSelectionUncheckedCreateNestedManyWithoutLeaveInput
+  statusHistory?: Prisma.LeaveStatusHistoryUncheckedCreateNestedManyWithoutLeaveInput
+}
+
+export type LeaveApplicationCreateOrConnectWithoutReportingManagerInput = {
+  where: Prisma.LeaveApplicationWhereUniqueInput
+  create: Prisma.XOR<Prisma.LeaveApplicationCreateWithoutReportingManagerInput, Prisma.LeaveApplicationUncheckedCreateWithoutReportingManagerInput>
+}
+
+export type LeaveApplicationCreateManyReportingManagerInputEnvelope = {
+  data: Prisma.LeaveApplicationCreateManyReportingManagerInput | Prisma.LeaveApplicationCreateManyReportingManagerInput[]
   skipDuplicates?: boolean
 }
 
@@ -863,7 +1150,12 @@ export type LeaveApplicationScalarWhereInput = {
   hrComments?: Prisma.StringNullableFilter<"LeaveApplication"> | string | null
   reviewedBy?: Prisma.IntNullableFilter<"LeaveApplication"> | number | null
   reviewedAt?: Prisma.DateTimeNullableFilter<"LeaveApplication"> | Date | string | null
+  reportingManagerEmployeeId?: Prisma.IntNullableFilter<"LeaveApplication"> | number | null
+  managerApprovalStatus?: Prisma.StringNullableFilter<"LeaveApplication"> | string | null
+  managerReviewedAt?: Prisma.DateTimeNullableFilter<"LeaveApplication"> | Date | string | null
+  managerComments?: Prisma.StringNullableFilter<"LeaveApplication"> | string | null
   createdAt?: Prisma.DateTimeFilter<"LeaveApplication"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"LeaveApplication"> | Date | string
 }
 
 export type LeaveApplicationUpsertWithWhereUniqueWithoutReviewerInput = {
@@ -882,6 +1174,22 @@ export type LeaveApplicationUpdateManyWithWhereWithoutReviewerInput = {
   data: Prisma.XOR<Prisma.LeaveApplicationUpdateManyMutationInput, Prisma.LeaveApplicationUncheckedUpdateManyWithoutReviewerInput>
 }
 
+export type LeaveApplicationUpsertWithWhereUniqueWithoutReportingManagerInput = {
+  where: Prisma.LeaveApplicationWhereUniqueInput
+  update: Prisma.XOR<Prisma.LeaveApplicationUpdateWithoutReportingManagerInput, Prisma.LeaveApplicationUncheckedUpdateWithoutReportingManagerInput>
+  create: Prisma.XOR<Prisma.LeaveApplicationCreateWithoutReportingManagerInput, Prisma.LeaveApplicationUncheckedCreateWithoutReportingManagerInput>
+}
+
+export type LeaveApplicationUpdateWithWhereUniqueWithoutReportingManagerInput = {
+  where: Prisma.LeaveApplicationWhereUniqueInput
+  data: Prisma.XOR<Prisma.LeaveApplicationUpdateWithoutReportingManagerInput, Prisma.LeaveApplicationUncheckedUpdateWithoutReportingManagerInput>
+}
+
+export type LeaveApplicationUpdateManyWithWhereWithoutReportingManagerInput = {
+  where: Prisma.LeaveApplicationScalarWhereInput
+  data: Prisma.XOR<Prisma.LeaveApplicationUpdateManyMutationInput, Prisma.LeaveApplicationUncheckedUpdateManyWithoutReportingManagerInput>
+}
+
 export type LeaveApplicationCreateWithoutLeaveTypeInput = {
   startDate: Date | string
   endDate: Date | string
@@ -892,10 +1200,17 @@ export type LeaveApplicationCreateWithoutLeaveTypeInput = {
   status?: string
   hrComments?: string | null
   reviewedAt?: Date | string | null
+  managerApprovalStatus?: string | null
+  managerReviewedAt?: Date | string | null
+  managerComments?: string | null
   createdAt?: Date | string
+  updatedAt?: Date | string
   employee: Prisma.EmployeeCreateNestedOneWithoutLeaveApplicationsInput
   reviewer?: Prisma.EmployeeCreateNestedOneWithoutReviewedLeavesInput
+  reportingManager?: Prisma.EmployeeCreateNestedOneWithoutReportingManagerLeavesInput
   documents?: Prisma.LeaveDocumentCreateNestedManyWithoutLeaveInput
+  dateSelections?: Prisma.LeaveDateSelectionCreateNestedManyWithoutLeaveInput
+  statusHistory?: Prisma.LeaveStatusHistoryCreateNestedManyWithoutLeaveInput
 }
 
 export type LeaveApplicationUncheckedCreateWithoutLeaveTypeInput = {
@@ -911,8 +1226,15 @@ export type LeaveApplicationUncheckedCreateWithoutLeaveTypeInput = {
   hrComments?: string | null
   reviewedBy?: number | null
   reviewedAt?: Date | string | null
+  reportingManagerEmployeeId?: number | null
+  managerApprovalStatus?: string | null
+  managerReviewedAt?: Date | string | null
+  managerComments?: string | null
   createdAt?: Date | string
+  updatedAt?: Date | string
   documents?: Prisma.LeaveDocumentUncheckedCreateNestedManyWithoutLeaveInput
+  dateSelections?: Prisma.LeaveDateSelectionUncheckedCreateNestedManyWithoutLeaveInput
+  statusHistory?: Prisma.LeaveStatusHistoryUncheckedCreateNestedManyWithoutLeaveInput
 }
 
 export type LeaveApplicationCreateOrConnectWithoutLeaveTypeInput = {
@@ -941,6 +1263,226 @@ export type LeaveApplicationUpdateManyWithWhereWithoutLeaveTypeInput = {
   data: Prisma.XOR<Prisma.LeaveApplicationUpdateManyMutationInput, Prisma.LeaveApplicationUncheckedUpdateManyWithoutLeaveTypeInput>
 }
 
+export type LeaveApplicationCreateWithoutDateSelectionsInput = {
+  startDate: Date | string
+  endDate: Date | string
+  durationType: string
+  halfDayType?: string | null
+  numberOfDays: runtime.Decimal | runtime.DecimalJsLike | number | string
+  reason: string
+  status?: string
+  hrComments?: string | null
+  reviewedAt?: Date | string | null
+  managerApprovalStatus?: string | null
+  managerReviewedAt?: Date | string | null
+  managerComments?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  employee: Prisma.EmployeeCreateNestedOneWithoutLeaveApplicationsInput
+  leaveType: Prisma.LeaveTypeCreateNestedOneWithoutLeaveApplicationsInput
+  reviewer?: Prisma.EmployeeCreateNestedOneWithoutReviewedLeavesInput
+  reportingManager?: Prisma.EmployeeCreateNestedOneWithoutReportingManagerLeavesInput
+  documents?: Prisma.LeaveDocumentCreateNestedManyWithoutLeaveInput
+  statusHistory?: Prisma.LeaveStatusHistoryCreateNestedManyWithoutLeaveInput
+}
+
+export type LeaveApplicationUncheckedCreateWithoutDateSelectionsInput = {
+  leaveId?: number
+  employeeId: number
+  leaveTypeId: number
+  startDate: Date | string
+  endDate: Date | string
+  durationType: string
+  halfDayType?: string | null
+  numberOfDays: runtime.Decimal | runtime.DecimalJsLike | number | string
+  reason: string
+  status?: string
+  hrComments?: string | null
+  reviewedBy?: number | null
+  reviewedAt?: Date | string | null
+  reportingManagerEmployeeId?: number | null
+  managerApprovalStatus?: string | null
+  managerReviewedAt?: Date | string | null
+  managerComments?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  documents?: Prisma.LeaveDocumentUncheckedCreateNestedManyWithoutLeaveInput
+  statusHistory?: Prisma.LeaveStatusHistoryUncheckedCreateNestedManyWithoutLeaveInput
+}
+
+export type LeaveApplicationCreateOrConnectWithoutDateSelectionsInput = {
+  where: Prisma.LeaveApplicationWhereUniqueInput
+  create: Prisma.XOR<Prisma.LeaveApplicationCreateWithoutDateSelectionsInput, Prisma.LeaveApplicationUncheckedCreateWithoutDateSelectionsInput>
+}
+
+export type LeaveApplicationUpsertWithoutDateSelectionsInput = {
+  update: Prisma.XOR<Prisma.LeaveApplicationUpdateWithoutDateSelectionsInput, Prisma.LeaveApplicationUncheckedUpdateWithoutDateSelectionsInput>
+  create: Prisma.XOR<Prisma.LeaveApplicationCreateWithoutDateSelectionsInput, Prisma.LeaveApplicationUncheckedCreateWithoutDateSelectionsInput>
+  where?: Prisma.LeaveApplicationWhereInput
+}
+
+export type LeaveApplicationUpdateToOneWithWhereWithoutDateSelectionsInput = {
+  where?: Prisma.LeaveApplicationWhereInput
+  data: Prisma.XOR<Prisma.LeaveApplicationUpdateWithoutDateSelectionsInput, Prisma.LeaveApplicationUncheckedUpdateWithoutDateSelectionsInput>
+}
+
+export type LeaveApplicationUpdateWithoutDateSelectionsInput = {
+  startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  endDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  durationType?: Prisma.StringFieldUpdateOperationsInput | string
+  halfDayType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  numberOfDays?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  reason?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  hrComments?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  managerApprovalStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  managerReviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  managerComments?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  employee?: Prisma.EmployeeUpdateOneRequiredWithoutLeaveApplicationsNestedInput
+  leaveType?: Prisma.LeaveTypeUpdateOneRequiredWithoutLeaveApplicationsNestedInput
+  reviewer?: Prisma.EmployeeUpdateOneWithoutReviewedLeavesNestedInput
+  reportingManager?: Prisma.EmployeeUpdateOneWithoutReportingManagerLeavesNestedInput
+  documents?: Prisma.LeaveDocumentUpdateManyWithoutLeaveNestedInput
+  statusHistory?: Prisma.LeaveStatusHistoryUpdateManyWithoutLeaveNestedInput
+}
+
+export type LeaveApplicationUncheckedUpdateWithoutDateSelectionsInput = {
+  leaveId?: Prisma.IntFieldUpdateOperationsInput | number
+  employeeId?: Prisma.IntFieldUpdateOperationsInput | number
+  leaveTypeId?: Prisma.IntFieldUpdateOperationsInput | number
+  startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  endDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  durationType?: Prisma.StringFieldUpdateOperationsInput | string
+  halfDayType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  numberOfDays?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  reason?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  hrComments?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedBy?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reportingManagerEmployeeId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  managerApprovalStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  managerReviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  managerComments?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  documents?: Prisma.LeaveDocumentUncheckedUpdateManyWithoutLeaveNestedInput
+  statusHistory?: Prisma.LeaveStatusHistoryUncheckedUpdateManyWithoutLeaveNestedInput
+}
+
+export type LeaveApplicationCreateWithoutStatusHistoryInput = {
+  startDate: Date | string
+  endDate: Date | string
+  durationType: string
+  halfDayType?: string | null
+  numberOfDays: runtime.Decimal | runtime.DecimalJsLike | number | string
+  reason: string
+  status?: string
+  hrComments?: string | null
+  reviewedAt?: Date | string | null
+  managerApprovalStatus?: string | null
+  managerReviewedAt?: Date | string | null
+  managerComments?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  employee: Prisma.EmployeeCreateNestedOneWithoutLeaveApplicationsInput
+  leaveType: Prisma.LeaveTypeCreateNestedOneWithoutLeaveApplicationsInput
+  reviewer?: Prisma.EmployeeCreateNestedOneWithoutReviewedLeavesInput
+  reportingManager?: Prisma.EmployeeCreateNestedOneWithoutReportingManagerLeavesInput
+  documents?: Prisma.LeaveDocumentCreateNestedManyWithoutLeaveInput
+  dateSelections?: Prisma.LeaveDateSelectionCreateNestedManyWithoutLeaveInput
+}
+
+export type LeaveApplicationUncheckedCreateWithoutStatusHistoryInput = {
+  leaveId?: number
+  employeeId: number
+  leaveTypeId: number
+  startDate: Date | string
+  endDate: Date | string
+  durationType: string
+  halfDayType?: string | null
+  numberOfDays: runtime.Decimal | runtime.DecimalJsLike | number | string
+  reason: string
+  status?: string
+  hrComments?: string | null
+  reviewedBy?: number | null
+  reviewedAt?: Date | string | null
+  reportingManagerEmployeeId?: number | null
+  managerApprovalStatus?: string | null
+  managerReviewedAt?: Date | string | null
+  managerComments?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  documents?: Prisma.LeaveDocumentUncheckedCreateNestedManyWithoutLeaveInput
+  dateSelections?: Prisma.LeaveDateSelectionUncheckedCreateNestedManyWithoutLeaveInput
+}
+
+export type LeaveApplicationCreateOrConnectWithoutStatusHistoryInput = {
+  where: Prisma.LeaveApplicationWhereUniqueInput
+  create: Prisma.XOR<Prisma.LeaveApplicationCreateWithoutStatusHistoryInput, Prisma.LeaveApplicationUncheckedCreateWithoutStatusHistoryInput>
+}
+
+export type LeaveApplicationUpsertWithoutStatusHistoryInput = {
+  update: Prisma.XOR<Prisma.LeaveApplicationUpdateWithoutStatusHistoryInput, Prisma.LeaveApplicationUncheckedUpdateWithoutStatusHistoryInput>
+  create: Prisma.XOR<Prisma.LeaveApplicationCreateWithoutStatusHistoryInput, Prisma.LeaveApplicationUncheckedCreateWithoutStatusHistoryInput>
+  where?: Prisma.LeaveApplicationWhereInput
+}
+
+export type LeaveApplicationUpdateToOneWithWhereWithoutStatusHistoryInput = {
+  where?: Prisma.LeaveApplicationWhereInput
+  data: Prisma.XOR<Prisma.LeaveApplicationUpdateWithoutStatusHistoryInput, Prisma.LeaveApplicationUncheckedUpdateWithoutStatusHistoryInput>
+}
+
+export type LeaveApplicationUpdateWithoutStatusHistoryInput = {
+  startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  endDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  durationType?: Prisma.StringFieldUpdateOperationsInput | string
+  halfDayType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  numberOfDays?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  reason?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  hrComments?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  managerApprovalStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  managerReviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  managerComments?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  employee?: Prisma.EmployeeUpdateOneRequiredWithoutLeaveApplicationsNestedInput
+  leaveType?: Prisma.LeaveTypeUpdateOneRequiredWithoutLeaveApplicationsNestedInput
+  reviewer?: Prisma.EmployeeUpdateOneWithoutReviewedLeavesNestedInput
+  reportingManager?: Prisma.EmployeeUpdateOneWithoutReportingManagerLeavesNestedInput
+  documents?: Prisma.LeaveDocumentUpdateManyWithoutLeaveNestedInput
+  dateSelections?: Prisma.LeaveDateSelectionUpdateManyWithoutLeaveNestedInput
+}
+
+export type LeaveApplicationUncheckedUpdateWithoutStatusHistoryInput = {
+  leaveId?: Prisma.IntFieldUpdateOperationsInput | number
+  employeeId?: Prisma.IntFieldUpdateOperationsInput | number
+  leaveTypeId?: Prisma.IntFieldUpdateOperationsInput | number
+  startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  endDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  durationType?: Prisma.StringFieldUpdateOperationsInput | string
+  halfDayType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  numberOfDays?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  reason?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  hrComments?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedBy?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reportingManagerEmployeeId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  managerApprovalStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  managerReviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  managerComments?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  documents?: Prisma.LeaveDocumentUncheckedUpdateManyWithoutLeaveNestedInput
+  dateSelections?: Prisma.LeaveDateSelectionUncheckedUpdateManyWithoutLeaveNestedInput
+}
+
 export type LeaveApplicationCreateWithoutDocumentsInput = {
   startDate: Date | string
   endDate: Date | string
@@ -951,10 +1493,17 @@ export type LeaveApplicationCreateWithoutDocumentsInput = {
   status?: string
   hrComments?: string | null
   reviewedAt?: Date | string | null
+  managerApprovalStatus?: string | null
+  managerReviewedAt?: Date | string | null
+  managerComments?: string | null
   createdAt?: Date | string
+  updatedAt?: Date | string
   employee: Prisma.EmployeeCreateNestedOneWithoutLeaveApplicationsInput
   leaveType: Prisma.LeaveTypeCreateNestedOneWithoutLeaveApplicationsInput
   reviewer?: Prisma.EmployeeCreateNestedOneWithoutReviewedLeavesInput
+  reportingManager?: Prisma.EmployeeCreateNestedOneWithoutReportingManagerLeavesInput
+  dateSelections?: Prisma.LeaveDateSelectionCreateNestedManyWithoutLeaveInput
+  statusHistory?: Prisma.LeaveStatusHistoryCreateNestedManyWithoutLeaveInput
 }
 
 export type LeaveApplicationUncheckedCreateWithoutDocumentsInput = {
@@ -971,7 +1520,14 @@ export type LeaveApplicationUncheckedCreateWithoutDocumentsInput = {
   hrComments?: string | null
   reviewedBy?: number | null
   reviewedAt?: Date | string | null
+  reportingManagerEmployeeId?: number | null
+  managerApprovalStatus?: string | null
+  managerReviewedAt?: Date | string | null
+  managerComments?: string | null
   createdAt?: Date | string
+  updatedAt?: Date | string
+  dateSelections?: Prisma.LeaveDateSelectionUncheckedCreateNestedManyWithoutLeaveInput
+  statusHistory?: Prisma.LeaveStatusHistoryUncheckedCreateNestedManyWithoutLeaveInput
 }
 
 export type LeaveApplicationCreateOrConnectWithoutDocumentsInput = {
@@ -1000,10 +1556,17 @@ export type LeaveApplicationUpdateWithoutDocumentsInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   hrComments?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  managerApprovalStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  managerReviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  managerComments?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   employee?: Prisma.EmployeeUpdateOneRequiredWithoutLeaveApplicationsNestedInput
   leaveType?: Prisma.LeaveTypeUpdateOneRequiredWithoutLeaveApplicationsNestedInput
   reviewer?: Prisma.EmployeeUpdateOneWithoutReviewedLeavesNestedInput
+  reportingManager?: Prisma.EmployeeUpdateOneWithoutReportingManagerLeavesNestedInput
+  dateSelections?: Prisma.LeaveDateSelectionUpdateManyWithoutLeaveNestedInput
+  statusHistory?: Prisma.LeaveStatusHistoryUpdateManyWithoutLeaveNestedInput
 }
 
 export type LeaveApplicationUncheckedUpdateWithoutDocumentsInput = {
@@ -1020,7 +1583,14 @@ export type LeaveApplicationUncheckedUpdateWithoutDocumentsInput = {
   hrComments?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reviewedBy?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reportingManagerEmployeeId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  managerApprovalStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  managerReviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  managerComments?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  dateSelections?: Prisma.LeaveDateSelectionUncheckedUpdateManyWithoutLeaveNestedInput
+  statusHistory?: Prisma.LeaveStatusHistoryUncheckedUpdateManyWithoutLeaveNestedInput
 }
 
 export type LeaveApplicationCreateManyEmployeeInput = {
@@ -1036,7 +1606,12 @@ export type LeaveApplicationCreateManyEmployeeInput = {
   hrComments?: string | null
   reviewedBy?: number | null
   reviewedAt?: Date | string | null
+  reportingManagerEmployeeId?: number | null
+  managerApprovalStatus?: string | null
+  managerReviewedAt?: Date | string | null
+  managerComments?: string | null
   createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type LeaveApplicationCreateManyReviewerInput = {
@@ -1052,7 +1627,33 @@ export type LeaveApplicationCreateManyReviewerInput = {
   status?: string
   hrComments?: string | null
   reviewedAt?: Date | string | null
+  reportingManagerEmployeeId?: number | null
+  managerApprovalStatus?: string | null
+  managerReviewedAt?: Date | string | null
+  managerComments?: string | null
   createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type LeaveApplicationCreateManyReportingManagerInput = {
+  leaveId?: number
+  employeeId: number
+  leaveTypeId: number
+  startDate: Date | string
+  endDate: Date | string
+  durationType: string
+  halfDayType?: string | null
+  numberOfDays: runtime.Decimal | runtime.DecimalJsLike | number | string
+  reason: string
+  status?: string
+  hrComments?: string | null
+  reviewedBy?: number | null
+  reviewedAt?: Date | string | null
+  managerApprovalStatus?: string | null
+  managerReviewedAt?: Date | string | null
+  managerComments?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type LeaveApplicationUpdateWithoutEmployeeInput = {
@@ -1065,10 +1666,17 @@ export type LeaveApplicationUpdateWithoutEmployeeInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   hrComments?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  managerApprovalStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  managerReviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  managerComments?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   leaveType?: Prisma.LeaveTypeUpdateOneRequiredWithoutLeaveApplicationsNestedInput
   reviewer?: Prisma.EmployeeUpdateOneWithoutReviewedLeavesNestedInput
+  reportingManager?: Prisma.EmployeeUpdateOneWithoutReportingManagerLeavesNestedInput
   documents?: Prisma.LeaveDocumentUpdateManyWithoutLeaveNestedInput
+  dateSelections?: Prisma.LeaveDateSelectionUpdateManyWithoutLeaveNestedInput
+  statusHistory?: Prisma.LeaveStatusHistoryUpdateManyWithoutLeaveNestedInput
 }
 
 export type LeaveApplicationUncheckedUpdateWithoutEmployeeInput = {
@@ -1084,8 +1692,15 @@ export type LeaveApplicationUncheckedUpdateWithoutEmployeeInput = {
   hrComments?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reviewedBy?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reportingManagerEmployeeId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  managerApprovalStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  managerReviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  managerComments?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   documents?: Prisma.LeaveDocumentUncheckedUpdateManyWithoutLeaveNestedInput
+  dateSelections?: Prisma.LeaveDateSelectionUncheckedUpdateManyWithoutLeaveNestedInput
+  statusHistory?: Prisma.LeaveStatusHistoryUncheckedUpdateManyWithoutLeaveNestedInput
 }
 
 export type LeaveApplicationUncheckedUpdateManyWithoutEmployeeInput = {
@@ -1101,7 +1716,12 @@ export type LeaveApplicationUncheckedUpdateManyWithoutEmployeeInput = {
   hrComments?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reviewedBy?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reportingManagerEmployeeId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  managerApprovalStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  managerReviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  managerComments?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type LeaveApplicationUpdateWithoutReviewerInput = {
@@ -1114,10 +1734,17 @@ export type LeaveApplicationUpdateWithoutReviewerInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   hrComments?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  managerApprovalStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  managerReviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  managerComments?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   employee?: Prisma.EmployeeUpdateOneRequiredWithoutLeaveApplicationsNestedInput
   leaveType?: Prisma.LeaveTypeUpdateOneRequiredWithoutLeaveApplicationsNestedInput
+  reportingManager?: Prisma.EmployeeUpdateOneWithoutReportingManagerLeavesNestedInput
   documents?: Prisma.LeaveDocumentUpdateManyWithoutLeaveNestedInput
+  dateSelections?: Prisma.LeaveDateSelectionUpdateManyWithoutLeaveNestedInput
+  statusHistory?: Prisma.LeaveStatusHistoryUpdateManyWithoutLeaveNestedInput
 }
 
 export type LeaveApplicationUncheckedUpdateWithoutReviewerInput = {
@@ -1133,8 +1760,15 @@ export type LeaveApplicationUncheckedUpdateWithoutReviewerInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   hrComments?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reportingManagerEmployeeId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  managerApprovalStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  managerReviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  managerComments?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   documents?: Prisma.LeaveDocumentUncheckedUpdateManyWithoutLeaveNestedInput
+  dateSelections?: Prisma.LeaveDateSelectionUncheckedUpdateManyWithoutLeaveNestedInput
+  statusHistory?: Prisma.LeaveStatusHistoryUncheckedUpdateManyWithoutLeaveNestedInput
 }
 
 export type LeaveApplicationUncheckedUpdateManyWithoutReviewerInput = {
@@ -1150,7 +1784,80 @@ export type LeaveApplicationUncheckedUpdateManyWithoutReviewerInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   hrComments?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reportingManagerEmployeeId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  managerApprovalStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  managerReviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  managerComments?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type LeaveApplicationUpdateWithoutReportingManagerInput = {
+  startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  endDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  durationType?: Prisma.StringFieldUpdateOperationsInput | string
+  halfDayType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  numberOfDays?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  reason?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  hrComments?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  managerApprovalStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  managerReviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  managerComments?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  employee?: Prisma.EmployeeUpdateOneRequiredWithoutLeaveApplicationsNestedInput
+  leaveType?: Prisma.LeaveTypeUpdateOneRequiredWithoutLeaveApplicationsNestedInput
+  reviewer?: Prisma.EmployeeUpdateOneWithoutReviewedLeavesNestedInput
+  documents?: Prisma.LeaveDocumentUpdateManyWithoutLeaveNestedInput
+  dateSelections?: Prisma.LeaveDateSelectionUpdateManyWithoutLeaveNestedInput
+  statusHistory?: Prisma.LeaveStatusHistoryUpdateManyWithoutLeaveNestedInput
+}
+
+export type LeaveApplicationUncheckedUpdateWithoutReportingManagerInput = {
+  leaveId?: Prisma.IntFieldUpdateOperationsInput | number
+  employeeId?: Prisma.IntFieldUpdateOperationsInput | number
+  leaveTypeId?: Prisma.IntFieldUpdateOperationsInput | number
+  startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  endDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  durationType?: Prisma.StringFieldUpdateOperationsInput | string
+  halfDayType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  numberOfDays?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  reason?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  hrComments?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedBy?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  managerApprovalStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  managerReviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  managerComments?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  documents?: Prisma.LeaveDocumentUncheckedUpdateManyWithoutLeaveNestedInput
+  dateSelections?: Prisma.LeaveDateSelectionUncheckedUpdateManyWithoutLeaveNestedInput
+  statusHistory?: Prisma.LeaveStatusHistoryUncheckedUpdateManyWithoutLeaveNestedInput
+}
+
+export type LeaveApplicationUncheckedUpdateManyWithoutReportingManagerInput = {
+  leaveId?: Prisma.IntFieldUpdateOperationsInput | number
+  employeeId?: Prisma.IntFieldUpdateOperationsInput | number
+  leaveTypeId?: Prisma.IntFieldUpdateOperationsInput | number
+  startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  endDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  durationType?: Prisma.StringFieldUpdateOperationsInput | string
+  halfDayType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  numberOfDays?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  reason?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  hrComments?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedBy?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  managerApprovalStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  managerReviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  managerComments?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type LeaveApplicationCreateManyLeaveTypeInput = {
@@ -1166,7 +1873,12 @@ export type LeaveApplicationCreateManyLeaveTypeInput = {
   hrComments?: string | null
   reviewedBy?: number | null
   reviewedAt?: Date | string | null
+  reportingManagerEmployeeId?: number | null
+  managerApprovalStatus?: string | null
+  managerReviewedAt?: Date | string | null
+  managerComments?: string | null
   createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type LeaveApplicationUpdateWithoutLeaveTypeInput = {
@@ -1179,10 +1891,17 @@ export type LeaveApplicationUpdateWithoutLeaveTypeInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   hrComments?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  managerApprovalStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  managerReviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  managerComments?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   employee?: Prisma.EmployeeUpdateOneRequiredWithoutLeaveApplicationsNestedInput
   reviewer?: Prisma.EmployeeUpdateOneWithoutReviewedLeavesNestedInput
+  reportingManager?: Prisma.EmployeeUpdateOneWithoutReportingManagerLeavesNestedInput
   documents?: Prisma.LeaveDocumentUpdateManyWithoutLeaveNestedInput
+  dateSelections?: Prisma.LeaveDateSelectionUpdateManyWithoutLeaveNestedInput
+  statusHistory?: Prisma.LeaveStatusHistoryUpdateManyWithoutLeaveNestedInput
 }
 
 export type LeaveApplicationUncheckedUpdateWithoutLeaveTypeInput = {
@@ -1198,8 +1917,15 @@ export type LeaveApplicationUncheckedUpdateWithoutLeaveTypeInput = {
   hrComments?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reviewedBy?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reportingManagerEmployeeId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  managerApprovalStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  managerReviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  managerComments?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   documents?: Prisma.LeaveDocumentUncheckedUpdateManyWithoutLeaveNestedInput
+  dateSelections?: Prisma.LeaveDateSelectionUncheckedUpdateManyWithoutLeaveNestedInput
+  statusHistory?: Prisma.LeaveStatusHistoryUncheckedUpdateManyWithoutLeaveNestedInput
 }
 
 export type LeaveApplicationUncheckedUpdateManyWithoutLeaveTypeInput = {
@@ -1215,7 +1941,12 @@ export type LeaveApplicationUncheckedUpdateManyWithoutLeaveTypeInput = {
   hrComments?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reviewedBy?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reportingManagerEmployeeId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  managerApprovalStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  managerReviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  managerComments?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 
@@ -1225,10 +1956,14 @@ export type LeaveApplicationUncheckedUpdateManyWithoutLeaveTypeInput = {
 
 export type LeaveApplicationCountOutputType = {
   documents: number
+  dateSelections: number
+  statusHistory: number
 }
 
 export type LeaveApplicationCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   documents?: boolean | LeaveApplicationCountOutputTypeCountDocumentsArgs
+  dateSelections?: boolean | LeaveApplicationCountOutputTypeCountDateSelectionsArgs
+  statusHistory?: boolean | LeaveApplicationCountOutputTypeCountStatusHistoryArgs
 }
 
 /**
@@ -1248,6 +1983,20 @@ export type LeaveApplicationCountOutputTypeCountDocumentsArgs<ExtArgs extends ru
   where?: Prisma.LeaveDocumentWhereInput
 }
 
+/**
+ * LeaveApplicationCountOutputType without action
+ */
+export type LeaveApplicationCountOutputTypeCountDateSelectionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.LeaveDateSelectionWhereInput
+}
+
+/**
+ * LeaveApplicationCountOutputType without action
+ */
+export type LeaveApplicationCountOutputTypeCountStatusHistoryArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.LeaveStatusHistoryWhereInput
+}
+
 
 export type LeaveApplicationSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   leaveId?: boolean
@@ -1263,11 +2012,19 @@ export type LeaveApplicationSelect<ExtArgs extends runtime.Types.Extensions.Inte
   hrComments?: boolean
   reviewedBy?: boolean
   reviewedAt?: boolean
+  reportingManagerEmployeeId?: boolean
+  managerApprovalStatus?: boolean
+  managerReviewedAt?: boolean
+  managerComments?: boolean
   createdAt?: boolean
+  updatedAt?: boolean
   employee?: boolean | Prisma.EmployeeDefaultArgs<ExtArgs>
   leaveType?: boolean | Prisma.LeaveTypeDefaultArgs<ExtArgs>
   reviewer?: boolean | Prisma.LeaveApplication$reviewerArgs<ExtArgs>
+  reportingManager?: boolean | Prisma.LeaveApplication$reportingManagerArgs<ExtArgs>
   documents?: boolean | Prisma.LeaveApplication$documentsArgs<ExtArgs>
+  dateSelections?: boolean | Prisma.LeaveApplication$dateSelectionsArgs<ExtArgs>
+  statusHistory?: boolean | Prisma.LeaveApplication$statusHistoryArgs<ExtArgs>
   _count?: boolean | Prisma.LeaveApplicationCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["leaveApplication"]>
 
@@ -1285,10 +2042,16 @@ export type LeaveApplicationSelectCreateManyAndReturn<ExtArgs extends runtime.Ty
   hrComments?: boolean
   reviewedBy?: boolean
   reviewedAt?: boolean
+  reportingManagerEmployeeId?: boolean
+  managerApprovalStatus?: boolean
+  managerReviewedAt?: boolean
+  managerComments?: boolean
   createdAt?: boolean
+  updatedAt?: boolean
   employee?: boolean | Prisma.EmployeeDefaultArgs<ExtArgs>
   leaveType?: boolean | Prisma.LeaveTypeDefaultArgs<ExtArgs>
   reviewer?: boolean | Prisma.LeaveApplication$reviewerArgs<ExtArgs>
+  reportingManager?: boolean | Prisma.LeaveApplication$reportingManagerArgs<ExtArgs>
 }, ExtArgs["result"]["leaveApplication"]>
 
 export type LeaveApplicationSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1305,10 +2068,16 @@ export type LeaveApplicationSelectUpdateManyAndReturn<ExtArgs extends runtime.Ty
   hrComments?: boolean
   reviewedBy?: boolean
   reviewedAt?: boolean
+  reportingManagerEmployeeId?: boolean
+  managerApprovalStatus?: boolean
+  managerReviewedAt?: boolean
+  managerComments?: boolean
   createdAt?: boolean
+  updatedAt?: boolean
   employee?: boolean | Prisma.EmployeeDefaultArgs<ExtArgs>
   leaveType?: boolean | Prisma.LeaveTypeDefaultArgs<ExtArgs>
   reviewer?: boolean | Prisma.LeaveApplication$reviewerArgs<ExtArgs>
+  reportingManager?: boolean | Prisma.LeaveApplication$reportingManagerArgs<ExtArgs>
 }, ExtArgs["result"]["leaveApplication"]>
 
 export type LeaveApplicationSelectScalar = {
@@ -1325,26 +2094,36 @@ export type LeaveApplicationSelectScalar = {
   hrComments?: boolean
   reviewedBy?: boolean
   reviewedAt?: boolean
+  reportingManagerEmployeeId?: boolean
+  managerApprovalStatus?: boolean
+  managerReviewedAt?: boolean
+  managerComments?: boolean
   createdAt?: boolean
+  updatedAt?: boolean
 }
 
-export type LeaveApplicationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"leaveId" | "employeeId" | "leaveTypeId" | "startDate" | "endDate" | "durationType" | "halfDayType" | "numberOfDays" | "reason" | "status" | "hrComments" | "reviewedBy" | "reviewedAt" | "createdAt", ExtArgs["result"]["leaveApplication"]>
+export type LeaveApplicationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"leaveId" | "employeeId" | "leaveTypeId" | "startDate" | "endDate" | "durationType" | "halfDayType" | "numberOfDays" | "reason" | "status" | "hrComments" | "reviewedBy" | "reviewedAt" | "reportingManagerEmployeeId" | "managerApprovalStatus" | "managerReviewedAt" | "managerComments" | "createdAt" | "updatedAt", ExtArgs["result"]["leaveApplication"]>
 export type LeaveApplicationInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   employee?: boolean | Prisma.EmployeeDefaultArgs<ExtArgs>
   leaveType?: boolean | Prisma.LeaveTypeDefaultArgs<ExtArgs>
   reviewer?: boolean | Prisma.LeaveApplication$reviewerArgs<ExtArgs>
+  reportingManager?: boolean | Prisma.LeaveApplication$reportingManagerArgs<ExtArgs>
   documents?: boolean | Prisma.LeaveApplication$documentsArgs<ExtArgs>
+  dateSelections?: boolean | Prisma.LeaveApplication$dateSelectionsArgs<ExtArgs>
+  statusHistory?: boolean | Prisma.LeaveApplication$statusHistoryArgs<ExtArgs>
   _count?: boolean | Prisma.LeaveApplicationCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type LeaveApplicationIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   employee?: boolean | Prisma.EmployeeDefaultArgs<ExtArgs>
   leaveType?: boolean | Prisma.LeaveTypeDefaultArgs<ExtArgs>
   reviewer?: boolean | Prisma.LeaveApplication$reviewerArgs<ExtArgs>
+  reportingManager?: boolean | Prisma.LeaveApplication$reportingManagerArgs<ExtArgs>
 }
 export type LeaveApplicationIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   employee?: boolean | Prisma.EmployeeDefaultArgs<ExtArgs>
   leaveType?: boolean | Prisma.LeaveTypeDefaultArgs<ExtArgs>
   reviewer?: boolean | Prisma.LeaveApplication$reviewerArgs<ExtArgs>
+  reportingManager?: boolean | Prisma.LeaveApplication$reportingManagerArgs<ExtArgs>
 }
 
 export type $LeaveApplicationPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1353,7 +2132,10 @@ export type $LeaveApplicationPayload<ExtArgs extends runtime.Types.Extensions.In
     employee: Prisma.$EmployeePayload<ExtArgs>
     leaveType: Prisma.$LeaveTypePayload<ExtArgs>
     reviewer: Prisma.$EmployeePayload<ExtArgs> | null
+    reportingManager: Prisma.$EmployeePayload<ExtArgs> | null
     documents: Prisma.$LeaveDocumentPayload<ExtArgs>[]
+    dateSelections: Prisma.$LeaveDateSelectionPayload<ExtArgs>[]
+    statusHistory: Prisma.$LeaveStatusHistoryPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     leaveId: number
@@ -1369,7 +2151,12 @@ export type $LeaveApplicationPayload<ExtArgs extends runtime.Types.Extensions.In
     hrComments: string | null
     reviewedBy: number | null
     reviewedAt: Date | null
+    reportingManagerEmployeeId: number | null
+    managerApprovalStatus: string | null
+    managerReviewedAt: Date | null
+    managerComments: string | null
     createdAt: Date
+    updatedAt: Date
   }, ExtArgs["result"]["leaveApplication"]>
   composites: {}
 }
@@ -1767,7 +2554,10 @@ export interface Prisma__LeaveApplicationClient<T, Null = never, ExtArgs extends
   employee<T extends Prisma.EmployeeDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.EmployeeDefaultArgs<ExtArgs>>): Prisma.Prisma__EmployeeClient<runtime.Types.Result.GetResult<Prisma.$EmployeePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   leaveType<T extends Prisma.LeaveTypeDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.LeaveTypeDefaultArgs<ExtArgs>>): Prisma.Prisma__LeaveTypeClient<runtime.Types.Result.GetResult<Prisma.$LeaveTypePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   reviewer<T extends Prisma.LeaveApplication$reviewerArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.LeaveApplication$reviewerArgs<ExtArgs>>): Prisma.Prisma__EmployeeClient<runtime.Types.Result.GetResult<Prisma.$EmployeePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  reportingManager<T extends Prisma.LeaveApplication$reportingManagerArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.LeaveApplication$reportingManagerArgs<ExtArgs>>): Prisma.Prisma__EmployeeClient<runtime.Types.Result.GetResult<Prisma.$EmployeePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   documents<T extends Prisma.LeaveApplication$documentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.LeaveApplication$documentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LeaveDocumentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  dateSelections<T extends Prisma.LeaveApplication$dateSelectionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.LeaveApplication$dateSelectionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LeaveDateSelectionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  statusHistory<T extends Prisma.LeaveApplication$statusHistoryArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.LeaveApplication$statusHistoryArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LeaveStatusHistoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1810,7 +2600,12 @@ export interface LeaveApplicationFieldRefs {
   readonly hrComments: Prisma.FieldRef<"LeaveApplication", 'String'>
   readonly reviewedBy: Prisma.FieldRef<"LeaveApplication", 'Int'>
   readonly reviewedAt: Prisma.FieldRef<"LeaveApplication", 'DateTime'>
+  readonly reportingManagerEmployeeId: Prisma.FieldRef<"LeaveApplication", 'Int'>
+  readonly managerApprovalStatus: Prisma.FieldRef<"LeaveApplication", 'String'>
+  readonly managerReviewedAt: Prisma.FieldRef<"LeaveApplication", 'DateTime'>
+  readonly managerComments: Prisma.FieldRef<"LeaveApplication", 'String'>
   readonly createdAt: Prisma.FieldRef<"LeaveApplication", 'DateTime'>
+  readonly updatedAt: Prisma.FieldRef<"LeaveApplication", 'DateTime'>
 }
     
 
@@ -2231,6 +3026,25 @@ export type LeaveApplication$reviewerArgs<ExtArgs extends runtime.Types.Extensio
 }
 
 /**
+ * LeaveApplication.reportingManager
+ */
+export type LeaveApplication$reportingManagerArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Employee
+   */
+  select?: Prisma.EmployeeSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Employee
+   */
+  omit?: Prisma.EmployeeOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.EmployeeInclude<ExtArgs> | null
+  where?: Prisma.EmployeeWhereInput
+}
+
+/**
  * LeaveApplication.documents
  */
 export type LeaveApplication$documentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2252,6 +3066,54 @@ export type LeaveApplication$documentsArgs<ExtArgs extends runtime.Types.Extensi
   take?: number
   skip?: number
   distinct?: Prisma.LeaveDocumentScalarFieldEnum | Prisma.LeaveDocumentScalarFieldEnum[]
+}
+
+/**
+ * LeaveApplication.dateSelections
+ */
+export type LeaveApplication$dateSelectionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the LeaveDateSelection
+   */
+  select?: Prisma.LeaveDateSelectionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the LeaveDateSelection
+   */
+  omit?: Prisma.LeaveDateSelectionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LeaveDateSelectionInclude<ExtArgs> | null
+  where?: Prisma.LeaveDateSelectionWhereInput
+  orderBy?: Prisma.LeaveDateSelectionOrderByWithRelationInput | Prisma.LeaveDateSelectionOrderByWithRelationInput[]
+  cursor?: Prisma.LeaveDateSelectionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.LeaveDateSelectionScalarFieldEnum | Prisma.LeaveDateSelectionScalarFieldEnum[]
+}
+
+/**
+ * LeaveApplication.statusHistory
+ */
+export type LeaveApplication$statusHistoryArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the LeaveStatusHistory
+   */
+  select?: Prisma.LeaveStatusHistorySelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the LeaveStatusHistory
+   */
+  omit?: Prisma.LeaveStatusHistoryOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LeaveStatusHistoryInclude<ExtArgs> | null
+  where?: Prisma.LeaveStatusHistoryWhereInput
+  orderBy?: Prisma.LeaveStatusHistoryOrderByWithRelationInput | Prisma.LeaveStatusHistoryOrderByWithRelationInput[]
+  cursor?: Prisma.LeaveStatusHistoryWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.LeaveStatusHistoryScalarFieldEnum | Prisma.LeaveStatusHistoryScalarFieldEnum[]
 }
 
 /**
