@@ -2,7 +2,7 @@
 
 **Entire inventory is Proposed** from the engineering pack. Not BRD-confirmed. Not implemented. Do not invent additional fields.
 
-- Base path: `/api/v1`. Implemented so far: departments, employees, holidays, org-settings (see [auth-and-employees](auth-and-employees.md)). Other inventory is still unimplemented.
+- Base path: `/api/v1`. Implemented so far: auth, departments, employees, holidays, org-settings, leaves (see [auth-and-employees](auth-and-employees.md) and [leave](leave.md)). Other inventory is still unimplemented.
 - Pack assumed UUID ids; **live Prisma models use integer PKs**.
 - Civil dates `YYYY-MM-DD` in org TZ; datetimes ISO-8601 UTC `Z` (Proposed)
 - Pagination `page` / `pageSize` default 20 max 100 — **requires confirmation**
@@ -27,6 +27,6 @@
 
 ## Not in this API
 
-Leave-balance, overtime, Teams/Slack, manager-approve, LV-APP-18 HR-absence.
+Leave-balance, overtime, Teams/Slack, LV-APP-18 HR-absence.
 
 Files: [auth-and-employees](auth-and-employees.md), [leave](leave.md), [attendance](attendance.md), [reports-notifications-audit](reports-notifications-audit.md).

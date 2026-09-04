@@ -2,11 +2,11 @@
 
 ## Status
 
-Confirmed LV-WF-01–09, LV-WF-13, LV-STS-01–07, LV-STS-10. **Not implemented.**
+Confirmed LV-WF-01–09, LV-WF-13, LV-STS-01–07, LV-STS-10. **Leave application workflow implemented** (in-app manager approval per current product plan).
 
 ## Purpose
 
-After external manager confirmation (when applicable), HR reviews leave: approve, reject, or request clarification.
+After in-app manager confirmation (when a reporting manager exists), HR reviews leave: approve or reject.
 
 ## Users and Roles
 
@@ -18,13 +18,13 @@ Statuses: Draft → Submitted → Pending HR Review → Approved / Rejected / Ca
 
 ## Out of Scope
 
-Manager approval **inside** the application (BR-15, LV-WF-01). A later pack sentence that says managers approve in-app is **wrong**; trust Confirmed IDs.
+Manager approval **inside** the application when a reporting manager is assigned. A no-manager path goes to HR review (LV-WF-13).
 
 ## User Flow
 
-1. Manager approval occurs outside the app; employee attests/proof (LV-WF-09).
-2. No reporting manager → HR-direct, no manager proof (LV-WF-13).
-3. HR Approve / Reject / Request Clarification.
+1. Manager approval occurs in-app when `reportingManagerEmployeeId` is set; otherwise the application goes to HR review.
+2. No reporting manager → HR-direct (LV-WF-13).
+3. HR Approve / Reject. HR/Admin self-leave is auto-approved (`SUBMITTED → APPROVED`); they cannot manually approve their own leave.
 4. Approved leave drives attendance (see leave-attendance-integration).
 5. Cancel/withdraw **approved** leave → correction request (LV-STS-10).
 
@@ -38,7 +38,7 @@ Admin cannot be assumed allowed to self-approve own leave — **Clarification Re
 
 ## API Endpoints
 
-Proposed: `POST /leaves/{id}/approve|reject|clarification|withdraw|cancel`. No API for LV-APP-18 (HR absence).
+Proposed: `POST /leaves/{id}/approve|reject|withdraw|cancel` plus `manager-approve` / `manager-reject`. No API for LV-APP-18 (HR absence).
 
 ## Audit Events
 
@@ -54,4 +54,5 @@ LV-APP-18 HR absence. Who may cancel/withdraw already approved leave.
 
 ## Change History
 
+2026-09-04 — In-app manager approval and HR/Admin self-leave auto-approval implemented.
 2026-08-27 — Extracted from source documentation.

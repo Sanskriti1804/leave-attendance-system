@@ -2,7 +2,7 @@
 
 ## Status
 
-Confirmed LV-APP-01–17, duration LV-DUR, dates LV-DATE-01–02/06–07, overlap LV-OVR-01. **Not implemented.**
+Confirmed LV-APP-01–17, duration LV-DUR, dates LV-DATE-01–02/06–07, overlap LV-OVR-01. **Leave applications HTTP API implemented** (zigzag selections, status-aware overlap, 14-day advance). Leave type CRUD and documents are not implemented here.
 
 ## Purpose
 
@@ -18,7 +18,7 @@ Form validations; half day (first/second), full day, multiple days; auto day cou
 
 ## Out of Scope
 
-In-app manager approval. Leave balance checks. Sandwich-filling weekends/holidays (CAL-07).
+Leave type CRUD and medical document upload (separate modules). Leave balance checks. Sandwich-filling weekends/holidays (CAL-07).
 
 ## User Flow
 
@@ -61,4 +61,5 @@ LV-OVR-03/04 which statuses block overlap. LV-APP-18 HR-absent path. MED-12 “e
 
 ## Change History
 
+2026-09-04 — Implementation: selected dates, 14-day advance (`LEAVE_MAX_ADVANCE_DAYS`), status-aware and session-aware overlap, in-app manager approval.
 2026-08-27 — Extracted from source documentation.
