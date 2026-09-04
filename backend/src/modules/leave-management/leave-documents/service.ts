@@ -4,9 +4,8 @@ import path from "node:path";
 import { env } from "../../../env.js";
 import type { AuthTokenPayload } from "../../shared/utils/security.js";
 import { HttpError } from "../../shared/utils/http-error.js";
-import { getOrganisationSettings } from "../../shared/organisation-settings/service.js";
 import { findLeaveById } from "../leave-applications/repository.js";
-import { findLeaveTypeById } from "../leave-types/repository.js";
+import { isMedicalDocumentRequired } from "../leave-policies/service.js";
 import * as leaveDocumentRepository from "./repository.js";
 import type { MultipartFile } from "./multipart.js";
 import { ALLOWED_CONTENT_TYPES, ALLOWED_EXTENSIONS, uploadLeaveIdSchema } from "./validation.js";
@@ -98,28 +97,6 @@ function canReadLeave(
     return true;
   }
   return leave.reportingManagerEmployeeId === actor.employeeId;
-}
-
-export async function isMedicalDocumentRequired(leaveTypeId: number, numberOfDays: number): Promise<boolean> {
-  const leaveType = await findLeaveTypeById(leaveTypeId);
-  if (!leaveType || leaveType.obsolete) {
-    throw new HttpError(422, "LEAVE_TYPE_NOT_ELIGIBLE", "Leave type not found or is obsolete");
-  }
-  if (!leaveType.requiresMedicalDocument) {
-    return false;
-  }
-
-  const settings = await getOrganisationSettings();
-  const policyAfterDays = leaveType.policies[0]?.medicalDocumentAfterDays;
-  const exceedsDays = policyAfterDays ?? settings.medicalDocExceedsDays;
-
-  if (numberOfDays > exceedsDays) {
-    return true;
-  }
-  if (numberOfDays > 0 && numberOfDays <= exceedsDays) {
-    return !settings.medicalDocOptional1To2Days;
-  }
-  return false;
 }
 
 export async function assertMedicalDocumentsForSubmit(params: {

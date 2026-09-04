@@ -1,4 +1,5 @@
 import type { ConfigurationSetting } from "../../../generated/prisma/client.js";
+import { env } from "../../../env.js";
 import * as organisationSettingsRepository from "./repository.js";
 import type { UpdateOrganisationSettingsBody } from "./validation.js";
 
@@ -16,7 +17,7 @@ export type OrganisationSettings = {
 };
 
 const DEFAULTS: OrganisationSettings = {
-  timezone: "America/New_York",
+  timezone: env.appTimezone,
   workStart: null,
   workEnd: null,
   graceMinutes: 0,
@@ -25,7 +26,7 @@ const DEFAULTS: OrganisationSettings = {
   leaveCountExcludesHolidays: false,
   medicalDocOptional1To2Days: true,
   medicalDocExceedsDays: 2,
-  maxAdvanceDays: 14,
+  maxAdvanceDays: env.leaveMaxAdvanceDays,
 };
 
 type SettingType = "string" | "number" | "boolean" | "json";

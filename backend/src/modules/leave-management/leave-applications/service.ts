@@ -1,8 +1,6 @@
 import { Prisma } from "../../../generated/prisma/client.js";
-import { env } from "../../../env.js";
 import type { AuthTokenPayload } from "../../shared/utils/security.js";
 import { findEmployeeById } from "../../shared/employees/repository.js";
-import { getOrganisationSettings } from "../../shared/organisation-settings/service.js";
 import { findManyHolidays } from "../../shared/holidays/repository.js";
 import { HttpError } from "../../shared/utils/http-error.js";
 import {
@@ -16,6 +14,7 @@ import { prisma } from "../../shared/db/index.js";
 import { findLeaveTypeById } from "../leave-types/repository.js";
 import { createStatusHistory } from "../leave-status-history/repository.js";
 import { assertMedicalDocumentsForSubmit } from "../leave-documents/service.js";
+import { getLeaveAdvanceConfig, getOrganisationLeaveConfig } from "../leave-policies/service.js";
 import * as leaveRepository from "./repository.js";
 import type { LeaveWithSelections } from "./repository.js";
 import type {
@@ -141,7 +140,7 @@ function deriveSummary(prepared: PreparedSelection[]) {
 }
 
 async function assertCountableDates(prepared: PreparedSelection[]): Promise<void> {
-  const settings = await getOrganisationSettings();
+  const settings = await getOrganisationLeaveConfig();
   const weekendDows =
     settings.weeklyOffDow.length > 0 ? settings.weeklyOffDow : settings.leaveCountExcludesWeekends ? [6, 7] : [];
   const holidayDates = new Set<string>();
@@ -176,9 +175,10 @@ async function assertCountableDates(prepared: PreparedSelection[]): Promise<void
   }
 }
 
-function assertAdvanceWindow(prepared: PreparedSelection[]): void {
-  const today = todayInTimeZone(env.appTimezone);
-  const maxDate = addCalendarDays(today, env.leaveMaxAdvanceDays);
+async function assertAdvanceWindow(prepared: PreparedSelection[]): Promise<void> {
+  const { timezone, maxAdvanceDays } = await getLeaveAdvanceConfig();
+  const today = todayInTimeZone(timezone);
+  const maxDate = addCalendarDays(today, maxAdvanceDays);
   for (const row of prepared) {
     if (row.civilDate < today || row.civilDate > maxDate) {
       throw new HttpError(
@@ -390,7 +390,7 @@ async function validatePayload(
   if (summary.numberOfDays <= 0) {
     throw new HttpError(422, "LEAVE_DAYS_ZERO", "Leave duration must be greater than zero");
   }
-  assertAdvanceWindow(prepared);
+  await assertAdvanceWindow(prepared);
   await assertCountableDates(prepared);
   const { rejectedWarnings } = await findOverlap({
     employeeId: employee.employeeId,
