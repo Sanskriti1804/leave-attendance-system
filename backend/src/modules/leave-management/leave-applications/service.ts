@@ -15,6 +15,7 @@ import {
 import { prisma } from "../../shared/db/index.js";
 import { findLeaveTypeById } from "../leave-types/repository.js";
 import { createStatusHistory } from "../leave-status-history/repository.js";
+import { assertMedicalDocumentsForSubmit } from "../leave-documents/service.js";
 import * as leaveRepository from "./repository.js";
 import type { LeaveWithSelections } from "./repository.js";
 import type {
@@ -245,12 +246,7 @@ async function findOverlap(params: {
   return { blocking: [], rejectedWarnings };
 }
 
-async function assertLeaveTypeEligible(
-  leaveTypeId: number,
-  employeeSex: string | null,
-  numberOfDays: number,
-  leaveId?: number,
-): Promise<void> {
+async function assertLeaveTypeEligible(leaveTypeId: number, employeeSex: string | null): Promise<void> {
   const leaveType = await findLeaveTypeById(leaveTypeId);
   if (!leaveType || leaveType.obsolete) {
     throw new HttpError(422, "LEAVE_TYPE_NOT_ELIGIBLE", "Leave type not found or is obsolete");
@@ -258,19 +254,6 @@ async function assertLeaveTypeEligible(
   if (leaveType.allowedSex && leaveType.allowedSex !== "unspecified") {
     if (!employeeSex || employeeSex !== leaveType.allowedSex) {
       throw new HttpError(422, "LEAVE_TYPE_NOT_ELIGIBLE", "Employee is not eligible for this leave type");
-    }
-  }
-
-  const settings = await getOrganisationSettings();
-  const medicalRequired =
-    leaveType.requiresMedicalDocument &&
-    (numberOfDays > settings.medicalDocExceedsDays ||
-      (numberOfDays > 0 && numberOfDays <= settings.medicalDocExceedsDays && !settings.medicalDocOptional1To2Days));
-
-  if (medicalRequired) {
-    const documentCount = leaveId ? await leaveRepository.countDocumentsForLeave(leaveId) : 0;
-    if (documentCount === 0) {
-      throw new HttpError(422, "MEDICAL_DOCUMENT_REQUIRED", "A medical document is required for this leave");
     }
   }
 }
@@ -400,9 +383,11 @@ async function validatePayload(
   body: LeaveApplicationBody,
   employee: { employeeId: number; sex: string | null },
   excludeLeaveId?: number,
+  options?: { requireMedicalDocuments?: boolean },
 ): Promise<{ prepared: PreparedSelection[]; warnings: Warning[] }> {
   const prepared = prepareSelections(body.selectedDates);
-  if (deriveSummary(prepared).numberOfDays <= 0) {
+  const summary = deriveSummary(prepared);
+  if (summary.numberOfDays <= 0) {
     throw new HttpError(422, "LEAVE_DAYS_ZERO", "Leave duration must be greater than zero");
   }
   assertAdvanceWindow(prepared);
@@ -412,12 +397,14 @@ async function validatePayload(
     prepared,
     excludeLeaveId,
   });
-  await assertLeaveTypeEligible(
-    body.leaveTypeId,
-    employee.sex,
-    deriveSummary(prepared).numberOfDays,
-    excludeLeaveId,
-  );
+  await assertLeaveTypeEligible(body.leaveTypeId, employee.sex);
+  if (options?.requireMedicalDocuments) {
+    await assertMedicalDocumentsForSubmit({
+      leaveTypeId: body.leaveTypeId,
+      numberOfDays: summary.numberOfDays,
+      leaveId: excludeLeaveId,
+    });
+  }
   return { prepared, warnings: rejectedWarnings };
 }
 
@@ -446,7 +433,9 @@ export async function submitNew(actor: AuthTokenPayload, body: LeaveApplicationB
     throw new HttpError(403, "FORBIDDEN", "You do not have permission to perform this action");
   }
   const employee = await loadActorEmployee(actor);
-  const { prepared, warnings } = await validatePayload(body, employee);
+  const { prepared, warnings } = await validatePayload(body, employee, undefined, {
+    requireMedicalDocuments: true,
+  });
   const leave = await prisma.$transaction(async (tx) => {
     const draft = await persistLeave(tx, {
       employeeId: employee.employeeId,
@@ -514,7 +503,9 @@ export async function submitDraft(actor: AuthTokenPayload, leaveId: number) {
       session: row.session as DateSelectionInput["session"],
     })),
   };
-  const { prepared, warnings } = await validatePayload(body, employee, leaveId);
+  const { prepared, warnings } = await validatePayload(body, employee, leaveId, {
+    requireMedicalDocuments: true,
+  });
   const submitted = await prisma.$transaction(async (tx) => {
     const updated = await persistLeave(tx, {
       leaveId,

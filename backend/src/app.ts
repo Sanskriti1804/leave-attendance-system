@@ -9,6 +9,7 @@ import employeeRouter from "./modules/shared/employees/route.js";
 import holidayRouter from "./modules/shared/holidays/route.js";
 import organisationSettingsRouter from "./modules/shared/organisation-settings/route.js";
 import leaveApplicationRouter from "./modules/leave-management/leave-applications/route.js";
+import leaveDocumentRouter from "./modules/leave-management/leave-documents/route.js";
 import { errorMiddleware, notFoundMiddleware } from "./modules/shared/middlewares/error.middleware.js";
 
 export function createApp() {
@@ -24,6 +25,7 @@ export function createApp() {
   app.use("/api/v1/holidays", holidayRouter);
   app.use("/api/v1/org-settings", organisationSettingsRouter);
   app.use("/api/v1/leaves", leaveApplicationRouter);
+  app.use("/api/v1/documents", leaveDocumentRouter);
 
   app.use(notFoundMiddleware);
   app.use(errorMiddleware);

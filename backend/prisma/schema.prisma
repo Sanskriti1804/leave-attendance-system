@@ -175,18 +175,20 @@ model LeaveStatusHistory {
 }
 
 model LeaveDocument {
-  documentId Int      @id @default(autoincrement())
-  leaveId    Int
+  documentId  Int      @id @default(autoincrement())
+  leaveId     Int
   fileName    String   @db.VarChar(50)
   filePath    String
   fileType    String   @db.VarChar(10)
   contentType String   @db.VarChar(100)
   fileSize    Int
   uploadedBy  Int
-  uploadedAt DateTime @default(now())
+  uploadedAt  DateTime @default(now())
 
   leave    LeaveApplication @relation(fields: [leaveId], references: [leaveId], onDelete: Cascade)
   uploader Employee         @relation(fields: [uploadedBy], references: [employeeId])
+
+  @@index([leaveId])
 }
 
 model Notification {

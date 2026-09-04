@@ -60,7 +60,3 @@ export function findBlockingSelections(params: {
     include: { leave: true },
   });
 }
-
-export function countDocumentsForLeave(leaveId: number): Promise<number> {
-  return prisma.leaveDocument.count({ where: { leaveId } });
-}
