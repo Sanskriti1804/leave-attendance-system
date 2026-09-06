@@ -2,7 +2,7 @@
 
 **Entire inventory is Proposed** from the engineering pack. Not BRD-confirmed. Not implemented. Do not invent additional fields.
 
-- Base path: `/api/v1`. Implemented so far: auth, departments, employees, holidays, org-settings, leaves (see [auth-and-employees](auth-and-employees.md) and [leave](leave.md)). Other inventory is still unimplemented.
+- Base path: `/api/v1`. Implemented so far: auth, departments, employees, holidays, org-settings, leaves, documents, leave-policies, leave-types (see [auth-and-employees](auth-and-employees.md) and [leave](leave.md)). Other inventory is still unimplemented.
 - Pack assumed UUID ids; **live Prisma models use integer PKs**.
 - Civil dates `YYYY-MM-DD` in org TZ; datetimes ISO-8601 UTC `Z` (Proposed)
 - Pagination `page` / `pageSize` default 20 max 100 — **requires confirmation**

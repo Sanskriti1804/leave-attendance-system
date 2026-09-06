@@ -27,7 +27,7 @@ model Employee {
   createdAt    DateTime  @default(now())
   status       String
   obsolete     Boolean   @default(false)
-  sex          String?   @db.VarChar(10)
+  sex          String?   @db.VarChar(20)
 
   department   Department @relation(fields: [departmentId], references: [departmentId])
   manager      Employee?  @relation("EmployeeManager", fields: [managerId], references: [employeeId])
@@ -92,7 +92,7 @@ model LeaveType {
   name                    String   @db.VarChar(50)
   description             String?
   requiresMedicalDocument Boolean  @default(false)
-  allowedSex              String?  @db.VarChar(10)
+  allowedSex              String?  @db.VarChar(20)
   obsolete                Boolean  @default(false)
   createdAt               DateTime @default(now())
   updatedAt               DateTime @updatedAt

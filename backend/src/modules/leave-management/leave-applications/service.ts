@@ -11,10 +11,10 @@ import {
   todayInTimeZone,
 } from "../../shared/utils/dates.js";
 import { prisma } from "../../shared/db/index.js";
-import { findLeaveTypeById } from "../leave-types/repository.js";
 import { createStatusHistory } from "../leave-status-history/repository.js";
 import { assertMedicalDocumentsForSubmit } from "../leave-documents/service.js";
 import { getLeaveAdvanceConfig, getOrganisationLeaveConfig } from "../leave-policies/service.js";
+import { assertEmployeeEligibleForLeaveType } from "../leave-types/service.js";
 import * as leaveRepository from "./repository.js";
 import type { LeaveWithSelections } from "./repository.js";
 import type {
@@ -246,18 +246,6 @@ async function findOverlap(params: {
   return { blocking: [], rejectedWarnings };
 }
 
-async function assertLeaveTypeEligible(leaveTypeId: number, employeeSex: string | null): Promise<void> {
-  const leaveType = await findLeaveTypeById(leaveTypeId);
-  if (!leaveType || leaveType.obsolete) {
-    throw new HttpError(422, "LEAVE_TYPE_NOT_ELIGIBLE", "Leave type not found or is obsolete");
-  }
-  if (leaveType.allowedSex && leaveType.allowedSex !== "unspecified") {
-    if (!employeeSex || employeeSex !== leaveType.allowedSex) {
-      throw new HttpError(422, "LEAVE_TYPE_NOT_ELIGIBLE", "Employee is not eligible for this leave type");
-    }
-  }
-}
-
 async function loadActorEmployee(actor: AuthTokenPayload) {
   const employee = await findEmployeeById(actor.employeeId);
   if (!employee || employee.obsolete || employee.status !== "ACTIVE") {
@@ -397,7 +385,7 @@ async function validatePayload(
     prepared,
     excludeLeaveId,
   });
-  await assertLeaveTypeEligible(body.leaveTypeId, employee.sex);
+  await assertEmployeeEligibleForLeaveType(body.leaveTypeId, employee.sex);
   if (options?.requireMedicalDocuments) {
     await assertMedicalDocumentsForSubmit({
       leaveTypeId: body.leaveTypeId,

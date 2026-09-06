@@ -1,6 +1,6 @@
 # Leave API
 
-Leave applications are implemented under `/api/v1/leaves` against Prisma integer IDs. Leave types and documents remain out of this module except lookup/count used by validation.
+Leave applications are implemented under `/api/v1/leaves` against Prisma integer IDs. Leave types are under `/api/v1/leave-types`. Documents are under `/api/v1/documents`.
 
 | Method | Path | Purpose | Auth |
 | --- | --- | --- | --- |
@@ -18,8 +18,41 @@ Leave applications are implemented under `/api/v1/leaves` against Prisma integer
 | POST | `/leaves/{id}/withdraw` | Withdraw | owner |
 | POST | `/leaves/{id}/cancel` | Cancel | owner or A |
 
-Body: `{ leaveTypeId, reason, selectedDates: [{ date, session }] }` where `session` is `FULL_DAY` \| `FIRST_HALF` \| `SECOND_HALF`. `startDate` / `endDate` / `numberOfDays` are derived from selections. Overlap of `SUBMITTED` / `PENDING_HR_REVIEW` / `APPROVED` → 409 `LEAVE_OVERLAP`. Rejected overlap returns `warnings`. Advance window from `LEAVE_MAX_ADVANCE_DAYS` and `APP_TIMEZONE`.
+Body: `{ leaveTypeId, reason, selectedDates: [{ date, session }] }` where `session` is `FULL_DAY` \| `FIRST_HALF` \| `SECOND_HALF`. `startDate` / `endDate` / `numberOfDays` are derived from selections. Overlap of `SUBMITTED` / `PENDING_HR_REVIEW` / `APPROVED` → 409 `LEAVE_OVERLAP`. Rejected overlap returns `warnings`. Advance window from organisation `maxAdvanceDays` (default `LEAVE_MAX_ADVANCE_DAYS` / 14) and organisation `timezone` (default `APP_TIMEZONE`). Medical leave uses `LeaveType.requiresMedicalDocument`, `LeavePolicy.medicalDocumentAfterDays` (fallback `medicalDocExceedsDays`), and `medicalDocOptional1To2Days`. Submit is blocked with `MEDICAL_DOCUMENT_REQUIRED` when a document is mandatory and none is attached to the draft. Immediate `POST /leaves` cannot attach a file in the same request.
+
+## Leave types
+
+| Method | Path | Purpose | Auth |
+| --- | --- | --- | --- |
+| GET | `/leave-types` | List; query `includeObsolete` (employees see active by default) | * |
+| POST | `/leave-types` | Create `{ name, description?, requiresMedicalDocument?, allowedSex? }` | A |
+| GET | `/leave-types/{id}` | Detail | * |
+| PATCH | `/leave-types/{id}` | Update fields or `obsolete` | A |
+| DELETE | `/leave-types/{id}` | Delete if unused; otherwise deactivate (`obsolete`) | A |
+
+`allowedSex` is `male` \| `female` \| `unspecified` or null (unrestricted). Eligibility is enforced in the leave-types module and applied on leave application create/submit (`LEAVE_TYPE_NOT_ELIGIBLE`).
+
+## Leave policies
+
+| Method | Path | Purpose | Auth |
+| --- | --- | --- | --- |
+| GET | `/leave-policies` | List; query `leaveTypeId`, `includeObsolete` | * |
+| POST | `/leave-policies` | Create `{ leaveTypeId, medicalDocumentAfterDays?, includeWeekends?, includeHolidays?, maxDays? }` | A |
+| GET | `/leave-policies/{id}` | Detail | * |
+| PATCH | `/leave-policies/{id}` | Update fields or `obsolete` | A |
+
+## Documents
+
+| Method | Path | Purpose | Auth |
+| --- | --- | --- | --- |
+| POST | `/documents` | multipart `leaveId` + `file` (PDF/JPG/JPEG/PNG) | E A (own draft, or admin on a draft) |
+| GET | `/documents/{id}` | Download bytes; medical 403 for employee | A G; E own non-medical |
+
+Stored metadata: `contentType` (MIME), `fileSize` (bytes > 0), `fileType` (extension), `fileName`, `filePath` (local disk under `LEAVE_DOCUMENTS_DIR`). Cap `LEAVE_DOCUMENT_MAX_BYTES` default 10 MiB (TD-17). No retention/deletion job.
 
 ## Change History
 
+2026-09-04 — Leave types CRUD and `allowedSex` eligibility consumed by leave applications.
+2026-09-04 — Leave policies API; advance window and medical rules resolved through the leave-policies module.
+2026-09-04 — Leave documents upload/download, medical-document submit rules.
 2026-09-04 — Leave applications, zigzag selections, in-app manager approval, status history.

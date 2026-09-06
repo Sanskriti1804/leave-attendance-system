@@ -2,7 +2,7 @@
 
 ## Status
 
-Holidays/weekly offs CAL-01–03, CAL-07 Confirmed. TZ-04 EST Confirmed. TZ-01 authoritative clock Proposed. Working-hours section in the refinement is **empty**. **HTTP implemented** for `/api/v1/holidays` and `/api/v1/org-settings` (no authz; leave day-count not wired).
+Holidays/weekly offs CAL-01–03, CAL-07 Confirmed. TZ-04 EST Confirmed. TZ-01 authoritative clock Proposed. Working-hours section in the refinement is **empty**. **HTTP implemented** for `/api/v1/holidays` and `/api/v1/org-settings`. Leave applications consume weekend/holiday flags and owner-provided holiday rows (Indian calendar; not generated). `maxAdvanceDays` default is **14**.
 
 ## Purpose
 
@@ -37,5 +37,6 @@ Section 13 working hours/shifts empty; BRD §8 cited later without a filled refi
 
 ## Change History
 
+2026-09-04 — Leave day-count uses org weekend/holiday flags and shared holidays; max advance default 14; Indian holiday list is owner-provided.
 2026-09-01 — Holiday and organisation-settings HTTP APIs.
 2026-08-27 — Extracted from source documentation.

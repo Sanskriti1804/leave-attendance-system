@@ -85,24 +85,24 @@ async function main() {
     }
   }
 
-  await ensureCasualLeaveType();
+  await ensureDefaultLeaveTypes();
 
   console.log("Seeding completed successfully.");
 }
 
-async function ensureCasualLeaveType() {
-  const existing = await prisma.leaveType.findFirst({
-    where: { name: "Casual" },
-  });
-  if (!existing) {
-    await prisma.leaveType.create({
-      data: {
-        name: "Casual",
-        description: "Casual leave",
-        requiresMedicalDocument: false,
-      },
-    });
-    console.log("Created LeaveType: Casual");
+async function ensureDefaultLeaveTypes() {
+  const defaults = [
+    { name: "Casual", description: "Casual leave", requiresMedicalDocument: false, allowedSex: null as string | null },
+    { name: "Sick", description: "Medical leave", requiresMedicalDocument: true, allowedSex: null as string | null },
+    { name: "Emergency", description: "Emergency leave", requiresMedicalDocument: false, allowedSex: null as string | null },
+    { name: "Planned", description: "Planned leave", requiresMedicalDocument: false, allowedSex: null as string | null },
+  ];
+  for (const leaveType of defaults) {
+    const existing = await prisma.leaveType.findFirst({ where: { name: leaveType.name } });
+    if (!existing) {
+      await prisma.leaveType.create({ data: leaveType });
+      console.log(`Created LeaveType: ${leaveType.name}`);
+    }
   }
 }
 
