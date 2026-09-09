@@ -18,7 +18,7 @@ Leave applications are implemented under `/api/v1/leaves` against Prisma integer
 | POST | `/leaves/{id}/withdraw` | Withdraw | owner |
 | POST | `/leaves/{id}/cancel` | Cancel | owner or A |
 
-Body: `{ leaveTypeId, reason, selectedDates: [{ date, session }] }` where `session` is `FULL_DAY` \| `FIRST_HALF` \| `SECOND_HALF`. `startDate` / `endDate` / `numberOfDays` are derived from selections. Overlap of `SUBMITTED` / `PENDING_HR_REVIEW` / `APPROVED` → 409 `LEAVE_OVERLAP`. Rejected overlap returns `warnings`. Advance window from organisation `maxAdvanceDays` (default `LEAVE_MAX_ADVANCE_DAYS` / 14) and organisation `timezone` (default `APP_TIMEZONE`). Medical leave uses `LeaveType.requiresMedicalDocument`, `LeavePolicy.medicalDocumentAfterDays` (fallback `medicalDocExceedsDays`), and `medicalDocOptional1To2Days`. Submit is blocked with `MEDICAL_DOCUMENT_REQUIRED` when a document is mandatory and none is attached to the draft. Immediate `POST /leaves` cannot attach a file in the same request.
+Body: `{ leaveTypeId, reason, selectedDates: [{ date, session }] }` where `session` is `FULL_DAY` \| `FIRST_HALF` \| `SECOND_HALF`. `startDate` / `endDate` / `numberOfDays` are derived from selections. Overlap of `SUBMITTED` / `PENDING_HR_REVIEW` / `APPROVED` → 409 `LEAVE_OVERLAP`. Rejected overlap returns `warnings`. Advance window from organisation `maxAdvanceDays` (default `LEAVE_MAX_ADVANCE_DAYS` / 14) and organisation `timezone` (default `APP_TIMEZONE`). Medical leave uses `LeaveType.requiresMedicalDocument`, `LeavePolicy.medicalDocumentAfterDays` (fallback `medicalDocExceedsDays`), and `medicalDocOptional1To2Days`. Weekend/holiday exclusion uses org `leaveCountExcludesWeekends` / `leaveCountExcludesHolidays` plus `Holiday` rows, overridden per type when that type’s active policy has `includeWeekends` / `includeHolidays` true. Submit is blocked with `MEDICAL_DOCUMENT_REQUIRED` when a document is mandatory and none is attached to the draft. Immediate `POST /leaves` cannot attach a file in the same request.
 
 ## Leave types
 
@@ -52,6 +52,7 @@ Stored metadata: `contentType` (MIME), `fileSize` (bytes > 0), `fileType` (exten
 
 ## Change History
 
+2026-09-09 — Leave day-count reads active `LeavePolicy.includeWeekends` / `includeHolidays` from the database (org exclude flags still apply when those are false).
 2026-09-04 — Leave types CRUD and `allowedSex` eligibility consumed by leave applications.
 2026-09-04 — Leave policies API; advance window and medical rules resolved through the leave-policies module.
 2026-09-04 — Leave documents upload/download, medical-document submit rules.

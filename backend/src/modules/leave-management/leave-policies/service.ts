@@ -47,6 +47,22 @@ export async function getLeaveAdvanceConfig(): Promise<{ timezone: string; maxAd
   };
 }
 
+export async function getCountableDateRules(leaveTypeId: number): Promise<{
+  excludeWeekends: boolean;
+  weekendDows: number[];
+  excludeHolidays: boolean;
+}> {
+  const settings = await getOrganisationLeaveConfig();
+  const policy = await leavePolicyRepository.findActivePolicyByLeaveTypeId(leaveTypeId);
+  const includeWeekends = policy?.includeWeekends === true;
+  const includeHolidays = policy?.includeHolidays === true;
+  const excludeWeekends = settings.leaveCountExcludesWeekends && !includeWeekends;
+  const excludeHolidays = settings.leaveCountExcludesHolidays && !includeHolidays;
+  const weekendDows =
+    settings.weeklyOffDow.length > 0 ? settings.weeklyOffDow : excludeWeekends ? [6, 7] : [];
+  return { excludeWeekends, weekendDows, excludeHolidays };
+}
+
 export async function isMedicalDocumentRequired(leaveTypeId: number, numberOfDays: number): Promise<boolean> {
   const leaveType = await findLeaveTypeById(leaveTypeId);
   if (!leaveType || leaveType.obsolete) {

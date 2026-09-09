@@ -13,7 +13,7 @@ import {
 import { prisma } from "../../shared/db/index.js";
 import { createStatusHistory } from "../leave-status-history/repository.js";
 import { assertMedicalDocumentsForSubmit } from "../leave-documents/service.js";
-import { getLeaveAdvanceConfig, getOrganisationLeaveConfig } from "../leave-policies/service.js";
+import { getCountableDateRules, getLeaveAdvanceConfig } from "../leave-policies/service.js";
 import { assertEmployeeEligibleForLeaveType } from "../leave-types/service.js";
 import * as leaveRepository from "./repository.js";
 import type { LeaveWithSelections } from "./repository.js";
@@ -139,12 +139,10 @@ function deriveSummary(prepared: PreparedSelection[]) {
   return { startDate, endDate, numberOfDays, durationType, halfDayType };
 }
 
-async function assertCountableDates(prepared: PreparedSelection[]): Promise<void> {
-  const settings = await getOrganisationLeaveConfig();
-  const weekendDows =
-    settings.weeklyOffDow.length > 0 ? settings.weeklyOffDow : settings.leaveCountExcludesWeekends ? [6, 7] : [];
+async function assertCountableDates(prepared: PreparedSelection[], leaveTypeId: number): Promise<void> {
+  const rules = await getCountableDateRules(leaveTypeId);
   const holidayDates = new Set<string>();
-  if (settings.leaveCountExcludesHolidays) {
+  if (rules.excludeHolidays) {
     const holidays = await findManyHolidays({
       from: fromCivilDate(prepared[0]!.civilDate),
       to: fromCivilDate(prepared[prepared.length - 1]!.civilDate),
@@ -158,14 +156,14 @@ async function assertCountableDates(prepared: PreparedSelection[]): Promise<void
   }
 
   for (const row of prepared) {
-    if (settings.leaveCountExcludesWeekends && weekendDows.includes(isoWeekday(row.civilDate))) {
+    if (rules.excludeWeekends && rules.weekendDows.includes(isoWeekday(row.civilDate))) {
       throw new HttpError(
         422,
         "VALIDATION_ERROR",
         `Selected date ${row.civilDate} falls on a weekly off and is excluded from leave`,
       );
     }
-    if (settings.leaveCountExcludesHolidays && holidayDates.has(row.civilDate)) {
+    if (rules.excludeHolidays && holidayDates.has(row.civilDate)) {
       throw new HttpError(
         422,
         "VALIDATION_ERROR",
@@ -379,7 +377,7 @@ async function validatePayload(
     throw new HttpError(422, "LEAVE_DAYS_ZERO", "Leave duration must be greater than zero");
   }
   await assertAdvanceWindow(prepared);
-  await assertCountableDates(prepared);
+  await assertCountableDates(prepared, body.leaveTypeId);
   const { rejectedWarnings } = await findOverlap({
     employeeId: employee.employeeId,
     prepared,

@@ -37,6 +37,7 @@ Section 13 working hours/shifts empty; BRD §8 cited later without a filled refi
 
 ## Change History
 
+2026-09-09 — Leave day-count also reads per-type `LeavePolicy` weekend/holiday include flags from the database.
 2026-09-04 — Leave day-count uses org weekend/holiday flags and shared holidays; max advance default 14; Indian holiday list is owner-provided.
 2026-09-01 — Holiday and organisation-settings HTTP APIs.
 2026-08-27 — Extracted from source documentation.

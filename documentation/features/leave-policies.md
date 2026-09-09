@@ -6,7 +6,7 @@
 
 ## Purpose
 
-Per-leave-type rules (`medicalDocumentAfterDays`, weekend/holiday flags, `maxDays`) plus a single place for leave applications and documents to read org leave configuration.
+Leave applications read the active `LeavePolicy` for the type (and org settings + `Holiday` rows) when validating selected dates. `includeWeekends` / `includeHolidays` on the policy turn off org weekend/holiday exclusion for that type.
 
 ## Users and Roles
 
@@ -26,4 +26,5 @@ Leave type CRUD. Automatic holiday calendars. Per-type max-advance override (LV-
 
 ## Change History
 
+2026-09-09 — Leave applications fetch active policy weekend/holiday flags from DB when counting dates.
 2026-09-04 — Implemented leave-policy module; advance window 14 days via env + org settings; medical rules consumed by leave documents.
