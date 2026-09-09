@@ -12,6 +12,7 @@ import leaveApplicationRouter from "./modules/leave-management/leave-application
 import leaveDocumentRouter from "./modules/leave-management/leave-documents/route.js";
 import leavePolicyRouter from "./modules/leave-management/leave-policies/route.js";
 import leaveTypeRouter from "./modules/leave-management/leave-types/route.js";
+import healthRouter from "./modules/shared/health/route.js";
 import { errorMiddleware, notFoundMiddleware } from "./modules/shared/middlewares/error.middleware.js";
 
 export function createApp() {
@@ -30,6 +31,7 @@ export function createApp() {
   app.use("/api/v1/documents", leaveDocumentRouter);
   app.use("/api/v1/leave-policies", leavePolicyRouter);
   app.use("/api/v1/leave-types", leaveTypeRouter);
+  app.use("/health", healthRouter);
 
   app.use(notFoundMiddleware);
   app.use(errorMiddleware);

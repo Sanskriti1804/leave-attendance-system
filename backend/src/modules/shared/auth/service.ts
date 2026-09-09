@@ -74,6 +74,7 @@ export async function login(body: LoginBody) {
     accessToken,
     expiresIn: env.jwtAccessExpiry,
     refreshToken: rawRefreshToken,
+    //to ensure safe data ios not exposed to the client
     user: toPublicEmployee(employee),
   };
 }
@@ -201,6 +202,7 @@ export async function forgotPassword(body: ForgotPasswordBody) {
       expiresAt,
     });
 
+    //create a reset link for the employee to click on to reset their password
     const resetLink = `${env.appUrl}/reset-password?token=${rawResetToken}`;
     await sendPasswordResetEmail(employee.email, resetLink);
   }

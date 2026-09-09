@@ -8,6 +8,7 @@ import type {
   ResetPasswordBody,
 } from "./validation.js";
 
+
 export async function login(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const result = await authService.login(req.body as LoginBody);

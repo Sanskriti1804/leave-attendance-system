@@ -11,7 +11,7 @@ export function createRefreshToken(data: {
     data: {
       employeeId: data.employeeId,
       tokenHash: data.tokenHash,
-      family: data.family,
+      family: data.family, 
       expiresAt: data.expiresAt,
     },
   });
@@ -21,7 +21,9 @@ export function findRefreshTokenByHash(
   tokenHash: string,
 ): Promise<(RefreshToken & { employee: Employee }) | null> {
   return prisma.refreshToken.findFirst({
+    //where the token hash is stored
     where: { tokenHash },
+    //also retrieve the employee data
     include: { employee: true },
   });
 }
@@ -33,6 +35,7 @@ export function revokeRefreshToken(refreshTokenId: number): Promise<RefreshToken
   });
 }
 
+//REQUIRED??
 export async function revokeRefreshTokenFamily(family: string): Promise<{ count: number }> {
   return prisma.refreshToken.updateMany({
     where: { family, isRevoked: false },
@@ -40,6 +43,8 @@ export async function revokeRefreshTokenFamily(family: string): Promise<{ count:
   });
 }
 
+
+//REQUIRED??
 export async function revokeAllEmployeeRefreshTokens(employeeId: number): Promise<{ count: number }> {
   return prisma.refreshToken.updateMany({
     where: { employeeId, isRevoked: false },

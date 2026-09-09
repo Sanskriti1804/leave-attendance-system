@@ -33,7 +33,7 @@ Source requirements were **not yet business-confirmed**. Later schema and API se
 
 ## Contents
 
-- [Architecture](architecture/overview.md)
+- [Architecture](architecture/overview.md) — [whole-app flow](architecture/flow.md)
 - [Features](features/auth-and-roles.md)
 - [API (Proposed)](api/overview.md)
 - [Database (Proposed)](database/overview.md)
