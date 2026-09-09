@@ -59,7 +59,7 @@ Keep three tokens: Alice, Bob, Charlie.
 2. `GET /api/v1/auth/me` (Bearer) → current employee.
 3. `POST /api/v1/auth/refresh` `{ "refreshToken": "..." }` → new pair; old refresh is invalid.
 4. `POST /api/v1/auth/change-password` (Bearer) `{ "currentPassword": "...", "newPassword": "NewPass123!" }` then log in with the new password (or seed again to restore).
-5. `POST /api/v1/auth/forgot-password` `{ "email": "bob.employee@example.com" }` → always 200; reset **token is emailed** (not in JSON). Without SMTP, use `npx tsx test-auth.ts` for that path.
+5. `POST /api/v1/auth/forgot-password` `{ "email": "bob.employee@example.com" }` → always 200; reset **token is emailed** (not in JSON). Without SMTP, use `npm test` (`test-all-apis.ts`) for that path.
 6. `POST /api/v1/auth/reset-password` `{ "token": "<from email>", "newPassword": "ResetPass123!" }`
 7. `POST /api/v1/auth/logout` (Bearer) optional `{ "refreshToken": "..." }` → **204**.
 

@@ -2,7 +2,9 @@
 
 ## Facts
 
-The concatenated source listed Testing in the pipeline but **did not contain a testing specification**. The repo has no unit, integration, API, or UI tests. Backend `npm test` prints that no tests are specified. Mobile has no test runner in `package.json`.
+The concatenated source listed Testing in the pipeline but **did not contain a testing specification**. Mobile has no test runner in `package.json`.
+
+Backend HTTP coverage lives in `backend/test-all-apis.ts` (`npm test` / `npm run test:apis`). Postman v2.1 JSON: `backend/postman/` (also `documentation/testing/postman/`). See [backend-api.md](backend-api.md).
 
 Test framework choice is a **Pending Decision**. Do not treat Jest, Detox, or Playwright as requirements.
 

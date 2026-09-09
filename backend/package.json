@@ -10,7 +10,8 @@
     "start": "tsx src/index.ts",
     "seed": "tsx prisma/seed.ts",
     "typecheck": "tsc --noEmit",
-    "test": "tsx test-auth.ts && tsx test-leave-applications.ts && tsx test-leave-documents.ts && tsx test-leave-policies.ts && tsx test-leave-types.ts"
+    "test": "tsx test-all-apis.ts",
+    "test:apis": "tsx test-all-apis.ts"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.10.0",

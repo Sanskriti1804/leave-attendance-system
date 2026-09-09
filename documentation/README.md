@@ -39,7 +39,7 @@ Source requirements were **not yet business-confirmed**. Later schema and API se
 - [Database (Proposed)](database/overview.md)
 - [Security](security/model.md)
 - [UI](ui/current-mobile.md)
-- [Testing](testing/strategy.md)
+- [Testing](testing/strategy.md) — [backend API suite & Postman](testing/backend-api.md)
 - [Deployment](deployment/environments.md)
 - [Decisions](decisions/ADR-0001-express-supabase-stack.md) (through [ADR-0008](decisions/ADR-0008-three-backend-modules.md))
 - [Out of scope](features/out-of-scope.md)
