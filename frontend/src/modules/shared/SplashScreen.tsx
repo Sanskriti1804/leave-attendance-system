@@ -1,10 +1,10 @@
 import { useEffect } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { useRouter } from "expo-router";
-import { colors, spacing, typography } from "../src/maxstarter/theme";
-import { assets } from "../src/maxstarter/assets";
-import { Logo } from "../src/maxstarter/Logo";
-import { designContent } from "../src/maxstarter/design";
+import { colors, spacing, typography } from "../../maxstarter/theme";
+import { assets } from "../../maxstarter/assets";
+import { Logo } from "../../maxstarter/Logo";
+import { designContent } from "../../maxstarter/design";
 
 export default function SplashScreen() {
   const router = useRouter();
@@ -16,7 +16,11 @@ export default function SplashScreen() {
   useEffect(() => {
     const timer = setTimeout(() => {
       // Route depends on features selected at generation time.
-      router.replace("/login");
+      if (__DEV__ && process.env.EXPO_PUBLIC_START_SCREEN) {
+        router.replace(process.env.EXPO_PUBLIC_START_SCREEN as any);
+      } else {
+        router.replace("/login");
+      }
     }, splashDuration);
 
     return () => clearTimeout(timer);
