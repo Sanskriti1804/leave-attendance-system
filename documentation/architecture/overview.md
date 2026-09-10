@@ -1,5 +1,7 @@
 # System overview
 
+End-to-end user journeys: [flow.md](flow.md).
+
 ## Status of this document
 
 Describes **what exists in the repository** and separately the **Proposed** engineering target. The target is not implemented and not business-signed.

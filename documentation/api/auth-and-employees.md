@@ -52,7 +52,7 @@ Employee JSON never includes `passwordHash`. `isActive=true` maps to `obsolete=f
 
 Implemented (no JWT/RBAC). Holidays use Prisma `Holiday` (`holidayId`, `holidayName`, `holidayDate` UNIQUE). POST body is pack `{date, name}`. Duplicate date → 409 `CONFLICT`. DELETE → 204.
 
-Org settings use Prisma `ConfigurationSetting` key-value (`settingCategory` = `organisation`), not a pack `org_settings` table. GET returns defaults when keys are missing (`timezone` `America/New_York`, `graceMinutes` 0, `medicalDocOptional1To2Days` true, `medicalDocExceedsDays` 2, `maxAdvanceDays` 4 TD). `workStart`/`workEnd` are `HH:MM` or null. `weeklyOffDow` is ISO 1–7. Leave day-count is **not** applied here.
+Org settings use Prisma `ConfigurationSetting` key-value (`settingCategory` = `organisation`), not a pack `org_settings` table. GET returns defaults when keys are missing (`timezone` from `APP_TIMEZONE` / `America/New_York`, `graceMinutes` 0, `medicalDocOptional1To2Days` true, `medicalDocExceedsDays` 2, `maxAdvanceDays` from `LEAVE_MAX_ADVANCE_DAYS` / **14**). `workStart`/`workEnd` are `HH:MM` or null. `weeklyOffDow` is ISO 1–7. Weekend/holiday leave exclusion flags are applied by leave application via the leave-policies config facade.
 
 | Method | Path | Purpose | Auth |
 | --- | --- | --- | --- |
@@ -64,7 +64,9 @@ Org settings use Prisma `ConfigurationSetting` key-value (`settingCategory` = `o
 
 ## Documents
 
+Implemented against Prisma `LeaveDocument` (integer ids). Bytes are stored on local disk (`LEAVE_DOCUMENTS_DIR`), not Supabase Storage.
+
 | Method | Path | Purpose | Auth |
 | --- | --- | --- | --- |
-| POST | `/documents` | multipart file, optional kind | E A |
+| POST | `/documents` | multipart `leaveId` + `file` | E A |
 | GET | `/documents/{id}` | Download; medical 403 for employee | A G; E own non-medical |

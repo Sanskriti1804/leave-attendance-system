@@ -2,6 +2,7 @@ import { z } from "zod";
 
 export const EMPLOYEE_ROLES = ["employee", "admin", "guest_admin"] as const;
 export const EMPLOYEE_STATUSES = ["ACTIVE", "INACTIVE"] as const;
+export const EMPLOYEE_SEX = ["male", "female", "unspecified"] as const;
 
 const idParam = z.object({
   id: z.coerce.number().int().positive(),
@@ -45,6 +46,7 @@ export const createEmployeeBodySchema = z.object({
     .optional()
     .nullable(),
   status: z.enum(EMPLOYEE_STATUSES).optional(),
+  sex: z.enum(EMPLOYEE_SEX).optional().nullable(),
 });
 
 export const updateEmployeeBodySchema = z
@@ -63,6 +65,7 @@ export const updateEmployeeBodySchema = z
       .nullable(),
     status: z.enum(EMPLOYEE_STATUSES).optional(),
     obsolete: z.boolean().optional(),
+    sex: z.enum(EMPLOYEE_SEX).optional().nullable(),
   })
   .refine((body) => Object.values(body).some((value) => value !== undefined), {
     message: "At least one field is required",

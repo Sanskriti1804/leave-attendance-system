@@ -2,7 +2,7 @@
 
 ## Status
 
-Confirmed MED-01–05, MED-09. Size/retention/day-count interpretation Open. **Not implemented.**
+Confirmed MED-01–05, MED-09. Size/retention/day-count interpretation Open. **Upload and medical-submit rules implemented.** No automated retention.
 
 ## Purpose
 
@@ -26,15 +26,15 @@ BR-03–06. Notify if medical missing before submit (NOTIF Confirmed).
 
 ## API Endpoints
 
-Proposed: `POST /documents` multipart; `GET /documents/{id}` download.
+Implemented: `POST /api/v1/documents` multipart (`leaveId`, `file`); `GET /api/v1/documents/{id}` download.
 
 ## Database Impact
 
-Proposed `documents` metadata; bytes in Storage `leave-documents`.
+Prisma `LeaveDocument` metadata including `contentType` and `fileSize` (CHECK > 0). Bytes on local disk under `LEAVE_DOCUMENTS_DIR`.
 
 ## Validation Rules
 
-Allowlist MIME/extensions. Proposed magic-byte check. Technical cap 10 MiB (TD-17) until MED-06 decided.
+Allowlist MIME/extensions and magic bytes for PDF, JPEG, PNG. Technical cap 10 MiB (TD-17) until MED-06 decided. Empty files rejected.
 
 ## Authorization Rules
 
@@ -50,4 +50,5 @@ MED-06 max size. MED-10 retention. MED-12 “exceeding two days” vs weekends/h
 
 ## Change History
 
+2026-09-04 — Implemented upload/download, `contentType`/`fileSize`, medical submit rules using `LeavePolicy.medicalDocumentAfterDays` and org settings. No retention job.
 2026-08-27 — Extracted from source documentation.

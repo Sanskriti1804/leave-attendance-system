@@ -1,0 +1,976 @@
+{
+  "info": {
+    "name": "Leave Attendance API",
+    "description": "Implemented Express routes at /health and /api/v1. Import with backend/postman/local.postman_environment.json. Run folder 0 first. See documentation/testing/backend-api.md.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000" }
+  ],
+  "item": [
+    {
+      "name": "0. Auth — login (run first)",
+      "item": [
+        {
+          "name": "Login admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.environment.set('adminAccessToken', j.accessToken);",
+                  "pm.environment.set('adminRefreshToken', j.refreshToken);",
+                  "if (j.user) { pm.environment.set('otherEmployeeId', String(j.user.employeeId)); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/auth/login"
+          }
+        },
+        {
+          "name": "Login employee",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.environment.set('employeeAccessToken', j.accessToken);",
+                  "pm.environment.set('employeeRefreshToken', j.refreshToken);",
+                  "if (j.user) { pm.environment.set('employeeId', String(j.user.employeeId)); pm.environment.set('departmentId', String(j.user.departmentId)); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{employeeEmail}}\",\n  \"password\": \"{{employeePassword}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/auth/login"
+          }
+        },
+        {
+          "name": "Login guest_admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.environment.set('guestAccessToken', j.accessToken);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{guestEmail}}\",\n  \"password\": \"{{guestPassword}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/auth/login"
+          }
+        },
+        {
+          "name": "Login — missing body (422)",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('422', () => pm.response.to.have.status(422));"] } }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{}" },
+            "url": "{{baseUrl}}/api/v1/auth/login"
+          }
+        },
+        {
+          "name": "Login — wrong password (401)",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('401', () => pm.response.to.have.status(401));"] } }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"WrongPassword123!\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/auth/login"
+          }
+        }
+      ]
+    },
+    {
+      "name": "1. Health",
+      "item": [
+        {
+          "name": "GET /health/health",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('200', () => pm.response.to.have.status(200));"] } }],
+          "request": { "method": "GET", "url": "{{baseUrl}}/health/health" }
+        },
+        {
+          "name": "Unknown route (404)",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('404', () => pm.response.to.have.status(404));"] } }],
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/does-not-exist" }
+        }
+      ]
+    },
+    {
+      "name": "2. Auth",
+      "item": [
+        {
+          "name": "GET /me (admin)",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('200', () => pm.response.to.have.status(200));"] } }],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminAccessToken}}" }],
+            "url": "{{baseUrl}}/api/v1/auth/me"
+          }
+        },
+        {
+          "name": "GET /me — no token (401)",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('401', () => pm.response.to.have.status(401));"] } }],
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/auth/me" }
+        },
+        {
+          "name": "POST /refresh (admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('200', () => pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.environment.set('adminAccessToken', j.accessToken);",
+                  "pm.environment.set('adminRefreshToken', j.refreshToken);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{adminRefreshToken}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/auth/refresh"
+          }
+        },
+        {
+          "name": "POST /refresh — invalid (401)",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('401', () => pm.response.to.have.status(401));"] } }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"refreshToken\": \"invalid-refresh\"\n}" },
+            "url": "{{baseUrl}}/api/v1/auth/refresh"
+          }
+        },
+        {
+          "name": "POST /forgot-password",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('200', () => pm.response.to.have.status(200));"] } }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{employeeEmail}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/auth/forgot-password"
+          }
+        },
+        {
+          "name": "POST /reset-password — bad token (400)",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('400', () => pm.response.to.have.status(400));"] } }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"deadbeef\",\n  \"newPassword\": \"ResetPass123!\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/auth/reset-password"
+          }
+        },
+        {
+          "name": "POST /change-password (alters seed password — skip in Runner if needed)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{employeeAccessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentPassword\": \"{{employeePassword}}\",\n  \"newPassword\": \"EmployeePassword123!\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/auth/change-password"
+          }
+        },
+        {
+          "name": "POST /logout",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('204', () => pm.response.to.have.status(204));"] } }],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminAccessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{adminRefreshToken}}\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/auth/logout"
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Departments",
+      "item": [
+        {
+          "name": "GET list (admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('200', () => pm.response.to.have.status(200));",
+                  "const items = pm.response.json().items || [];",
+                  "if (items[0]) pm.environment.set('departmentId', String(items[0].departmentId));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminAccessToken}}" }],
+            "url": "{{baseUrl}}/api/v1/departments"
+          }
+        },
+        {
+          "name": "GET list — no token (401)",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('401', () => pm.response.to.have.status(401));"] } }],
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/departments" }
+        },
+        {
+          "name": "POST — guest 403",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('403', () => pm.response.to.have.status(403));"] } }],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{guestAccessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"departmentName\": \"ShouldFail\"\n}" },
+            "url": "{{baseUrl}}/api/v1/departments"
+          }
+        },
+        {
+          "name": "POST (admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('201', () => pm.response.to.have.status(201));",
+                  "pm.environment.set('departmentId', String(pm.response.json().departmentId));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminAccessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"departmentName\": \"QA Manual\"\n}" },
+            "url": "{{baseUrl}}/api/v1/departments"
+          }
+        },
+        {
+          "name": "GET by id",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('200', () => pm.response.to.have.status(200));"] } }],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminAccessToken}}" }],
+            "url": "{{baseUrl}}/api/v1/departments/{{departmentId}}"
+          }
+        },
+        {
+          "name": "GET missing id (404)",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('404', () => pm.response.to.have.status(404));"] } }],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminAccessToken}}" }],
+            "url": "{{baseUrl}}/api/v1/departments/99999999"
+          }
+        },
+        {
+          "name": "PATCH (admin)",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('200', () => pm.response.to.have.status(200));"] } }],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminAccessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"departmentName\": \"QA Lab Manual\"\n}" },
+            "url": "{{baseUrl}}/api/v1/departments/{{departmentId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Employees",
+      "item": [
+        {
+          "name": "GET list (admin)",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('200', () => pm.response.to.have.status(200));"] } }],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminAccessToken}}" }],
+            "url": "{{baseUrl}}/api/v1/employees"
+          }
+        },
+        {
+          "name": "GET list — employee 403",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('403', () => pm.response.to.have.status(403));"] } }],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{employeeAccessToken}}" }],
+            "url": "{{baseUrl}}/api/v1/employees"
+          }
+        },
+        {
+          "name": "GET self (employee)",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('200', () => pm.response.to.have.status(200));"] } }],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{employeeAccessToken}}" }],
+            "url": "{{baseUrl}}/api/v1/employees/{{employeeId}}"
+          }
+        },
+        {
+          "name": "GET other — employee 403",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('403', () => pm.response.to.have.status(403));"] } }],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{employeeAccessToken}}" }],
+            "url": "{{baseUrl}}/api/v1/employees/{{otherEmployeeId}}"
+          }
+        },
+        {
+          "name": "POST — guest 403",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('403', () => pm.response.to.have.status(403));"] } }],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{guestAccessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"X\",\n  \"email\": \"x.manual@example.com\",\n  \"password\": \"Employee2Pass123!\",\n  \"departmentId\": {{departmentId}},\n  \"role\": \"employee\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/employees"
+          }
+        },
+        {
+          "name": "POST (admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('201 or 409', () => pm.expect([201, 409, 422]).to.include(pm.response.code));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminAccessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Manual\",\n  \"lastName\": \"User\",\n  \"email\": \"manual.user@example.com\",\n  \"password\": \"Employee2Pass123!\",\n  \"departmentId\": {{departmentId}},\n  \"role\": \"employee\",\n  \"sex\": \"female\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/employees"
+          }
+        },
+        {
+          "name": "PATCH (admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminAccessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"sex\": \"female\"\n}" },
+            "url": "{{baseUrl}}/api/v1/employees/{{employeeId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Org settings",
+      "item": [
+        {
+          "name": "GET",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('200', () => pm.response.to.have.status(200));"] } }],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{employeeAccessToken}}" }],
+            "url": "{{baseUrl}}/api/v1/org-settings"
+          }
+        },
+        {
+          "name": "PATCH — guest 403",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('403', () => pm.response.to.have.status(403));"] } }],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{guestAccessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"graceMinutes\": 5\n}" },
+            "url": "{{baseUrl}}/api/v1/org-settings"
+          }
+        },
+        {
+          "name": "PATCH empty (422)",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('422', () => pm.response.to.have.status(422));"] } }],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminAccessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{}" },
+            "url": "{{baseUrl}}/api/v1/org-settings"
+          }
+        },
+        {
+          "name": "PATCH (admin)",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('200', () => pm.response.to.have.status(200));"] } }],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminAccessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"maxAdvanceDays\": 14\n}" },
+            "url": "{{baseUrl}}/api/v1/org-settings"
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Holidays",
+      "item": [
+        {
+          "name": "GET list",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('200', () => pm.response.to.have.status(200));"] } }],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminAccessToken}}" }],
+            "url": "{{baseUrl}}/api/v1/holidays?from={{leaveDate}}&to={{leaveDate}}"
+          }
+        },
+        {
+          "name": "POST — guest 403",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('403', () => pm.response.to.have.status(403));"] } }],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{guestAccessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"date\": \"{{leaveDate}}\",\n  \"name\": \"Nope\"\n}" },
+            "url": "{{baseUrl}}/api/v1/holidays"
+          }
+        },
+        {
+          "name": "POST (admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('201 or 409', () => pm.expect([201, 409]).to.include(pm.response.code));",
+                  "if (pm.response.code === 201) pm.environment.set('holidayId', String(pm.response.json().holidayId));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminAccessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"date\": \"{{leaveDate}}\",\n  \"name\": \"Manual Holiday\"\n}" },
+            "url": "{{baseUrl}}/api/v1/holidays"
+          }
+        },
+        {
+          "name": "DELETE (admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminAccessToken}}" }],
+            "url": "{{baseUrl}}/api/v1/holidays/{{holidayId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "7. Leave types",
+      "item": [
+        {
+          "name": "GET list",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('200', () => pm.response.to.have.status(200));",
+                  "const items = pm.response.json().items || [];",
+                  "const casual = items.find(i => i.name === 'Casual') || items[0];",
+                  "const sick = items.find(i => i.name === 'Sick') || items[1] || items[0];",
+                  "if (casual) pm.environment.set('leaveTypeId', String(casual.leaveTypeId));",
+                  "if (sick) pm.environment.set('sickLeaveTypeId', String(sick.leaveTypeId));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{employeeAccessToken}}" }],
+            "url": "{{baseUrl}}/api/v1/leave-types"
+          }
+        },
+        {
+          "name": "GET by id",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('200', () => pm.response.to.have.status(200));"] } }],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{employeeAccessToken}}" }],
+            "url": "{{baseUrl}}/api/v1/leave-types/{{leaveTypeId}}"
+          }
+        },
+        {
+          "name": "POST — guest 403",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('403', () => pm.response.to.have.status(403));"] } }],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{guestAccessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Nope\"\n}" },
+            "url": "{{baseUrl}}/api/v1/leave-types"
+          }
+        },
+        {
+          "name": "POST (admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminAccessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Manual Type\",\n  \"requiresMedicalDocument\": false\n}" },
+            "url": "{{baseUrl}}/api/v1/leave-types"
+          }
+        },
+        {
+          "name": "PATCH (admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminAccessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"description\": \"updated\"\n}" },
+            "url": "{{baseUrl}}/api/v1/leave-types/{{leaveTypeId}}"
+          }
+        },
+        {
+          "name": "DELETE (admin) — unused type only 204",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminAccessToken}}" }],
+            "url": "{{baseUrl}}/api/v1/leave-types/{{leaveTypeId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "8. Leave policies",
+      "item": [
+        {
+          "name": "GET list",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('200', () => pm.response.to.have.status(200));",
+                  "const items = pm.response.json().items || [];",
+                  "if (items[0]) pm.environment.set('policyId', String(items[0].policyId));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{guestAccessToken}}" }],
+            "url": "{{baseUrl}}/api/v1/leave-policies"
+          }
+        },
+        {
+          "name": "GET by id",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminAccessToken}}" }],
+            "url": "{{baseUrl}}/api/v1/leave-policies/{{policyId}}"
+          }
+        },
+        {
+          "name": "POST — guest 403",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('403', () => pm.response.to.have.status(403));"] } }],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{guestAccessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"leaveTypeId\": {{leaveTypeId}},\n  \"medicalDocumentAfterDays\": 2\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/leave-policies"
+          }
+        },
+        {
+          "name": "POST (admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminAccessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"leaveTypeId\": {{leaveTypeId}},\n  \"medicalDocumentAfterDays\": 5\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/leave-policies"
+          }
+        },
+        {
+          "name": "PATCH (admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminAccessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"maxDays\": 10\n}" },
+            "url": "{{baseUrl}}/api/v1/leave-policies/{{policyId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "9. Leave applications",
+      "item": [
+        {
+          "name": "POST — no token 401",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('401', () => pm.response.to.have.status(401));"] } }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"leaveTypeId\": {{leaveTypeId}},\n  \"reason\": \"x\",\n  \"selectedDates\": [{ \"date\": \"{{leaveDate}}\", \"session\": \"FULL_DAY\" }]\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/leaves"
+          }
+        },
+        {
+          "name": "POST invalid (422)",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('422', () => pm.response.to.have.status(422));"] } }],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{employeeAccessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"leaveTypeId\": {{leaveTypeId}},\n  \"reason\": \"\",\n  \"selectedDates\": []\n}" },
+            "url": "{{baseUrl}}/api/v1/leaves"
+          }
+        },
+        {
+          "name": "POST submit (employee)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('201 or overlap 409', () => pm.expect([201, 409]).to.include(pm.response.code));",
+                  "if (pm.response.code === 201) pm.environment.set('leaveId', String(pm.response.json().leaveId));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{employeeAccessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"leaveTypeId\": {{leaveTypeId}},\n  \"reason\": \"Personal work\",\n  \"selectedDates\": [{ \"date\": \"{{leaveDate}}\", \"session\": \"FULL_DAY\" }]\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/leaves"
+          }
+        },
+        {
+          "name": "GET list",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('200', () => pm.response.to.have.status(200));"] } }],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{employeeAccessToken}}" }],
+            "url": "{{baseUrl}}/api/v1/leaves"
+          }
+        },
+        {
+          "name": "GET by id",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{employeeAccessToken}}" }],
+            "url": "{{baseUrl}}/api/v1/leaves/{{leaveId}}"
+          }
+        },
+        {
+          "name": "GET history",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{employeeAccessToken}}" }],
+            "url": "{{baseUrl}}/api/v1/leaves/{{leaveId}}/history"
+          }
+        },
+        {
+          "name": "POST drafts",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) pm.environment.set('draftLeaveId', String(pm.response.json().leaveId));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{employeeAccessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"leaveTypeId\": {{leaveTypeId}},\n  \"reason\": \"draft\",\n  \"selectedDates\": [{ \"date\": \"{{leaveDate}}\", \"session\": \"FIRST_HALF\" }]\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/leaves/drafts"
+          }
+        },
+        {
+          "name": "PATCH draft",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{employeeAccessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"reason\": \"updated draft\"\n}" },
+            "url": "{{baseUrl}}/api/v1/leaves/{{draftLeaveId}}"
+          }
+        },
+        {
+          "name": "POST submit draft",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{employeeAccessToken}}" }],
+            "url": "{{baseUrl}}/api/v1/leaves/{{draftLeaveId}}/submit"
+          }
+        },
+        {
+          "name": "POST manager-approve",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{employeeAccessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{}" },
+            "url": "{{baseUrl}}/api/v1/leaves/{{leaveId}}/manager-approve"
+          }
+        },
+        {
+          "name": "POST manager-reject",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{employeeAccessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"comment\": \"No\"\n}" },
+            "url": "{{baseUrl}}/api/v1/leaves/{{leaveId}}/manager-reject"
+          }
+        },
+        {
+          "name": "POST approve (admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminAccessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"comment\": \"OK\"\n}" },
+            "url": "{{baseUrl}}/api/v1/leaves/{{leaveId}}/approve"
+          }
+        },
+        {
+          "name": "POST reject (admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{adminAccessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"comment\": \"No\"\n}" },
+            "url": "{{baseUrl}}/api/v1/leaves/{{leaveId}}/reject"
+          }
+        },
+        {
+          "name": "POST withdraw",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{employeeAccessToken}}" }],
+            "url": "{{baseUrl}}/api/v1/leaves/{{leaveId}}/withdraw"
+          }
+        },
+        {
+          "name": "POST cancel",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{employeeAccessToken}}" }],
+            "url": "{{baseUrl}}/api/v1/leaves/{{leaveId}}/cancel"
+          }
+        },
+        {
+          "name": "POST — guest 403",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('403', () => pm.response.to.have.status(403));"] } }],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{guestAccessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"leaveTypeId\": {{leaveTypeId}},\n  \"reason\": \"guest\",\n  \"selectedDates\": [{ \"date\": \"{{leaveDate}}\", \"session\": \"FULL_DAY\" }]\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/leaves"
+          }
+        }
+      ]
+    },
+    {
+      "name": "10. Documents",
+      "item": [
+        {
+          "name": "POST upload (multipart — attach a PDF/JPG/PNG)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) pm.environment.set('documentId', String(pm.response.json().documentId));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{employeeAccessToken}}" }],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "leaveId", "type": "text", "value": "{{draftLeaveId}}" },
+                { "key": "file", "type": "file", "src": [] }
+              ]
+            },
+            "url": "{{baseUrl}}/api/v1/documents"
+          }
+        },
+        {
+          "name": "POST upload — JSON not multipart (422)",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('422', () => pm.response.to.have.status(422));"] } }],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{employeeAccessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": { "mode": "raw", "raw": "{\n  \"leaveId\": {{draftLeaveId}}\n}" },
+            "url": "{{baseUrl}}/api/v1/documents"
+          }
+        },
+        {
+          "name": "GET — employee medical (expect 403 if medical type)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{employeeAccessToken}}" }],
+            "url": "{{baseUrl}}/api/v1/documents/{{documentId}}"
+          }
+        },
+        {
+          "name": "GET — admin",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminAccessToken}}" }],
+            "url": "{{baseUrl}}/api/v1/documents/{{documentId}}"
+          }
+        },
+        {
+          "name": "GET — guest_admin",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{guestAccessToken}}" }],
+            "url": "{{baseUrl}}/api/v1/documents/{{documentId}}"
+          }
+        }
+      ]
+    }
+  ]
+}

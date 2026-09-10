@@ -32,6 +32,7 @@ export const resetPasswordBodySchema = z.object({
   newPassword: passwordComplexitySchema,
 });
 
+//creating a ts type
 export type LoginBody = z.infer<typeof loginBodySchema>;
 export type RefreshBody = z.infer<typeof refreshBodySchema>;
 export type ChangePasswordBody = z.infer<typeof changePasswordBodySchema>;

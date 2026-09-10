@@ -33,6 +33,7 @@ backend/logs/
 backend/*.log
 backend/dist/
 backend/coverage/
+backend/uploads/
 
 # Build / coverage
 dist/

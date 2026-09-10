@@ -51,6 +51,7 @@ export type EmployeeMinAggregateOutputType = {
   createdAt: Date | null
   status: string | null
   obsolete: boolean | null
+  sex: string | null
 }
 
 export type EmployeeMaxAggregateOutputType = {
@@ -66,6 +67,7 @@ export type EmployeeMaxAggregateOutputType = {
   createdAt: Date | null
   status: string | null
   obsolete: boolean | null
+  sex: string | null
 }
 
 export type EmployeeCountAggregateOutputType = {
@@ -81,6 +83,7 @@ export type EmployeeCountAggregateOutputType = {
   createdAt: number
   status: number
   obsolete: number
+  sex: number
   _all: number
 }
 
@@ -110,6 +113,7 @@ export type EmployeeMinAggregateInputType = {
   createdAt?: true
   status?: true
   obsolete?: true
+  sex?: true
 }
 
 export type EmployeeMaxAggregateInputType = {
@@ -125,6 +129,7 @@ export type EmployeeMaxAggregateInputType = {
   createdAt?: true
   status?: true
   obsolete?: true
+  sex?: true
 }
 
 export type EmployeeCountAggregateInputType = {
@@ -140,6 +145,7 @@ export type EmployeeCountAggregateInputType = {
   createdAt?: true
   status?: true
   obsolete?: true
+  sex?: true
   _all?: true
 }
 
@@ -242,6 +248,7 @@ export type EmployeeGroupByOutputType = {
   createdAt: Date
   status: string
   obsolete: boolean
+  sex: string | null
   _count: EmployeeCountAggregateOutputType | null
   _avg: EmployeeAvgAggregateOutputType | null
   _sum: EmployeeSumAggregateOutputType | null
@@ -280,6 +287,7 @@ export type EmployeeWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"Employee"> | Date | string
   status?: Prisma.StringFilter<"Employee"> | string
   obsolete?: Prisma.BoolFilter<"Employee"> | boolean
+  sex?: Prisma.StringNullableFilter<"Employee"> | string | null
   department?: Prisma.XOR<Prisma.DepartmentScalarRelationFilter, Prisma.DepartmentWhereInput>
   manager?: Prisma.XOR<Prisma.EmployeeNullableScalarRelationFilter, Prisma.EmployeeWhereInput> | null
   subordinates?: Prisma.EmployeeListRelationFilter
@@ -289,8 +297,10 @@ export type EmployeeWhereInput = {
   notifications?: Prisma.NotificationListRelationFilter
   auditLogs?: Prisma.AuditLogListRelationFilter
   reviewedLeaves?: Prisma.LeaveApplicationListRelationFilter
+  reportingManagerLeaves?: Prisma.LeaveApplicationListRelationFilter
   reviewedCorrections?: Prisma.AttendanceCorrectionListRelationFilter
   uploadedDocuments?: Prisma.LeaveDocumentListRelationFilter
+  leaveStatusChanges?: Prisma.LeaveStatusHistoryListRelationFilter
   refreshTokens?: Prisma.RefreshTokenListRelationFilter
   passwordResetTokens?: Prisma.PasswordResetTokenListRelationFilter
 }
@@ -308,6 +318,7 @@ export type EmployeeOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   status?: Prisma.SortOrder
   obsolete?: Prisma.SortOrder
+  sex?: Prisma.SortOrderInput | Prisma.SortOrder
   department?: Prisma.DepartmentOrderByWithRelationInput
   manager?: Prisma.EmployeeOrderByWithRelationInput
   subordinates?: Prisma.EmployeeOrderByRelationAggregateInput
@@ -317,8 +328,10 @@ export type EmployeeOrderByWithRelationInput = {
   notifications?: Prisma.NotificationOrderByRelationAggregateInput
   auditLogs?: Prisma.AuditLogOrderByRelationAggregateInput
   reviewedLeaves?: Prisma.LeaveApplicationOrderByRelationAggregateInput
+  reportingManagerLeaves?: Prisma.LeaveApplicationOrderByRelationAggregateInput
   reviewedCorrections?: Prisma.AttendanceCorrectionOrderByRelationAggregateInput
   uploadedDocuments?: Prisma.LeaveDocumentOrderByRelationAggregateInput
+  leaveStatusChanges?: Prisma.LeaveStatusHistoryOrderByRelationAggregateInput
   refreshTokens?: Prisma.RefreshTokenOrderByRelationAggregateInput
   passwordResetTokens?: Prisma.PasswordResetTokenOrderByRelationAggregateInput
 }
@@ -339,6 +352,7 @@ export type EmployeeWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"Employee"> | Date | string
   status?: Prisma.StringFilter<"Employee"> | string
   obsolete?: Prisma.BoolFilter<"Employee"> | boolean
+  sex?: Prisma.StringNullableFilter<"Employee"> | string | null
   department?: Prisma.XOR<Prisma.DepartmentScalarRelationFilter, Prisma.DepartmentWhereInput>
   manager?: Prisma.XOR<Prisma.EmployeeNullableScalarRelationFilter, Prisma.EmployeeWhereInput> | null
   subordinates?: Prisma.EmployeeListRelationFilter
@@ -348,8 +362,10 @@ export type EmployeeWhereUniqueInput = Prisma.AtLeast<{
   notifications?: Prisma.NotificationListRelationFilter
   auditLogs?: Prisma.AuditLogListRelationFilter
   reviewedLeaves?: Prisma.LeaveApplicationListRelationFilter
+  reportingManagerLeaves?: Prisma.LeaveApplicationListRelationFilter
   reviewedCorrections?: Prisma.AttendanceCorrectionListRelationFilter
   uploadedDocuments?: Prisma.LeaveDocumentListRelationFilter
+  leaveStatusChanges?: Prisma.LeaveStatusHistoryListRelationFilter
   refreshTokens?: Prisma.RefreshTokenListRelationFilter
   passwordResetTokens?: Prisma.PasswordResetTokenListRelationFilter
 }, "employeeId" | "email">
@@ -367,6 +383,7 @@ export type EmployeeOrderByWithAggregationInput = {
   createdAt?: Prisma.SortOrder
   status?: Prisma.SortOrder
   obsolete?: Prisma.SortOrder
+  sex?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.EmployeeCountOrderByAggregateInput
   _avg?: Prisma.EmployeeAvgOrderByAggregateInput
   _max?: Prisma.EmployeeMaxOrderByAggregateInput
@@ -390,6 +407,7 @@ export type EmployeeScalarWhereWithAggregatesInput = {
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Employee"> | Date | string
   status?: Prisma.StringWithAggregatesFilter<"Employee"> | string
   obsolete?: Prisma.BoolWithAggregatesFilter<"Employee"> | boolean
+  sex?: Prisma.StringNullableWithAggregatesFilter<"Employee"> | string | null
 }
 
 export type EmployeeCreateInput = {
@@ -402,6 +420,7 @@ export type EmployeeCreateInput = {
   createdAt?: Date | string
   status: string
   obsolete?: boolean
+  sex?: string | null
   department: Prisma.DepartmentCreateNestedOneWithoutEmployeesInput
   manager?: Prisma.EmployeeCreateNestedOneWithoutSubordinatesInput
   subordinates?: Prisma.EmployeeCreateNestedManyWithoutManagerInput
@@ -411,8 +430,10 @@ export type EmployeeCreateInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutUserInput
   reviewedLeaves?: Prisma.LeaveApplicationCreateNestedManyWithoutReviewerInput
+  reportingManagerLeaves?: Prisma.LeaveApplicationCreateNestedManyWithoutReportingManagerInput
   reviewedCorrections?: Prisma.AttendanceCorrectionCreateNestedManyWithoutReviewerInput
   uploadedDocuments?: Prisma.LeaveDocumentCreateNestedManyWithoutUploaderInput
+  leaveStatusChanges?: Prisma.LeaveStatusHistoryCreateNestedManyWithoutChangedByInput
   refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutEmployeeInput
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutEmployeeInput
 }
@@ -430,6 +451,7 @@ export type EmployeeUncheckedCreateInput = {
   createdAt?: Date | string
   status: string
   obsolete?: boolean
+  sex?: string | null
   subordinates?: Prisma.EmployeeUncheckedCreateNestedManyWithoutManagerInput
   attendance?: Prisma.AttendanceUncheckedCreateNestedManyWithoutEmployeeInput
   attendanceCorrections?: Prisma.AttendanceCorrectionUncheckedCreateNestedManyWithoutEmployeeInput
@@ -437,8 +459,10 @@ export type EmployeeUncheckedCreateInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutUserInput
   reviewedLeaves?: Prisma.LeaveApplicationUncheckedCreateNestedManyWithoutReviewerInput
+  reportingManagerLeaves?: Prisma.LeaveApplicationUncheckedCreateNestedManyWithoutReportingManagerInput
   reviewedCorrections?: Prisma.AttendanceCorrectionUncheckedCreateNestedManyWithoutReviewerInput
   uploadedDocuments?: Prisma.LeaveDocumentUncheckedCreateNestedManyWithoutUploaderInput
+  leaveStatusChanges?: Prisma.LeaveStatusHistoryUncheckedCreateNestedManyWithoutChangedByInput
   refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutEmployeeInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutEmployeeInput
 }
@@ -453,6 +477,7 @@ export type EmployeeUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   department?: Prisma.DepartmentUpdateOneRequiredWithoutEmployeesNestedInput
   manager?: Prisma.EmployeeUpdateOneWithoutSubordinatesNestedInput
   subordinates?: Prisma.EmployeeUpdateManyWithoutManagerNestedInput
@@ -462,8 +487,10 @@ export type EmployeeUpdateInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutUserNestedInput
   reviewedLeaves?: Prisma.LeaveApplicationUpdateManyWithoutReviewerNestedInput
+  reportingManagerLeaves?: Prisma.LeaveApplicationUpdateManyWithoutReportingManagerNestedInput
   reviewedCorrections?: Prisma.AttendanceCorrectionUpdateManyWithoutReviewerNestedInput
   uploadedDocuments?: Prisma.LeaveDocumentUpdateManyWithoutUploaderNestedInput
+  leaveStatusChanges?: Prisma.LeaveStatusHistoryUpdateManyWithoutChangedByNestedInput
   refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutEmployeeNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutEmployeeNestedInput
 }
@@ -481,6 +508,7 @@ export type EmployeeUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subordinates?: Prisma.EmployeeUncheckedUpdateManyWithoutManagerNestedInput
   attendance?: Prisma.AttendanceUncheckedUpdateManyWithoutEmployeeNestedInput
   attendanceCorrections?: Prisma.AttendanceCorrectionUncheckedUpdateManyWithoutEmployeeNestedInput
@@ -488,8 +516,10 @@ export type EmployeeUncheckedUpdateInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutUserNestedInput
   reviewedLeaves?: Prisma.LeaveApplicationUncheckedUpdateManyWithoutReviewerNestedInput
+  reportingManagerLeaves?: Prisma.LeaveApplicationUncheckedUpdateManyWithoutReportingManagerNestedInput
   reviewedCorrections?: Prisma.AttendanceCorrectionUncheckedUpdateManyWithoutReviewerNestedInput
   uploadedDocuments?: Prisma.LeaveDocumentUncheckedUpdateManyWithoutUploaderNestedInput
+  leaveStatusChanges?: Prisma.LeaveStatusHistoryUncheckedUpdateManyWithoutChangedByNestedInput
   refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutEmployeeNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutEmployeeNestedInput
 }
@@ -507,6 +537,7 @@ export type EmployeeCreateManyInput = {
   createdAt?: Date | string
   status: string
   obsolete?: boolean
+  sex?: string | null
 }
 
 export type EmployeeUpdateManyMutationInput = {
@@ -519,6 +550,7 @@ export type EmployeeUpdateManyMutationInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type EmployeeUncheckedUpdateManyInput = {
@@ -534,6 +566,7 @@ export type EmployeeUncheckedUpdateManyInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type EmployeeListRelationFilter = {
@@ -564,6 +597,7 @@ export type EmployeeCountOrderByAggregateInput = {
   createdAt?: Prisma.SortOrder
   status?: Prisma.SortOrder
   obsolete?: Prisma.SortOrder
+  sex?: Prisma.SortOrder
 }
 
 export type EmployeeAvgOrderByAggregateInput = {
@@ -585,6 +619,7 @@ export type EmployeeMaxOrderByAggregateInput = {
   createdAt?: Prisma.SortOrder
   status?: Prisma.SortOrder
   obsolete?: Prisma.SortOrder
+  sex?: Prisma.SortOrder
 }
 
 export type EmployeeMinOrderByAggregateInput = {
@@ -600,6 +635,7 @@ export type EmployeeMinOrderByAggregateInput = {
   createdAt?: Prisma.SortOrder
   status?: Prisma.SortOrder
   obsolete?: Prisma.SortOrder
+  sex?: Prisma.SortOrder
 }
 
 export type EmployeeSumOrderByAggregateInput = {
@@ -789,6 +825,12 @@ export type EmployeeCreateNestedOneWithoutReviewedLeavesInput = {
   connect?: Prisma.EmployeeWhereUniqueInput
 }
 
+export type EmployeeCreateNestedOneWithoutReportingManagerLeavesInput = {
+  create?: Prisma.XOR<Prisma.EmployeeCreateWithoutReportingManagerLeavesInput, Prisma.EmployeeUncheckedCreateWithoutReportingManagerLeavesInput>
+  connectOrCreate?: Prisma.EmployeeCreateOrConnectWithoutReportingManagerLeavesInput
+  connect?: Prisma.EmployeeWhereUniqueInput
+}
+
 export type EmployeeUpdateOneRequiredWithoutLeaveApplicationsNestedInput = {
   create?: Prisma.XOR<Prisma.EmployeeCreateWithoutLeaveApplicationsInput, Prisma.EmployeeUncheckedCreateWithoutLeaveApplicationsInput>
   connectOrCreate?: Prisma.EmployeeCreateOrConnectWithoutLeaveApplicationsInput
@@ -805,6 +847,32 @@ export type EmployeeUpdateOneWithoutReviewedLeavesNestedInput = {
   delete?: Prisma.EmployeeWhereInput | boolean
   connect?: Prisma.EmployeeWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.EmployeeUpdateToOneWithWhereWithoutReviewedLeavesInput, Prisma.EmployeeUpdateWithoutReviewedLeavesInput>, Prisma.EmployeeUncheckedUpdateWithoutReviewedLeavesInput>
+}
+
+export type EmployeeUpdateOneWithoutReportingManagerLeavesNestedInput = {
+  create?: Prisma.XOR<Prisma.EmployeeCreateWithoutReportingManagerLeavesInput, Prisma.EmployeeUncheckedCreateWithoutReportingManagerLeavesInput>
+  connectOrCreate?: Prisma.EmployeeCreateOrConnectWithoutReportingManagerLeavesInput
+  upsert?: Prisma.EmployeeUpsertWithoutReportingManagerLeavesInput
+  disconnect?: Prisma.EmployeeWhereInput | boolean
+  delete?: Prisma.EmployeeWhereInput | boolean
+  connect?: Prisma.EmployeeWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.EmployeeUpdateToOneWithWhereWithoutReportingManagerLeavesInput, Prisma.EmployeeUpdateWithoutReportingManagerLeavesInput>, Prisma.EmployeeUncheckedUpdateWithoutReportingManagerLeavesInput>
+}
+
+export type EmployeeCreateNestedOneWithoutLeaveStatusChangesInput = {
+  create?: Prisma.XOR<Prisma.EmployeeCreateWithoutLeaveStatusChangesInput, Prisma.EmployeeUncheckedCreateWithoutLeaveStatusChangesInput>
+  connectOrCreate?: Prisma.EmployeeCreateOrConnectWithoutLeaveStatusChangesInput
+  connect?: Prisma.EmployeeWhereUniqueInput
+}
+
+export type EmployeeUpdateOneWithoutLeaveStatusChangesNestedInput = {
+  create?: Prisma.XOR<Prisma.EmployeeCreateWithoutLeaveStatusChangesInput, Prisma.EmployeeUncheckedCreateWithoutLeaveStatusChangesInput>
+  connectOrCreate?: Prisma.EmployeeCreateOrConnectWithoutLeaveStatusChangesInput
+  upsert?: Prisma.EmployeeUpsertWithoutLeaveStatusChangesInput
+  disconnect?: Prisma.EmployeeWhereInput | boolean
+  delete?: Prisma.EmployeeWhereInput | boolean
+  connect?: Prisma.EmployeeWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.EmployeeUpdateToOneWithWhereWithoutLeaveStatusChangesInput, Prisma.EmployeeUpdateWithoutLeaveStatusChangesInput>, Prisma.EmployeeUncheckedUpdateWithoutLeaveStatusChangesInput>
 }
 
 export type EmployeeCreateNestedOneWithoutUploadedDocumentsInput = {
@@ -887,6 +955,7 @@ export type EmployeeCreateWithoutDepartmentInput = {
   createdAt?: Date | string
   status: string
   obsolete?: boolean
+  sex?: string | null
   manager?: Prisma.EmployeeCreateNestedOneWithoutSubordinatesInput
   subordinates?: Prisma.EmployeeCreateNestedManyWithoutManagerInput
   attendance?: Prisma.AttendanceCreateNestedManyWithoutEmployeeInput
@@ -895,8 +964,10 @@ export type EmployeeCreateWithoutDepartmentInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutUserInput
   reviewedLeaves?: Prisma.LeaveApplicationCreateNestedManyWithoutReviewerInput
+  reportingManagerLeaves?: Prisma.LeaveApplicationCreateNestedManyWithoutReportingManagerInput
   reviewedCorrections?: Prisma.AttendanceCorrectionCreateNestedManyWithoutReviewerInput
   uploadedDocuments?: Prisma.LeaveDocumentCreateNestedManyWithoutUploaderInput
+  leaveStatusChanges?: Prisma.LeaveStatusHistoryCreateNestedManyWithoutChangedByInput
   refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutEmployeeInput
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutEmployeeInput
 }
@@ -913,6 +984,7 @@ export type EmployeeUncheckedCreateWithoutDepartmentInput = {
   createdAt?: Date | string
   status: string
   obsolete?: boolean
+  sex?: string | null
   subordinates?: Prisma.EmployeeUncheckedCreateNestedManyWithoutManagerInput
   attendance?: Prisma.AttendanceUncheckedCreateNestedManyWithoutEmployeeInput
   attendanceCorrections?: Prisma.AttendanceCorrectionUncheckedCreateNestedManyWithoutEmployeeInput
@@ -920,8 +992,10 @@ export type EmployeeUncheckedCreateWithoutDepartmentInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutUserInput
   reviewedLeaves?: Prisma.LeaveApplicationUncheckedCreateNestedManyWithoutReviewerInput
+  reportingManagerLeaves?: Prisma.LeaveApplicationUncheckedCreateNestedManyWithoutReportingManagerInput
   reviewedCorrections?: Prisma.AttendanceCorrectionUncheckedCreateNestedManyWithoutReviewerInput
   uploadedDocuments?: Prisma.LeaveDocumentUncheckedCreateNestedManyWithoutUploaderInput
+  leaveStatusChanges?: Prisma.LeaveStatusHistoryUncheckedCreateNestedManyWithoutChangedByInput
   refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutEmployeeInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutEmployeeInput
 }
@@ -968,6 +1042,7 @@ export type EmployeeScalarWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"Employee"> | Date | string
   status?: Prisma.StringFilter<"Employee"> | string
   obsolete?: Prisma.BoolFilter<"Employee"> | boolean
+  sex?: Prisma.StringNullableFilter<"Employee"> | string | null
 }
 
 export type EmployeeCreateWithoutSubordinatesInput = {
@@ -980,6 +1055,7 @@ export type EmployeeCreateWithoutSubordinatesInput = {
   createdAt?: Date | string
   status: string
   obsolete?: boolean
+  sex?: string | null
   department: Prisma.DepartmentCreateNestedOneWithoutEmployeesInput
   manager?: Prisma.EmployeeCreateNestedOneWithoutSubordinatesInput
   attendance?: Prisma.AttendanceCreateNestedManyWithoutEmployeeInput
@@ -988,8 +1064,10 @@ export type EmployeeCreateWithoutSubordinatesInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutUserInput
   reviewedLeaves?: Prisma.LeaveApplicationCreateNestedManyWithoutReviewerInput
+  reportingManagerLeaves?: Prisma.LeaveApplicationCreateNestedManyWithoutReportingManagerInput
   reviewedCorrections?: Prisma.AttendanceCorrectionCreateNestedManyWithoutReviewerInput
   uploadedDocuments?: Prisma.LeaveDocumentCreateNestedManyWithoutUploaderInput
+  leaveStatusChanges?: Prisma.LeaveStatusHistoryCreateNestedManyWithoutChangedByInput
   refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutEmployeeInput
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutEmployeeInput
 }
@@ -1007,14 +1085,17 @@ export type EmployeeUncheckedCreateWithoutSubordinatesInput = {
   createdAt?: Date | string
   status: string
   obsolete?: boolean
+  sex?: string | null
   attendance?: Prisma.AttendanceUncheckedCreateNestedManyWithoutEmployeeInput
   attendanceCorrections?: Prisma.AttendanceCorrectionUncheckedCreateNestedManyWithoutEmployeeInput
   leaveApplications?: Prisma.LeaveApplicationUncheckedCreateNestedManyWithoutEmployeeInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutUserInput
   reviewedLeaves?: Prisma.LeaveApplicationUncheckedCreateNestedManyWithoutReviewerInput
+  reportingManagerLeaves?: Prisma.LeaveApplicationUncheckedCreateNestedManyWithoutReportingManagerInput
   reviewedCorrections?: Prisma.AttendanceCorrectionUncheckedCreateNestedManyWithoutReviewerInput
   uploadedDocuments?: Prisma.LeaveDocumentUncheckedCreateNestedManyWithoutUploaderInput
+  leaveStatusChanges?: Prisma.LeaveStatusHistoryUncheckedCreateNestedManyWithoutChangedByInput
   refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutEmployeeInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutEmployeeInput
 }
@@ -1034,6 +1115,7 @@ export type EmployeeCreateWithoutManagerInput = {
   createdAt?: Date | string
   status: string
   obsolete?: boolean
+  sex?: string | null
   department: Prisma.DepartmentCreateNestedOneWithoutEmployeesInput
   subordinates?: Prisma.EmployeeCreateNestedManyWithoutManagerInput
   attendance?: Prisma.AttendanceCreateNestedManyWithoutEmployeeInput
@@ -1042,8 +1124,10 @@ export type EmployeeCreateWithoutManagerInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutUserInput
   reviewedLeaves?: Prisma.LeaveApplicationCreateNestedManyWithoutReviewerInput
+  reportingManagerLeaves?: Prisma.LeaveApplicationCreateNestedManyWithoutReportingManagerInput
   reviewedCorrections?: Prisma.AttendanceCorrectionCreateNestedManyWithoutReviewerInput
   uploadedDocuments?: Prisma.LeaveDocumentCreateNestedManyWithoutUploaderInput
+  leaveStatusChanges?: Prisma.LeaveStatusHistoryCreateNestedManyWithoutChangedByInput
   refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutEmployeeInput
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutEmployeeInput
 }
@@ -1060,6 +1144,7 @@ export type EmployeeUncheckedCreateWithoutManagerInput = {
   createdAt?: Date | string
   status: string
   obsolete?: boolean
+  sex?: string | null
   subordinates?: Prisma.EmployeeUncheckedCreateNestedManyWithoutManagerInput
   attendance?: Prisma.AttendanceUncheckedCreateNestedManyWithoutEmployeeInput
   attendanceCorrections?: Prisma.AttendanceCorrectionUncheckedCreateNestedManyWithoutEmployeeInput
@@ -1067,8 +1152,10 @@ export type EmployeeUncheckedCreateWithoutManagerInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutUserInput
   reviewedLeaves?: Prisma.LeaveApplicationUncheckedCreateNestedManyWithoutReviewerInput
+  reportingManagerLeaves?: Prisma.LeaveApplicationUncheckedCreateNestedManyWithoutReportingManagerInput
   reviewedCorrections?: Prisma.AttendanceCorrectionUncheckedCreateNestedManyWithoutReviewerInput
   uploadedDocuments?: Prisma.LeaveDocumentUncheckedCreateNestedManyWithoutUploaderInput
+  leaveStatusChanges?: Prisma.LeaveStatusHistoryUncheckedCreateNestedManyWithoutChangedByInput
   refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutEmployeeInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutEmployeeInput
 }
@@ -1104,6 +1191,7 @@ export type EmployeeUpdateWithoutSubordinatesInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   department?: Prisma.DepartmentUpdateOneRequiredWithoutEmployeesNestedInput
   manager?: Prisma.EmployeeUpdateOneWithoutSubordinatesNestedInput
   attendance?: Prisma.AttendanceUpdateManyWithoutEmployeeNestedInput
@@ -1112,8 +1200,10 @@ export type EmployeeUpdateWithoutSubordinatesInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutUserNestedInput
   reviewedLeaves?: Prisma.LeaveApplicationUpdateManyWithoutReviewerNestedInput
+  reportingManagerLeaves?: Prisma.LeaveApplicationUpdateManyWithoutReportingManagerNestedInput
   reviewedCorrections?: Prisma.AttendanceCorrectionUpdateManyWithoutReviewerNestedInput
   uploadedDocuments?: Prisma.LeaveDocumentUpdateManyWithoutUploaderNestedInput
+  leaveStatusChanges?: Prisma.LeaveStatusHistoryUpdateManyWithoutChangedByNestedInput
   refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutEmployeeNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutEmployeeNestedInput
 }
@@ -1131,14 +1221,17 @@ export type EmployeeUncheckedUpdateWithoutSubordinatesInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   attendance?: Prisma.AttendanceUncheckedUpdateManyWithoutEmployeeNestedInput
   attendanceCorrections?: Prisma.AttendanceCorrectionUncheckedUpdateManyWithoutEmployeeNestedInput
   leaveApplications?: Prisma.LeaveApplicationUncheckedUpdateManyWithoutEmployeeNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutUserNestedInput
   reviewedLeaves?: Prisma.LeaveApplicationUncheckedUpdateManyWithoutReviewerNestedInput
+  reportingManagerLeaves?: Prisma.LeaveApplicationUncheckedUpdateManyWithoutReportingManagerNestedInput
   reviewedCorrections?: Prisma.AttendanceCorrectionUncheckedUpdateManyWithoutReviewerNestedInput
   uploadedDocuments?: Prisma.LeaveDocumentUncheckedUpdateManyWithoutUploaderNestedInput
+  leaveStatusChanges?: Prisma.LeaveStatusHistoryUncheckedUpdateManyWithoutChangedByNestedInput
   refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutEmployeeNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutEmployeeNestedInput
 }
@@ -1169,6 +1262,7 @@ export type EmployeeCreateWithoutAttendanceInput = {
   createdAt?: Date | string
   status: string
   obsolete?: boolean
+  sex?: string | null
   department: Prisma.DepartmentCreateNestedOneWithoutEmployeesInput
   manager?: Prisma.EmployeeCreateNestedOneWithoutSubordinatesInput
   subordinates?: Prisma.EmployeeCreateNestedManyWithoutManagerInput
@@ -1177,8 +1271,10 @@ export type EmployeeCreateWithoutAttendanceInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutUserInput
   reviewedLeaves?: Prisma.LeaveApplicationCreateNestedManyWithoutReviewerInput
+  reportingManagerLeaves?: Prisma.LeaveApplicationCreateNestedManyWithoutReportingManagerInput
   reviewedCorrections?: Prisma.AttendanceCorrectionCreateNestedManyWithoutReviewerInput
   uploadedDocuments?: Prisma.LeaveDocumentCreateNestedManyWithoutUploaderInput
+  leaveStatusChanges?: Prisma.LeaveStatusHistoryCreateNestedManyWithoutChangedByInput
   refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutEmployeeInput
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutEmployeeInput
 }
@@ -1196,14 +1292,17 @@ export type EmployeeUncheckedCreateWithoutAttendanceInput = {
   createdAt?: Date | string
   status: string
   obsolete?: boolean
+  sex?: string | null
   subordinates?: Prisma.EmployeeUncheckedCreateNestedManyWithoutManagerInput
   attendanceCorrections?: Prisma.AttendanceCorrectionUncheckedCreateNestedManyWithoutEmployeeInput
   leaveApplications?: Prisma.LeaveApplicationUncheckedCreateNestedManyWithoutEmployeeInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutUserInput
   reviewedLeaves?: Prisma.LeaveApplicationUncheckedCreateNestedManyWithoutReviewerInput
+  reportingManagerLeaves?: Prisma.LeaveApplicationUncheckedCreateNestedManyWithoutReportingManagerInput
   reviewedCorrections?: Prisma.AttendanceCorrectionUncheckedCreateNestedManyWithoutReviewerInput
   uploadedDocuments?: Prisma.LeaveDocumentUncheckedCreateNestedManyWithoutUploaderInput
+  leaveStatusChanges?: Prisma.LeaveStatusHistoryUncheckedCreateNestedManyWithoutChangedByInput
   refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutEmployeeInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutEmployeeInput
 }
@@ -1234,6 +1333,7 @@ export type EmployeeUpdateWithoutAttendanceInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   department?: Prisma.DepartmentUpdateOneRequiredWithoutEmployeesNestedInput
   manager?: Prisma.EmployeeUpdateOneWithoutSubordinatesNestedInput
   subordinates?: Prisma.EmployeeUpdateManyWithoutManagerNestedInput
@@ -1242,8 +1342,10 @@ export type EmployeeUpdateWithoutAttendanceInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutUserNestedInput
   reviewedLeaves?: Prisma.LeaveApplicationUpdateManyWithoutReviewerNestedInput
+  reportingManagerLeaves?: Prisma.LeaveApplicationUpdateManyWithoutReportingManagerNestedInput
   reviewedCorrections?: Prisma.AttendanceCorrectionUpdateManyWithoutReviewerNestedInput
   uploadedDocuments?: Prisma.LeaveDocumentUpdateManyWithoutUploaderNestedInput
+  leaveStatusChanges?: Prisma.LeaveStatusHistoryUpdateManyWithoutChangedByNestedInput
   refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutEmployeeNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutEmployeeNestedInput
 }
@@ -1261,14 +1363,17 @@ export type EmployeeUncheckedUpdateWithoutAttendanceInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subordinates?: Prisma.EmployeeUncheckedUpdateManyWithoutManagerNestedInput
   attendanceCorrections?: Prisma.AttendanceCorrectionUncheckedUpdateManyWithoutEmployeeNestedInput
   leaveApplications?: Prisma.LeaveApplicationUncheckedUpdateManyWithoutEmployeeNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutUserNestedInput
   reviewedLeaves?: Prisma.LeaveApplicationUncheckedUpdateManyWithoutReviewerNestedInput
+  reportingManagerLeaves?: Prisma.LeaveApplicationUncheckedUpdateManyWithoutReportingManagerNestedInput
   reviewedCorrections?: Prisma.AttendanceCorrectionUncheckedUpdateManyWithoutReviewerNestedInput
   uploadedDocuments?: Prisma.LeaveDocumentUncheckedUpdateManyWithoutUploaderNestedInput
+  leaveStatusChanges?: Prisma.LeaveStatusHistoryUncheckedUpdateManyWithoutChangedByNestedInput
   refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutEmployeeNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutEmployeeNestedInput
 }
@@ -1283,6 +1388,7 @@ export type EmployeeCreateWithoutAttendanceCorrectionsInput = {
   createdAt?: Date | string
   status: string
   obsolete?: boolean
+  sex?: string | null
   department: Prisma.DepartmentCreateNestedOneWithoutEmployeesInput
   manager?: Prisma.EmployeeCreateNestedOneWithoutSubordinatesInput
   subordinates?: Prisma.EmployeeCreateNestedManyWithoutManagerInput
@@ -1291,8 +1397,10 @@ export type EmployeeCreateWithoutAttendanceCorrectionsInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutUserInput
   reviewedLeaves?: Prisma.LeaveApplicationCreateNestedManyWithoutReviewerInput
+  reportingManagerLeaves?: Prisma.LeaveApplicationCreateNestedManyWithoutReportingManagerInput
   reviewedCorrections?: Prisma.AttendanceCorrectionCreateNestedManyWithoutReviewerInput
   uploadedDocuments?: Prisma.LeaveDocumentCreateNestedManyWithoutUploaderInput
+  leaveStatusChanges?: Prisma.LeaveStatusHistoryCreateNestedManyWithoutChangedByInput
   refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutEmployeeInput
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutEmployeeInput
 }
@@ -1310,14 +1418,17 @@ export type EmployeeUncheckedCreateWithoutAttendanceCorrectionsInput = {
   createdAt?: Date | string
   status: string
   obsolete?: boolean
+  sex?: string | null
   subordinates?: Prisma.EmployeeUncheckedCreateNestedManyWithoutManagerInput
   attendance?: Prisma.AttendanceUncheckedCreateNestedManyWithoutEmployeeInput
   leaveApplications?: Prisma.LeaveApplicationUncheckedCreateNestedManyWithoutEmployeeInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutUserInput
   reviewedLeaves?: Prisma.LeaveApplicationUncheckedCreateNestedManyWithoutReviewerInput
+  reportingManagerLeaves?: Prisma.LeaveApplicationUncheckedCreateNestedManyWithoutReportingManagerInput
   reviewedCorrections?: Prisma.AttendanceCorrectionUncheckedCreateNestedManyWithoutReviewerInput
   uploadedDocuments?: Prisma.LeaveDocumentUncheckedCreateNestedManyWithoutUploaderInput
+  leaveStatusChanges?: Prisma.LeaveStatusHistoryUncheckedCreateNestedManyWithoutChangedByInput
   refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutEmployeeInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutEmployeeInput
 }
@@ -1337,6 +1448,7 @@ export type EmployeeCreateWithoutReviewedCorrectionsInput = {
   createdAt?: Date | string
   status: string
   obsolete?: boolean
+  sex?: string | null
   department: Prisma.DepartmentCreateNestedOneWithoutEmployeesInput
   manager?: Prisma.EmployeeCreateNestedOneWithoutSubordinatesInput
   subordinates?: Prisma.EmployeeCreateNestedManyWithoutManagerInput
@@ -1346,7 +1458,9 @@ export type EmployeeCreateWithoutReviewedCorrectionsInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutUserInput
   reviewedLeaves?: Prisma.LeaveApplicationCreateNestedManyWithoutReviewerInput
+  reportingManagerLeaves?: Prisma.LeaveApplicationCreateNestedManyWithoutReportingManagerInput
   uploadedDocuments?: Prisma.LeaveDocumentCreateNestedManyWithoutUploaderInput
+  leaveStatusChanges?: Prisma.LeaveStatusHistoryCreateNestedManyWithoutChangedByInput
   refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutEmployeeInput
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutEmployeeInput
 }
@@ -1364,6 +1478,7 @@ export type EmployeeUncheckedCreateWithoutReviewedCorrectionsInput = {
   createdAt?: Date | string
   status: string
   obsolete?: boolean
+  sex?: string | null
   subordinates?: Prisma.EmployeeUncheckedCreateNestedManyWithoutManagerInput
   attendance?: Prisma.AttendanceUncheckedCreateNestedManyWithoutEmployeeInput
   attendanceCorrections?: Prisma.AttendanceCorrectionUncheckedCreateNestedManyWithoutEmployeeInput
@@ -1371,7 +1486,9 @@ export type EmployeeUncheckedCreateWithoutReviewedCorrectionsInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutUserInput
   reviewedLeaves?: Prisma.LeaveApplicationUncheckedCreateNestedManyWithoutReviewerInput
+  reportingManagerLeaves?: Prisma.LeaveApplicationUncheckedCreateNestedManyWithoutReportingManagerInput
   uploadedDocuments?: Prisma.LeaveDocumentUncheckedCreateNestedManyWithoutUploaderInput
+  leaveStatusChanges?: Prisma.LeaveStatusHistoryUncheckedCreateNestedManyWithoutChangedByInput
   refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutEmployeeInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutEmployeeInput
 }
@@ -1402,6 +1519,7 @@ export type EmployeeUpdateWithoutAttendanceCorrectionsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   department?: Prisma.DepartmentUpdateOneRequiredWithoutEmployeesNestedInput
   manager?: Prisma.EmployeeUpdateOneWithoutSubordinatesNestedInput
   subordinates?: Prisma.EmployeeUpdateManyWithoutManagerNestedInput
@@ -1410,8 +1528,10 @@ export type EmployeeUpdateWithoutAttendanceCorrectionsInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutUserNestedInput
   reviewedLeaves?: Prisma.LeaveApplicationUpdateManyWithoutReviewerNestedInput
+  reportingManagerLeaves?: Prisma.LeaveApplicationUpdateManyWithoutReportingManagerNestedInput
   reviewedCorrections?: Prisma.AttendanceCorrectionUpdateManyWithoutReviewerNestedInput
   uploadedDocuments?: Prisma.LeaveDocumentUpdateManyWithoutUploaderNestedInput
+  leaveStatusChanges?: Prisma.LeaveStatusHistoryUpdateManyWithoutChangedByNestedInput
   refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutEmployeeNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutEmployeeNestedInput
 }
@@ -1429,14 +1549,17 @@ export type EmployeeUncheckedUpdateWithoutAttendanceCorrectionsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subordinates?: Prisma.EmployeeUncheckedUpdateManyWithoutManagerNestedInput
   attendance?: Prisma.AttendanceUncheckedUpdateManyWithoutEmployeeNestedInput
   leaveApplications?: Prisma.LeaveApplicationUncheckedUpdateManyWithoutEmployeeNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutUserNestedInput
   reviewedLeaves?: Prisma.LeaveApplicationUncheckedUpdateManyWithoutReviewerNestedInput
+  reportingManagerLeaves?: Prisma.LeaveApplicationUncheckedUpdateManyWithoutReportingManagerNestedInput
   reviewedCorrections?: Prisma.AttendanceCorrectionUncheckedUpdateManyWithoutReviewerNestedInput
   uploadedDocuments?: Prisma.LeaveDocumentUncheckedUpdateManyWithoutUploaderNestedInput
+  leaveStatusChanges?: Prisma.LeaveStatusHistoryUncheckedUpdateManyWithoutChangedByNestedInput
   refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutEmployeeNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutEmployeeNestedInput
 }
@@ -1462,6 +1585,7 @@ export type EmployeeUpdateWithoutReviewedCorrectionsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   department?: Prisma.DepartmentUpdateOneRequiredWithoutEmployeesNestedInput
   manager?: Prisma.EmployeeUpdateOneWithoutSubordinatesNestedInput
   subordinates?: Prisma.EmployeeUpdateManyWithoutManagerNestedInput
@@ -1471,7 +1595,9 @@ export type EmployeeUpdateWithoutReviewedCorrectionsInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutUserNestedInput
   reviewedLeaves?: Prisma.LeaveApplicationUpdateManyWithoutReviewerNestedInput
+  reportingManagerLeaves?: Prisma.LeaveApplicationUpdateManyWithoutReportingManagerNestedInput
   uploadedDocuments?: Prisma.LeaveDocumentUpdateManyWithoutUploaderNestedInput
+  leaveStatusChanges?: Prisma.LeaveStatusHistoryUpdateManyWithoutChangedByNestedInput
   refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutEmployeeNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutEmployeeNestedInput
 }
@@ -1489,6 +1615,7 @@ export type EmployeeUncheckedUpdateWithoutReviewedCorrectionsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subordinates?: Prisma.EmployeeUncheckedUpdateManyWithoutManagerNestedInput
   attendance?: Prisma.AttendanceUncheckedUpdateManyWithoutEmployeeNestedInput
   attendanceCorrections?: Prisma.AttendanceCorrectionUncheckedUpdateManyWithoutEmployeeNestedInput
@@ -1496,7 +1623,9 @@ export type EmployeeUncheckedUpdateWithoutReviewedCorrectionsInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutUserNestedInput
   reviewedLeaves?: Prisma.LeaveApplicationUncheckedUpdateManyWithoutReviewerNestedInput
+  reportingManagerLeaves?: Prisma.LeaveApplicationUncheckedUpdateManyWithoutReportingManagerNestedInput
   uploadedDocuments?: Prisma.LeaveDocumentUncheckedUpdateManyWithoutUploaderNestedInput
+  leaveStatusChanges?: Prisma.LeaveStatusHistoryUncheckedUpdateManyWithoutChangedByNestedInput
   refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutEmployeeNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutEmployeeNestedInput
 }
@@ -1511,6 +1640,7 @@ export type EmployeeCreateWithoutLeaveApplicationsInput = {
   createdAt?: Date | string
   status: string
   obsolete?: boolean
+  sex?: string | null
   department: Prisma.DepartmentCreateNestedOneWithoutEmployeesInput
   manager?: Prisma.EmployeeCreateNestedOneWithoutSubordinatesInput
   subordinates?: Prisma.EmployeeCreateNestedManyWithoutManagerInput
@@ -1519,8 +1649,10 @@ export type EmployeeCreateWithoutLeaveApplicationsInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutUserInput
   reviewedLeaves?: Prisma.LeaveApplicationCreateNestedManyWithoutReviewerInput
+  reportingManagerLeaves?: Prisma.LeaveApplicationCreateNestedManyWithoutReportingManagerInput
   reviewedCorrections?: Prisma.AttendanceCorrectionCreateNestedManyWithoutReviewerInput
   uploadedDocuments?: Prisma.LeaveDocumentCreateNestedManyWithoutUploaderInput
+  leaveStatusChanges?: Prisma.LeaveStatusHistoryCreateNestedManyWithoutChangedByInput
   refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutEmployeeInput
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutEmployeeInput
 }
@@ -1538,14 +1670,17 @@ export type EmployeeUncheckedCreateWithoutLeaveApplicationsInput = {
   createdAt?: Date | string
   status: string
   obsolete?: boolean
+  sex?: string | null
   subordinates?: Prisma.EmployeeUncheckedCreateNestedManyWithoutManagerInput
   attendance?: Prisma.AttendanceUncheckedCreateNestedManyWithoutEmployeeInput
   attendanceCorrections?: Prisma.AttendanceCorrectionUncheckedCreateNestedManyWithoutEmployeeInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutUserInput
   reviewedLeaves?: Prisma.LeaveApplicationUncheckedCreateNestedManyWithoutReviewerInput
+  reportingManagerLeaves?: Prisma.LeaveApplicationUncheckedCreateNestedManyWithoutReportingManagerInput
   reviewedCorrections?: Prisma.AttendanceCorrectionUncheckedCreateNestedManyWithoutReviewerInput
   uploadedDocuments?: Prisma.LeaveDocumentUncheckedCreateNestedManyWithoutUploaderInput
+  leaveStatusChanges?: Prisma.LeaveStatusHistoryUncheckedCreateNestedManyWithoutChangedByInput
   refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutEmployeeInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutEmployeeInput
 }
@@ -1565,6 +1700,7 @@ export type EmployeeCreateWithoutReviewedLeavesInput = {
   createdAt?: Date | string
   status: string
   obsolete?: boolean
+  sex?: string | null
   department: Prisma.DepartmentCreateNestedOneWithoutEmployeesInput
   manager?: Prisma.EmployeeCreateNestedOneWithoutSubordinatesInput
   subordinates?: Prisma.EmployeeCreateNestedManyWithoutManagerInput
@@ -1573,8 +1709,10 @@ export type EmployeeCreateWithoutReviewedLeavesInput = {
   leaveApplications?: Prisma.LeaveApplicationCreateNestedManyWithoutEmployeeInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutUserInput
+  reportingManagerLeaves?: Prisma.LeaveApplicationCreateNestedManyWithoutReportingManagerInput
   reviewedCorrections?: Prisma.AttendanceCorrectionCreateNestedManyWithoutReviewerInput
   uploadedDocuments?: Prisma.LeaveDocumentCreateNestedManyWithoutUploaderInput
+  leaveStatusChanges?: Prisma.LeaveStatusHistoryCreateNestedManyWithoutChangedByInput
   refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutEmployeeInput
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutEmployeeInput
 }
@@ -1592,14 +1730,17 @@ export type EmployeeUncheckedCreateWithoutReviewedLeavesInput = {
   createdAt?: Date | string
   status: string
   obsolete?: boolean
+  sex?: string | null
   subordinates?: Prisma.EmployeeUncheckedCreateNestedManyWithoutManagerInput
   attendance?: Prisma.AttendanceUncheckedCreateNestedManyWithoutEmployeeInput
   attendanceCorrections?: Prisma.AttendanceCorrectionUncheckedCreateNestedManyWithoutEmployeeInput
   leaveApplications?: Prisma.LeaveApplicationUncheckedCreateNestedManyWithoutEmployeeInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutUserInput
+  reportingManagerLeaves?: Prisma.LeaveApplicationUncheckedCreateNestedManyWithoutReportingManagerInput
   reviewedCorrections?: Prisma.AttendanceCorrectionUncheckedCreateNestedManyWithoutReviewerInput
   uploadedDocuments?: Prisma.LeaveDocumentUncheckedCreateNestedManyWithoutUploaderInput
+  leaveStatusChanges?: Prisma.LeaveStatusHistoryUncheckedCreateNestedManyWithoutChangedByInput
   refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutEmployeeInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutEmployeeInput
 }
@@ -1607,6 +1748,66 @@ export type EmployeeUncheckedCreateWithoutReviewedLeavesInput = {
 export type EmployeeCreateOrConnectWithoutReviewedLeavesInput = {
   where: Prisma.EmployeeWhereUniqueInput
   create: Prisma.XOR<Prisma.EmployeeCreateWithoutReviewedLeavesInput, Prisma.EmployeeUncheckedCreateWithoutReviewedLeavesInput>
+}
+
+export type EmployeeCreateWithoutReportingManagerLeavesInput = {
+  firstName: string
+  lastName?: string | null
+  email: string
+  passwordHash: string
+  role: string
+  joiningDate?: Date | string | null
+  createdAt?: Date | string
+  status: string
+  obsolete?: boolean
+  sex?: string | null
+  department: Prisma.DepartmentCreateNestedOneWithoutEmployeesInput
+  manager?: Prisma.EmployeeCreateNestedOneWithoutSubordinatesInput
+  subordinates?: Prisma.EmployeeCreateNestedManyWithoutManagerInput
+  attendance?: Prisma.AttendanceCreateNestedManyWithoutEmployeeInput
+  attendanceCorrections?: Prisma.AttendanceCorrectionCreateNestedManyWithoutEmployeeInput
+  leaveApplications?: Prisma.LeaveApplicationCreateNestedManyWithoutEmployeeInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutUserInput
+  reviewedLeaves?: Prisma.LeaveApplicationCreateNestedManyWithoutReviewerInput
+  reviewedCorrections?: Prisma.AttendanceCorrectionCreateNestedManyWithoutReviewerInput
+  uploadedDocuments?: Prisma.LeaveDocumentCreateNestedManyWithoutUploaderInput
+  leaveStatusChanges?: Prisma.LeaveStatusHistoryCreateNestedManyWithoutChangedByInput
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutEmployeeInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutEmployeeInput
+}
+
+export type EmployeeUncheckedCreateWithoutReportingManagerLeavesInput = {
+  employeeId?: number
+  firstName: string
+  lastName?: string | null
+  email: string
+  passwordHash: string
+  departmentId: number
+  role: string
+  managerId?: number | null
+  joiningDate?: Date | string | null
+  createdAt?: Date | string
+  status: string
+  obsolete?: boolean
+  sex?: string | null
+  subordinates?: Prisma.EmployeeUncheckedCreateNestedManyWithoutManagerInput
+  attendance?: Prisma.AttendanceUncheckedCreateNestedManyWithoutEmployeeInput
+  attendanceCorrections?: Prisma.AttendanceCorrectionUncheckedCreateNestedManyWithoutEmployeeInput
+  leaveApplications?: Prisma.LeaveApplicationUncheckedCreateNestedManyWithoutEmployeeInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutUserInput
+  reviewedLeaves?: Prisma.LeaveApplicationUncheckedCreateNestedManyWithoutReviewerInput
+  reviewedCorrections?: Prisma.AttendanceCorrectionUncheckedCreateNestedManyWithoutReviewerInput
+  uploadedDocuments?: Prisma.LeaveDocumentUncheckedCreateNestedManyWithoutUploaderInput
+  leaveStatusChanges?: Prisma.LeaveStatusHistoryUncheckedCreateNestedManyWithoutChangedByInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutEmployeeInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutEmployeeInput
+}
+
+export type EmployeeCreateOrConnectWithoutReportingManagerLeavesInput = {
+  where: Prisma.EmployeeWhereUniqueInput
+  create: Prisma.XOR<Prisma.EmployeeCreateWithoutReportingManagerLeavesInput, Prisma.EmployeeUncheckedCreateWithoutReportingManagerLeavesInput>
 }
 
 export type EmployeeUpsertWithoutLeaveApplicationsInput = {
@@ -1630,6 +1831,7 @@ export type EmployeeUpdateWithoutLeaveApplicationsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   department?: Prisma.DepartmentUpdateOneRequiredWithoutEmployeesNestedInput
   manager?: Prisma.EmployeeUpdateOneWithoutSubordinatesNestedInput
   subordinates?: Prisma.EmployeeUpdateManyWithoutManagerNestedInput
@@ -1638,8 +1840,10 @@ export type EmployeeUpdateWithoutLeaveApplicationsInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutUserNestedInput
   reviewedLeaves?: Prisma.LeaveApplicationUpdateManyWithoutReviewerNestedInput
+  reportingManagerLeaves?: Prisma.LeaveApplicationUpdateManyWithoutReportingManagerNestedInput
   reviewedCorrections?: Prisma.AttendanceCorrectionUpdateManyWithoutReviewerNestedInput
   uploadedDocuments?: Prisma.LeaveDocumentUpdateManyWithoutUploaderNestedInput
+  leaveStatusChanges?: Prisma.LeaveStatusHistoryUpdateManyWithoutChangedByNestedInput
   refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutEmployeeNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutEmployeeNestedInput
 }
@@ -1657,14 +1861,17 @@ export type EmployeeUncheckedUpdateWithoutLeaveApplicationsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subordinates?: Prisma.EmployeeUncheckedUpdateManyWithoutManagerNestedInput
   attendance?: Prisma.AttendanceUncheckedUpdateManyWithoutEmployeeNestedInput
   attendanceCorrections?: Prisma.AttendanceCorrectionUncheckedUpdateManyWithoutEmployeeNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutUserNestedInput
   reviewedLeaves?: Prisma.LeaveApplicationUncheckedUpdateManyWithoutReviewerNestedInput
+  reportingManagerLeaves?: Prisma.LeaveApplicationUncheckedUpdateManyWithoutReportingManagerNestedInput
   reviewedCorrections?: Prisma.AttendanceCorrectionUncheckedUpdateManyWithoutReviewerNestedInput
   uploadedDocuments?: Prisma.LeaveDocumentUncheckedUpdateManyWithoutUploaderNestedInput
+  leaveStatusChanges?: Prisma.LeaveStatusHistoryUncheckedUpdateManyWithoutChangedByNestedInput
   refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutEmployeeNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutEmployeeNestedInput
 }
@@ -1690,6 +1897,7 @@ export type EmployeeUpdateWithoutReviewedLeavesInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   department?: Prisma.DepartmentUpdateOneRequiredWithoutEmployeesNestedInput
   manager?: Prisma.EmployeeUpdateOneWithoutSubordinatesNestedInput
   subordinates?: Prisma.EmployeeUpdateManyWithoutManagerNestedInput
@@ -1698,8 +1906,10 @@ export type EmployeeUpdateWithoutReviewedLeavesInput = {
   leaveApplications?: Prisma.LeaveApplicationUpdateManyWithoutEmployeeNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutUserNestedInput
+  reportingManagerLeaves?: Prisma.LeaveApplicationUpdateManyWithoutReportingManagerNestedInput
   reviewedCorrections?: Prisma.AttendanceCorrectionUpdateManyWithoutReviewerNestedInput
   uploadedDocuments?: Prisma.LeaveDocumentUpdateManyWithoutUploaderNestedInput
+  leaveStatusChanges?: Prisma.LeaveStatusHistoryUpdateManyWithoutChangedByNestedInput
   refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutEmployeeNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutEmployeeNestedInput
 }
@@ -1717,12 +1927,207 @@ export type EmployeeUncheckedUpdateWithoutReviewedLeavesInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subordinates?: Prisma.EmployeeUncheckedUpdateManyWithoutManagerNestedInput
   attendance?: Prisma.AttendanceUncheckedUpdateManyWithoutEmployeeNestedInput
   attendanceCorrections?: Prisma.AttendanceCorrectionUncheckedUpdateManyWithoutEmployeeNestedInput
   leaveApplications?: Prisma.LeaveApplicationUncheckedUpdateManyWithoutEmployeeNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutUserNestedInput
+  reportingManagerLeaves?: Prisma.LeaveApplicationUncheckedUpdateManyWithoutReportingManagerNestedInput
+  reviewedCorrections?: Prisma.AttendanceCorrectionUncheckedUpdateManyWithoutReviewerNestedInput
+  uploadedDocuments?: Prisma.LeaveDocumentUncheckedUpdateManyWithoutUploaderNestedInput
+  leaveStatusChanges?: Prisma.LeaveStatusHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutEmployeeNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutEmployeeNestedInput
+}
+
+export type EmployeeUpsertWithoutReportingManagerLeavesInput = {
+  update: Prisma.XOR<Prisma.EmployeeUpdateWithoutReportingManagerLeavesInput, Prisma.EmployeeUncheckedUpdateWithoutReportingManagerLeavesInput>
+  create: Prisma.XOR<Prisma.EmployeeCreateWithoutReportingManagerLeavesInput, Prisma.EmployeeUncheckedCreateWithoutReportingManagerLeavesInput>
+  where?: Prisma.EmployeeWhereInput
+}
+
+export type EmployeeUpdateToOneWithWhereWithoutReportingManagerLeavesInput = {
+  where?: Prisma.EmployeeWhereInput
+  data: Prisma.XOR<Prisma.EmployeeUpdateWithoutReportingManagerLeavesInput, Prisma.EmployeeUncheckedUpdateWithoutReportingManagerLeavesInput>
+}
+
+export type EmployeeUpdateWithoutReportingManagerLeavesInput = {
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.StringFieldUpdateOperationsInput | string
+  joiningDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  department?: Prisma.DepartmentUpdateOneRequiredWithoutEmployeesNestedInput
+  manager?: Prisma.EmployeeUpdateOneWithoutSubordinatesNestedInput
+  subordinates?: Prisma.EmployeeUpdateManyWithoutManagerNestedInput
+  attendance?: Prisma.AttendanceUpdateManyWithoutEmployeeNestedInput
+  attendanceCorrections?: Prisma.AttendanceCorrectionUpdateManyWithoutEmployeeNestedInput
+  leaveApplications?: Prisma.LeaveApplicationUpdateManyWithoutEmployeeNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutUserNestedInput
+  reviewedLeaves?: Prisma.LeaveApplicationUpdateManyWithoutReviewerNestedInput
+  reviewedCorrections?: Prisma.AttendanceCorrectionUpdateManyWithoutReviewerNestedInput
+  uploadedDocuments?: Prisma.LeaveDocumentUpdateManyWithoutUploaderNestedInput
+  leaveStatusChanges?: Prisma.LeaveStatusHistoryUpdateManyWithoutChangedByNestedInput
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutEmployeeNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutEmployeeNestedInput
+}
+
+export type EmployeeUncheckedUpdateWithoutReportingManagerLeavesInput = {
+  employeeId?: Prisma.IntFieldUpdateOperationsInput | number
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  departmentId?: Prisma.IntFieldUpdateOperationsInput | number
+  role?: Prisma.StringFieldUpdateOperationsInput | string
+  managerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  joiningDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  subordinates?: Prisma.EmployeeUncheckedUpdateManyWithoutManagerNestedInput
+  attendance?: Prisma.AttendanceUncheckedUpdateManyWithoutEmployeeNestedInput
+  attendanceCorrections?: Prisma.AttendanceCorrectionUncheckedUpdateManyWithoutEmployeeNestedInput
+  leaveApplications?: Prisma.LeaveApplicationUncheckedUpdateManyWithoutEmployeeNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutUserNestedInput
+  reviewedLeaves?: Prisma.LeaveApplicationUncheckedUpdateManyWithoutReviewerNestedInput
+  reviewedCorrections?: Prisma.AttendanceCorrectionUncheckedUpdateManyWithoutReviewerNestedInput
+  uploadedDocuments?: Prisma.LeaveDocumentUncheckedUpdateManyWithoutUploaderNestedInput
+  leaveStatusChanges?: Prisma.LeaveStatusHistoryUncheckedUpdateManyWithoutChangedByNestedInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutEmployeeNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutEmployeeNestedInput
+}
+
+export type EmployeeCreateWithoutLeaveStatusChangesInput = {
+  firstName: string
+  lastName?: string | null
+  email: string
+  passwordHash: string
+  role: string
+  joiningDate?: Date | string | null
+  createdAt?: Date | string
+  status: string
+  obsolete?: boolean
+  sex?: string | null
+  department: Prisma.DepartmentCreateNestedOneWithoutEmployeesInput
+  manager?: Prisma.EmployeeCreateNestedOneWithoutSubordinatesInput
+  subordinates?: Prisma.EmployeeCreateNestedManyWithoutManagerInput
+  attendance?: Prisma.AttendanceCreateNestedManyWithoutEmployeeInput
+  attendanceCorrections?: Prisma.AttendanceCorrectionCreateNestedManyWithoutEmployeeInput
+  leaveApplications?: Prisma.LeaveApplicationCreateNestedManyWithoutEmployeeInput
+  notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutUserInput
+  reviewedLeaves?: Prisma.LeaveApplicationCreateNestedManyWithoutReviewerInput
+  reportingManagerLeaves?: Prisma.LeaveApplicationCreateNestedManyWithoutReportingManagerInput
+  reviewedCorrections?: Prisma.AttendanceCorrectionCreateNestedManyWithoutReviewerInput
+  uploadedDocuments?: Prisma.LeaveDocumentCreateNestedManyWithoutUploaderInput
+  refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutEmployeeInput
+  passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutEmployeeInput
+}
+
+export type EmployeeUncheckedCreateWithoutLeaveStatusChangesInput = {
+  employeeId?: number
+  firstName: string
+  lastName?: string | null
+  email: string
+  passwordHash: string
+  departmentId: number
+  role: string
+  managerId?: number | null
+  joiningDate?: Date | string | null
+  createdAt?: Date | string
+  status: string
+  obsolete?: boolean
+  sex?: string | null
+  subordinates?: Prisma.EmployeeUncheckedCreateNestedManyWithoutManagerInput
+  attendance?: Prisma.AttendanceUncheckedCreateNestedManyWithoutEmployeeInput
+  attendanceCorrections?: Prisma.AttendanceCorrectionUncheckedCreateNestedManyWithoutEmployeeInput
+  leaveApplications?: Prisma.LeaveApplicationUncheckedCreateNestedManyWithoutEmployeeInput
+  notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutUserInput
+  reviewedLeaves?: Prisma.LeaveApplicationUncheckedCreateNestedManyWithoutReviewerInput
+  reportingManagerLeaves?: Prisma.LeaveApplicationUncheckedCreateNestedManyWithoutReportingManagerInput
+  reviewedCorrections?: Prisma.AttendanceCorrectionUncheckedCreateNestedManyWithoutReviewerInput
+  uploadedDocuments?: Prisma.LeaveDocumentUncheckedCreateNestedManyWithoutUploaderInput
+  refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutEmployeeInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutEmployeeInput
+}
+
+export type EmployeeCreateOrConnectWithoutLeaveStatusChangesInput = {
+  where: Prisma.EmployeeWhereUniqueInput
+  create: Prisma.XOR<Prisma.EmployeeCreateWithoutLeaveStatusChangesInput, Prisma.EmployeeUncheckedCreateWithoutLeaveStatusChangesInput>
+}
+
+export type EmployeeUpsertWithoutLeaveStatusChangesInput = {
+  update: Prisma.XOR<Prisma.EmployeeUpdateWithoutLeaveStatusChangesInput, Prisma.EmployeeUncheckedUpdateWithoutLeaveStatusChangesInput>
+  create: Prisma.XOR<Prisma.EmployeeCreateWithoutLeaveStatusChangesInput, Prisma.EmployeeUncheckedCreateWithoutLeaveStatusChangesInput>
+  where?: Prisma.EmployeeWhereInput
+}
+
+export type EmployeeUpdateToOneWithWhereWithoutLeaveStatusChangesInput = {
+  where?: Prisma.EmployeeWhereInput
+  data: Prisma.XOR<Prisma.EmployeeUpdateWithoutLeaveStatusChangesInput, Prisma.EmployeeUncheckedUpdateWithoutLeaveStatusChangesInput>
+}
+
+export type EmployeeUpdateWithoutLeaveStatusChangesInput = {
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.StringFieldUpdateOperationsInput | string
+  joiningDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  department?: Prisma.DepartmentUpdateOneRequiredWithoutEmployeesNestedInput
+  manager?: Prisma.EmployeeUpdateOneWithoutSubordinatesNestedInput
+  subordinates?: Prisma.EmployeeUpdateManyWithoutManagerNestedInput
+  attendance?: Prisma.AttendanceUpdateManyWithoutEmployeeNestedInput
+  attendanceCorrections?: Prisma.AttendanceCorrectionUpdateManyWithoutEmployeeNestedInput
+  leaveApplications?: Prisma.LeaveApplicationUpdateManyWithoutEmployeeNestedInput
+  notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutUserNestedInput
+  reviewedLeaves?: Prisma.LeaveApplicationUpdateManyWithoutReviewerNestedInput
+  reportingManagerLeaves?: Prisma.LeaveApplicationUpdateManyWithoutReportingManagerNestedInput
+  reviewedCorrections?: Prisma.AttendanceCorrectionUpdateManyWithoutReviewerNestedInput
+  uploadedDocuments?: Prisma.LeaveDocumentUpdateManyWithoutUploaderNestedInput
+  refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutEmployeeNestedInput
+  passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutEmployeeNestedInput
+}
+
+export type EmployeeUncheckedUpdateWithoutLeaveStatusChangesInput = {
+  employeeId?: Prisma.IntFieldUpdateOperationsInput | number
+  firstName?: Prisma.StringFieldUpdateOperationsInput | string
+  lastName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  departmentId?: Prisma.IntFieldUpdateOperationsInput | number
+  role?: Prisma.StringFieldUpdateOperationsInput | string
+  managerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  joiningDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  subordinates?: Prisma.EmployeeUncheckedUpdateManyWithoutManagerNestedInput
+  attendance?: Prisma.AttendanceUncheckedUpdateManyWithoutEmployeeNestedInput
+  attendanceCorrections?: Prisma.AttendanceCorrectionUncheckedUpdateManyWithoutEmployeeNestedInput
+  leaveApplications?: Prisma.LeaveApplicationUncheckedUpdateManyWithoutEmployeeNestedInput
+  notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutUserNestedInput
+  reviewedLeaves?: Prisma.LeaveApplicationUncheckedUpdateManyWithoutReviewerNestedInput
+  reportingManagerLeaves?: Prisma.LeaveApplicationUncheckedUpdateManyWithoutReportingManagerNestedInput
   reviewedCorrections?: Prisma.AttendanceCorrectionUncheckedUpdateManyWithoutReviewerNestedInput
   uploadedDocuments?: Prisma.LeaveDocumentUncheckedUpdateManyWithoutUploaderNestedInput
   refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutEmployeeNestedInput
@@ -1739,6 +2144,7 @@ export type EmployeeCreateWithoutUploadedDocumentsInput = {
   createdAt?: Date | string
   status: string
   obsolete?: boolean
+  sex?: string | null
   department: Prisma.DepartmentCreateNestedOneWithoutEmployeesInput
   manager?: Prisma.EmployeeCreateNestedOneWithoutSubordinatesInput
   subordinates?: Prisma.EmployeeCreateNestedManyWithoutManagerInput
@@ -1748,7 +2154,9 @@ export type EmployeeCreateWithoutUploadedDocumentsInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutUserInput
   reviewedLeaves?: Prisma.LeaveApplicationCreateNestedManyWithoutReviewerInput
+  reportingManagerLeaves?: Prisma.LeaveApplicationCreateNestedManyWithoutReportingManagerInput
   reviewedCorrections?: Prisma.AttendanceCorrectionCreateNestedManyWithoutReviewerInput
+  leaveStatusChanges?: Prisma.LeaveStatusHistoryCreateNestedManyWithoutChangedByInput
   refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutEmployeeInput
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutEmployeeInput
 }
@@ -1766,6 +2174,7 @@ export type EmployeeUncheckedCreateWithoutUploadedDocumentsInput = {
   createdAt?: Date | string
   status: string
   obsolete?: boolean
+  sex?: string | null
   subordinates?: Prisma.EmployeeUncheckedCreateNestedManyWithoutManagerInput
   attendance?: Prisma.AttendanceUncheckedCreateNestedManyWithoutEmployeeInput
   attendanceCorrections?: Prisma.AttendanceCorrectionUncheckedCreateNestedManyWithoutEmployeeInput
@@ -1773,7 +2182,9 @@ export type EmployeeUncheckedCreateWithoutUploadedDocumentsInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutUserInput
   reviewedLeaves?: Prisma.LeaveApplicationUncheckedCreateNestedManyWithoutReviewerInput
+  reportingManagerLeaves?: Prisma.LeaveApplicationUncheckedCreateNestedManyWithoutReportingManagerInput
   reviewedCorrections?: Prisma.AttendanceCorrectionUncheckedCreateNestedManyWithoutReviewerInput
+  leaveStatusChanges?: Prisma.LeaveStatusHistoryUncheckedCreateNestedManyWithoutChangedByInput
   refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutEmployeeInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutEmployeeInput
 }
@@ -1804,6 +2215,7 @@ export type EmployeeUpdateWithoutUploadedDocumentsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   department?: Prisma.DepartmentUpdateOneRequiredWithoutEmployeesNestedInput
   manager?: Prisma.EmployeeUpdateOneWithoutSubordinatesNestedInput
   subordinates?: Prisma.EmployeeUpdateManyWithoutManagerNestedInput
@@ -1813,7 +2225,9 @@ export type EmployeeUpdateWithoutUploadedDocumentsInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutUserNestedInput
   reviewedLeaves?: Prisma.LeaveApplicationUpdateManyWithoutReviewerNestedInput
+  reportingManagerLeaves?: Prisma.LeaveApplicationUpdateManyWithoutReportingManagerNestedInput
   reviewedCorrections?: Prisma.AttendanceCorrectionUpdateManyWithoutReviewerNestedInput
+  leaveStatusChanges?: Prisma.LeaveStatusHistoryUpdateManyWithoutChangedByNestedInput
   refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutEmployeeNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutEmployeeNestedInput
 }
@@ -1831,6 +2245,7 @@ export type EmployeeUncheckedUpdateWithoutUploadedDocumentsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subordinates?: Prisma.EmployeeUncheckedUpdateManyWithoutManagerNestedInput
   attendance?: Prisma.AttendanceUncheckedUpdateManyWithoutEmployeeNestedInput
   attendanceCorrections?: Prisma.AttendanceCorrectionUncheckedUpdateManyWithoutEmployeeNestedInput
@@ -1838,7 +2253,9 @@ export type EmployeeUncheckedUpdateWithoutUploadedDocumentsInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutUserNestedInput
   reviewedLeaves?: Prisma.LeaveApplicationUncheckedUpdateManyWithoutReviewerNestedInput
+  reportingManagerLeaves?: Prisma.LeaveApplicationUncheckedUpdateManyWithoutReportingManagerNestedInput
   reviewedCorrections?: Prisma.AttendanceCorrectionUncheckedUpdateManyWithoutReviewerNestedInput
+  leaveStatusChanges?: Prisma.LeaveStatusHistoryUncheckedUpdateManyWithoutChangedByNestedInput
   refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutEmployeeNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutEmployeeNestedInput
 }
@@ -1853,6 +2270,7 @@ export type EmployeeCreateWithoutNotificationsInput = {
   createdAt?: Date | string
   status: string
   obsolete?: boolean
+  sex?: string | null
   department: Prisma.DepartmentCreateNestedOneWithoutEmployeesInput
   manager?: Prisma.EmployeeCreateNestedOneWithoutSubordinatesInput
   subordinates?: Prisma.EmployeeCreateNestedManyWithoutManagerInput
@@ -1861,8 +2279,10 @@ export type EmployeeCreateWithoutNotificationsInput = {
   leaveApplications?: Prisma.LeaveApplicationCreateNestedManyWithoutEmployeeInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutUserInput
   reviewedLeaves?: Prisma.LeaveApplicationCreateNestedManyWithoutReviewerInput
+  reportingManagerLeaves?: Prisma.LeaveApplicationCreateNestedManyWithoutReportingManagerInput
   reviewedCorrections?: Prisma.AttendanceCorrectionCreateNestedManyWithoutReviewerInput
   uploadedDocuments?: Prisma.LeaveDocumentCreateNestedManyWithoutUploaderInput
+  leaveStatusChanges?: Prisma.LeaveStatusHistoryCreateNestedManyWithoutChangedByInput
   refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutEmployeeInput
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutEmployeeInput
 }
@@ -1880,14 +2300,17 @@ export type EmployeeUncheckedCreateWithoutNotificationsInput = {
   createdAt?: Date | string
   status: string
   obsolete?: boolean
+  sex?: string | null
   subordinates?: Prisma.EmployeeUncheckedCreateNestedManyWithoutManagerInput
   attendance?: Prisma.AttendanceUncheckedCreateNestedManyWithoutEmployeeInput
   attendanceCorrections?: Prisma.AttendanceCorrectionUncheckedCreateNestedManyWithoutEmployeeInput
   leaveApplications?: Prisma.LeaveApplicationUncheckedCreateNestedManyWithoutEmployeeInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutUserInput
   reviewedLeaves?: Prisma.LeaveApplicationUncheckedCreateNestedManyWithoutReviewerInput
+  reportingManagerLeaves?: Prisma.LeaveApplicationUncheckedCreateNestedManyWithoutReportingManagerInput
   reviewedCorrections?: Prisma.AttendanceCorrectionUncheckedCreateNestedManyWithoutReviewerInput
   uploadedDocuments?: Prisma.LeaveDocumentUncheckedCreateNestedManyWithoutUploaderInput
+  leaveStatusChanges?: Prisma.LeaveStatusHistoryUncheckedCreateNestedManyWithoutChangedByInput
   refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutEmployeeInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutEmployeeInput
 }
@@ -1918,6 +2341,7 @@ export type EmployeeUpdateWithoutNotificationsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   department?: Prisma.DepartmentUpdateOneRequiredWithoutEmployeesNestedInput
   manager?: Prisma.EmployeeUpdateOneWithoutSubordinatesNestedInput
   subordinates?: Prisma.EmployeeUpdateManyWithoutManagerNestedInput
@@ -1926,8 +2350,10 @@ export type EmployeeUpdateWithoutNotificationsInput = {
   leaveApplications?: Prisma.LeaveApplicationUpdateManyWithoutEmployeeNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutUserNestedInput
   reviewedLeaves?: Prisma.LeaveApplicationUpdateManyWithoutReviewerNestedInput
+  reportingManagerLeaves?: Prisma.LeaveApplicationUpdateManyWithoutReportingManagerNestedInput
   reviewedCorrections?: Prisma.AttendanceCorrectionUpdateManyWithoutReviewerNestedInput
   uploadedDocuments?: Prisma.LeaveDocumentUpdateManyWithoutUploaderNestedInput
+  leaveStatusChanges?: Prisma.LeaveStatusHistoryUpdateManyWithoutChangedByNestedInput
   refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutEmployeeNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutEmployeeNestedInput
 }
@@ -1945,14 +2371,17 @@ export type EmployeeUncheckedUpdateWithoutNotificationsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subordinates?: Prisma.EmployeeUncheckedUpdateManyWithoutManagerNestedInput
   attendance?: Prisma.AttendanceUncheckedUpdateManyWithoutEmployeeNestedInput
   attendanceCorrections?: Prisma.AttendanceCorrectionUncheckedUpdateManyWithoutEmployeeNestedInput
   leaveApplications?: Prisma.LeaveApplicationUncheckedUpdateManyWithoutEmployeeNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutUserNestedInput
   reviewedLeaves?: Prisma.LeaveApplicationUncheckedUpdateManyWithoutReviewerNestedInput
+  reportingManagerLeaves?: Prisma.LeaveApplicationUncheckedUpdateManyWithoutReportingManagerNestedInput
   reviewedCorrections?: Prisma.AttendanceCorrectionUncheckedUpdateManyWithoutReviewerNestedInput
   uploadedDocuments?: Prisma.LeaveDocumentUncheckedUpdateManyWithoutUploaderNestedInput
+  leaveStatusChanges?: Prisma.LeaveStatusHistoryUncheckedUpdateManyWithoutChangedByNestedInput
   refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutEmployeeNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutEmployeeNestedInput
 }
@@ -1967,6 +2396,7 @@ export type EmployeeCreateWithoutAuditLogsInput = {
   createdAt?: Date | string
   status: string
   obsolete?: boolean
+  sex?: string | null
   department: Prisma.DepartmentCreateNestedOneWithoutEmployeesInput
   manager?: Prisma.EmployeeCreateNestedOneWithoutSubordinatesInput
   subordinates?: Prisma.EmployeeCreateNestedManyWithoutManagerInput
@@ -1975,8 +2405,10 @@ export type EmployeeCreateWithoutAuditLogsInput = {
   leaveApplications?: Prisma.LeaveApplicationCreateNestedManyWithoutEmployeeInput
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   reviewedLeaves?: Prisma.LeaveApplicationCreateNestedManyWithoutReviewerInput
+  reportingManagerLeaves?: Prisma.LeaveApplicationCreateNestedManyWithoutReportingManagerInput
   reviewedCorrections?: Prisma.AttendanceCorrectionCreateNestedManyWithoutReviewerInput
   uploadedDocuments?: Prisma.LeaveDocumentCreateNestedManyWithoutUploaderInput
+  leaveStatusChanges?: Prisma.LeaveStatusHistoryCreateNestedManyWithoutChangedByInput
   refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutEmployeeInput
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutEmployeeInput
 }
@@ -1994,14 +2426,17 @@ export type EmployeeUncheckedCreateWithoutAuditLogsInput = {
   createdAt?: Date | string
   status: string
   obsolete?: boolean
+  sex?: string | null
   subordinates?: Prisma.EmployeeUncheckedCreateNestedManyWithoutManagerInput
   attendance?: Prisma.AttendanceUncheckedCreateNestedManyWithoutEmployeeInput
   attendanceCorrections?: Prisma.AttendanceCorrectionUncheckedCreateNestedManyWithoutEmployeeInput
   leaveApplications?: Prisma.LeaveApplicationUncheckedCreateNestedManyWithoutEmployeeInput
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   reviewedLeaves?: Prisma.LeaveApplicationUncheckedCreateNestedManyWithoutReviewerInput
+  reportingManagerLeaves?: Prisma.LeaveApplicationUncheckedCreateNestedManyWithoutReportingManagerInput
   reviewedCorrections?: Prisma.AttendanceCorrectionUncheckedCreateNestedManyWithoutReviewerInput
   uploadedDocuments?: Prisma.LeaveDocumentUncheckedCreateNestedManyWithoutUploaderInput
+  leaveStatusChanges?: Prisma.LeaveStatusHistoryUncheckedCreateNestedManyWithoutChangedByInput
   refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutEmployeeInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutEmployeeInput
 }
@@ -2032,6 +2467,7 @@ export type EmployeeUpdateWithoutAuditLogsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   department?: Prisma.DepartmentUpdateOneRequiredWithoutEmployeesNestedInput
   manager?: Prisma.EmployeeUpdateOneWithoutSubordinatesNestedInput
   subordinates?: Prisma.EmployeeUpdateManyWithoutManagerNestedInput
@@ -2040,8 +2476,10 @@ export type EmployeeUpdateWithoutAuditLogsInput = {
   leaveApplications?: Prisma.LeaveApplicationUpdateManyWithoutEmployeeNestedInput
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   reviewedLeaves?: Prisma.LeaveApplicationUpdateManyWithoutReviewerNestedInput
+  reportingManagerLeaves?: Prisma.LeaveApplicationUpdateManyWithoutReportingManagerNestedInput
   reviewedCorrections?: Prisma.AttendanceCorrectionUpdateManyWithoutReviewerNestedInput
   uploadedDocuments?: Prisma.LeaveDocumentUpdateManyWithoutUploaderNestedInput
+  leaveStatusChanges?: Prisma.LeaveStatusHistoryUpdateManyWithoutChangedByNestedInput
   refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutEmployeeNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutEmployeeNestedInput
 }
@@ -2059,14 +2497,17 @@ export type EmployeeUncheckedUpdateWithoutAuditLogsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subordinates?: Prisma.EmployeeUncheckedUpdateManyWithoutManagerNestedInput
   attendance?: Prisma.AttendanceUncheckedUpdateManyWithoutEmployeeNestedInput
   attendanceCorrections?: Prisma.AttendanceCorrectionUncheckedUpdateManyWithoutEmployeeNestedInput
   leaveApplications?: Prisma.LeaveApplicationUncheckedUpdateManyWithoutEmployeeNestedInput
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   reviewedLeaves?: Prisma.LeaveApplicationUncheckedUpdateManyWithoutReviewerNestedInput
+  reportingManagerLeaves?: Prisma.LeaveApplicationUncheckedUpdateManyWithoutReportingManagerNestedInput
   reviewedCorrections?: Prisma.AttendanceCorrectionUncheckedUpdateManyWithoutReviewerNestedInput
   uploadedDocuments?: Prisma.LeaveDocumentUncheckedUpdateManyWithoutUploaderNestedInput
+  leaveStatusChanges?: Prisma.LeaveStatusHistoryUncheckedUpdateManyWithoutChangedByNestedInput
   refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutEmployeeNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutEmployeeNestedInput
 }
@@ -2081,6 +2522,7 @@ export type EmployeeCreateWithoutRefreshTokensInput = {
   createdAt?: Date | string
   status: string
   obsolete?: boolean
+  sex?: string | null
   department: Prisma.DepartmentCreateNestedOneWithoutEmployeesInput
   manager?: Prisma.EmployeeCreateNestedOneWithoutSubordinatesInput
   subordinates?: Prisma.EmployeeCreateNestedManyWithoutManagerInput
@@ -2090,8 +2532,10 @@ export type EmployeeCreateWithoutRefreshTokensInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutUserInput
   reviewedLeaves?: Prisma.LeaveApplicationCreateNestedManyWithoutReviewerInput
+  reportingManagerLeaves?: Prisma.LeaveApplicationCreateNestedManyWithoutReportingManagerInput
   reviewedCorrections?: Prisma.AttendanceCorrectionCreateNestedManyWithoutReviewerInput
   uploadedDocuments?: Prisma.LeaveDocumentCreateNestedManyWithoutUploaderInput
+  leaveStatusChanges?: Prisma.LeaveStatusHistoryCreateNestedManyWithoutChangedByInput
   passwordResetTokens?: Prisma.PasswordResetTokenCreateNestedManyWithoutEmployeeInput
 }
 
@@ -2108,6 +2552,7 @@ export type EmployeeUncheckedCreateWithoutRefreshTokensInput = {
   createdAt?: Date | string
   status: string
   obsolete?: boolean
+  sex?: string | null
   subordinates?: Prisma.EmployeeUncheckedCreateNestedManyWithoutManagerInput
   attendance?: Prisma.AttendanceUncheckedCreateNestedManyWithoutEmployeeInput
   attendanceCorrections?: Prisma.AttendanceCorrectionUncheckedCreateNestedManyWithoutEmployeeInput
@@ -2115,8 +2560,10 @@ export type EmployeeUncheckedCreateWithoutRefreshTokensInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutUserInput
   reviewedLeaves?: Prisma.LeaveApplicationUncheckedCreateNestedManyWithoutReviewerInput
+  reportingManagerLeaves?: Prisma.LeaveApplicationUncheckedCreateNestedManyWithoutReportingManagerInput
   reviewedCorrections?: Prisma.AttendanceCorrectionUncheckedCreateNestedManyWithoutReviewerInput
   uploadedDocuments?: Prisma.LeaveDocumentUncheckedCreateNestedManyWithoutUploaderInput
+  leaveStatusChanges?: Prisma.LeaveStatusHistoryUncheckedCreateNestedManyWithoutChangedByInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedCreateNestedManyWithoutEmployeeInput
 }
 
@@ -2146,6 +2593,7 @@ export type EmployeeUpdateWithoutRefreshTokensInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   department?: Prisma.DepartmentUpdateOneRequiredWithoutEmployeesNestedInput
   manager?: Prisma.EmployeeUpdateOneWithoutSubordinatesNestedInput
   subordinates?: Prisma.EmployeeUpdateManyWithoutManagerNestedInput
@@ -2155,8 +2603,10 @@ export type EmployeeUpdateWithoutRefreshTokensInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutUserNestedInput
   reviewedLeaves?: Prisma.LeaveApplicationUpdateManyWithoutReviewerNestedInput
+  reportingManagerLeaves?: Prisma.LeaveApplicationUpdateManyWithoutReportingManagerNestedInput
   reviewedCorrections?: Prisma.AttendanceCorrectionUpdateManyWithoutReviewerNestedInput
   uploadedDocuments?: Prisma.LeaveDocumentUpdateManyWithoutUploaderNestedInput
+  leaveStatusChanges?: Prisma.LeaveStatusHistoryUpdateManyWithoutChangedByNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutEmployeeNestedInput
 }
 
@@ -2173,6 +2623,7 @@ export type EmployeeUncheckedUpdateWithoutRefreshTokensInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subordinates?: Prisma.EmployeeUncheckedUpdateManyWithoutManagerNestedInput
   attendance?: Prisma.AttendanceUncheckedUpdateManyWithoutEmployeeNestedInput
   attendanceCorrections?: Prisma.AttendanceCorrectionUncheckedUpdateManyWithoutEmployeeNestedInput
@@ -2180,8 +2631,10 @@ export type EmployeeUncheckedUpdateWithoutRefreshTokensInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutUserNestedInput
   reviewedLeaves?: Prisma.LeaveApplicationUncheckedUpdateManyWithoutReviewerNestedInput
+  reportingManagerLeaves?: Prisma.LeaveApplicationUncheckedUpdateManyWithoutReportingManagerNestedInput
   reviewedCorrections?: Prisma.AttendanceCorrectionUncheckedUpdateManyWithoutReviewerNestedInput
   uploadedDocuments?: Prisma.LeaveDocumentUncheckedUpdateManyWithoutUploaderNestedInput
+  leaveStatusChanges?: Prisma.LeaveStatusHistoryUncheckedUpdateManyWithoutChangedByNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutEmployeeNestedInput
 }
 
@@ -2195,6 +2648,7 @@ export type EmployeeCreateWithoutPasswordResetTokensInput = {
   createdAt?: Date | string
   status: string
   obsolete?: boolean
+  sex?: string | null
   department: Prisma.DepartmentCreateNestedOneWithoutEmployeesInput
   manager?: Prisma.EmployeeCreateNestedOneWithoutSubordinatesInput
   subordinates?: Prisma.EmployeeCreateNestedManyWithoutManagerInput
@@ -2204,8 +2658,10 @@ export type EmployeeCreateWithoutPasswordResetTokensInput = {
   notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutUserInput
   reviewedLeaves?: Prisma.LeaveApplicationCreateNestedManyWithoutReviewerInput
+  reportingManagerLeaves?: Prisma.LeaveApplicationCreateNestedManyWithoutReportingManagerInput
   reviewedCorrections?: Prisma.AttendanceCorrectionCreateNestedManyWithoutReviewerInput
   uploadedDocuments?: Prisma.LeaveDocumentCreateNestedManyWithoutUploaderInput
+  leaveStatusChanges?: Prisma.LeaveStatusHistoryCreateNestedManyWithoutChangedByInput
   refreshTokens?: Prisma.RefreshTokenCreateNestedManyWithoutEmployeeInput
 }
 
@@ -2222,6 +2678,7 @@ export type EmployeeUncheckedCreateWithoutPasswordResetTokensInput = {
   createdAt?: Date | string
   status: string
   obsolete?: boolean
+  sex?: string | null
   subordinates?: Prisma.EmployeeUncheckedCreateNestedManyWithoutManagerInput
   attendance?: Prisma.AttendanceUncheckedCreateNestedManyWithoutEmployeeInput
   attendanceCorrections?: Prisma.AttendanceCorrectionUncheckedCreateNestedManyWithoutEmployeeInput
@@ -2229,8 +2686,10 @@ export type EmployeeUncheckedCreateWithoutPasswordResetTokensInput = {
   notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutUserInput
   reviewedLeaves?: Prisma.LeaveApplicationUncheckedCreateNestedManyWithoutReviewerInput
+  reportingManagerLeaves?: Prisma.LeaveApplicationUncheckedCreateNestedManyWithoutReportingManagerInput
   reviewedCorrections?: Prisma.AttendanceCorrectionUncheckedCreateNestedManyWithoutReviewerInput
   uploadedDocuments?: Prisma.LeaveDocumentUncheckedCreateNestedManyWithoutUploaderInput
+  leaveStatusChanges?: Prisma.LeaveStatusHistoryUncheckedCreateNestedManyWithoutChangedByInput
   refreshTokens?: Prisma.RefreshTokenUncheckedCreateNestedManyWithoutEmployeeInput
 }
 
@@ -2260,6 +2719,7 @@ export type EmployeeUpdateWithoutPasswordResetTokensInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   department?: Prisma.DepartmentUpdateOneRequiredWithoutEmployeesNestedInput
   manager?: Prisma.EmployeeUpdateOneWithoutSubordinatesNestedInput
   subordinates?: Prisma.EmployeeUpdateManyWithoutManagerNestedInput
@@ -2269,8 +2729,10 @@ export type EmployeeUpdateWithoutPasswordResetTokensInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutUserNestedInput
   reviewedLeaves?: Prisma.LeaveApplicationUpdateManyWithoutReviewerNestedInput
+  reportingManagerLeaves?: Prisma.LeaveApplicationUpdateManyWithoutReportingManagerNestedInput
   reviewedCorrections?: Prisma.AttendanceCorrectionUpdateManyWithoutReviewerNestedInput
   uploadedDocuments?: Prisma.LeaveDocumentUpdateManyWithoutUploaderNestedInput
+  leaveStatusChanges?: Prisma.LeaveStatusHistoryUpdateManyWithoutChangedByNestedInput
   refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutEmployeeNestedInput
 }
 
@@ -2287,6 +2749,7 @@ export type EmployeeUncheckedUpdateWithoutPasswordResetTokensInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subordinates?: Prisma.EmployeeUncheckedUpdateManyWithoutManagerNestedInput
   attendance?: Prisma.AttendanceUncheckedUpdateManyWithoutEmployeeNestedInput
   attendanceCorrections?: Prisma.AttendanceCorrectionUncheckedUpdateManyWithoutEmployeeNestedInput
@@ -2294,8 +2757,10 @@ export type EmployeeUncheckedUpdateWithoutPasswordResetTokensInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutUserNestedInput
   reviewedLeaves?: Prisma.LeaveApplicationUncheckedUpdateManyWithoutReviewerNestedInput
+  reportingManagerLeaves?: Prisma.LeaveApplicationUncheckedUpdateManyWithoutReportingManagerNestedInput
   reviewedCorrections?: Prisma.AttendanceCorrectionUncheckedUpdateManyWithoutReviewerNestedInput
   uploadedDocuments?: Prisma.LeaveDocumentUncheckedUpdateManyWithoutUploaderNestedInput
+  leaveStatusChanges?: Prisma.LeaveStatusHistoryUncheckedUpdateManyWithoutChangedByNestedInput
   refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutEmployeeNestedInput
 }
 
@@ -2311,6 +2776,7 @@ export type EmployeeCreateManyDepartmentInput = {
   createdAt?: Date | string
   status: string
   obsolete?: boolean
+  sex?: string | null
 }
 
 export type EmployeeUpdateWithoutDepartmentInput = {
@@ -2323,6 +2789,7 @@ export type EmployeeUpdateWithoutDepartmentInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   manager?: Prisma.EmployeeUpdateOneWithoutSubordinatesNestedInput
   subordinates?: Prisma.EmployeeUpdateManyWithoutManagerNestedInput
   attendance?: Prisma.AttendanceUpdateManyWithoutEmployeeNestedInput
@@ -2331,8 +2798,10 @@ export type EmployeeUpdateWithoutDepartmentInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutUserNestedInput
   reviewedLeaves?: Prisma.LeaveApplicationUpdateManyWithoutReviewerNestedInput
+  reportingManagerLeaves?: Prisma.LeaveApplicationUpdateManyWithoutReportingManagerNestedInput
   reviewedCorrections?: Prisma.AttendanceCorrectionUpdateManyWithoutReviewerNestedInput
   uploadedDocuments?: Prisma.LeaveDocumentUpdateManyWithoutUploaderNestedInput
+  leaveStatusChanges?: Prisma.LeaveStatusHistoryUpdateManyWithoutChangedByNestedInput
   refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutEmployeeNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutEmployeeNestedInput
 }
@@ -2349,6 +2818,7 @@ export type EmployeeUncheckedUpdateWithoutDepartmentInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subordinates?: Prisma.EmployeeUncheckedUpdateManyWithoutManagerNestedInput
   attendance?: Prisma.AttendanceUncheckedUpdateManyWithoutEmployeeNestedInput
   attendanceCorrections?: Prisma.AttendanceCorrectionUncheckedUpdateManyWithoutEmployeeNestedInput
@@ -2356,8 +2826,10 @@ export type EmployeeUncheckedUpdateWithoutDepartmentInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutUserNestedInput
   reviewedLeaves?: Prisma.LeaveApplicationUncheckedUpdateManyWithoutReviewerNestedInput
+  reportingManagerLeaves?: Prisma.LeaveApplicationUncheckedUpdateManyWithoutReportingManagerNestedInput
   reviewedCorrections?: Prisma.AttendanceCorrectionUncheckedUpdateManyWithoutReviewerNestedInput
   uploadedDocuments?: Prisma.LeaveDocumentUncheckedUpdateManyWithoutUploaderNestedInput
+  leaveStatusChanges?: Prisma.LeaveStatusHistoryUncheckedUpdateManyWithoutChangedByNestedInput
   refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutEmployeeNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutEmployeeNestedInput
 }
@@ -2374,6 +2846,7 @@ export type EmployeeUncheckedUpdateManyWithoutDepartmentInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type EmployeeCreateManyManagerInput = {
@@ -2388,6 +2861,7 @@ export type EmployeeCreateManyManagerInput = {
   createdAt?: Date | string
   status: string
   obsolete?: boolean
+  sex?: string | null
 }
 
 export type EmployeeUpdateWithoutManagerInput = {
@@ -2400,6 +2874,7 @@ export type EmployeeUpdateWithoutManagerInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   department?: Prisma.DepartmentUpdateOneRequiredWithoutEmployeesNestedInput
   subordinates?: Prisma.EmployeeUpdateManyWithoutManagerNestedInput
   attendance?: Prisma.AttendanceUpdateManyWithoutEmployeeNestedInput
@@ -2408,8 +2883,10 @@ export type EmployeeUpdateWithoutManagerInput = {
   notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutUserNestedInput
   reviewedLeaves?: Prisma.LeaveApplicationUpdateManyWithoutReviewerNestedInput
+  reportingManagerLeaves?: Prisma.LeaveApplicationUpdateManyWithoutReportingManagerNestedInput
   reviewedCorrections?: Prisma.AttendanceCorrectionUpdateManyWithoutReviewerNestedInput
   uploadedDocuments?: Prisma.LeaveDocumentUpdateManyWithoutUploaderNestedInput
+  leaveStatusChanges?: Prisma.LeaveStatusHistoryUpdateManyWithoutChangedByNestedInput
   refreshTokens?: Prisma.RefreshTokenUpdateManyWithoutEmployeeNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUpdateManyWithoutEmployeeNestedInput
 }
@@ -2426,6 +2903,7 @@ export type EmployeeUncheckedUpdateWithoutManagerInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subordinates?: Prisma.EmployeeUncheckedUpdateManyWithoutManagerNestedInput
   attendance?: Prisma.AttendanceUncheckedUpdateManyWithoutEmployeeNestedInput
   attendanceCorrections?: Prisma.AttendanceCorrectionUncheckedUpdateManyWithoutEmployeeNestedInput
@@ -2433,8 +2911,10 @@ export type EmployeeUncheckedUpdateWithoutManagerInput = {
   notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutUserNestedInput
   reviewedLeaves?: Prisma.LeaveApplicationUncheckedUpdateManyWithoutReviewerNestedInput
+  reportingManagerLeaves?: Prisma.LeaveApplicationUncheckedUpdateManyWithoutReportingManagerNestedInput
   reviewedCorrections?: Prisma.AttendanceCorrectionUncheckedUpdateManyWithoutReviewerNestedInput
   uploadedDocuments?: Prisma.LeaveDocumentUncheckedUpdateManyWithoutUploaderNestedInput
+  leaveStatusChanges?: Prisma.LeaveStatusHistoryUncheckedUpdateManyWithoutChangedByNestedInput
   refreshTokens?: Prisma.RefreshTokenUncheckedUpdateManyWithoutEmployeeNestedInput
   passwordResetTokens?: Prisma.PasswordResetTokenUncheckedUpdateManyWithoutEmployeeNestedInput
 }
@@ -2451,6 +2931,7 @@ export type EmployeeUncheckedUpdateManyWithoutManagerInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 
@@ -2466,8 +2947,10 @@ export type EmployeeCountOutputType = {
   notifications: number
   auditLogs: number
   reviewedLeaves: number
+  reportingManagerLeaves: number
   reviewedCorrections: number
   uploadedDocuments: number
+  leaveStatusChanges: number
   refreshTokens: number
   passwordResetTokens: number
 }
@@ -2480,8 +2963,10 @@ export type EmployeeCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensio
   notifications?: boolean | EmployeeCountOutputTypeCountNotificationsArgs
   auditLogs?: boolean | EmployeeCountOutputTypeCountAuditLogsArgs
   reviewedLeaves?: boolean | EmployeeCountOutputTypeCountReviewedLeavesArgs
+  reportingManagerLeaves?: boolean | EmployeeCountOutputTypeCountReportingManagerLeavesArgs
   reviewedCorrections?: boolean | EmployeeCountOutputTypeCountReviewedCorrectionsArgs
   uploadedDocuments?: boolean | EmployeeCountOutputTypeCountUploadedDocumentsArgs
+  leaveStatusChanges?: boolean | EmployeeCountOutputTypeCountLeaveStatusChangesArgs
   refreshTokens?: boolean | EmployeeCountOutputTypeCountRefreshTokensArgs
   passwordResetTokens?: boolean | EmployeeCountOutputTypeCountPasswordResetTokensArgs
 }
@@ -2548,6 +3033,13 @@ export type EmployeeCountOutputTypeCountReviewedLeavesArgs<ExtArgs extends runti
 /**
  * EmployeeCountOutputType without action
  */
+export type EmployeeCountOutputTypeCountReportingManagerLeavesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.LeaveApplicationWhereInput
+}
+
+/**
+ * EmployeeCountOutputType without action
+ */
 export type EmployeeCountOutputTypeCountReviewedCorrectionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.AttendanceCorrectionWhereInput
 }
@@ -2557,6 +3049,13 @@ export type EmployeeCountOutputTypeCountReviewedCorrectionsArgs<ExtArgs extends 
  */
 export type EmployeeCountOutputTypeCountUploadedDocumentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.LeaveDocumentWhereInput
+}
+
+/**
+ * EmployeeCountOutputType without action
+ */
+export type EmployeeCountOutputTypeCountLeaveStatusChangesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.LeaveStatusHistoryWhereInput
 }
 
 /**
@@ -2587,6 +3086,7 @@ export type EmployeeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   createdAt?: boolean
   status?: boolean
   obsolete?: boolean
+  sex?: boolean
   department?: boolean | Prisma.DepartmentDefaultArgs<ExtArgs>
   manager?: boolean | Prisma.Employee$managerArgs<ExtArgs>
   subordinates?: boolean | Prisma.Employee$subordinatesArgs<ExtArgs>
@@ -2596,8 +3096,10 @@ export type EmployeeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   notifications?: boolean | Prisma.Employee$notificationsArgs<ExtArgs>
   auditLogs?: boolean | Prisma.Employee$auditLogsArgs<ExtArgs>
   reviewedLeaves?: boolean | Prisma.Employee$reviewedLeavesArgs<ExtArgs>
+  reportingManagerLeaves?: boolean | Prisma.Employee$reportingManagerLeavesArgs<ExtArgs>
   reviewedCorrections?: boolean | Prisma.Employee$reviewedCorrectionsArgs<ExtArgs>
   uploadedDocuments?: boolean | Prisma.Employee$uploadedDocumentsArgs<ExtArgs>
+  leaveStatusChanges?: boolean | Prisma.Employee$leaveStatusChangesArgs<ExtArgs>
   refreshTokens?: boolean | Prisma.Employee$refreshTokensArgs<ExtArgs>
   passwordResetTokens?: boolean | Prisma.Employee$passwordResetTokensArgs<ExtArgs>
   _count?: boolean | Prisma.EmployeeCountOutputTypeDefaultArgs<ExtArgs>
@@ -2616,6 +3118,7 @@ export type EmployeeSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   createdAt?: boolean
   status?: boolean
   obsolete?: boolean
+  sex?: boolean
   department?: boolean | Prisma.DepartmentDefaultArgs<ExtArgs>
   manager?: boolean | Prisma.Employee$managerArgs<ExtArgs>
 }, ExtArgs["result"]["employee"]>
@@ -2633,6 +3136,7 @@ export type EmployeeSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
   createdAt?: boolean
   status?: boolean
   obsolete?: boolean
+  sex?: boolean
   department?: boolean | Prisma.DepartmentDefaultArgs<ExtArgs>
   manager?: boolean | Prisma.Employee$managerArgs<ExtArgs>
 }, ExtArgs["result"]["employee"]>
@@ -2650,9 +3154,10 @@ export type EmployeeSelectScalar = {
   createdAt?: boolean
   status?: boolean
   obsolete?: boolean
+  sex?: boolean
 }
 
-export type EmployeeOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"employeeId" | "firstName" | "lastName" | "email" | "passwordHash" | "departmentId" | "role" | "managerId" | "joiningDate" | "createdAt" | "status" | "obsolete", ExtArgs["result"]["employee"]>
+export type EmployeeOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"employeeId" | "firstName" | "lastName" | "email" | "passwordHash" | "departmentId" | "role" | "managerId" | "joiningDate" | "createdAt" | "status" | "obsolete" | "sex", ExtArgs["result"]["employee"]>
 export type EmployeeInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   department?: boolean | Prisma.DepartmentDefaultArgs<ExtArgs>
   manager?: boolean | Prisma.Employee$managerArgs<ExtArgs>
@@ -2663,8 +3168,10 @@ export type EmployeeInclude<ExtArgs extends runtime.Types.Extensions.InternalArg
   notifications?: boolean | Prisma.Employee$notificationsArgs<ExtArgs>
   auditLogs?: boolean | Prisma.Employee$auditLogsArgs<ExtArgs>
   reviewedLeaves?: boolean | Prisma.Employee$reviewedLeavesArgs<ExtArgs>
+  reportingManagerLeaves?: boolean | Prisma.Employee$reportingManagerLeavesArgs<ExtArgs>
   reviewedCorrections?: boolean | Prisma.Employee$reviewedCorrectionsArgs<ExtArgs>
   uploadedDocuments?: boolean | Prisma.Employee$uploadedDocumentsArgs<ExtArgs>
+  leaveStatusChanges?: boolean | Prisma.Employee$leaveStatusChangesArgs<ExtArgs>
   refreshTokens?: boolean | Prisma.Employee$refreshTokensArgs<ExtArgs>
   passwordResetTokens?: boolean | Prisma.Employee$passwordResetTokensArgs<ExtArgs>
   _count?: boolean | Prisma.EmployeeCountOutputTypeDefaultArgs<ExtArgs>
@@ -2690,8 +3197,10 @@ export type $EmployeePayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     notifications: Prisma.$NotificationPayload<ExtArgs>[]
     auditLogs: Prisma.$AuditLogPayload<ExtArgs>[]
     reviewedLeaves: Prisma.$LeaveApplicationPayload<ExtArgs>[]
+    reportingManagerLeaves: Prisma.$LeaveApplicationPayload<ExtArgs>[]
     reviewedCorrections: Prisma.$AttendanceCorrectionPayload<ExtArgs>[]
     uploadedDocuments: Prisma.$LeaveDocumentPayload<ExtArgs>[]
+    leaveStatusChanges: Prisma.$LeaveStatusHistoryPayload<ExtArgs>[]
     refreshTokens: Prisma.$RefreshTokenPayload<ExtArgs>[]
     passwordResetTokens: Prisma.$PasswordResetTokenPayload<ExtArgs>[]
   }
@@ -2708,6 +3217,7 @@ export type $EmployeePayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     createdAt: Date
     status: string
     obsolete: boolean
+    sex: string | null
   }, ExtArgs["result"]["employee"]>
   composites: {}
 }
@@ -3111,8 +3621,10 @@ export interface Prisma__EmployeeClient<T, Null = never, ExtArgs extends runtime
   notifications<T extends Prisma.Employee$notificationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Employee$notificationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   auditLogs<T extends Prisma.Employee$auditLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Employee$auditLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AuditLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   reviewedLeaves<T extends Prisma.Employee$reviewedLeavesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Employee$reviewedLeavesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LeaveApplicationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  reportingManagerLeaves<T extends Prisma.Employee$reportingManagerLeavesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Employee$reportingManagerLeavesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LeaveApplicationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   reviewedCorrections<T extends Prisma.Employee$reviewedCorrectionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Employee$reviewedCorrectionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AttendanceCorrectionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   uploadedDocuments<T extends Prisma.Employee$uploadedDocumentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Employee$uploadedDocumentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LeaveDocumentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  leaveStatusChanges<T extends Prisma.Employee$leaveStatusChangesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Employee$leaveStatusChangesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LeaveStatusHistoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   refreshTokens<T extends Prisma.Employee$refreshTokensArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Employee$refreshTokensArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RefreshTokenPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   passwordResetTokens<T extends Prisma.Employee$passwordResetTokensArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Employee$passwordResetTokensArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PasswordResetTokenPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
@@ -3156,6 +3668,7 @@ export interface EmployeeFieldRefs {
   readonly createdAt: Prisma.FieldRef<"Employee", 'DateTime'>
   readonly status: Prisma.FieldRef<"Employee", 'String'>
   readonly obsolete: Prisma.FieldRef<"Employee", 'Boolean'>
+  readonly sex: Prisma.FieldRef<"Employee", 'String'>
 }
     
 
@@ -3744,6 +4257,30 @@ export type Employee$reviewedLeavesArgs<ExtArgs extends runtime.Types.Extensions
 }
 
 /**
+ * Employee.reportingManagerLeaves
+ */
+export type Employee$reportingManagerLeavesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the LeaveApplication
+   */
+  select?: Prisma.LeaveApplicationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the LeaveApplication
+   */
+  omit?: Prisma.LeaveApplicationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LeaveApplicationInclude<ExtArgs> | null
+  where?: Prisma.LeaveApplicationWhereInput
+  orderBy?: Prisma.LeaveApplicationOrderByWithRelationInput | Prisma.LeaveApplicationOrderByWithRelationInput[]
+  cursor?: Prisma.LeaveApplicationWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.LeaveApplicationScalarFieldEnum | Prisma.LeaveApplicationScalarFieldEnum[]
+}
+
+/**
  * Employee.reviewedCorrections
  */
 export type Employee$reviewedCorrectionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -3789,6 +4326,30 @@ export type Employee$uploadedDocumentsArgs<ExtArgs extends runtime.Types.Extensi
   take?: number
   skip?: number
   distinct?: Prisma.LeaveDocumentScalarFieldEnum | Prisma.LeaveDocumentScalarFieldEnum[]
+}
+
+/**
+ * Employee.leaveStatusChanges
+ */
+export type Employee$leaveStatusChangesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the LeaveStatusHistory
+   */
+  select?: Prisma.LeaveStatusHistorySelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the LeaveStatusHistory
+   */
+  omit?: Prisma.LeaveStatusHistoryOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LeaveStatusHistoryInclude<ExtArgs> | null
+  where?: Prisma.LeaveStatusHistoryWhereInput
+  orderBy?: Prisma.LeaveStatusHistoryOrderByWithRelationInput | Prisma.LeaveStatusHistoryOrderByWithRelationInput[]
+  cursor?: Prisma.LeaveStatusHistoryWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.LeaveStatusHistoryScalarFieldEnum | Prisma.LeaveStatusHistoryScalarFieldEnum[]
 }
 
 /**

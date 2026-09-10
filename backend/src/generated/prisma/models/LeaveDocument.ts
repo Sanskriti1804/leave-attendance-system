@@ -29,12 +29,14 @@ export type AggregateLeaveDocument = {
 export type LeaveDocumentAvgAggregateOutputType = {
   documentId: number | null
   leaveId: number | null
+  fileSize: number | null
   uploadedBy: number | null
 }
 
 export type LeaveDocumentSumAggregateOutputType = {
   documentId: number | null
   leaveId: number | null
+  fileSize: number | null
   uploadedBy: number | null
 }
 
@@ -44,6 +46,8 @@ export type LeaveDocumentMinAggregateOutputType = {
   fileName: string | null
   filePath: string | null
   fileType: string | null
+  contentType: string | null
+  fileSize: number | null
   uploadedBy: number | null
   uploadedAt: Date | null
 }
@@ -54,6 +58,8 @@ export type LeaveDocumentMaxAggregateOutputType = {
   fileName: string | null
   filePath: string | null
   fileType: string | null
+  contentType: string | null
+  fileSize: number | null
   uploadedBy: number | null
   uploadedAt: Date | null
 }
@@ -64,6 +70,8 @@ export type LeaveDocumentCountAggregateOutputType = {
   fileName: number
   filePath: number
   fileType: number
+  contentType: number
+  fileSize: number
   uploadedBy: number
   uploadedAt: number
   _all: number
@@ -73,12 +81,14 @@ export type LeaveDocumentCountAggregateOutputType = {
 export type LeaveDocumentAvgAggregateInputType = {
   documentId?: true
   leaveId?: true
+  fileSize?: true
   uploadedBy?: true
 }
 
 export type LeaveDocumentSumAggregateInputType = {
   documentId?: true
   leaveId?: true
+  fileSize?: true
   uploadedBy?: true
 }
 
@@ -88,6 +98,8 @@ export type LeaveDocumentMinAggregateInputType = {
   fileName?: true
   filePath?: true
   fileType?: true
+  contentType?: true
+  fileSize?: true
   uploadedBy?: true
   uploadedAt?: true
 }
@@ -98,6 +110,8 @@ export type LeaveDocumentMaxAggregateInputType = {
   fileName?: true
   filePath?: true
   fileType?: true
+  contentType?: true
+  fileSize?: true
   uploadedBy?: true
   uploadedAt?: true
 }
@@ -108,6 +122,8 @@ export type LeaveDocumentCountAggregateInputType = {
   fileName?: true
   filePath?: true
   fileType?: true
+  contentType?: true
+  fileSize?: true
   uploadedBy?: true
   uploadedAt?: true
   _all?: true
@@ -205,6 +221,8 @@ export type LeaveDocumentGroupByOutputType = {
   fileName: string
   filePath: string
   fileType: string
+  contentType: string
+  fileSize: number
   uploadedBy: number
   uploadedAt: Date
   _count: LeaveDocumentCountAggregateOutputType | null
@@ -238,6 +256,8 @@ export type LeaveDocumentWhereInput = {
   fileName?: Prisma.StringFilter<"LeaveDocument"> | string
   filePath?: Prisma.StringFilter<"LeaveDocument"> | string
   fileType?: Prisma.StringFilter<"LeaveDocument"> | string
+  contentType?: Prisma.StringFilter<"LeaveDocument"> | string
+  fileSize?: Prisma.IntFilter<"LeaveDocument"> | number
   uploadedBy?: Prisma.IntFilter<"LeaveDocument"> | number
   uploadedAt?: Prisma.DateTimeFilter<"LeaveDocument"> | Date | string
   leave?: Prisma.XOR<Prisma.LeaveApplicationScalarRelationFilter, Prisma.LeaveApplicationWhereInput>
@@ -250,6 +270,8 @@ export type LeaveDocumentOrderByWithRelationInput = {
   fileName?: Prisma.SortOrder
   filePath?: Prisma.SortOrder
   fileType?: Prisma.SortOrder
+  contentType?: Prisma.SortOrder
+  fileSize?: Prisma.SortOrder
   uploadedBy?: Prisma.SortOrder
   uploadedAt?: Prisma.SortOrder
   leave?: Prisma.LeaveApplicationOrderByWithRelationInput
@@ -265,6 +287,8 @@ export type LeaveDocumentWhereUniqueInput = Prisma.AtLeast<{
   fileName?: Prisma.StringFilter<"LeaveDocument"> | string
   filePath?: Prisma.StringFilter<"LeaveDocument"> | string
   fileType?: Prisma.StringFilter<"LeaveDocument"> | string
+  contentType?: Prisma.StringFilter<"LeaveDocument"> | string
+  fileSize?: Prisma.IntFilter<"LeaveDocument"> | number
   uploadedBy?: Prisma.IntFilter<"LeaveDocument"> | number
   uploadedAt?: Prisma.DateTimeFilter<"LeaveDocument"> | Date | string
   leave?: Prisma.XOR<Prisma.LeaveApplicationScalarRelationFilter, Prisma.LeaveApplicationWhereInput>
@@ -277,6 +301,8 @@ export type LeaveDocumentOrderByWithAggregationInput = {
   fileName?: Prisma.SortOrder
   filePath?: Prisma.SortOrder
   fileType?: Prisma.SortOrder
+  contentType?: Prisma.SortOrder
+  fileSize?: Prisma.SortOrder
   uploadedBy?: Prisma.SortOrder
   uploadedAt?: Prisma.SortOrder
   _count?: Prisma.LeaveDocumentCountOrderByAggregateInput
@@ -295,6 +321,8 @@ export type LeaveDocumentScalarWhereWithAggregatesInput = {
   fileName?: Prisma.StringWithAggregatesFilter<"LeaveDocument"> | string
   filePath?: Prisma.StringWithAggregatesFilter<"LeaveDocument"> | string
   fileType?: Prisma.StringWithAggregatesFilter<"LeaveDocument"> | string
+  contentType?: Prisma.StringWithAggregatesFilter<"LeaveDocument"> | string
+  fileSize?: Prisma.IntWithAggregatesFilter<"LeaveDocument"> | number
   uploadedBy?: Prisma.IntWithAggregatesFilter<"LeaveDocument"> | number
   uploadedAt?: Prisma.DateTimeWithAggregatesFilter<"LeaveDocument"> | Date | string
 }
@@ -303,6 +331,8 @@ export type LeaveDocumentCreateInput = {
   fileName: string
   filePath: string
   fileType: string
+  contentType: string
+  fileSize: number
   uploadedAt?: Date | string
   leave: Prisma.LeaveApplicationCreateNestedOneWithoutDocumentsInput
   uploader: Prisma.EmployeeCreateNestedOneWithoutUploadedDocumentsInput
@@ -314,6 +344,8 @@ export type LeaveDocumentUncheckedCreateInput = {
   fileName: string
   filePath: string
   fileType: string
+  contentType: string
+  fileSize: number
   uploadedBy: number
   uploadedAt?: Date | string
 }
@@ -322,6 +354,8 @@ export type LeaveDocumentUpdateInput = {
   fileName?: Prisma.StringFieldUpdateOperationsInput | string
   filePath?: Prisma.StringFieldUpdateOperationsInput | string
   fileType?: Prisma.StringFieldUpdateOperationsInput | string
+  contentType?: Prisma.StringFieldUpdateOperationsInput | string
+  fileSize?: Prisma.IntFieldUpdateOperationsInput | number
   uploadedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   leave?: Prisma.LeaveApplicationUpdateOneRequiredWithoutDocumentsNestedInput
   uploader?: Prisma.EmployeeUpdateOneRequiredWithoutUploadedDocumentsNestedInput
@@ -333,6 +367,8 @@ export type LeaveDocumentUncheckedUpdateInput = {
   fileName?: Prisma.StringFieldUpdateOperationsInput | string
   filePath?: Prisma.StringFieldUpdateOperationsInput | string
   fileType?: Prisma.StringFieldUpdateOperationsInput | string
+  contentType?: Prisma.StringFieldUpdateOperationsInput | string
+  fileSize?: Prisma.IntFieldUpdateOperationsInput | number
   uploadedBy?: Prisma.IntFieldUpdateOperationsInput | number
   uploadedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -343,6 +379,8 @@ export type LeaveDocumentCreateManyInput = {
   fileName: string
   filePath: string
   fileType: string
+  contentType: string
+  fileSize: number
   uploadedBy: number
   uploadedAt?: Date | string
 }
@@ -351,6 +389,8 @@ export type LeaveDocumentUpdateManyMutationInput = {
   fileName?: Prisma.StringFieldUpdateOperationsInput | string
   filePath?: Prisma.StringFieldUpdateOperationsInput | string
   fileType?: Prisma.StringFieldUpdateOperationsInput | string
+  contentType?: Prisma.StringFieldUpdateOperationsInput | string
+  fileSize?: Prisma.IntFieldUpdateOperationsInput | number
   uploadedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -360,6 +400,8 @@ export type LeaveDocumentUncheckedUpdateManyInput = {
   fileName?: Prisma.StringFieldUpdateOperationsInput | string
   filePath?: Prisma.StringFieldUpdateOperationsInput | string
   fileType?: Prisma.StringFieldUpdateOperationsInput | string
+  contentType?: Prisma.StringFieldUpdateOperationsInput | string
+  fileSize?: Prisma.IntFieldUpdateOperationsInput | number
   uploadedBy?: Prisma.IntFieldUpdateOperationsInput | number
   uploadedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -380,6 +422,8 @@ export type LeaveDocumentCountOrderByAggregateInput = {
   fileName?: Prisma.SortOrder
   filePath?: Prisma.SortOrder
   fileType?: Prisma.SortOrder
+  contentType?: Prisma.SortOrder
+  fileSize?: Prisma.SortOrder
   uploadedBy?: Prisma.SortOrder
   uploadedAt?: Prisma.SortOrder
 }
@@ -387,6 +431,7 @@ export type LeaveDocumentCountOrderByAggregateInput = {
 export type LeaveDocumentAvgOrderByAggregateInput = {
   documentId?: Prisma.SortOrder
   leaveId?: Prisma.SortOrder
+  fileSize?: Prisma.SortOrder
   uploadedBy?: Prisma.SortOrder
 }
 
@@ -396,6 +441,8 @@ export type LeaveDocumentMaxOrderByAggregateInput = {
   fileName?: Prisma.SortOrder
   filePath?: Prisma.SortOrder
   fileType?: Prisma.SortOrder
+  contentType?: Prisma.SortOrder
+  fileSize?: Prisma.SortOrder
   uploadedBy?: Prisma.SortOrder
   uploadedAt?: Prisma.SortOrder
 }
@@ -406,6 +453,8 @@ export type LeaveDocumentMinOrderByAggregateInput = {
   fileName?: Prisma.SortOrder
   filePath?: Prisma.SortOrder
   fileType?: Prisma.SortOrder
+  contentType?: Prisma.SortOrder
+  fileSize?: Prisma.SortOrder
   uploadedBy?: Prisma.SortOrder
   uploadedAt?: Prisma.SortOrder
 }
@@ -413,6 +462,7 @@ export type LeaveDocumentMinOrderByAggregateInput = {
 export type LeaveDocumentSumOrderByAggregateInput = {
   documentId?: Prisma.SortOrder
   leaveId?: Prisma.SortOrder
+  fileSize?: Prisma.SortOrder
   uploadedBy?: Prisma.SortOrder
 }
 
@@ -504,6 +554,8 @@ export type LeaveDocumentCreateWithoutUploaderInput = {
   fileName: string
   filePath: string
   fileType: string
+  contentType: string
+  fileSize: number
   uploadedAt?: Date | string
   leave: Prisma.LeaveApplicationCreateNestedOneWithoutDocumentsInput
 }
@@ -514,6 +566,8 @@ export type LeaveDocumentUncheckedCreateWithoutUploaderInput = {
   fileName: string
   filePath: string
   fileType: string
+  contentType: string
+  fileSize: number
   uploadedAt?: Date | string
 }
 
@@ -552,6 +606,8 @@ export type LeaveDocumentScalarWhereInput = {
   fileName?: Prisma.StringFilter<"LeaveDocument"> | string
   filePath?: Prisma.StringFilter<"LeaveDocument"> | string
   fileType?: Prisma.StringFilter<"LeaveDocument"> | string
+  contentType?: Prisma.StringFilter<"LeaveDocument"> | string
+  fileSize?: Prisma.IntFilter<"LeaveDocument"> | number
   uploadedBy?: Prisma.IntFilter<"LeaveDocument"> | number
   uploadedAt?: Prisma.DateTimeFilter<"LeaveDocument"> | Date | string
 }
@@ -560,6 +616,8 @@ export type LeaveDocumentCreateWithoutLeaveInput = {
   fileName: string
   filePath: string
   fileType: string
+  contentType: string
+  fileSize: number
   uploadedAt?: Date | string
   uploader: Prisma.EmployeeCreateNestedOneWithoutUploadedDocumentsInput
 }
@@ -569,6 +627,8 @@ export type LeaveDocumentUncheckedCreateWithoutLeaveInput = {
   fileName: string
   filePath: string
   fileType: string
+  contentType: string
+  fileSize: number
   uploadedBy: number
   uploadedAt?: Date | string
 }
@@ -605,6 +665,8 @@ export type LeaveDocumentCreateManyUploaderInput = {
   fileName: string
   filePath: string
   fileType: string
+  contentType: string
+  fileSize: number
   uploadedAt?: Date | string
 }
 
@@ -612,6 +674,8 @@ export type LeaveDocumentUpdateWithoutUploaderInput = {
   fileName?: Prisma.StringFieldUpdateOperationsInput | string
   filePath?: Prisma.StringFieldUpdateOperationsInput | string
   fileType?: Prisma.StringFieldUpdateOperationsInput | string
+  contentType?: Prisma.StringFieldUpdateOperationsInput | string
+  fileSize?: Prisma.IntFieldUpdateOperationsInput | number
   uploadedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   leave?: Prisma.LeaveApplicationUpdateOneRequiredWithoutDocumentsNestedInput
 }
@@ -622,6 +686,8 @@ export type LeaveDocumentUncheckedUpdateWithoutUploaderInput = {
   fileName?: Prisma.StringFieldUpdateOperationsInput | string
   filePath?: Prisma.StringFieldUpdateOperationsInput | string
   fileType?: Prisma.StringFieldUpdateOperationsInput | string
+  contentType?: Prisma.StringFieldUpdateOperationsInput | string
+  fileSize?: Prisma.IntFieldUpdateOperationsInput | number
   uploadedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -631,6 +697,8 @@ export type LeaveDocumentUncheckedUpdateManyWithoutUploaderInput = {
   fileName?: Prisma.StringFieldUpdateOperationsInput | string
   filePath?: Prisma.StringFieldUpdateOperationsInput | string
   fileType?: Prisma.StringFieldUpdateOperationsInput | string
+  contentType?: Prisma.StringFieldUpdateOperationsInput | string
+  fileSize?: Prisma.IntFieldUpdateOperationsInput | number
   uploadedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -639,6 +707,8 @@ export type LeaveDocumentCreateManyLeaveInput = {
   fileName: string
   filePath: string
   fileType: string
+  contentType: string
+  fileSize: number
   uploadedBy: number
   uploadedAt?: Date | string
 }
@@ -647,6 +717,8 @@ export type LeaveDocumentUpdateWithoutLeaveInput = {
   fileName?: Prisma.StringFieldUpdateOperationsInput | string
   filePath?: Prisma.StringFieldUpdateOperationsInput | string
   fileType?: Prisma.StringFieldUpdateOperationsInput | string
+  contentType?: Prisma.StringFieldUpdateOperationsInput | string
+  fileSize?: Prisma.IntFieldUpdateOperationsInput | number
   uploadedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   uploader?: Prisma.EmployeeUpdateOneRequiredWithoutUploadedDocumentsNestedInput
 }
@@ -656,6 +728,8 @@ export type LeaveDocumentUncheckedUpdateWithoutLeaveInput = {
   fileName?: Prisma.StringFieldUpdateOperationsInput | string
   filePath?: Prisma.StringFieldUpdateOperationsInput | string
   fileType?: Prisma.StringFieldUpdateOperationsInput | string
+  contentType?: Prisma.StringFieldUpdateOperationsInput | string
+  fileSize?: Prisma.IntFieldUpdateOperationsInput | number
   uploadedBy?: Prisma.IntFieldUpdateOperationsInput | number
   uploadedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -665,6 +739,8 @@ export type LeaveDocumentUncheckedUpdateManyWithoutLeaveInput = {
   fileName?: Prisma.StringFieldUpdateOperationsInput | string
   filePath?: Prisma.StringFieldUpdateOperationsInput | string
   fileType?: Prisma.StringFieldUpdateOperationsInput | string
+  contentType?: Prisma.StringFieldUpdateOperationsInput | string
+  fileSize?: Prisma.IntFieldUpdateOperationsInput | number
   uploadedBy?: Prisma.IntFieldUpdateOperationsInput | number
   uploadedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -677,6 +753,8 @@ export type LeaveDocumentSelect<ExtArgs extends runtime.Types.Extensions.Interna
   fileName?: boolean
   filePath?: boolean
   fileType?: boolean
+  contentType?: boolean
+  fileSize?: boolean
   uploadedBy?: boolean
   uploadedAt?: boolean
   leave?: boolean | Prisma.LeaveApplicationDefaultArgs<ExtArgs>
@@ -689,6 +767,8 @@ export type LeaveDocumentSelectCreateManyAndReturn<ExtArgs extends runtime.Types
   fileName?: boolean
   filePath?: boolean
   fileType?: boolean
+  contentType?: boolean
+  fileSize?: boolean
   uploadedBy?: boolean
   uploadedAt?: boolean
   leave?: boolean | Prisma.LeaveApplicationDefaultArgs<ExtArgs>
@@ -701,6 +781,8 @@ export type LeaveDocumentSelectUpdateManyAndReturn<ExtArgs extends runtime.Types
   fileName?: boolean
   filePath?: boolean
   fileType?: boolean
+  contentType?: boolean
+  fileSize?: boolean
   uploadedBy?: boolean
   uploadedAt?: boolean
   leave?: boolean | Prisma.LeaveApplicationDefaultArgs<ExtArgs>
@@ -713,11 +795,13 @@ export type LeaveDocumentSelectScalar = {
   fileName?: boolean
   filePath?: boolean
   fileType?: boolean
+  contentType?: boolean
+  fileSize?: boolean
   uploadedBy?: boolean
   uploadedAt?: boolean
 }
 
-export type LeaveDocumentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"documentId" | "leaveId" | "fileName" | "filePath" | "fileType" | "uploadedBy" | "uploadedAt", ExtArgs["result"]["leaveDocument"]>
+export type LeaveDocumentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"documentId" | "leaveId" | "fileName" | "filePath" | "fileType" | "contentType" | "fileSize" | "uploadedBy" | "uploadedAt", ExtArgs["result"]["leaveDocument"]>
 export type LeaveDocumentInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   leave?: boolean | Prisma.LeaveApplicationDefaultArgs<ExtArgs>
   uploader?: boolean | Prisma.EmployeeDefaultArgs<ExtArgs>
@@ -743,6 +827,8 @@ export type $LeaveDocumentPayload<ExtArgs extends runtime.Types.Extensions.Inter
     fileName: string
     filePath: string
     fileType: string
+    contentType: string
+    fileSize: number
     uploadedBy: number
     uploadedAt: Date
   }, ExtArgs["result"]["leaveDocument"]>
@@ -1175,6 +1261,8 @@ export interface LeaveDocumentFieldRefs {
   readonly fileName: Prisma.FieldRef<"LeaveDocument", 'String'>
   readonly filePath: Prisma.FieldRef<"LeaveDocument", 'String'>
   readonly fileType: Prisma.FieldRef<"LeaveDocument", 'String'>
+  readonly contentType: Prisma.FieldRef<"LeaveDocument", 'String'>
+  readonly fileSize: Prisma.FieldRef<"LeaveDocument", 'Int'>
   readonly uploadedBy: Prisma.FieldRef<"LeaveDocument", 'Int'>
   readonly uploadedAt: Prisma.FieldRef<"LeaveDocument", 'DateTime'>
 }

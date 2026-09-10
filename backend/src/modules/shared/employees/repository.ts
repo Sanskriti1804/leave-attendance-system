@@ -13,6 +13,7 @@ const employeePublicSelect = {
   createdAt: true,
   status: true,
   obsolete: true,
+  sex: true,
 } satisfies Prisma.EmployeeSelect;
 
 export type EmployeePublic = Prisma.EmployeeGetPayload<{ select: typeof employeePublicSelect }>;
