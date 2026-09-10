@@ -2,7 +2,7 @@ import { useState } from "react";
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, KeyboardAvoidingView, Platform, SafeAreaView } from "react-native";
 import { useRouter } from "expo-router";
 import { MaterialIcons } from '@expo/vector-icons';
-import { login as authLogin, passLogin } from "../services/auth";
+import { login as authLogin, passLogin } from "../../../services/auth";
 
 // Stitch Design Colors
 const colors = {
