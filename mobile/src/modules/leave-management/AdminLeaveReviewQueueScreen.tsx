@@ -1,0 +1,270 @@
+import React from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, SafeAreaView } from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
+
+const colors = {
+  surface: "#fcf9f8",
+  primary: "#000000",
+  onPrimary: "#ffffff",
+  surfaceContainerLowest: "#ffffff",
+  surfaceContainerLow: "#f6f3f2",
+  surfaceContainer: "#f0edec",
+  surfaceContainerHigh: "#ebe7e7",
+  surfaceContainerHighest: "#e5e2e1",
+  secondary: "#585f6c",
+  error: "#ba1a1a",
+  border: "#cfc4c5",
+  onSurface: "#1c1b1b",
+};
+
+export default function AdminLeaveReviewQueueScreen() {
+  const [isGuestMode, setIsGuestMode] = React.useState(true);
+
+  return (
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.header}>
+        <View style={styles.headerTop}>
+          <Text style={styles.headerTitle}>LEAVE REVIEW QUEUE</Text>
+          <View style={styles.headerActions}>
+            <TouchableOpacity style={styles.iconButton}>
+              <MaterialIcons name="search" size={20} color={colors.onSurface} />
+            </TouchableOpacity>
+            <View style={styles.profileAvatar}>
+              <MaterialIcons name="person" size={18} color={colors.onPrimary} />
+            </View>
+          </View>
+        </View>
+      </View>
+
+      <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+        <Text style={styles.screenTitle}>Leave Review Queue</Text>
+
+        <View style={styles.roleToggle}>
+          <View style={styles.roleInfo}>
+            <View style={[styles.roleDot, { backgroundColor: isGuestMode ? colors.error : colors.primary }]} />
+            <View>
+              <Text style={styles.roleName}>{isGuestMode ? 'Guest Admin (View Only)' : 'HR Admin (Full Authority)'}</Text>
+              <Text style={styles.roleUser}>Preeti Kaur</Text>
+            </View>
+          </View>
+          <TouchableOpacity style={styles.toggleBtn} onPress={() => setIsGuestMode(!isGuestMode)}>
+            <MaterialIcons name="swap-horiz" size={16} color={colors.onSurface} />
+            <Text style={styles.toggleBtnText}>{isGuestMode ? 'SWITCH TO HR ADMIN' : 'SIMULATE GUEST'}</Text>
+          </TouchableOpacity>
+        </View>
+
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.statusChips} contentContainerStyle={styles.statusChipsContent}>
+          <TouchableOpacity style={styles.chipActive}>
+            <Text style={styles.chipActiveText}>PENDING REVIEW</Text>
+            <View style={styles.chipBadgeActive}>
+              <Text style={styles.chipBadgeTextActive}>5</Text>
+            </View>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.chipInactive}>
+            <Text style={styles.chipInactiveText}>MEDICAL ATTESTED</Text>
+            <View style={styles.chipBadgeInactive}>
+              <Text style={styles.chipBadgeTextInactive}>3</Text>
+            </View>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.chipInactive}>
+            <Text style={styles.chipInactiveText}>APPROVED</Text>
+            <View style={styles.chipBadgeInactive}>
+              <Text style={styles.chipBadgeTextInactive}>142</Text>
+            </View>
+          </TouchableOpacity>
+        </ScrollView>
+
+        {/* Item 1 */}
+        <View style={styles.card}>
+          <View style={styles.cardHeader}>
+            <View style={styles.empInfo}>
+              <View style={styles.avatarPlaceholder} />
+              <View>
+                <View style={styles.nameRow}>
+                  <Text style={styles.empName}>Milind Rawat</Text>
+                  <View style={styles.empIdBadge}>
+                    <Text style={styles.empIdText}>EMP-4102</Text>
+                  </View>
+                </View>
+                <Text style={styles.empRole}>VP, Engineering & DevOps</Text>
+              </View>
+            </View>
+          </View>
+
+          <View style={styles.detailsMatrix}>
+            <View style={styles.detailItem}>
+              <Text style={styles.detailLabel}>LEAVE CLASSIFICATION</Text>
+              <Text style={styles.detailValue}>Medical / Sick Leave</Text>
+            </View>
+            <View style={styles.detailItem}>
+              <Text style={styles.detailLabel}>STATUTORY DURATION</Text>
+              <Text style={styles.detailValue}>3 Days · Oct 26–29, 2026</Text>
+            </View>
+            <View style={styles.detailFullRow}>
+              <Text style={styles.detailLabel}>ATTESTED JUSTIFICATION</Text>
+              <Text style={styles.detailDesc}>Post-operative surgical recovery following outpatient procedure. Doctor advised strict rest.</Text>
+            </View>
+            <View style={styles.detailFullRowFlex}>
+              <MaterialIcons name="approval" size={14} color={colors.secondary} />
+              <Text style={styles.detailNote}>Direct Manager notified / Self-attested</Text>
+            </View>
+          </View>
+
+          <View style={styles.attachmentBox}>
+            <View style={styles.attachmentHeader}>
+              <View style={styles.attachmentTitleRow}>
+                <MaterialIcons name="description" size={18} color={colors.primary} />
+                <Text style={styles.attachmentTitle}>MEDICAL PROOF</Text>
+              </View>
+              <View style={styles.reqBadge}>
+                <Text style={styles.reqBadgeText}>REQUIRED &gt;2 DAYS</Text>
+              </View>
+            </View>
+
+            <View style={styles.fileCard}>
+              <View style={styles.fileInfo}>
+                <View style={styles.fileIconBox}>
+                  <MaterialIcons name="picture-as-pdf" size={20} color={colors.onSurface} />
+                </View>
+                <View>
+                  <Text style={styles.fileName}>medical_cert_vance_oct26.pdf</Text>
+                  <Text style={styles.fileSize}>1.8 MB</Text>
+                </View>
+              </View>
+              <TouchableOpacity style={styles.downloadBtn}>
+                <MaterialIcons name="download" size={16} color={colors.onPrimary} />
+                <Text style={styles.downloadBtnText}>DOWNLOAD</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {!isGuestMode ? (
+            <View style={styles.actionsBox}>
+              <View style={styles.actionRow}>
+                <TouchableOpacity style={styles.approveBtn}>
+                  <MaterialIcons name="done-all" size={18} color={colors.onPrimary} />
+                  <Text style={styles.approveBtnText}>Approve Leave</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.rejectBtn}>
+                  <MaterialIcons name="chat-bubble-outline" size={18} color={colors.onSurface} />
+                  <Text style={styles.rejectBtnText}>Reject / Clarify</Text>
+                </TouchableOpacity>
+              </View>
+              <TouchableOpacity style={styles.noteBtn}>
+                <MaterialIcons name="note-add" size={16} color={colors.secondary} />
+                <Text style={styles.noteBtnText}>Add Internal HR Note (Private)</Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <View style={styles.guestNotice}>
+              <View style={styles.guestNoticeLeft}>
+                <MaterialIcons name="visibility" size={18} color={colors.secondary} />
+                <View>
+                  <Text style={styles.guestNoticeTitle}>GUEST VIEW ACCESS</Text>
+                  <Text style={styles.guestNoticeSub}>Read-only view • Actions restricted to HR Admin</Text>
+                </View>
+              </View>
+              <View style={styles.readOnlyBadge}>
+                <Text style={styles.readOnlyText}>READ ONLY</Text>
+              </View>
+            </View>
+          )}
+        </View>
+
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  safeArea: { flex: 1, backgroundColor: colors.surface },
+  header: {
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 8,
+    backgroundColor: 'rgba(252, 249, 248, 0.9)',
+    borderBottomWidth: 1,
+    borderBottomColor: colors.surfaceContainer,
+  },
+  headerTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  headerTitle: { fontSize: 18, fontWeight: '600', color: colors.onSurface },
+  headerActions: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  iconButton: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
+  profileAvatar: { width: 32, height: 32, borderRadius: 16, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center' },
+  container: { flex: 1 },
+  content: { padding: 16, paddingBottom: 64, gap: 16 },
+  screenTitle: { fontSize: 20, fontWeight: '600', color: colors.onSurface },
+  roleToggle: {
+    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+    padding: 8, backgroundColor: colors.surfaceContainerLow, borderRadius: 8
+  },
+  roleInfo: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  roleDot: { width: 8, height: 8, borderRadius: 4 },
+  roleName: { fontSize: 12, fontWeight: '500', color: colors.onSurface },
+  roleUser: { fontSize: 12, color: colors.secondary },
+  toggleBtn: {
+    flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surfaceContainerHighest,
+    paddingHorizontal: 12, height: 44, borderRadius: 4, gap: 4
+  },
+  toggleBtnText: { fontSize: 11, fontWeight: '600', color: colors.onSurface },
+  statusChips: { marginHorizontal: -16 },
+  statusChipsContent: { paddingHorizontal: 16, gap: 8 },
+  chipActive: {
+    flexDirection: 'row', alignItems: 'center', backgroundColor: colors.primary,
+    paddingHorizontal: 12, paddingVertical: 8, borderRadius: 4, gap: 4
+  },
+  chipActiveText: { fontSize: 11, fontWeight: '600', color: colors.onPrimary },
+  chipBadgeActive: { backgroundColor: 'rgba(252,249,248,0.2)', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 },
+  chipBadgeTextActive: { fontSize: 11, color: colors.onPrimary },
+  chipInactive: {
+    flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surfaceContainer,
+    paddingHorizontal: 12, paddingVertical: 8, borderRadius: 4, gap: 4
+  },
+  chipInactiveText: { fontSize: 11, fontWeight: '600', color: colors.secondary },
+  chipBadgeInactive: { backgroundColor: colors.surfaceContainerHigh, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 },
+  chipBadgeTextInactive: { fontSize: 11, color: colors.onSurface },
+  card: { backgroundColor: colors.surfaceContainerLowest, borderRadius: 12, padding: 16, gap: 16 },
+  cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
+  empInfo: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  avatarPlaceholder: { width: 48, height: 48, borderRadius: 24, backgroundColor: colors.surfaceContainerHigh },
+  nameRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  empName: { fontSize: 16, fontWeight: '500', color: colors.onSurface },
+  empIdBadge: { backgroundColor: colors.surfaceContainer, paddingHorizontal: 4, paddingVertical: 2, borderRadius: 4 },
+  empIdText: { fontSize: 11, fontWeight: '600', color: colors.secondary },
+  empRole: { fontSize: 12, color: colors.secondary },
+  detailsMatrix: { flexDirection: 'row', flexWrap: 'wrap', padding: 12, backgroundColor: colors.surfaceContainerLow, borderRadius: 8, gap: 8 },
+  detailItem: { width: '48%' },
+  detailFullRow: { width: '100%', marginTop: 8 },
+  detailFullRowFlex: { width: '100%', flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 8 },
+  detailLabel: { fontSize: 11, fontWeight: '600', color: colors.secondary, marginBottom: 2 },
+  detailValue: { fontSize: 12, fontWeight: '500', color: colors.onSurface },
+  detailDesc: { fontSize: 12, color: colors.onSurface, lineHeight: 16 },
+  detailNote: { fontSize: 12, color: colors.secondary },
+  attachmentBox: { padding: 12, backgroundColor: colors.surfaceContainer, borderRadius: 8, gap: 12 },
+  attachmentHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  attachmentTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  attachmentTitle: { fontSize: 11, fontWeight: '600', color: colors.onSurface, letterSpacing: 0.5 },
+  reqBadge: { backgroundColor: colors.surfaceContainerHigh, paddingHorizontal: 8, paddingVertical: 4, borderRadius: 4 },
+  reqBadgeText: { fontSize: 11, fontWeight: '600', color: colors.secondary },
+  fileCard: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: colors.surfaceContainerLowest, padding: 8, borderRadius: 4 },
+  fileInfo: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  fileIconBox: { width: 36, height: 36, borderRadius: 4, backgroundColor: colors.surfaceContainerHigh, alignItems: 'center', justifyContent: 'center' },
+  fileName: { fontSize: 12, fontWeight: '500', color: colors.onSurface },
+  fileSize: { fontSize: 12, color: colors.secondary },
+  downloadBtn: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.primary, paddingHorizontal: 12, height: 44, borderRadius: 4, gap: 4 },
+  downloadBtnText: { fontSize: 11, fontWeight: '600', color: colors.onPrimary },
+  actionsBox: { gap: 8, marginTop: 8 },
+  actionRow: { flexDirection: 'row', gap: 8 },
+  approveBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: colors.primary, height: 44, borderRadius: 4, gap: 4 },
+  approveBtnText: { fontSize: 14, fontWeight: '500', color: colors.onPrimary },
+  rejectBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surfaceContainerHighest, height: 44, borderRadius: 4, gap: 4 },
+  rejectBtnText: { fontSize: 14, fontWeight: '500', color: colors.onSurface },
+  noteBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', height: 44, gap: 4 },
+  noteBtnText: { fontSize: 12, fontWeight: '500', color: colors.secondary },
+  guestNotice: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 12, backgroundColor: colors.surfaceContainerLow, borderRadius: 8 },
+  guestNoticeLeft: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  guestNoticeTitle: { fontSize: 11, fontWeight: '600', color: colors.secondary },
+  guestNoticeSub: { fontSize: 12, color: colors.secondary },
+  readOnlyBadge: { backgroundColor: colors.surfaceContainerHighest, paddingHorizontal: 8, paddingVertical: 4, borderRadius: 4 },
+  readOnlyText: { fontSize: 11, fontWeight: '600', color: colors.secondary }
+});

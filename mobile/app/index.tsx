@@ -16,7 +16,11 @@ export default function SplashScreen() {
   useEffect(() => {
     const timer = setTimeout(() => {
       // Route depends on features selected at generation time.
-      router.replace("/login");
+      if (__DEV__ && process.env.EXPO_PUBLIC_START_SCREEN) {
+        router.replace(process.env.EXPO_PUBLIC_START_SCREEN as any);
+      } else {
+        router.replace("/login");
+      }
     }, splashDuration);
 
     return () => clearTimeout(timer);
