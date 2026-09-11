@@ -1,0 +1,10 @@
+# EAS upload ignore — android/ is currently untracked, so .gradle
+# would otherwise be packed and fail with EBUSY on Windows locks.
+android/.gradle/
+android/build/
+android/app/build/
+android/app/.cxx/
+**/*.hprof
+**/.DS_Store
+node_modules/
+.expo/

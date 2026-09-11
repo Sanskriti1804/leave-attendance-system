@@ -18,13 +18,22 @@
       "adaptiveIcon": {
         "backgroundColor": "#FFFFFF"
       },
-      "package": "com.maxstarter.leaveattendance"
+      "package": "com.maxstarter.leaveattendance",
+      "usesCleartextTraffic": true
     },
     "plugins": [
-      "expo-router"
+      "expo-router",
+      "expo-font",
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "df46d289-c835-4efa-bebf-84a7a71a0d1b"
+      }
     }
   }
 }

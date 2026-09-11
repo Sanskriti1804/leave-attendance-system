@@ -5,6 +5,7 @@ import { colors, spacing, typography } from "../../maxstarter/theme";
 import { assets } from "../../maxstarter/assets";
 import { Logo } from "../../maxstarter/Logo";
 import { designContent } from "../../maxstarter/design";
+import { getSession } from "../../../services/auth";
 
 export default function SplashScreen() {
   const router = useRouter();
@@ -14,13 +15,15 @@ export default function SplashScreen() {
   // MAXSTARTER:END splash-config
 
   useEffect(() => {
-    const timer = setTimeout(() => {
+    const timer = setTimeout(async () => {
       // Route depends on features selected at generation time.
-      if (__DEV__ && process.env.EXPO_PUBLIC_START_SCREEN) {
+      if (__DEV__ && process.env.EXPO_PUBLIC_START_SCREEN && process.env.EXPO_PUBLIC_START_SCREEN !== "/login") {
         router.replace(process.env.EXPO_PUBLIC_START_SCREEN as any);
-      } else {
-        router.replace("/login");
+        return;
       }
+
+      const session = await getSession();
+      router.replace(session ? "/(tabs)" : "/login");
     }, splashDuration);
 
     return () => clearTimeout(timer);

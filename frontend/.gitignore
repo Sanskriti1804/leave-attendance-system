@@ -6,6 +6,12 @@ node_modules/
 dist/
 web-build/
 
+# Android local Gradle caches (do not upload to EAS)
+android/.gradle/
+android/build/
+android/app/build/
+android/app/.cxx/
+
 # Native
 *.orig.*
 *.jks
