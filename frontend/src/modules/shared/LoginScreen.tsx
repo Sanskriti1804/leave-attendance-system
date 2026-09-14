@@ -3,6 +3,7 @@ import { View, Text, TextInput, StyleSheet, TouchableOpacity, KeyboardAvoidingVi
 import { useRouter } from "expo-router";
 import { MaterialIcons } from '@expo/vector-icons';
 import { login as authLogin, passLogin } from "../../../services/auth";
+import { getPostLoginRoute } from "./SplashScreen";
 
 // Stitch Design Colors
 const colors = {
@@ -41,7 +42,7 @@ export default function LoginScreen() {
     setLoading(true);
     try {
       await authLogin({ email: email.trim(), password });
-      router.replace("/(tabs)");
+      router.replace(getPostLoginRoute());
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed.");
     } finally {
@@ -54,7 +55,7 @@ export default function LoginScreen() {
     setLoading(true);
     try {
       await passLogin();
-      router.replace("/(tabs)");
+      router.replace(getPostLoginRoute());
     } catch (err) {
       setError(err instanceof Error ? err.message : "Pass failed.");
     } finally {

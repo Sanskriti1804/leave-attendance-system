@@ -1,7 +1,20 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, SafeAreaView } from 'react-native';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, SafeAreaView, ActivityIndicator } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { getSession } from '../../../services/auth';
+import {
+  apiErrorMessage,
+  createLeave,
+  createLeaveDraft,
+  displayName,
+  getEmployee,
+  getMe,
+  getOrgSettings,
+  listLeaveTypes,
+  type EmployeePublic,
+  type LeaveType,
+} from '../../../services/resources';
 
 const colors = {
   surface: "#fcf9f8",
@@ -20,9 +33,187 @@ const colors = {
   secondaryFixedDim: "#c0c7d6",
 };
 
+function pad2(value: number): string {
+  return String(value).padStart(2, "0");
+}
+
+function toCivil(date: Date): string {
+  return `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(date.getDate())}`;
+}
+
+function parseCivil(civil: string): Date {
+  const [y, m, d] = civil.split("-").map(Number);
+  return new Date(y, (m ?? 1) - 1, d ?? 1);
+}
+
+function addDays(civil: string, days: number): string {
+  const date = parseCivil(civil);
+  date.setDate(date.getDate() + days);
+  return toCivil(date);
+}
+
+function formatLong(civil: string): string {
+  return parseCivil(civil).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+}
+
+function weekdayName(civil: string): string {
+  return parseCivil(civil).toLocaleDateString(undefined, { weekday: "long" });
+}
+
+function iconForLeaveType(name: string): "medical-services" | "beach-access" | "money-off" | "event-available" {
+  const lower = name.toLowerCase();
+  if (lower.includes("sick") || lower.includes("medical")) {
+    return "medical-services";
+  }
+  if (lower.includes("planned") || lower.includes("annual")) {
+    return "beach-access";
+  }
+  if (lower.includes("emergency")) {
+    return "money-off";
+  }
+  return "event-available";
+}
+
+function initials(employee: EmployeePublic | null): string {
+  if (!employee) {
+    return "—";
+  }
+  return `${employee.firstName[0] ?? ""}${employee.lastName?.[0] ?? ""}`.toUpperCase();
+}
+
 export default function ApplyLeaveScreen() {
   const router = useRouter();
-  
+  const [me, setMe] = useState<EmployeePublic | null>(null);
+  const [managerName, setManagerName] = useState("—");
+  const [types, setTypes] = useState<LeaveType[]>([]);
+  const [leaveTypeId, setLeaveTypeId] = useState<number | null>(null);
+  const [reason, setReason] = useState("");
+  const [selectedDates, setSelectedDates] = useState<string[]>([]);
+  const [viewMonth, setViewMonth] = useState(() => {
+    const now = new Date();
+    return { year: now.getFullYear(), month: now.getMonth() };
+  });
+  const [maxAdvanceDays, setMaxAdvanceDays] = useState(14);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const today = toCivil(new Date());
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const [session, leaveTypes, settings] = await Promise.all([
+        getSession(),
+        listLeaveTypes(),
+        getOrgSettings(),
+      ]);
+      setMaxAdvanceDays(settings.maxAdvanceDays);
+      setTypes(leaveTypes.items);
+      const sick = leaveTypes.items.find((row) => /sick|medical/i.test(row.name));
+      setLeaveTypeId((sick ?? leaveTypes.items[0])?.leaveTypeId ?? null);
+      const tomorrow = addDays(today, 1);
+      setSelectedDates([tomorrow]);
+
+      let profile = session?.user as EmployeePublic | undefined;
+      try {
+        profile = await getMe();
+      } catch {
+        // Pass/dev session has no API user.
+      }
+      if (profile) {
+        setMe(profile);
+        if (profile.managerId) {
+          try {
+            const manager = await getEmployee(profile.managerId);
+            setManagerName(displayName(manager));
+          } catch {
+            setManagerName(`EMP-${profile.managerId}`);
+          }
+        }
+      }
+    } catch (err) {
+      setError(apiErrorMessage(err));
+    } finally {
+      setLoading(false);
+    }
+  }, [today]);
+
+  useEffect(() => {
+    void load();
+  }, [load]);
+
+  const cells = useMemo(() => {
+    const first = new Date(viewMonth.year, viewMonth.month, 1);
+    const startOffset = (first.getDay() + 6) % 7;
+    const start = new Date(first);
+    start.setDate(1 - startOffset);
+    return Array.from({ length: 42 }, (_, index) => {
+      const date = new Date(start);
+      date.setDate(start.getDate() + index);
+      const civil = toCivil(date);
+      const inMonth = date.getMonth() === viewMonth.month;
+      const dow = date.getDay();
+      return {
+        civil,
+        day: date.getDate(),
+        inMonth,
+        isWeekend: dow === 0 || dow === 6,
+        isToday: civil === today,
+        selected: selectedDates.includes(civil),
+      };
+    });
+  }, [selectedDates, today, viewMonth.month, viewMonth.year]);
+
+  const sortedDates = [...selectedDates].sort();
+  const fromDate = sortedDates[0];
+  const toDate = sortedDates[sortedDates.length - 1];
+  const selectedType = types.find((row) => row.leaveTypeId === leaveTypeId);
+
+  function toggleDate(civil: string) {
+    setSelectedDates((current) =>
+      current.includes(civil) ? current.filter((value) => value !== civil) : [...current, civil].sort(),
+    );
+  }
+
+  async function submit(kind: "submit" | "draft") {
+    if (!leaveTypeId) {
+      setError("Select a leave type.");
+      return;
+    }
+    if (!reason.trim()) {
+      setError("Reason is required.");
+      return;
+    }
+    if (sortedDates.length === 0) {
+      setError("Select at least one date.");
+      return;
+    }
+    setSubmitting(true);
+    setError(null);
+    setMessage(null);
+    const body = {
+      leaveTypeId,
+      reason: reason.trim(),
+      selectedDates: sortedDates.map((date) => ({ date, session: "FULL_DAY" })),
+    };
+    try {
+      const result = kind === "draft" ? await createLeaveDraft(body) : await createLeave(body);
+      setMessage(`${kind === "draft" ? "Draft saved" : "Submitted"} (#${result.leaveId}, ${result.status}).`);
+    } catch (err) {
+      setError(apiErrorMessage(err));
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  const monthLabel = new Date(viewMonth.year, viewMonth.month, 1).toLocaleDateString(undefined, {
+    month: "long",
+    year: "numeric",
+  });
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.header}>
@@ -47,7 +238,7 @@ export default function ApplyLeaveScreen() {
         {/* Micro Policy Guidance Banner */}
         <View style={styles.policyBanner}>
           <MaterialIcons name="verified-user" size={18} color={colors.secondary} style={styles.policyIcon} />
-          <Text style={styles.policyText}>Advance booking limit: Max ~2 week forward notice compliant.</Text>
+          <Text style={styles.policyText}>Advance booking limit: Max {maxAdvanceDays} calendar days forward.</Text>
         </View>
 
         {/* Employee Context Header */}
@@ -55,16 +246,16 @@ export default function ApplyLeaveScreen() {
           <View style={styles.empCardRow}>
             <View style={styles.empInfoLeft}>
               <View style={styles.empInitialsBox}>
-                <Text style={styles.empInitials}>AC</Text>
+                <Text style={styles.empInitials}>{initials(me)}</Text>
               </View>
               <View>
-                <Text style={styles.empName}>Anand Chadda</Text>
-                <Text style={styles.empRole}>Engineering & DevOps</Text>
+                <Text style={styles.empName}>{displayName(me)}</Text>
+                <Text style={styles.empRole}>{me?.email ?? "Sign in required for live data"}</Text>
               </View>
             </View>
             <View style={styles.approverBox}>
               <Text style={styles.approverLabel}>APPROVER</Text>
-              <Text style={styles.approverName}>Marcus Vance</Text>
+              <Text style={styles.approverName}>{managerName}</Text>
             </View>
           </View>
         </View>
@@ -76,37 +267,33 @@ export default function ApplyLeaveScreen() {
           </View>
 
           <View style={styles.leaveTypeGrid}>
-            <TouchableOpacity style={styles.leaveTypeItemActive}>
-              <View style={styles.leaveTypeIconRow}>
-                <MaterialIcons name="medical-services" size={18} color={colors.onPrimary} />
-                <MaterialIcons name="check-circle" size={16} color={colors.onPrimary} />
-              </View>
-              <Text style={styles.leaveTypeTextActive}>Medical / Sick</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.leaveTypeItem}>
-              <View style={styles.leaveTypeIconRow}>
-                <MaterialIcons name="event-available" size={18} color={colors.secondary} />
-                <View style={styles.radioDot} />
-              </View>
-              <Text style={styles.leaveTypeText}>Casual Leave</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.leaveTypeItem}>
-              <View style={styles.leaveTypeIconRow}>
-                <MaterialIcons name="beach-access" size={18} color={colors.secondary} />
-                <View style={styles.radioDot} />
-              </View>
-              <Text style={styles.leaveTypeText}>Planned Leave</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.leaveTypeItem}>
-              <View style={styles.leaveTypeIconRow}>
-                <MaterialIcons name="money-off" size={18} color={colors.secondary} />
-                <View style={styles.radioDot} />
-              </View>
-              <Text style={styles.leaveTypeText}>Emergency Leave</Text>
-            </TouchableOpacity>
+            {types.length === 0 && !loading ? (
+              <Text style={styles.empRole}>No leave types returned from the API.</Text>
+            ) : null}
+            {types.map((type) => {
+              const active = type.leaveTypeId === leaveTypeId;
+              return (
+                <TouchableOpacity
+                  key={type.leaveTypeId}
+                  style={active ? styles.leaveTypeItemActive : styles.leaveTypeItem}
+                  onPress={() => setLeaveTypeId(type.leaveTypeId)}
+                >
+                  <View style={styles.leaveTypeIconRow}>
+                    <MaterialIcons
+                      name={iconForLeaveType(type.name)}
+                      size={18}
+                      color={active ? colors.onPrimary : colors.secondary}
+                    />
+                    {active ? (
+                      <MaterialIcons name="check-circle" size={16} color={colors.onPrimary} />
+                    ) : (
+                      <View style={styles.radioDot} />
+                    )}
+                  </View>
+                  <Text style={active ? styles.leaveTypeTextActive : styles.leaveTypeText}>{type.name}</Text>
+                </TouchableOpacity>
+              );
+            })}
           </View>
         </View>
 
@@ -116,20 +303,38 @@ export default function ApplyLeaveScreen() {
               <MaterialIcons name="date-range" size={20} color={colors.primary} />
               <View>
                 <Text style={styles.calendarTitle}>Leave Schedule & Calendar</Text>
-                <Text style={styles.calendarSubtitle}>Today: Monday, Oct 19, 2026</Text>
+                <Text style={styles.calendarSubtitle}>Today: {formatLong(today)}</Text>
               </View>
             </View>
             <View style={styles.monthBadge}>
-              <Text style={styles.monthBadgeText}>OCT 2026</Text>
+              <Text style={styles.monthBadgeText}>{monthLabel.toUpperCase()}</Text>
             </View>
           </View>
 
           <View style={styles.calendarBox}>
             <View style={styles.calendarNav}>
-              <Text style={styles.calendarMonthText}>October 2026</Text>
+              <Text style={styles.calendarMonthText}>{monthLabel}</Text>
               <View style={styles.calendarNavBtns}>
-                <MaterialIcons name="chevron-left" size={18} color={colors.secondary} />
-                <MaterialIcons name="chevron-right" size={18} color={colors.secondary} />
+                <TouchableOpacity
+                  onPress={() =>
+                    setViewMonth((current) => {
+                      const date = new Date(current.year, current.month - 1, 1);
+                      return { year: date.getFullYear(), month: date.getMonth() };
+                    })
+                  }
+                >
+                  <MaterialIcons name="chevron-left" size={18} color={colors.secondary} />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() =>
+                    setViewMonth((current) => {
+                      const date = new Date(current.year, current.month + 1, 1);
+                      return { year: date.getFullYear(), month: date.getMonth() };
+                    })
+                  }
+                >
+                  <MaterialIcons name="chevron-right" size={18} color={colors.secondary} />
+                </TouchableOpacity>
               </View>
             </View>
             <View style={styles.calendarDaysRow}>
@@ -138,11 +343,30 @@ export default function ApplyLeaveScreen() {
               ))}
             </View>
             <View style={styles.calendarGrid}>
-              <Text style={styles.calTextOff}>28</Text><Text style={styles.calTextOff}>29</Text><Text style={styles.calTextOff}>30</Text><Text style={styles.calText}>1</Text><Text style={styles.calText}>2</Text><Text style={styles.calTextWeekend}>3</Text><Text style={styles.calTextWeekend}>4</Text>
-              <Text style={styles.calText}>5</Text><Text style={styles.calText}>6</Text><Text style={styles.calText}>7</Text><Text style={styles.calText}>8</Text><Text style={styles.calText}>9</Text><Text style={styles.calTextWeekend}>10</Text><Text style={styles.calTextWeekend}>11</Text>
-              <Text style={styles.calText}>12</Text><Text style={styles.calText}>13</Text><Text style={styles.calText}>14</Text><Text style={styles.calText}>15</Text><Text style={styles.calText}>16</Text><Text style={styles.calTextWeekend}>17</Text><Text style={styles.calTextWeekend}>18</Text>
-              <View style={styles.calTextToday}><Text style={styles.calTextTodayStr}>19</Text></View><Text style={styles.calText}>20</Text><Text style={styles.calText}>21</Text><Text style={styles.calText}>22</Text><Text style={styles.calText}>23</Text><Text style={styles.calTextWeekend}>24</Text><Text style={styles.calTextWeekend}>25</Text>
-              <View style={styles.calTextSelLeft}><Text style={styles.calTextSelStr}>26</Text></View><View style={styles.calTextSelMid}><Text style={styles.calTextSelStr}>27</Text></View><View style={styles.calTextSelMid}><Text style={styles.calTextSelStr}>28</Text></View><View style={styles.calTextSelRight}><Text style={styles.calTextSelStr}>29</Text></View><Text style={styles.calText}>30</Text><Text style={styles.calTextWeekend}>31</Text><Text style={styles.calTextOff}>1</Text>
+              {cells.map((cell) => {
+                if (!cell.inMonth) {
+                  return <Text key={cell.civil} style={styles.calTextOff}>{cell.day}</Text>;
+                }
+                if (cell.selected) {
+                  return (
+                    <TouchableOpacity key={cell.civil} style={styles.calTextSelMid} onPress={() => toggleDate(cell.civil)}>
+                      <Text style={styles.calTextSelStr}>{cell.day}</Text>
+                    </TouchableOpacity>
+                  );
+                }
+                if (cell.isToday) {
+                  return (
+                    <TouchableOpacity key={cell.civil} style={styles.calTextToday} onPress={() => toggleDate(cell.civil)}>
+                      <Text style={styles.calTextTodayStr}>{cell.day}</Text>
+                    </TouchableOpacity>
+                  );
+                }
+                return (
+                  <TouchableOpacity key={cell.civil} style={{ width: "14%" }} onPress={() => toggleDate(cell.civil)}>
+                    <Text style={cell.isWeekend ? styles.calTextWeekend : styles.calText}>{cell.day}</Text>
+                  </TouchableOpacity>
+                );
+              })}
             </View>
             <View style={styles.calendarLegend}>
               <View style={styles.legendItem}>
@@ -161,27 +385,29 @@ export default function ApplyLeaveScreen() {
               <Text style={styles.dateRangeLabel}>FROM (INCLUSIVE)</Text>
               <View style={styles.dateRangeValRow}>
                 <MaterialIcons name="calendar-today" size={18} color={colors.secondary} />
-                <Text style={styles.dateRangeVal}>Oct 26, 2026</Text>
+                <Text style={styles.dateRangeVal}>{fromDate ? formatLong(fromDate) : "Select date"}</Text>
               </View>
-              <Text style={styles.dateRangeDay}>Monday</Text>
+              <Text style={styles.dateRangeDay}>{fromDate ? weekdayName(fromDate) : "—"}</Text>
             </View>
             <View style={styles.dateRangeItem}>
               <Text style={styles.dateRangeLabel}>TO (INCLUSIVE)</Text>
               <View style={styles.dateRangeValRow}>
                 <MaterialIcons name="event" size={18} color={colors.secondary} />
-                <Text style={styles.dateRangeVal}>Oct 29, 2026</Text>
+                <Text style={styles.dateRangeVal}>{toDate ? formatLong(toDate) : "Select date"}</Text>
               </View>
-              <Text style={styles.dateRangeDay}>Thursday</Text>
+              <Text style={styles.dateRangeDay}>{toDate ? weekdayName(toDate) : "—"}</Text>
             </View>
           </View>
 
           <View style={styles.durationResult}>
             <View>
-              <Text style={styles.durationTitle}>3 Working Days</Text>
-              <Text style={styles.durationSubtitle}>Mon Oct 26 – Thu Oct 29</Text>
+              <Text style={styles.durationTitle}>{sortedDates.length} Selected Day{sortedDates.length === 1 ? "" : "s"}</Text>
+              <Text style={styles.durationSubtitle}>
+                {fromDate && toDate ? `${formatLong(fromDate)} – ${formatLong(toDate)}` : "Tap calendar days"}
+              </Text>
             </View>
             <View style={styles.durationBadge}>
-              <Text style={styles.durationBadgeText}>3.0</Text>
+              <Text style={styles.durationBadgeText}>{sortedDates.length.toFixed(1)}</Text>
             </View>
           </View>
         </View>
@@ -192,10 +418,13 @@ export default function ApplyLeaveScreen() {
             style={styles.reasonInput}
             multiline
             numberOfLines={3}
-            value="Post-operative surgical recovery following outpatient procedure. Doctor advised strict rest."
-            editable={false}
+            value={reason}
+            onChangeText={setReason}
+            maxLength={500}
+            placeholder="Reason for leave"
+            placeholderTextColor={colors.secondary}
           />
-          <Text style={styles.charCount}>84 / 500</Text>
+          <Text style={styles.charCount}>{reason.length} / 500</Text>
         </View>
 
         <View style={styles.uploadCard}>
@@ -204,7 +433,11 @@ export default function ApplyLeaveScreen() {
               <MaterialIcons name="attachment" size={18} color={colors.primary} />
               <Text style={styles.uploadTitle}>Medical Document Upload</Text>
             </View>
-            <Text style={styles.uploadSubtitle}>Medical Certificate Required (Absences {'>'} 2 days)</Text>
+            <Text style={styles.uploadSubtitle}>
+              {selectedType?.requiresMedicalDocument
+                ? "This type may require a medical document on the server (upload API needs a file picker; not wired)."
+                : "Medical upload applies only when the selected type requires a document."}
+            </Text>
           </View>
           <View style={styles.fileCard}>
             <View style={styles.fileInfo}>
@@ -212,12 +445,12 @@ export default function ApplyLeaveScreen() {
                 <MaterialIcons name="picture-as-pdf" size={20} color={colors.onPrimary} />
               </View>
               <View>
-                <Text style={styles.fileName}>medical_cert_oct26.pdf</Text>
-                <Text style={styles.fileSize}>1.4 MB •</Text>
+                <Text style={styles.fileName}>No file attached</Text>
+                <Text style={styles.fileSize}>Use draft + documents API later</Text>
               </View>
             </View>
           </View>
-          <Text style={styles.uploadFormats}>Accepted Formats: PDF, JPG, PNG (Max 15MB)</Text>
+          <Text style={styles.uploadFormats}>Accepted Formats: PDF, JPG, PNG (server cap LEAVE_DOCUMENT_MAX_BYTES)</Text>
         </View>
 
         <View style={styles.attestCard}>
@@ -232,17 +465,21 @@ export default function ApplyLeaveScreen() {
               <MaterialIcons name="check" size={16} color={colors.onPrimary} />
             </View>
             <Text style={styles.checkboxText}>
-              I certify that I have notified my reporting manager (<Text style={styles.checkboxTextBold}>Manisha Verma</Text>) in advance or via formal channel regarding this surgical absence.
+              I certify that I have notified my reporting manager (<Text style={styles.checkboxTextBold}>{managerName}</Text>) regarding this absence.
             </Text>
           </View>
         </View>
 
+        {loading ? <ActivityIndicator color={colors.primary} /> : null}
+        {error ? <Text style={styles.policyText}>{error}</Text> : null}
+        {message ? <Text style={styles.policyText}>{message}</Text> : null}
+
         <View style={styles.submitActions}>
-          <TouchableOpacity style={styles.submitBtn}>
-            <Text style={styles.submitBtnText}>Submit Leave Application</Text>
+          <TouchableOpacity style={styles.submitBtn} onPress={() => void submit("submit")} disabled={submitting}>
+            <Text style={styles.submitBtnText}>{submitting ? "Submitting..." : "Submit Leave Application"}</Text>
             <MaterialIcons name="arrow-forward" size={18} color={colors.onPrimary} />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.draftBtn}>
+          <TouchableOpacity style={styles.draftBtn} onPress={() => void submit("draft")} disabled={submitting}>
             <Text style={styles.draftBtnText}>Save as Draft</Text>
           </TouchableOpacity>
         </View>

@@ -1,8 +1,11 @@
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { useRouter } from "expo-router";
 import { AppIcon } from "../../components";
 import { colors, spacing, typography } from "../../src/maxstarter/theme";
+import { logout } from "../../services/auth";
 
 export default function SettingsScreen() {
+  const router = useRouter();
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -10,9 +13,17 @@ export default function SettingsScreen() {
         <Text style={styles.title}>Settings</Text>
       </View>
       <Text style={styles.body}>
-        {/* TODO: Replace this placeholder UI with your application design. */}
-        Minimal settings screen. Add preferences here.
+        Account session uses the existing auth service. Attendance punch APIs are not available.
       </Text>
+      <TouchableOpacity
+        onPress={async () => {
+          await logout();
+          router.replace("/login");
+        }}
+        style={{ marginTop: spacing.md, paddingVertical: spacing.sm }}
+      >
+        <Text style={{ color: colors.primary, fontWeight: "600" }}>Log out</Text>
+      </TouchableOpacity>
     </View>
   );
 }

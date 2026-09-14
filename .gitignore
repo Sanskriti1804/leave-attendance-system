@@ -54,3 +54,17 @@ expo-env.d.ts
 *.tsbuildinfo
 
 memory.md
+
+# Android generated build files
+android/.cxx/
+android/.gradle/
+android/build/
+android/app/build/
+
+# Expo / Android generated files
+frontend/android/.cxx/
+frontend/android/.gradle/
+frontend/android/build/
+frontend/android/app/build/
+
+frontend/android/app/.cxx/
