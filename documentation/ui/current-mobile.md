@@ -26,7 +26,7 @@ Files: `mobile/app/_layout.tsx`, `mobile/app/index.tsx`, `mobile/app/login.tsx`,
 
 ## Auth UX
 
-Client-side validation: non-empty email/password, email contains `@`. Errors shown on the form. Success navigates to tabs without storing the session. `getSession()` always null — splash always goes to login.
+Client-side validation: non-empty email/password, email contains `@`. Errors shown on the form. Success navigates to tabs and stores a mock session in memory. `getSession()` is null until login in the current JS runtime; splash goes to login on a cold start.
 
 ## Assets
 
