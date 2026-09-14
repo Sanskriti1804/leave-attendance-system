@@ -1,3 +1,5 @@
+import { apiRequest, type ApiRequestInit } from "./api";
+
 export type Credentials = {
   email: string;
   password: string;
@@ -6,7 +8,10 @@ export type Credentials = {
 export type AuthSession = {
   token: string;
   email: string;
+  user?: unknown;
 };
+
+let currentSession: AuthSession | null = null;
 
 /**
  * Placeholder authentication service.
@@ -21,10 +26,11 @@ export async function login(credentials: Credentials): Promise<AuthSession> {
   }
 
   // Mock success — swap for your backend response.
-  return {
+  currentSession = {
     token: "mock-token",
     email: credentials.email,
   };
+  return currentSession;
 }
 
 /**
@@ -36,17 +42,27 @@ export async function passLogin(): Promise<AuthSession> {
   // TODO: Optionally hook a real "guest" / "dev" auth endpoint here.
   await new Promise((resolve) => setTimeout(resolve, 200));
 
-  return {
+  currentSession = {
     token: "dev-pass-token",
     email: "developer@local",
   };
+  return currentSession;
 }
 
 export async function logout(): Promise<void> {
   // TODO: Connect your authentication API here.
+  currentSession = null;
 }
 
 export async function getSession(): Promise<AuthSession | null> {
-  // TODO: Connect your authentication API here.
-  return null;
+  return currentSession;
+}
+
+export async function authorizedRequest<T>(path: string, init: ApiRequestInit = {}): Promise<T> {
+  const session = currentSession;
+  const headers = new Headers(init.headers);
+  if (session?.token) {
+    headers.set("Authorization", `Bearer ${session.token}`);
+  }
+  return apiRequest<T>(path, { ...init, headers });
 }

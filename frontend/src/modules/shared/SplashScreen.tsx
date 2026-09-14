@@ -5,6 +5,7 @@ import { colors, spacing, typography } from "../../maxstarter/theme";
 import { assets } from "../../maxstarter/assets";
 import { Logo } from "../../maxstarter/Logo";
 import { designContent } from "../../maxstarter/design";
+import { getSession } from "../../../services/auth";
 
 /** Post-auth destination for EXPO_PUBLIC_START_SCREEN. `/login` keeps the default home tab. */
 export function getPostLoginRoute(): Href {
