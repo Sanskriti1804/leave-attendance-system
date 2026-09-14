@@ -1,6 +1,20 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView } from 'react-native';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, ActivityIndicator } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import { getSession } from '../../../services/auth';
+import {
+  apiErrorMessage,
+  displayName,
+  getMe,
+  listLeaveTypes,
+  listLeaves,
+  submitLeaveDraft,
+  withdrawLeave,
+  type EmployeePublic,
+  type LeaveApplication,
+  type LeaveType,
+} from '../../../services/resources';
 
 const colors = {
   surface: "#fcf9f8",
@@ -18,8 +32,93 @@ const colors = {
   onSurfaceVariant: "#4c4546",
 };
 
+function matchesFilter(status: string, filter: string): boolean {
+  if (filter === "all") {
+    return true;
+  }
+  if (filter === "pending") {
+    return status === "DRAFT" || status === "SUBMITTED" || status === "PENDING_HR_REVIEW";
+  }
+  if (filter === "approved") {
+    return status === "APPROVED";
+  }
+  return status === "REJECTED" || status === "CANCELLED" || status === "WITHDRAWN";
+}
+
+function statusLabel(status: string): string {
+  return status.replaceAll("_", " ");
+}
+
 export default function MyLeaveListScreen() {
+  const router = useRouter();
+  const applyHref = (process.env.EXPO_PUBLIC_APPLY_LEAVE as string | undefined) || "/leave/apply";
   const [activeFilter, setActiveFilter] = useState('all');
+  const [me, setMe] = useState<EmployeePublic | null>(null);
+  const [types, setTypes] = useState<LeaveType[]>([]);
+  const [items, setItems] = useState<LeaveApplication[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [busyId, setBusyId] = useState<number | null>(null);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const session = await getSession();
+      try {
+        setMe(await getMe());
+      } catch {
+        setMe((session?.user as EmployeePublic | undefined) ?? null);
+      }
+      const [leaveTypes, leaves] = await Promise.all([listLeaveTypes(), listLeaves()]);
+      setTypes(leaveTypes.items);
+      setItems(leaves.items);
+    } catch (err) {
+      setError(apiErrorMessage(err));
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void load();
+  }, [load]);
+
+  const typeName = (leaveTypeId: number) =>
+    types.find((row) => row.leaveTypeId === leaveTypeId)?.name ?? `Type ${leaveTypeId}`;
+
+  const filtered = useMemo(
+    () => items.filter((row) => matchesFilter(row.status, activeFilter)),
+    [activeFilter, items],
+  );
+
+  const count = (filter: string) => items.filter((row) => matchesFilter(row.status, filter)).length;
+
+  async function onWithdraw(leaveId: number) {
+    setBusyId(leaveId);
+    setError(null);
+    try {
+      await withdrawLeave(leaveId);
+      await load();
+    } catch (err) {
+      setError(apiErrorMessage(err));
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  async function onSubmitDraft(leaveId: number) {
+    setBusyId(leaveId);
+    setError(null);
+    try {
+      await submitLeaveDraft(leaveId);
+      await load();
+    } catch (err) {
+      setError(apiErrorMessage(err));
+    } finally {
+      setBusyId(null);
+    }
+  }
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -40,9 +139,9 @@ export default function MyLeaveListScreen() {
         <View style={styles.topRow}>
           <View>
             <Text style={styles.topLabel}>LEAVE RECORDS</Text>
-            <Text style={styles.empName}>Priya Khanna</Text>
+            <Text style={styles.empName}>{displayName(me)}</Text>
           </View>
-          <TouchableOpacity style={styles.applyBtn}>
+          <TouchableOpacity style={styles.applyBtn} onPress={() => router.push(applyHref as never)}>
             <MaterialIcons name="add" size={18} color={colors.onPrimary} />
             <Text style={styles.applyBtnText}>Apply Leave</Text>
           </TouchableOpacity>
@@ -52,186 +151,120 @@ export default function MyLeaveListScreen() {
           <TouchableOpacity style={activeFilter === 'all' ? styles.filterChipActive : styles.filterChip} onPress={() => setActiveFilter('all')}>
             <Text style={activeFilter === 'all' ? styles.filterChipTextActive : styles.filterChipText}>All</Text>
             <View style={activeFilter === 'all' ? styles.filterBadgeActive : styles.filterBadge}>
-              <Text style={styles.filterBadgeText}>5</Text>
+              <Text style={styles.filterBadgeText}>{count("all")}</Text>
             </View>
           </TouchableOpacity>
           <TouchableOpacity style={activeFilter === 'pending' ? styles.filterChipActive : styles.filterChip} onPress={() => setActiveFilter('pending')}>
             <Text style={activeFilter === 'pending' ? styles.filterChipTextActive : styles.filterChipText}>Pending</Text>
             <View style={activeFilter === 'pending' ? styles.filterBadgeActive : styles.filterBadge}>
-              <Text style={styles.filterBadgeText}>2</Text>
+              <Text style={styles.filterBadgeText}>{count("pending")}</Text>
             </View>
           </TouchableOpacity>
           <TouchableOpacity style={activeFilter === 'approved' ? styles.filterChipActive : styles.filterChip} onPress={() => setActiveFilter('approved')}>
             <Text style={activeFilter === 'approved' ? styles.filterChipTextActive : styles.filterChipText}>Approved</Text>
             <View style={activeFilter === 'approved' ? styles.filterBadgeActive : styles.filterBadge}>
-              <Text style={styles.filterBadgeText}>2</Text>
+              <Text style={styles.filterBadgeText}>{count("approved")}</Text>
             </View>
           </TouchableOpacity>
           <TouchableOpacity style={activeFilter === 'history' ? styles.filterChipActive : styles.filterChip} onPress={() => setActiveFilter('history')}>
             <Text style={activeFilter === 'history' ? styles.filterChipTextActive : styles.filterChipText}>Past / History</Text>
             <View style={activeFilter === 'history' ? styles.filterBadgeActive : styles.filterBadge}>
-              <Text style={styles.filterBadgeText}>1</Text>
+              <Text style={styles.filterBadgeText}>{count("history")}</Text>
             </View>
           </TouchableOpacity>
         </ScrollView>
 
+        {loading ? <ActivityIndicator color={colors.primary} style={{ marginTop: 16 }} /> : null}
+        {error ? <Text style={[styles.cardDuration, { paddingHorizontal: 16 }]}>{error}</Text> : null}
+
         <View style={styles.listContainer}>
-          
-          {/* Card 1: Pending */}
-          {(activeFilter === 'all' || activeFilter === 'pending') && (
-            <View style={styles.card}>
-              <View style={styles.cardHeader}>
-                <View style={styles.cardInfo}>
-                  <View style={styles.cardTitleRow}>
-                    <Text style={styles.cardTitle}>Medical Leave</Text>
-                    <View style={styles.statusBadgePending}>
-                      <MaterialIcons name="hourglass-top" size={12} color={colors.onSurface} />
-                      <Text style={styles.statusBadgeTextPending}>Pending HR Review</Text>
+          {!loading && filtered.length === 0 ? (
+            <Text style={styles.cardDuration}>No leave applications for this filter.</Text>
+          ) : null}
+          {filtered.map((leave) => {
+            const pending = leave.status === "SUBMITTED" || leave.status === "PENDING_HR_REVIEW";
+            const draft = leave.status === "DRAFT";
+            const approved = leave.status === "APPROVED";
+            const history = leave.status === "REJECTED" || leave.status === "CANCELLED" || leave.status === "WITHDRAWN";
+            return (
+              <View key={leave.leaveId} style={styles.card}>
+                <View style={styles.cardHeader}>
+                  <View style={styles.cardInfo}>
+                    <View style={styles.cardTitleRow}>
+                      <Text style={styles.cardTitle}>{typeName(leave.leaveTypeId)}</Text>
+                      <View
+                        style={
+                          approved
+                            ? styles.statusBadgeApproved
+                            : history
+                              ? styles.statusBadgeRejected
+                              : draft
+                                ? styles.statusBadgeDraft
+                                : styles.statusBadgePending
+                        }
+                      >
+                        <Text
+                          style={
+                            approved ? styles.statusBadgeTextApproved : styles.statusBadgeTextPending
+                          }
+                        >
+                          {statusLabel(leave.status)}
+                        </Text>
+                      </View>
                     </View>
+                    <Text style={styles.cardDate}>{leave.startDate} – {leave.endDate}</Text>
+                    <Text style={styles.cardDuration}>Duration: {leave.numberOfDays} day(s) · {leave.durationType}</Text>
                   </View>
-                  <Text style={styles.cardDate}>Oct 26, 2026 – Oct 29, 2026</Text>
-                  <Text style={styles.cardDuration}>Duration: 3 Days (Full-time)</Text>
+                  <View style={styles.cardIconBox}>
+                    <MaterialIcons name="event-available" size={18} color={colors.onSurface} />
+                  </View>
                 </View>
-                <View style={styles.cardIconBox}>
-                  <MaterialIcons name="medical-services" size={18} color={colors.onSurface} />
-                </View>
-              </View>
 
-              <View style={styles.cardReasonBox}>
-                <View style={styles.reasonRow}>
-                  <MaterialIcons name="assignment" size={16} color={colors.onSurface} />
-                  <Text style={styles.reasonText}>Reason: Post-operative recovery • Medical Cert Attached</Text>
-                </View>
-                <View style={styles.fileRow}>
-                  <MaterialIcons name="lock" size={14} color={colors.secondary} />
-                  <Text style={styles.fileText}>Medical file included</Text>
-                </View>
-              </View>
-
-              <View style={styles.cardFooter}>
-                <View style={styles.footerTime}>
-                  <MaterialIcons name="schedule" size={16} color={colors.secondary} />
-                  <Text style={styles.footerTimeText}>Submitted 4 hours ago</Text>
-                </View>
-                <TouchableOpacity style={styles.actionBtn}>
-                  <MaterialIcons name="undo" size={16} color={colors.onSurface} />
-                  <Text style={styles.actionBtnText}>Withdraw Request</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          )}
-
-          {/* Card 2: Approved */}
-          {(activeFilter === 'all' || activeFilter === 'approved') && (
-            <View style={styles.card}>
-              <View style={styles.cardHeader}>
-                <View style={styles.cardInfo}>
-                  <View style={styles.cardTitleRow}>
-                    <Text style={styles.cardTitle}>Casual Leave</Text>
-                    <View style={styles.statusBadgeApproved}>
-                      <MaterialIcons name="check-circle" size={12} color={colors.onPrimary} />
-                      <Text style={styles.statusBadgeTextApproved}>Approved</Text>
+                <View style={styles.cardReasonBox}>
+                  <View style={styles.reasonRow}>
+                    <MaterialIcons name="assignment" size={16} color={colors.onSurface} />
+                    <Text style={styles.reasonText}>Reason: {leave.reason}</Text>
+                  </View>
+                  {leave.hrComments ? (
+                    <View style={styles.fileRow}>
+                      <MaterialIcons name="chat-bubble" size={14} color={colors.secondary} />
+                      <Text style={styles.fileText}>{leave.hrComments}</Text>
                     </View>
-                  </View>
-                  <Text style={styles.cardDate}>Sep 14, 2026</Text>
-                  <Text style={styles.cardDuration}>Duration: 1 Day • Half-day Second 4h</Text>
+                  ) : null}
                 </View>
-                <View style={styles.cardIconBox}>
-                  <MaterialIcons name="event-available" size={18} color={colors.onSurface} />
-                </View>
-              </View>
 
-              <View style={styles.cardReasonBox}>
-                <View style={styles.reasonRow}>
-                  <MaterialIcons name="description" size={16} color={colors.onSurface} />
-                  <Text style={styles.reasonText}>Reason: Family matter commitment</Text>
-                </View>
-                <View style={styles.fileRow}>
-                  <MaterialIcons name="verified-user" size={16} color={colors.secondary} />
-                  <Text style={styles.fileText}>Approved by HR and TL</Text>
-                </View>
-              </View>
-            </View>
-          )}
-
-          {/* Card 3: Rejected */}
-          {(activeFilter === 'all' || activeFilter === 'history') && (
-            <View style={styles.card}>
-              <View style={styles.cardHeader}>
-                <View style={styles.cardInfo}>
-                  <View style={styles.cardTitleRow}>
-                    <Text style={styles.cardTitle}>Annual Leave</Text>
-                    <View style={styles.statusBadgeRejected}>
-                      <MaterialIcons name="cancel" size={12} color={colors.onSurface} />
-                      <Text style={styles.statusBadgeTextRejected}>Rejected</Text>
+                {pending ? (
+                  <View style={styles.cardFooter}>
+                    <View style={styles.footerTime}>
+                      <MaterialIcons name="schedule" size={16} color={colors.secondary} />
+                      <Text style={styles.footerTimeText}>{new Date(leave.createdAt).toLocaleString()}</Text>
                     </View>
+                    <TouchableOpacity
+                      style={styles.actionBtn}
+                      onPress={() => void onWithdraw(leave.leaveId)}
+                      disabled={busyId === leave.leaveId}
+                    >
+                      <MaterialIcons name="undo" size={16} color={colors.onSurface} />
+                      <Text style={styles.actionBtnText}>{busyId === leave.leaveId ? "..." : "Withdraw Request"}</Text>
+                    </TouchableOpacity>
                   </View>
-                  <Text style={styles.cardDate}>Aug 18, 2026 – Aug 20, 2026</Text>
-                  <Text style={styles.cardDuration}>Duration: 3 Days (Full-time)</Text>
-                </View>
-                <View style={styles.cardIconBox}>
-                  <MaterialIcons name="event-busy" size={18} color={colors.onSurface} />
-                </View>
-              </View>
+                ) : null}
 
-              <View style={styles.cardCommentBox}>
-                <View style={styles.commentHeader}>
-                  <MaterialIcons name="chat-bubble" size={16} color={colors.onSurface} />
-                  <Text style={styles.commentTitle}>HR CLARIFICATION COMMENT</Text>
-                </View>
-                <Text style={styles.commentDesc}>"HR Note: High sprint freeze period during release cycle. Please reschedule with manager."</Text>
-              </View>
-
-              <View style={styles.cardFooter}>
-                <View style={styles.footerTime}>
-                  <MaterialIcons name="history" size={16} color={colors.secondary} />
-                  <Text style={styles.footerTimeText}>Logged on Aug 02, 2026</Text>
-                </View>
-                <TouchableOpacity style={styles.actionBtn}>
-                  <Text style={styles.actionBtnText}>Resubmit New</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          )}
-
-          {/* Card 4: Draft */}
-          {(activeFilter === 'all' || activeFilter === 'pending') && (
-            <View style={styles.card}>
-              <View style={styles.cardHeader}>
-                <View style={styles.cardInfo}>
-                  <View style={styles.cardTitleRow}>
-                    <Text style={styles.cardTitle}>Casual Leave</Text>
-                    <View style={styles.statusBadgeDraft}>
-                      <MaterialIcons name="edit-note" size={12} color={colors.onSurface} />
-                      <Text style={styles.statusBadgeTextDraft}>Draft</Text>
-                    </View>
+                {draft ? (
+                  <View style={styles.cardFooterRight}>
+                    <TouchableOpacity
+                      style={styles.actionBtnPrimary}
+                      onPress={() => void onSubmitDraft(leave.leaveId)}
+                      disabled={busyId === leave.leaveId}
+                    >
+                      <MaterialIcons name="send" size={16} color={colors.onPrimary} />
+                      <Text style={styles.actionBtnPrimaryText}>{busyId === leave.leaveId ? "..." : "Submit Draft"}</Text>
+                    </TouchableOpacity>
                   </View>
-                  <Text style={styles.cardDate}>Nov 12, 2026</Text>
-                  <Text style={styles.cardDuration}>Duration: 1 Day • Pending Submission</Text>
-                </View>
-                <View style={styles.cardIconBox}>
-                  <MaterialIcons name="drafts" size={18} color={colors.onSurface} />
-                </View>
+                ) : null}
               </View>
-
-              <View style={styles.cardDraftBox}>
-                <Text style={styles.draftText}>Draft saved locally 2 days ago</Text>
-                <Text style={styles.draftBadge}>UNSENT</Text>
-              </View>
-
-              <View style={styles.cardFooterRight}>
-                <TouchableOpacity style={styles.actionBtn}>
-                  <MaterialIcons name="delete" size={16} color={colors.onSurface} />
-                  <Text style={styles.actionBtnText}>Delete</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.actionBtnPrimary}>
-                  <MaterialIcons name="edit" size={16} color={colors.onPrimary} />
-                  <Text style={styles.actionBtnPrimaryText}>Edit Draft</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          )}
-
+            );
+          })}
         </View>
 
       </ScrollView>

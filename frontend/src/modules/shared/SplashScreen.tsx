@@ -1,11 +1,25 @@
 import { useEffect } from "react";
 import { View, Text, StyleSheet } from "react-native";
-import { useRouter } from "expo-router";
+import { useRouter, type Href } from "expo-router";
 import { colors, spacing, typography } from "../../maxstarter/theme";
 import { assets } from "../../maxstarter/assets";
 import { Logo } from "../../maxstarter/Logo";
 import { designContent } from "../../maxstarter/design";
-import { getSession } from "../../../services/auth";
+
+/** Post-auth destination for EXPO_PUBLIC_START_SCREEN. `/login` keeps the default home tab. */
+export function getPostLoginRoute(): Href {
+  const start = process.env.EXPO_PUBLIC_START_SCREEN;
+  if (start === "/") {
+    return "/(tabs)";
+  }
+  if (start === "/profile") {
+    return "/(tabs)/profile";
+  }
+  if (start === "/admin") {
+    return "/admin";
+  }
+  return "/(tabs)";
+}
 
 export default function SplashScreen() {
   const router = useRouter();
@@ -15,15 +29,10 @@ export default function SplashScreen() {
   // MAXSTARTER:END splash-config
 
   useEffect(() => {
-    const timer = setTimeout(async () => {
-      // Route depends on features selected at generation time.
-      if (__DEV__ && process.env.EXPO_PUBLIC_START_SCREEN && process.env.EXPO_PUBLIC_START_SCREEN !== "/login") {
-        router.replace(process.env.EXPO_PUBLIC_START_SCREEN as any);
-        return;
-      }
 
+    const timer = setTimeout(async () => {
       const session = await getSession();
-      router.replace(session ? "/(tabs)" : "/login");
+      router.replace(session ? getPostLoginRoute() : "/login");
     }, splashDuration);
 
     return () => clearTimeout(timer);

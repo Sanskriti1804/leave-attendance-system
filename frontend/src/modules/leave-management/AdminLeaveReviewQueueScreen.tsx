@@ -1,6 +1,20 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, SafeAreaView } from 'react-native';
+import React, { useCallback, useEffect, useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, ActivityIndicator } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+import { getSession } from '../../../services/auth';
+import {
+  apiErrorMessage,
+  approveLeave,
+  displayName,
+  getMe,
+  listEmployees,
+  listLeaveTypes,
+  listLeaves,
+  rejectLeave,
+  type EmployeePublic,
+  type LeaveApplication,
+  type LeaveType,
+} from '../../../services/resources';
 
 const colors = {
   surface: "#fcf9f8",
@@ -18,7 +32,79 @@ const colors = {
 };
 
 export default function AdminLeaveReviewQueueScreen() {
-  const [isGuestMode, setIsGuestMode] = React.useState(true);
+  const [me, setMe] = useState<EmployeePublic | null>(null);
+  const [filter, setFilter] = useState<"PENDING_HR_REVIEW" | "APPROVED">("PENDING_HR_REVIEW");
+  const [items, setItems] = useState<LeaveApplication[]>([]);
+  const [types, setTypes] = useState<LeaveType[]>([]);
+  const [employees, setEmployees] = useState<EmployeePublic[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [busyId, setBusyId] = useState<number | null>(null);
+
+  const isGuest = me?.role === "guest_admin";
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const session = await getSession();
+      try {
+        setMe(await getMe());
+      } catch {
+        setMe((session?.user as EmployeePublic | undefined) ?? null);
+      }
+      const [leaves, leaveTypes, people] = await Promise.all([
+        listLeaves(filter),
+        listLeaveTypes(),
+        listEmployees().catch(() => ({ items: [] as EmployeePublic[] })),
+      ]);
+      setItems(leaves.items);
+      setTypes(leaveTypes.items);
+      setEmployees(people.items);
+    } catch (err) {
+      setError(apiErrorMessage(err));
+    } finally {
+      setLoading(false);
+    }
+  }, [filter]);
+
+  useEffect(() => {
+    void load();
+  }, [load]);
+
+  const employeeName = (employeeId: number) => {
+    const row = employees.find((item) => item.employeeId === employeeId);
+    return row ? displayName(row) : `EMP-${employeeId}`;
+  };
+
+  const typeName = (leaveTypeId: number) =>
+    types.find((row) => row.leaveTypeId === leaveTypeId)?.name ?? `Type ${leaveTypeId}`;
+
+  async function onApprove(leaveId: number) {
+    setBusyId(leaveId);
+    setError(null);
+    try {
+      await approveLeave(leaveId);
+      await load();
+    } catch (err) {
+      setError(apiErrorMessage(err));
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  async function onReject(leaveId: number) {
+    setBusyId(leaveId);
+    setError(null);
+    try {
+      await rejectLeave(leaveId, "Rejected from review queue");
+      await load();
+    } catch (err) {
+      setError(apiErrorMessage(err));
+    } finally {
+      setBusyId(null);
+    }
+  }
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -41,52 +127,49 @@ export default function AdminLeaveReviewQueueScreen() {
 
         <View style={styles.roleToggle}>
           <View style={styles.roleInfo}>
-            <View style={[styles.roleDot, { backgroundColor: isGuestMode ? colors.error : colors.primary }]} />
+            <View style={[styles.roleDot, { backgroundColor: isGuest ? colors.error : colors.primary }]} />
             <View>
-              <Text style={styles.roleName}>{isGuestMode ? 'Guest Admin (View Only)' : 'HR Admin (Full Authority)'}</Text>
-              <Text style={styles.roleUser}>Preeti Kaur</Text>
+              <Text style={styles.roleName}>{isGuest ? "Guest Admin (View Only)" : me?.role === "admin" ? "HR Admin (Full Authority)" : me?.role ?? "Unknown role"}</Text>
+              <Text style={styles.roleUser}>{displayName(me)}</Text>
             </View>
           </View>
-          <TouchableOpacity style={styles.toggleBtn} onPress={() => setIsGuestMode(!isGuestMode)}>
-            <MaterialIcons name="swap-horiz" size={16} color={colors.onSurface} />
-            <Text style={styles.toggleBtnText}>{isGuestMode ? 'SWITCH TO HR ADMIN' : 'SIMULATE GUEST'}</Text>
-          </TouchableOpacity>
         </View>
 
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.statusChips} contentContainerStyle={styles.statusChipsContent}>
-          <TouchableOpacity style={styles.chipActive}>
-            <Text style={styles.chipActiveText}>PENDING REVIEW</Text>
-            <View style={styles.chipBadgeActive}>
-              <Text style={styles.chipBadgeTextActive}>5</Text>
+          <TouchableOpacity
+            style={filter === "PENDING_HR_REVIEW" ? styles.chipActive : styles.chipInactive}
+            onPress={() => setFilter("PENDING_HR_REVIEW")}
+          >
+            <Text style={filter === "PENDING_HR_REVIEW" ? styles.chipActiveText : styles.chipInactiveText}>PENDING REVIEW</Text>
+            <View style={filter === "PENDING_HR_REVIEW" ? styles.chipBadgeActive : styles.chipBadgeInactive}>
+              <Text style={filter === "PENDING_HR_REVIEW" ? styles.chipBadgeTextActive : styles.chipBadgeTextInactive}>{items.length}</Text>
             </View>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.chipInactive}>
-            <Text style={styles.chipInactiveText}>MEDICAL ATTESTED</Text>
-            <View style={styles.chipBadgeInactive}>
-              <Text style={styles.chipBadgeTextInactive}>3</Text>
-            </View>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.chipInactive}>
-            <Text style={styles.chipInactiveText}>APPROVED</Text>
-            <View style={styles.chipBadgeInactive}>
-              <Text style={styles.chipBadgeTextInactive}>142</Text>
-            </View>
+          <TouchableOpacity
+            style={filter === "APPROVED" ? styles.chipActive : styles.chipInactive}
+            onPress={() => setFilter("APPROVED")}
+          >
+            <Text style={filter === "APPROVED" ? styles.chipActiveText : styles.chipInactiveText}>APPROVED</Text>
           </TouchableOpacity>
         </ScrollView>
 
-        {/* Item 1 */}
-        <View style={styles.card}>
+        {loading ? <ActivityIndicator color={colors.primary} /> : null}
+        {error ? <Text style={styles.empRole}>{error}</Text> : null}
+        {!loading && items.length === 0 ? <Text style={styles.empRole}>No applications in this queue.</Text> : null}
+
+        {items.map((leave) => (
+        <View key={leave.leaveId} style={styles.card}>
           <View style={styles.cardHeader}>
             <View style={styles.empInfo}>
               <View style={styles.avatarPlaceholder} />
               <View>
                 <View style={styles.nameRow}>
-                  <Text style={styles.empName}>Milind Rawat</Text>
+                  <Text style={styles.empName}>{employeeName(leave.employeeId)}</Text>
                   <View style={styles.empIdBadge}>
-                    <Text style={styles.empIdText}>EMP-4102</Text>
+                    <Text style={styles.empIdText}>EMP-{leave.employeeId}</Text>
                   </View>
                 </View>
-                <Text style={styles.empRole}>VP, Engineering & DevOps</Text>
+                <Text style={styles.empRole}>{leave.status.replaceAll("_", " ")}</Text>
               </View>
             </View>
           </View>
@@ -94,74 +177,48 @@ export default function AdminLeaveReviewQueueScreen() {
           <View style={styles.detailsMatrix}>
             <View style={styles.detailItem}>
               <Text style={styles.detailLabel}>LEAVE CLASSIFICATION</Text>
-              <Text style={styles.detailValue}>Medical / Sick Leave</Text>
+              <Text style={styles.detailValue}>{typeName(leave.leaveTypeId)}</Text>
             </View>
             <View style={styles.detailItem}>
               <Text style={styles.detailLabel}>STATUTORY DURATION</Text>
-              <Text style={styles.detailValue}>3 Days · Oct 26–29, 2026</Text>
+              <Text style={styles.detailValue}>{leave.numberOfDays} Days · {leave.startDate}–{leave.endDate}</Text>
             </View>
             <View style={styles.detailFullRow}>
               <Text style={styles.detailLabel}>ATTESTED JUSTIFICATION</Text>
-              <Text style={styles.detailDesc}>Post-operative surgical recovery following outpatient procedure. Doctor advised strict rest.</Text>
-            </View>
-            <View style={styles.detailFullRowFlex}>
-              <MaterialIcons name="approval" size={14} color={colors.secondary} />
-              <Text style={styles.detailNote}>Direct Manager notified / Self-attested</Text>
+              <Text style={styles.detailDesc}>{leave.reason}</Text>
             </View>
           </View>
 
-          <View style={styles.attachmentBox}>
-            <View style={styles.attachmentHeader}>
-              <View style={styles.attachmentTitleRow}>
-                <MaterialIcons name="description" size={18} color={colors.primary} />
-                <Text style={styles.attachmentTitle}>MEDICAL PROOF</Text>
-              </View>
-              <View style={styles.reqBadge}>
-                <Text style={styles.reqBadgeText}>REQUIRED &gt;2 DAYS</Text>
-              </View>
-            </View>
-
-            <View style={styles.fileCard}>
-              <View style={styles.fileInfo}>
-                <View style={styles.fileIconBox}>
-                  <MaterialIcons name="picture-as-pdf" size={20} color={colors.onSurface} />
-                </View>
-                <View>
-                  <Text style={styles.fileName}>medical_cert_vance_oct26.pdf</Text>
-                  <Text style={styles.fileSize}>1.8 MB</Text>
-                </View>
-              </View>
-              <TouchableOpacity style={styles.downloadBtn}>
-                <MaterialIcons name="download" size={16} color={colors.onPrimary} />
-                <Text style={styles.downloadBtnText}>DOWNLOAD</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          {!isGuestMode ? (
+          {!isGuest && filter === "PENDING_HR_REVIEW" && me?.role === "admin" ? (
             <View style={styles.actionsBox}>
               <View style={styles.actionRow}>
-                <TouchableOpacity style={styles.approveBtn}>
+                <TouchableOpacity
+                  style={styles.approveBtn}
+                  onPress={() => void onApprove(leave.leaveId)}
+                  disabled={busyId === leave.leaveId}
+                >
                   <MaterialIcons name="done-all" size={18} color={colors.onPrimary} />
-                  <Text style={styles.approveBtnText}>Approve Leave</Text>
+                  <Text style={styles.approveBtnText}>{busyId === leave.leaveId ? "..." : "Approve Leave"}</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.rejectBtn}>
+                <TouchableOpacity
+                  style={styles.rejectBtn}
+                  onPress={() => void onReject(leave.leaveId)}
+                  disabled={busyId === leave.leaveId}
+                >
                   <MaterialIcons name="chat-bubble-outline" size={18} color={colors.onSurface} />
                   <Text style={styles.rejectBtnText}>Reject / Clarify</Text>
                 </TouchableOpacity>
               </View>
-              <TouchableOpacity style={styles.noteBtn}>
-                <MaterialIcons name="note-add" size={16} color={colors.secondary} />
-                <Text style={styles.noteBtnText}>Add Internal HR Note (Private)</Text>
-              </TouchableOpacity>
             </View>
           ) : (
             <View style={styles.guestNotice}>
               <View style={styles.guestNoticeLeft}>
                 <MaterialIcons name="visibility" size={18} color={colors.secondary} />
                 <View>
-                  <Text style={styles.guestNoticeTitle}>GUEST VIEW ACCESS</Text>
-                  <Text style={styles.guestNoticeSub}>Read-only view • Actions restricted to HR Admin</Text>
+                  <Text style={styles.guestNoticeTitle}>{isGuest ? "GUEST VIEW ACCESS" : "READ"}</Text>
+                  <Text style={styles.guestNoticeSub}>
+                    {isGuest ? "Read-only view • Actions restricted to HR Admin" : leave.status}
+                  </Text>
                 </View>
               </View>
               <View style={styles.readOnlyBadge}>
@@ -170,6 +227,7 @@ export default function AdminLeaveReviewQueueScreen() {
             </View>
           )}
         </View>
+        ))}
 
       </ScrollView>
     </SafeAreaView>
