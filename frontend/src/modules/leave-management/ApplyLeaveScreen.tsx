@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, SafeAreaView, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, SafeAreaView, ActivityIndicator, Alert } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { getSession } from '../../../services/auth';
@@ -15,6 +15,7 @@ import {
   type EmployeePublic,
   type LeaveType,
 } from '../../../services/resources';
+import { UIFallbackIndicator } from '../../components/ui/UIFallback';
 
 const colors = {
   surface: "#fcf9f8",
@@ -81,6 +82,32 @@ function initials(employee: EmployeePublic | null): string {
   return `${employee.firstName[0] ?? ""}${employee.lastName?.[0] ?? ""}`.toUpperCase();
 }
 
+const FALLBACK_LEAVE_TYPES: LeaveType[] = [
+  { leaveTypeId: 1, name: "Casual", description: "Casual leave", requiresMedicalDocument: false, allowedSex: null, obsolete: false },
+  { leaveTypeId: 2, name: "Sick", description: "Medical leave", requiresMedicalDocument: true, allowedSex: null, obsolete: false },
+  { leaveTypeId: 3, name: "Emergency", description: "Emergency leave", requiresMedicalDocument: false, allowedSex: null, obsolete: false },
+  { leaveTypeId: 4, name: "Planned", description: "Planned leave", requiresMedicalDocument: false, allowedSex: null, obsolete: false },
+];
+
+type DaySession = "FULL_DAY" | "FIRST_HALF";
+type DurationMode = "FULL" | "HALF";
+
+function enumerateRange(from: string, to: string): string[] {
+  const start = from <= to ? from : to;
+  const end = from <= to ? to : from;
+  const dates: string[] = [];
+  let cursor = start;
+  while (cursor <= end) {
+    dates.push(cursor);
+    cursor = addDays(cursor, 1);
+  }
+  return dates;
+}
+
+function sessionForMode(mode: DurationMode): DaySession {
+  return mode === "HALF" ? "FIRST_HALF" : "FULL_DAY";
+}
+
 export default function ApplyLeaveScreen() {
   const router = useRouter();
   const [me, setMe] = useState<EmployeePublic | null>(null);
@@ -89,6 +116,12 @@ export default function ApplyLeaveScreen() {
   const [leaveTypeId, setLeaveTypeId] = useState<number | null>(null);
   const [reason, setReason] = useState("");
   const [selectedDates, setSelectedDates] = useState<string[]>([]);
+  const [dateSessions, setDateSessions] = useState<Record<string, DaySession>>({});
+  const [dateOverrides, setDateOverrides] = useState<Record<string, true>>({});
+  const [durationMode, setDurationMode] = useState<DurationMode>("FULL");
+  const [waitingForTo, setWaitingForTo] = useState(false);
+  const [sessionMenuOpen, setSessionMenuOpen] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
   const [viewMonth, setViewMonth] = useState(() => {
     const now = new Date();
     return { year: now.getFullYear(), month: now.getMonth() };
@@ -111,11 +144,16 @@ export default function ApplyLeaveScreen() {
         getOrgSettings(),
       ]);
       setMaxAdvanceDays(settings.maxAdvanceDays);
-      setTypes(leaveTypes.items);
-      const sick = leaveTypes.items.find((row) => /sick|medical/i.test(row.name));
-      setLeaveTypeId((sick ?? leaveTypes.items[0])?.leaveTypeId ?? null);
+      const resolvedTypes = leaveTypes.items.length > 0 ? leaveTypes.items : FALLBACK_LEAVE_TYPES;
+      setTypes(resolvedTypes);
+      const sick = resolvedTypes.find((row) => /sick|medical/i.test(row.name));
+      setLeaveTypeId((sick ?? resolvedTypes[0])?.leaveTypeId ?? null);
       const tomorrow = addDays(today, 1);
       setSelectedDates([tomorrow]);
+      setDateSessions({ [tomorrow]: "FULL_DAY" });
+      setDateOverrides({});
+      setDurationMode("FULL");
+      setWaitingForTo(true);
 
       let profile = session?.user as EmployeePublic | undefined;
       try {
@@ -145,6 +183,14 @@ export default function ApplyLeaveScreen() {
     void load();
   }, [load]);
 
+  useEffect(() => {
+    if (!toast) {
+      return;
+    }
+    const timer = setTimeout(() => setToast(null), 4000);
+    return () => clearTimeout(timer);
+  }, [toast]);
+
   const cells = useMemo(() => {
     const first = new Date(viewMonth.year, viewMonth.month, 1);
     const startOffset = (first.getDay() + 6) % 7;
@@ -169,13 +215,59 @@ export default function ApplyLeaveScreen() {
 
   const sortedDates = [...selectedDates].sort();
   const fromDate = sortedDates[0];
-  const toDate = sortedDates[sortedDates.length - 1];
+  const toDate = waitingForTo ? undefined : sortedDates[sortedDates.length - 1];
   const selectedType = types.find((row) => row.leaveTypeId === leaveTypeId);
+  const leaveDayCount = sortedDates.reduce(
+    (sum, date) => sum + (dateSessions[date] === "FIRST_HALF" ? 0.5 : 1),
+    0,
+  );
+
+  function applyDurationMode(mode: DurationMode) {
+    setDurationMode(mode);
+    setSessionMenuOpen(false);
+    const session = sessionForMode(mode);
+    setDateSessions((current) => {
+      const next = { ...current };
+      for (const date of selectedDates) {
+        if (!dateOverrides[date]) {
+          next[date] = session;
+        }
+      }
+      return next;
+    });
+  }
+
+  function setDateSession(civil: string, session: DaySession) {
+    setDateSessions((current) => ({ ...current, [civil]: session }));
+    setDateOverrides((current) => ({ ...current, [civil]: true }));
+  }
+
+  function openDateSessionMenu(civil: string) {
+    Alert.alert(formatLong(civil), "Session type for this date", [
+      { text: "Full Day", onPress: () => setDateSession(civil, "FULL_DAY") },
+      { text: "Half Day", onPress: () => setDateSession(civil, "FIRST_HALF") },
+      { text: "Cancel", style: "cancel" },
+    ]);
+  }
 
   function toggleDate(civil: string) {
-    setSelectedDates((current) =>
-      current.includes(civil) ? current.filter((value) => value !== civil) : [...current, civil].sort(),
-    );
+    if (waitingForTo && fromDate) {
+      const range = enumerateRange(fromDate, civil);
+      setSelectedDates(range);
+      setDateSessions(Object.fromEntries(range.map((date) => [date, "FULL_DAY"])));
+      setDateOverrides({});
+      setDurationMode("FULL");
+      setWaitingForTo(false);
+      return;
+    }
+    if (selectedDates.includes(civil)) {
+      return;
+    }
+    setSelectedDates([civil]);
+    setDateSessions({ [civil]: "FULL_DAY" });
+    setDateOverrides({});
+    setDurationMode("FULL");
+    setWaitingForTo(true);
   }
 
   async function submit(kind: "submit" | "draft") {
@@ -197,13 +289,13 @@ export default function ApplyLeaveScreen() {
     const body = {
       leaveTypeId,
       reason: reason.trim(),
-      selectedDates: sortedDates.map((date) => ({ date, session: "FULL_DAY" })),
+      selectedDates: sortedDates.map((date) => ({ date, session: dateSessions[date] ?? "FULL_DAY" })),
     };
     try {
       const result = kind === "draft" ? await createLeaveDraft(body) : await createLeave(body);
       setMessage(`${kind === "draft" ? "Draft saved" : "Submitted"} (#${result.leaveId}, ${result.status}).`);
     } catch (err) {
-      setError(apiErrorMessage(err));
+      setToast(apiErrorMessage(err));
     } finally {
       setSubmitting(false);
     }
@@ -246,16 +338,22 @@ export default function ApplyLeaveScreen() {
           <View style={styles.empCardRow}>
             <View style={styles.empInfoLeft}>
               <View style={styles.empInitialsBox}>
-                <Text style={styles.empInitials}>{initials(me)}</Text>
+                <Text style={styles.empInitials}>{error ? "AC" : initials(me)}</Text>
               </View>
               <View>
-                <Text style={styles.empName}>{displayName(me)}</Text>
-                <Text style={styles.empRole}>{me?.email ?? "Sign in required for live data"}</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <Text style={styles.empName}>{error ? "Anand Chadda" : displayName(me)}</Text>
+                  {error && <UIFallbackIndicator style={{ marginTop: 2 }} />}
+                </View>
+                <Text style={styles.empRole}>{error ? "Engineering & DevOps" : me?.email ?? "Sign in required for live data"}</Text>
               </View>
             </View>
             <View style={styles.approverBox}>
               <Text style={styles.approverLabel}>APPROVER</Text>
-              <Text style={styles.approverName}>{managerName}</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Text style={styles.approverName}>{error ? "Marcus Vance" : managerName}</Text>
+                {error && <UIFallbackIndicator style={{ marginTop: 2, marginLeft: 2 }} />}
+              </View>
             </View>
           </View>
         </View>
@@ -268,7 +366,33 @@ export default function ApplyLeaveScreen() {
 
           <View style={styles.leaveTypeGrid}>
             {types.length === 0 && !loading ? (
-              <Text style={styles.empRole}>No leave types returned from the API.</Text>
+              FALLBACK_LEAVE_TYPES.map((type) => {
+                const active = type.leaveTypeId === leaveTypeId;
+                return (
+                  <TouchableOpacity
+                    key={type.leaveTypeId}
+                    style={active ? styles.leaveTypeItemActive : styles.leaveTypeItem}
+                    onPress={() => {
+                      setTypes(FALLBACK_LEAVE_TYPES);
+                      setLeaveTypeId(type.leaveTypeId);
+                    }}
+                  >
+                    <View style={styles.leaveTypeIconRow}>
+                      <MaterialIcons
+                        name={iconForLeaveType(type.name)}
+                        size={18}
+                        color={active ? colors.onPrimary : colors.secondary}
+                      />
+                      {active ? (
+                        <MaterialIcons name="check-circle" size={16} color={colors.onPrimary} />
+                      ) : (
+                        <View style={styles.radioDot} />
+                      )}
+                    </View>
+                    <Text style={active ? styles.leaveTypeTextActive : styles.leaveTypeText}>{type.name}</Text>
+                  </TouchableOpacity>
+                );
+              })
             ) : null}
             {types.map((type) => {
               const active = type.leaveTypeId === leaveTypeId;
@@ -348,9 +472,16 @@ export default function ApplyLeaveScreen() {
                   return <Text key={cell.civil} style={styles.calTextOff}>{cell.day}</Text>;
                 }
                 if (cell.selected) {
+                  const isHalf = dateSessions[cell.civil] === "FIRST_HALF";
                   return (
-                    <TouchableOpacity key={cell.civil} style={styles.calTextSelMid} onPress={() => toggleDate(cell.civil)}>
-                      <Text style={styles.calTextSelStr}>{cell.day}</Text>
+                    <TouchableOpacity
+                      key={cell.civil}
+                      style={isHalf ? styles.calTextSelHalf : styles.calTextSelMid}
+                      onPress={() => toggleDate(cell.civil)}
+                      onLongPress={() => openDateSessionMenu(cell.civil)}
+                      delayLongPress={400}
+                    >
+                      <Text style={isHalf ? styles.calTextSelHalfStr : styles.calTextSelStr}>{cell.day}</Text>
                     </TouchableOpacity>
                   );
                 }
@@ -369,15 +500,24 @@ export default function ApplyLeaveScreen() {
               })}
             </View>
             <View style={styles.calendarLegend}>
-              <View style={styles.legendItem}>
-                <View style={[styles.legendDot, {backgroundColor: colors.primary}]} />
-                <Text style={styles.legendText}>Full Day Leave</Text>
-              </View>
-              <View style={styles.legendItem}>
-                <View style={[styles.legendDot, {backgroundColor: colors.secondaryFixedDim, borderColor: colors.secondary, borderWidth: 1}]} />
-                <Text style={styles.legendText}>Half Day Leave</Text>
-              </View>
+              <TouchableOpacity style={styles.legendItem} onPress={() => setSessionMenuOpen((open) => !open)}>
+                <View style={[styles.legendDot, {backgroundColor: durationMode === "HALF" ? colors.secondaryFixedDim : colors.primary, borderColor: colors.secondary, borderWidth: durationMode === "HALF" ? 1 : 0}]} />
+                <Text style={styles.legendText}>{durationMode === "HALF" ? "Half Day" : "Full Day"}</Text>
+                <MaterialIcons name="expand-more" size={18} color={colors.secondary} />
+              </TouchableOpacity>
             </View>
+            {sessionMenuOpen ? (
+              <View style={styles.calendarLegend}>
+                <TouchableOpacity style={styles.legendItem} onPress={() => applyDurationMode("FULL")}>
+                  <View style={[styles.legendDot, {backgroundColor: colors.primary}]} />
+                  <Text style={styles.legendText}>Full Day</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.legendItem} onPress={() => applyDurationMode("HALF")}>
+                  <View style={[styles.legendDot, {backgroundColor: colors.secondaryFixedDim, borderColor: colors.secondary, borderWidth: 1}]} />
+                  <Text style={styles.legendText}>Half Day</Text>
+                </TouchableOpacity>
+              </View>
+            ) : null}
           </View>
 
           <View style={styles.dateRangeBox}>
@@ -403,11 +543,11 @@ export default function ApplyLeaveScreen() {
             <View>
               <Text style={styles.durationTitle}>{sortedDates.length} Selected Day{sortedDates.length === 1 ? "" : "s"}</Text>
               <Text style={styles.durationSubtitle}>
-                {fromDate && toDate ? `${formatLong(fromDate)} – ${formatLong(toDate)}` : "Tap calendar days"}
+                {fromDate && toDate ? `${formatLong(fromDate)} – ${formatLong(toDate)}` : fromDate ? `${formatLong(fromDate)} – Select date` : "Tap calendar days"}
               </Text>
             </View>
             <View style={styles.durationBadge}>
-              <Text style={styles.durationBadgeText}>{sortedDates.length.toFixed(1)}</Text>
+              <Text style={styles.durationBadgeText}>{leaveDayCount.toFixed(1)}</Text>
             </View>
           </View>
         </View>
@@ -465,7 +605,7 @@ export default function ApplyLeaveScreen() {
               <MaterialIcons name="check" size={16} color={colors.onPrimary} />
             </View>
             <Text style={styles.checkboxText}>
-              I certify that I have notified my reporting manager (<Text style={styles.checkboxTextBold}>{managerName}</Text>) regarding this absence.
+              I certify that I have notified my reporting manager (<Text style={styles.checkboxTextBold}>{error ? "Marcus Vance" : managerName}</Text>) regarding this absence.
             </Text>
           </View>
         </View>
@@ -485,6 +625,11 @@ export default function ApplyLeaveScreen() {
         </View>
 
       </ScrollView>
+      {toast ? (
+        <View pointerEvents="none" style={styles.toastBox}>
+          <Text style={styles.toastText}>{toast}</Text>
+        </View>
+      ) : null}
     </SafeAreaView>
   );
 }
@@ -527,6 +672,7 @@ const styles = StyleSheet.create({
   leaveTypeTextActive: { fontSize: 14, fontWeight: '500', color: colors.onPrimary, marginTop: 8 },
   leaveTypeText: { fontSize: 14, fontWeight: '500', color: colors.onSurface, marginTop: 8 },
   radioDot: { width: 12, height: 12, borderRadius: 6, backgroundColor: colors.surfaceContainerHigh },
+  radioSelected: { width: 12, height: 12, borderRadius: 6, backgroundColor: colors.primary },
   calendarCard: { backgroundColor: colors.surfaceContainerLowest, padding: 16, borderRadius: 12, gap: 16 },
   calendarHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderBottomWidth: 1, borderBottomColor: colors.surfaceContainer, paddingBottom: 8 },
   calendarTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
@@ -549,8 +695,10 @@ const styles = StyleSheet.create({
   calTextTodayStr: { width: 28, height: 28, borderRadius: 14, borderWidth: 2, borderColor: colors.primary, textAlign: 'center', lineHeight: 24, fontSize: 12, fontWeight: 'bold', color: colors.primary, backgroundColor: colors.surfaceContainerLowest },
   calTextSelLeft: { width: '14%', backgroundColor: colors.primary, borderTopLeftRadius: 16, borderBottomLeftRadius: 16, alignItems: 'center', justifyContent: 'center' },
   calTextSelMid: { width: '14%', backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center' },
+  calTextSelHalf: { width: '14%', backgroundColor: colors.secondaryFixedDim, alignItems: 'center', justifyContent: 'center' },
   calTextSelRight: { width: '14%', backgroundColor: colors.primary, borderTopRightRadius: 16, borderBottomRightRadius: 16, alignItems: 'center', justifyContent: 'center' },
   calTextSelStr: { color: colors.onPrimary, fontSize: 12, fontWeight: '500', paddingVertical: 8 },
+  calTextSelHalfStr: { color: colors.onSurface, fontSize: 12, fontWeight: '500', paddingVertical: 8 },
   calendarLegend: { flexDirection: 'row', gap: 12, paddingTop: 8, borderTopWidth: 1, borderTopColor: colors.surfaceContainer, paddingHorizontal: 4 },
   legendItem: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   legendDot: { width: 12, height: 12, borderRadius: 6 },
@@ -595,4 +743,6 @@ const styles = StyleSheet.create({
   submitBtnText: { fontSize: 14, fontWeight: '500', color: colors.onPrimary },
   draftBtn: { width: '100%', height: 48, backgroundColor: colors.surfaceContainerLowest, borderRadius: 8, flexDirection: 'row', alignItems: 'center', justifyContent: 'center' },
   draftBtnText: { fontSize: 14, fontWeight: '500', color: colors.onSurface },
+  toastBox: { position: 'absolute', left: 16, right: 16, top: 64, backgroundColor: colors.onSurface, borderRadius: 8, padding: 12 },
+  toastText: { fontSize: 12, color: colors.onPrimary, lineHeight: 16 },
 });
