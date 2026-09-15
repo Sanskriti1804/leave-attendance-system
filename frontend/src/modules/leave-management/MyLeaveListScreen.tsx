@@ -12,6 +12,7 @@ import {
   submitLeaveDraft,
   withdrawLeave,
   type EmployeePublic,
+  type LeaveApplication,
   type LeaveType,
 } from '../../../services/resources';
 import { UIFallbackIndicator } from '../../components/ui/UIFallback';
@@ -50,16 +51,16 @@ function statusLabel(status: string): string {
 }
 
 const FALLBACK_TYPES: LeaveType[] = [
-  { leaveTypeId: 1, name: "Medical Leave", code: "ML", requiresAttestation: true, defaultDays: 14, isActive: true },
-  { leaveTypeId: 2, name: "Casual Leave", code: "CL", requiresAttestation: false, defaultDays: 14, isActive: true },
-  { leaveTypeId: 3, name: "Annual Leave", code: "AL", requiresAttestation: false, defaultDays: 14, isActive: true },
+  { leaveTypeId: 1, name: "Medical Leave", description: null, requiresMedicalDocument: true, allowedSex: null, obsolete: false },
+  { leaveTypeId: 2, name: "Casual Leave", description: null, requiresMedicalDocument: false, allowedSex: null, obsolete: false },
+  { leaveTypeId: 3, name: "Annual Leave", description: null, requiresMedicalDocument: false, allowedSex: null, obsolete: false },
 ];
 
 const FALLBACK_LEAVES: LeaveApplication[] = [
-  { leaveId: 1, employeeId: 1, leaveTypeId: 1, startDate: "2026-10-26", endDate: "2026-10-29", numberOfDays: 3, durationType: "FULL_DAY", status: "PENDING_HR_REVIEW", reason: "Medical reasons", createdAt: "2026-10-25T10:00:00Z", updatedAt: "2026-10-25T10:00:00Z" },
-  { leaveId: 2, employeeId: 1, leaveTypeId: 2, startDate: "2026-09-14", endDate: "2026-09-14", numberOfDays: 1, durationType: "FULL_DAY", status: "APPROVED", reason: "Personal work", createdAt: "2026-09-10T10:00:00Z", updatedAt: "2026-09-10T10:00:00Z" },
-  { leaveId: 3, employeeId: 1, leaveTypeId: 3, startDate: "2026-08-18", endDate: "2026-08-20", numberOfDays: 3, durationType: "FULL_DAY", status: "REJECTED", reason: "Vacation", createdAt: "2026-08-01T10:00:00Z", updatedAt: "2026-08-01T10:00:00Z" },
-  { leaveId: 4, employeeId: 1, leaveTypeId: 2, startDate: "2026-11-12", endDate: "2026-11-12", numberOfDays: 1, durationType: "FULL_DAY", status: "DRAFT", reason: "Family event", createdAt: "2026-11-01T10:00:00Z", updatedAt: "2026-11-01T10:00:00Z" },
+  { leaveId: 1, employeeId: 1, leaveTypeId: 1, startDate: "2026-10-26", endDate: "2026-10-29", numberOfDays: 3, durationType: "FULL_DAY", halfDayType: null, status: "PENDING_HR_REVIEW", reason: "Medical reasons", hrComments: null, createdAt: "2026-10-25T10:00:00Z", selectedDates: [] },
+  { leaveId: 2, employeeId: 1, leaveTypeId: 2, startDate: "2026-09-14", endDate: "2026-09-14", numberOfDays: 1, durationType: "FULL_DAY", halfDayType: null, status: "APPROVED", reason: "Personal work", hrComments: null, createdAt: "2026-09-10T10:00:00Z", selectedDates: [] },
+  { leaveId: 3, employeeId: 1, leaveTypeId: 3, startDate: "2026-08-18", endDate: "2026-08-20", numberOfDays: 3, durationType: "FULL_DAY", halfDayType: null, status: "REJECTED", reason: "Vacation", hrComments: null, createdAt: "2026-08-01T10:00:00Z", selectedDates: [] },
+  { leaveId: 4, employeeId: 1, leaveTypeId: 2, startDate: "2026-11-12", endDate: "2026-11-12", numberOfDays: 1, durationType: "FULL_DAY", halfDayType: null, status: "DRAFT", reason: "Family event", hrComments: null, createdAt: "2026-11-01T10:00:00Z", selectedDates: [] },
 ];
 
 export default function MyLeaveListScreen() {

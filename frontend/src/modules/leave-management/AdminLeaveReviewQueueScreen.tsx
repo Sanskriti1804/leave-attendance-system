@@ -12,9 +12,11 @@ import {
   listLeaves,
   rejectLeave,
   type EmployeePublic,
+  type LeaveApplication,
   type LeaveType,
 } from '../../../services/resources';
 import { UIFallbackIndicator } from '../../components/ui/UIFallback';
+import { BottomNavBar } from '../../components/ui/AdminComponents';
 
 const colors = {
   surface: "#fcf9f8",
@@ -32,21 +34,21 @@ const colors = {
 };
 
 const FALLBACK_EMPLOYEES: EmployeePublic[] = [
-  { employeeId: 1, firstName: "Milind", lastName: "Rawat", email: "milind@enterprisehrms.internal", role: "VP, Engineering", status: "Active", createdAt: "", updatedAt: "" },
-  { employeeId: 2, firstName: "Elena", lastName: "D'Souza", email: "elena@enterprisehrms.internal", role: "Product & Design", status: "Active", createdAt: "", updatedAt: "" },
-  { employeeId: 3, firstName: "Rajesh", lastName: "Patel", email: "rajesh@enterprisehrms.internal", role: "Customer Operations", status: "Active", createdAt: "", updatedAt: "" },
+  { employeeId: 1, firstName: "Milind", lastName: "Rawat", email: "milind@enterprisehrms.internal", departmentId: 1, role: "employee", managerId: null, joiningDate: null, createdAt: "", status: "ACTIVE", obsolete: false },
+  { employeeId: 2, firstName: "Elena", lastName: "D'Souza", email: "elena@enterprisehrms.internal", departmentId: 1, role: "employee", managerId: null, joiningDate: null, createdAt: "", status: "ACTIVE", obsolete: false },
+  { employeeId: 3, firstName: "Rajesh", lastName: "Patel", email: "rajesh@enterprisehrms.internal", departmentId: 1, role: "employee", managerId: null, joiningDate: null, createdAt: "", status: "ACTIVE", obsolete: false },
 ];
 
 const FALLBACK_TYPES: LeaveType[] = [
-  { leaveTypeId: 1, name: "Medical Leave", code: "ML", requiresAttestation: true, defaultDays: 14, isActive: true },
-  { leaveTypeId: 2, name: "Casual Leave", code: "CL", requiresAttestation: false, defaultDays: 14, isActive: true },
-  { leaveTypeId: 3, name: "Clarification Thread", code: "CT", requiresAttestation: false, defaultDays: 0, isActive: true },
+  { leaveTypeId: 1, name: "Medical Leave", description: null, requiresMedicalDocument: true, allowedSex: null, obsolete: false },
+  { leaveTypeId: 2, name: "Casual Leave", description: null, requiresMedicalDocument: false, allowedSex: null, obsolete: false },
+  { leaveTypeId: 3, name: "Clarification Thread", description: null, requiresMedicalDocument: false, allowedSex: null, obsolete: false },
 ];
 
 const FALLBACK_LEAVES: LeaveApplication[] = [
-  { leaveId: 1, employeeId: 1, leaveTypeId: 1, startDate: "2026-10-26", endDate: "2026-10-29", numberOfDays: 4, durationType: "FULL_DAY", status: "PENDING_HR_REVIEW", reason: "Medical leave", createdAt: "2026-10-25T10:00:00Z", updatedAt: "2026-10-25T10:00:00Z" },
-  { leaveId: 2, employeeId: 2, leaveTypeId: 2, startDate: "2026-11-02", endDate: "2026-11-02", numberOfDays: 1, durationType: "FULL_DAY", status: "PENDING_HR_REVIEW", reason: "Personal work", createdAt: "2026-11-01T10:00:00Z", updatedAt: "2026-11-01T10:00:00Z" },
-  { leaveId: 3, employeeId: 3, leaveTypeId: 3, startDate: "2026-11-05", endDate: "2026-11-05", numberOfDays: 1, durationType: "FULL_DAY", status: "PENDING_HR_REVIEW", reason: "Clarification required on previous leave", createdAt: "2026-11-04T10:00:00Z", updatedAt: "2026-11-04T10:00:00Z" },
+  { leaveId: 1, employeeId: 1, leaveTypeId: 1, startDate: "2026-10-26", endDate: "2026-10-29", numberOfDays: 4, durationType: "FULL_DAY", halfDayType: null, status: "PENDING_HR_REVIEW", reason: "Medical leave", hrComments: null, createdAt: "2026-10-25T10:00:00Z", selectedDates: [] },
+  { leaveId: 2, employeeId: 2, leaveTypeId: 2, startDate: "2026-11-02", endDate: "2026-11-02", numberOfDays: 1, durationType: "FULL_DAY", halfDayType: null, status: "PENDING_HR_REVIEW", reason: "Personal work", hrComments: null, createdAt: "2026-11-01T10:00:00Z", selectedDates: [] },
+  { leaveId: 3, employeeId: 3, leaveTypeId: 3, startDate: "2026-11-05", endDate: "2026-11-05", numberOfDays: 1, durationType: "FULL_DAY", halfDayType: null, status: "PENDING_HR_REVIEW", reason: "Clarification required on previous leave", hrComments: null, createdAt: "2026-11-04T10:00:00Z", selectedDates: [] },
 ];
 
 export default function AdminLeaveReviewQueueScreen() {
@@ -254,6 +256,7 @@ export default function AdminLeaveReviewQueueScreen() {
         ))}
 
       </ScrollView>
+      <BottomNavBar activeRoute="leave" />
     </SafeAreaView>
   );
 }

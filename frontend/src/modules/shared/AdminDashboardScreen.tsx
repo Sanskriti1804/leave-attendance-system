@@ -12,7 +12,7 @@ import {
   type EmployeePublic,
   type LeaveApplication,
 } from "../../../services/resources";
-import { TopNavBar, HROperationsCard, ContentCard, StatsCard } from "../../components/ui/AdminComponents";
+import { TopNavBar, HROperationsCard, ContentCard, StatsCard, BottomNavBar } from "../../components/ui/AdminComponents";
 import { UIFallbackIndicator } from "../../components/ui/UIFallback";
 
 export default function AdminDashboardScreen() {
@@ -195,6 +195,7 @@ export default function AdminDashboardScreen() {
             ))}
           </View>
         </ScrollView>
+        <BottomNavBar activeRoute="home" />
       </SafeAreaView>
     </LinearGradient>
   );
