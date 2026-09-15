@@ -1,4 +1,4 @@
-import { apiRequest, type ApiRequestInit } from "./api";
+import { apiRequest, authPath, type ApiRequestInit } from "./api";
 
 export type Credentials = {
   email: string;
@@ -18,17 +18,22 @@ let currentSession: AuthSession | null = null;
  * Replace the body of these functions with your real API calls.
  */
 export async function login(credentials: Credentials): Promise<AuthSession> {
-  // TODO: Connect your authentication API here.
-  await new Promise((resolve) => setTimeout(resolve, 600));
-
   if (!credentials.email || !credentials.password) {
     throw new Error("Invalid credentials.");
   }
 
-  // Mock success — swap for your backend response.
+  const result = await apiRequest<{
+    accessToken: string;
+    user?: unknown;
+  }>(authPath("/login"), {
+    method: "POST",
+    body: { email: credentials.email, password: credentials.password },
+  });
+
   currentSession = {
-    token: "mock-token",
+    token: result.accessToken,
     email: credentials.email,
+    user: result.user,
   };
   return currentSession;
 }

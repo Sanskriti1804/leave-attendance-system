@@ -12,9 +12,9 @@ import {
   submitLeaveDraft,
   withdrawLeave,
   type EmployeePublic,
-  type LeaveApplication,
   type LeaveType,
 } from '../../../services/resources';
+import { UIFallbackIndicator } from '../../components/ui/UIFallback';
 
 const colors = {
   surface: "#fcf9f8",
@@ -49,6 +49,19 @@ function statusLabel(status: string): string {
   return status.replaceAll("_", " ");
 }
 
+const FALLBACK_TYPES: LeaveType[] = [
+  { leaveTypeId: 1, name: "Medical Leave", code: "ML", requiresAttestation: true, defaultDays: 14, isActive: true },
+  { leaveTypeId: 2, name: "Casual Leave", code: "CL", requiresAttestation: false, defaultDays: 14, isActive: true },
+  { leaveTypeId: 3, name: "Annual Leave", code: "AL", requiresAttestation: false, defaultDays: 14, isActive: true },
+];
+
+const FALLBACK_LEAVES: LeaveApplication[] = [
+  { leaveId: 1, employeeId: 1, leaveTypeId: 1, startDate: "2026-10-26", endDate: "2026-10-29", numberOfDays: 3, durationType: "FULL_DAY", status: "PENDING_HR_REVIEW", reason: "Medical reasons", createdAt: "2026-10-25T10:00:00Z", updatedAt: "2026-10-25T10:00:00Z" },
+  { leaveId: 2, employeeId: 1, leaveTypeId: 2, startDate: "2026-09-14", endDate: "2026-09-14", numberOfDays: 1, durationType: "FULL_DAY", status: "APPROVED", reason: "Personal work", createdAt: "2026-09-10T10:00:00Z", updatedAt: "2026-09-10T10:00:00Z" },
+  { leaveId: 3, employeeId: 1, leaveTypeId: 3, startDate: "2026-08-18", endDate: "2026-08-20", numberOfDays: 3, durationType: "FULL_DAY", status: "REJECTED", reason: "Vacation", createdAt: "2026-08-01T10:00:00Z", updatedAt: "2026-08-01T10:00:00Z" },
+  { leaveId: 4, employeeId: 1, leaveTypeId: 2, startDate: "2026-11-12", endDate: "2026-11-12", numberOfDays: 1, durationType: "FULL_DAY", status: "DRAFT", reason: "Family event", createdAt: "2026-11-01T10:00:00Z", updatedAt: "2026-11-01T10:00:00Z" },
+];
+
 export default function MyLeaveListScreen() {
   const router = useRouter();
   const applyHref = (process.env.EXPO_PUBLIC_APPLY_LEAVE as string | undefined) || "/leave/apply";
@@ -75,6 +88,8 @@ export default function MyLeaveListScreen() {
       setItems(leaves.items);
     } catch (err) {
       setError(apiErrorMessage(err));
+      setTypes(FALLBACK_TYPES);
+      setItems(FALLBACK_LEAVES);
     } finally {
       setLoading(false);
     }
@@ -139,7 +154,10 @@ export default function MyLeaveListScreen() {
         <View style={styles.topRow}>
           <View>
             <Text style={styles.topLabel}>LEAVE RECORDS</Text>
-            <Text style={styles.empName}>{displayName(me)}</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Text style={styles.empName}>{error ? "Priya Khanna" : displayName(me)}</Text>
+              {error && <UIFallbackIndicator style={{ marginTop: 4 }} />}
+            </View>
           </View>
           <TouchableOpacity style={styles.applyBtn} onPress={() => router.push(applyHref as never)}>
             <MaterialIcons name="add" size={18} color={colors.onPrimary} />

@@ -76,9 +76,11 @@ Copies for the documentation tree: `documentation/testing/postman/`.
 | --- | --- | --- |
 | admin | `alice.admin@example.com` | `AdminPassword123!` |
 | employee | `bob.employee@example.com` | `EmployeePassword123!` |
+| employee | `dana.employee@example.com` | `EmployeePassword123!` |
+| employee | `eve.employee@example.com` | `EmployeePassword123!` |
 | guest_admin | `charlie.guest@example.com` | `GuestPassword123!` |
 
-Set `leaveDate` to a civil date inside the advance window. Set `leaveTypeId` / `sickLeaveTypeId` / `departmentId` from GET responses (seed types: Casual, Sick, Emergency, Planned).
+Set `leaveDate` to a civil date inside the advance window. Set `leaveTypeId` / `sickLeaveTypeId` / `departmentId` from GET responses (seed types: Casual, Sick, Emergency, Planned). Seed also creates organisation settings, holidays, one leave policy per type, Bob/Dana/Eve reporting to Alice, sample leave rows (`[seed] …` reasons), attendance punches, and attendance-correction requests (pending / approved / rejected).
 
 ### What the collection covers
 
@@ -94,5 +96,7 @@ Login is rate-limited (10 / 15 min). Collection Runner on the login folder can h
 
 | Date | Change |
 | --- | --- |
+| 2026-09-15 | Seed: extra employees Dana/Eve, more leave rows, attendance punches and correction requests. |
+| 2026-09-15 | Seed: org settings, holidays, leave policies, manager link, sample leave applications. |
 | 2026-09-09 | Added `npm run test:apis`, Postman collection + local environment, this page. |
 | 2026-09-09 | Removed per-module `test-auth.ts` / leave `tsx` scripts; `npm test` is `test-all-apis.ts` only. |

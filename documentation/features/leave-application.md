@@ -61,6 +61,7 @@ LV-OVR-03/04 which statuses block overlap. LV-APP-18 HR-absent path. MED-12 “e
 
 ## Change History
 
+2026-09-14 — Apply Leave: From–To range defaults to Full Day; session dropdown; long-press per-date session override; submit errors as toast.
 2026-09-04 — Medical document requirement on submit; duration uses selected-date `numberOfDays`.
 2026-09-04 — Implementation: selected dates, 14-day advance (`LEAVE_MAX_ADVANCE_DAYS`), status-aware and session-aware overlap, in-app manager approval.
 2026-08-27 — Extracted from source documentation.

@@ -11,6 +11,7 @@ import {
   type EmployeePublic,
   type OrganisationSettings,
 } from "../../../services/resources";
+import { UIFallbackIndicator } from "../../components/ui/UIFallback";
 
 const colors = {
   surface: "#fcf9f8",
@@ -145,10 +146,13 @@ export default function EmployeeHomeScreen() {
         <View style={styles.punchCard}>
           <View style={styles.punchHeader}>
             <View>
-              <Text style={styles.punchLabel}>Operational Clock</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Text style={styles.punchLabel}>Operational Clock</Text>
+                {error && <UIFallbackIndicator style={{ marginLeft: 8 }} />}
+              </View>
               <View style={styles.clockRow}>
                 <Text style={styles.clockText}>{clock || "--:--:--"}</Text>
-                <Text style={styles.amPmText}>{displayName(me)}</Text>
+                <Text style={styles.amPmText}>{error ? "EMP-8492" : displayName(me)}</Text>
               </View>
             </View>
             <View style={styles.shiftBadge}>

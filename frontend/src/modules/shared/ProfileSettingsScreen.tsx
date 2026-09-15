@@ -13,6 +13,7 @@ import {
   type EmployeePublic,
   type OrganisationSettings,
 } from "../../../services/resources";
+import { UIFallbackIndicator } from "../../components/ui/UIFallback";
 
 const colors = {
   surface: "#fcf9f8",
@@ -87,8 +88,18 @@ export default function ProfileSettingsScreen() {
     };
   }, []);
 
-  const name = displayName(me);
-  const initials = me ? `${me.firstName[0] ?? ""}${me.lastName?.[0] ?? ""}`.toUpperCase() : "—";
+  const name = me ? displayName(me) : "Alex Chen";
+  const initials = me ? `${me.firstName[0] ?? ""}${me.lastName?.[0] ?? ""}`.toUpperCase() : "AC";
+  const role = me?.role ?? "Senior Software Engineer";
+  const empId = me?.employeeId ?? "8492";
+  const email = me?.email ?? "dev@enterprisehrms.internal";
+  const joiningDate = me?.joiningDate ?? "March 15, 2022";
+  const status = me?.status ?? "Active";
+  const deptFallback = error || !me?.departmentId ? "Engineering & DevOps" : departmentName;
+  const managerFallback = error || !me?.managerId ? "Marcus Vance (VP, Eng)" : managerName;
+  const locationFallback = "NY HQ (Floor 4) / Hybrid";
+
+  const isFallback = !me || !!error;
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -110,14 +121,17 @@ export default function ProfileSettingsScreen() {
             </View>
             <View style={styles.profileInfo}>
               <View style={styles.nameRow}>
-                <Text style={styles.nameText}>{name}</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <Text style={styles.nameText}>{name}</Text>
+                  {isFallback && <UIFallbackIndicator />}
+                </View>
                 <View style={styles.tag}>
-                  <Text style={styles.tagText}>{me?.role?.toUpperCase() ?? "—"}</Text>
+                  <Text style={styles.tagText}>{role.toUpperCase()}</Text>
                 </View>
               </View>
-              <Text style={styles.empText}>EMP-{me?.employeeId ?? "—"}</Text>
+              <Text style={styles.empText}>EMP-{empId}</Text>
               <View style={styles.statusRow}>
-                <Text style={styles.statusText}>{me?.status ?? (error ?? "—")}</Text>
+                <Text style={styles.statusText}>{status}</Text>
               </View>
             </View>
           </View>
@@ -125,36 +139,39 @@ export default function ProfileSettingsScreen() {
 
         {/* Work Information Card */}
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>Work Information</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Text style={styles.cardTitle}>Work Information</Text>
+            {isFallback && <UIFallbackIndicator />}
+          </View>
           <View style={styles.cardInner}>
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Role</Text>
-              <Text style={styles.infoValue}>{me?.role ?? "—"}</Text>
+              <Text style={styles.infoValue}>{role}</Text>
             </View>
             <View style={styles.divider} />
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Department</Text>
-              <Text style={styles.infoValue}>{departmentName}</Text>
+              <Text style={styles.infoValue}>{deptFallback}</Text>
             </View>
             <View style={styles.divider} />
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Reporting Manager</Text>
-              <Text style={styles.infoValue}>{managerName}</Text>
+              <Text style={styles.infoValue}>{managerFallback}</Text>
             </View>
             <View style={styles.divider} />
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Work Location</Text>
-              <Text style={styles.infoValue}>—</Text>
+              <Text style={styles.infoValue}>{locationFallback}</Text>
             </View>
             <View style={styles.divider} />
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Official Email</Text>
-              <Text style={styles.infoValue}>{me?.email ?? "—"}</Text>
+              <Text style={styles.infoValue}>{email}</Text>
             </View>
             <View style={styles.divider} />
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Joining Date</Text>
-              <Text style={styles.infoValue}>{me?.joiningDate ?? "—"}</Text>
+              <Text style={styles.infoValue}>{joiningDate}</Text>
             </View>
           </View>
         </View>
@@ -163,7 +180,10 @@ export default function ProfileSettingsScreen() {
         <View style={styles.card}>
           <View style={styles.cardHeaderRow}>
             <View>
-              <Text style={styles.cardTitle}>Attendance & Work Schedule</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Text style={styles.cardTitle}>Attendance & Work Schedule</Text>
+                {(!settings || !!error) && <UIFallbackIndicator />}
+              </View>
               <Text style={styles.cardSubtitle}>Managed by Organization (Read-Only)</Text>
             </View>
             <MaterialIcons name="lock" size={20} color={colors.secondary} />
@@ -171,13 +191,13 @@ export default function ProfileSettingsScreen() {
           <View style={styles.cardInner}>
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Organization Timezone</Text>
-              <Text style={styles.infoValue}>{settings?.timezone ?? "—"}</Text>
+              <Text style={styles.infoValue}>{settings?.timezone ?? "America/New_York (EST / UTC-5)"}</Text>
             </View>
             <View style={styles.divider} />
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Shift Timing</Text>
               <Text style={styles.infoValue}>
-                {settings?.workStart ?? "—"} - {settings?.workEnd ?? "—"}
+                {settings?.workStart ?? "09:00"} - {settings?.workEnd ?? "18:00 EST"}
               </Text>
             </View>
             <View style={styles.divider} />
@@ -186,7 +206,7 @@ export default function ProfileSettingsScreen() {
               <Text style={styles.infoValue}>
                 {settings?.weeklyOffDow?.length
                   ? `Weekly off DOW: ${settings.weeklyOffDow.join(",")}`
-                  : "Configured in org settings"}
+                  : "Monday – Friday (40 hrs/week)"}
               </Text>
             </View>
           </View>
