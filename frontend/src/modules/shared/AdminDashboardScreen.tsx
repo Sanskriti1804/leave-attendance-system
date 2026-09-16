@@ -1,8 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, TextInput } from "react-native";
+import { View, Text, ScrollView, TouchableOpacity, SafeAreaView, TextInput } from "react-native";
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from "expo-router";
-import { LinearGradient } from "expo-linear-gradient";
 import { getSession } from "../../../services/auth";
 import {
   displayName,
@@ -12,11 +11,13 @@ import {
   type EmployeePublic,
   type LeaveApplication,
 } from "../../../services/resources";
-import { TopNavBar, HROperationsCard, ContentCard, StatsCard } from "../../components/ui/AdminComponents";
+import { ScreenGradient } from "../../components/ui/AppChrome";
+import { TopNavBar, HROperationsCard, ContentCard, StatsCard, BottomNavBar, useTopNavContentInset } from "../../components/ui/AdminComponents";
 import { UIFallbackIndicator } from "../../components/ui/UIFallback";
 
 export default function AdminDashboardScreen() {
   const router = useRouter();
+  const topInset = useTopNavContentInset();
   const reviewHref = (process.env.EXPO_PUBLIC_ADMIN_LEAVE_REVIEW as string | undefined) || "/leave/admin-review";
   const [me, setMe] = useState<EmployeePublic | null>(null);
   const [employees, setEmployees] = useState<EmployeePublic[]>([]);
@@ -76,17 +77,11 @@ export default function AdminDashboardScreen() {
   const onLeaveToday = approved.filter((row) => row.startDate <= today && row.endDate >= today).length;
 
   return (
-    <LinearGradient
-      colors={['rgba(0, 168, 153, 0.45)', 'rgba(240, 248, 252, 0.75)', 'rgba(38, 169, 225, 0.48)']}
-      locations={[0, 0.5, 1]}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 1 }}
-      style={{ flex: 1 }}
-    >
+    <ScreenGradient>
       <SafeAreaView style={{ flex: 1 }}>
-        <TopNavBar />
+        <TopNavBar title="Admin Dashboard" />
         
-        <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingTop: 80, paddingHorizontal: 16, paddingBottom: 100, gap: 16 }}>
+        <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingTop: topInset, paddingHorizontal: 16, paddingBottom: 100, gap: 16 }}>
           <HROperationsCard 
             name={me ? displayName(me).toUpperCase() : "PREETI KAUR"}
             role={me?.role ?? "Human Resource"}
@@ -195,7 +190,8 @@ export default function AdminDashboardScreen() {
             ))}
           </View>
         </ScrollView>
+        <BottomNavBar activeRoute="home" />
       </SafeAreaView>
-    </LinearGradient>
+    </ScreenGradient>
   );
 }

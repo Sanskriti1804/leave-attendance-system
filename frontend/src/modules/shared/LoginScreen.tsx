@@ -2,14 +2,14 @@ import { useState } from "react";
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, KeyboardAvoidingView, Platform, SafeAreaView, Image } from "react-native";
 import { useRouter } from "expo-router";
 import { MaterialIcons } from '@expo/vector-icons';
-import { LinearGradient } from "expo-linear-gradient";
+import { ScreenGradient } from "../../components/ui/AppChrome";
 import { login as authLogin, passLogin } from "../../../services/auth";
 import { getMe } from "../../../services/resources";
 import { getPostLoginRoute } from "./SplashScreen";
 
 // Stitch Design Colors & Token Map
 const colors = {
-  primary: "#000000",
+  primary: "#242424",
   onPrimary: "#ffffff",
   secondary: "#374151", // text-secondary
   error: "#ba1a1a",
@@ -17,9 +17,9 @@ const colors = {
   cardBorder: "rgba(0, 0, 0, 0.15)",
   inputBg: "#f6f3f2",
   inputBorder: "#374151",
-  textMain: "rgb(0, 0, 0)",
+  textMain: "rgb(36, 36, 36)",
   textVariant: "rgb(28, 27, 27)",
-  indicatorPulse: "#000000",
+  indicatorPulse: "#242424",
 };
 
 export default function LoginScreen() {
@@ -82,13 +82,7 @@ export default function LoginScreen() {
   };
 
   return (
-    <LinearGradient
-      colors={['rgba(0, 168, 153, 0.45)', 'rgba(240, 248, 252, 0.75)', 'rgba(38, 169, 225, 0.48)']}
-      locations={[0, 0.5, 1]}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 1 }}
-      style={styles.gradientContainer}
-    >
+    <ScreenGradient>
       <SafeAreaView style={styles.safeArea}>
         <KeyboardAvoidingView 
           style={styles.container}
@@ -204,7 +198,7 @@ export default function LoginScreen() {
 
         </KeyboardAvoidingView>
       </SafeAreaView>
-    </LinearGradient>
+    </ScreenGradient>
   );
 }
 

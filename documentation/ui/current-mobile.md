@@ -38,7 +38,15 @@ MaxStarter owns `src/maxstarter/` and `MAXSTARTER:BEGIN/END` regions.
 
 ## Domain UI
 
-No leave, attendance, HR, reports, or notification screens exist.
+`frontend/` Expo Router app (Stitch-aligned):
+
+- Splash `/` and Login `/login`
+- Employee: Home `/(tabs)`, Leave `/leave/list`, Apply `/leave/apply`, Attendance `/(tabs)/attendance`, Alerts `/(tabs)/notifications` (Stitch in-app notifications layout; notification APIs not implemented), Profile `/(tabs)/profile`
+- Admin / guest_admin: Dashboard `/admin`, Leave review `/leave/admin-review`, People `/people`, Reports `/reports`, More `/settings` (Stitch More/Settings). From More: Admin/Guest profile `/admin-profile`, Organisation Settings `/org-settings` (GET live; PATCH admin-only, guest_admin read-only AUTH-09).
+
+Expo tab bar is hidden. All roles use the admin pill bottom nav styling with role-specific destinations.
+
+Leave list and apply keep live `/api/v1` leave calls. Admin review approve/reject is admin-only; guest_admin is read-only. Medical document bytes are not fetched for employees (MED-09). File picker upload is still not wired. Punch and reports APIs are not implemented.
 
 ## Theme tokens (from design.md)
 

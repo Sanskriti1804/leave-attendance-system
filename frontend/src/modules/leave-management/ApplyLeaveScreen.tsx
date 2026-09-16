@@ -1,7 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, SafeAreaView, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, SafeAreaView, ActivityIndicator, Alert, Modal } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { ScreenGradient } from '../../components/ui/AppChrome';
+import { TopNavBar, useTopNavContentInset } from '../../components/ui/AdminComponents';
 import { getSession } from '../../../services/auth';
 import {
   apiErrorMessage,
@@ -12,14 +13,16 @@ import {
   getMe,
   getOrgSettings,
   listLeaveTypes,
+  uploadLeaveDocument,
   type EmployeePublic,
   type LeaveType,
 } from '../../../services/resources';
 import { UIFallbackIndicator } from '../../components/ui/UIFallback';
+import * as DocumentPicker from 'expo-document-picker';
 
 const colors = {
   surface: "#fcf9f8",
-  primary: "#000000",
+  primary: "#242424",
   onPrimary: "#ffffff",
   surfaceContainerLowest: "#ffffff",
   surfaceContainerLow: "#f6f3f2",
@@ -32,6 +35,8 @@ const colors = {
   onSurface: "#1c1b1b",
   onSurfaceVariant: "#4c4546",
   secondaryFixedDim: "#c0c7d6",
+  glass: "rgb(222, 223, 227)",
+  glassBorder: "rgba(0, 0, 0, 0.15)",
 };
 
 function pad2(value: number): string {
@@ -89,7 +94,7 @@ const FALLBACK_LEAVE_TYPES: LeaveType[] = [
   { leaveTypeId: 4, name: "Planned", description: "Planned leave", requiresMedicalDocument: false, allowedSex: null, obsolete: false },
 ];
 
-type DaySession = "FULL_DAY" | "FIRST_HALF";
+type DaySession = "FULL_DAY" | "FIRST_HALF" | "SECOND_HALF";
 type DurationMode = "FULL" | "HALF";
 
 function enumerateRange(from: string, to: string): string[] {
@@ -104,12 +109,14 @@ function enumerateRange(from: string, to: string): string[] {
   return dates;
 }
 
-function sessionForMode(mode: DurationMode): DaySession {
-  return mode === "HALF" ? "FIRST_HALF" : "FULL_DAY";
+function sessionForMode(mode: DurationMode, half: DaySession = "FIRST_HALF"): DaySession {
+  return mode === "HALF" ? half : "FULL_DAY";
 }
 
+const HARDCODED_APPROVER = "S. Raman";
+
 export default function ApplyLeaveScreen() {
-  const router = useRouter();
+  const topInset = useTopNavContentInset();
   const [me, setMe] = useState<EmployeePublic | null>(null);
   const [managerName, setManagerName] = useState("—");
   const [types, setTypes] = useState<LeaveType[]>([]);
@@ -120,7 +127,8 @@ export default function ApplyLeaveScreen() {
   const [dateOverrides, setDateOverrides] = useState<Record<string, true>>({});
   const [durationMode, setDurationMode] = useState<DurationMode>("FULL");
   const [waitingForTo, setWaitingForTo] = useState(false);
-  const [sessionMenuOpen, setSessionMenuOpen] = useState(false);
+  const [durationInfoOpen, setDurationInfoOpen] = useState(false);
+  const [attested, setAttested] = useState(true);
   const [toast, setToast] = useState<string | null>(null);
   const [viewMonth, setViewMonth] = useState(() => {
     const now = new Date();
@@ -131,6 +139,7 @@ export default function ApplyLeaveScreen() {
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [pickedFile, setPickedFile] = useState<{ uri: string; name: string; type: string } | null>(null);
 
   const today = toCivil(new Date());
 
@@ -168,7 +177,7 @@ export default function ApplyLeaveScreen() {
             const manager = await getEmployee(profile.managerId);
             setManagerName(displayName(manager));
           } catch {
-            setManagerName(`EMP-${profile.managerId}`);
+            setManagerName("");
           }
         }
       }
@@ -218,14 +227,13 @@ export default function ApplyLeaveScreen() {
   const toDate = waitingForTo ? undefined : sortedDates[sortedDates.length - 1];
   const selectedType = types.find((row) => row.leaveTypeId === leaveTypeId);
   const leaveDayCount = sortedDates.reduce(
-    (sum, date) => sum + (dateSessions[date] === "FIRST_HALF" ? 0.5 : 1),
+    (sum, date) => sum + (dateSessions[date] === "FIRST_HALF" || dateSessions[date] === "SECOND_HALF" ? 0.5 : 1),
     0,
   );
 
-  function applyDurationMode(mode: DurationMode) {
+  function applyDurationMode(mode: DurationMode, half: DaySession = "FIRST_HALF") {
     setDurationMode(mode);
-    setSessionMenuOpen(false);
-    const session = sessionForMode(mode);
+    const session = sessionForMode(mode, half);
     setDateSessions((current) => {
       const next = { ...current };
       for (const date of selectedDates) {
@@ -237,6 +245,39 @@ export default function ApplyLeaveScreen() {
     });
   }
 
+  function requestHalfDayMode() {
+    Alert.alert("Half Day", "Choose First Half or Second Half", [
+      { text: "First Half", onPress: () => applyDurationMode("HALF", "FIRST_HALF") },
+      { text: "Second Half", onPress: () => applyDurationMode("HALF", "SECOND_HALF") },
+      { text: "Cancel", style: "cancel" },
+    ]);
+  }
+
+  async function pickMedicalFile() {
+    Alert.alert("Medical documentation", "Select a local file (PDF, JPG, PNG). Paste is available where the system file sheet supports it.", [
+      {
+        text: "Choose file",
+        onPress: async () => {
+          const result = await DocumentPicker.getDocumentAsync({
+            type: ["application/pdf", "image/jpeg", "image/png", "image/jpg"],
+            copyToCacheDirectory: true,
+            multiple: false,
+          });
+          if (result.canceled || !result.assets?.[0]) {
+            return;
+          }
+          const asset = result.assets[0];
+          setPickedFile({
+            uri: asset.uri,
+            name: asset.name ?? "medical-document",
+            type: asset.mimeType ?? "application/octet-stream",
+          });
+        },
+      },
+      { text: "Cancel", style: "cancel" },
+    ]);
+  }
+
   function setDateSession(civil: string, session: DaySession) {
     setDateSessions((current) => ({ ...current, [civil]: session }));
     setDateOverrides((current) => ({ ...current, [civil]: true }));
@@ -245,7 +286,8 @@ export default function ApplyLeaveScreen() {
   function openDateSessionMenu(civil: string) {
     Alert.alert(formatLong(civil), "Session type for this date", [
       { text: "Full Day", onPress: () => setDateSession(civil, "FULL_DAY") },
-      { text: "Half Day", onPress: () => setDateSession(civil, "FIRST_HALF") },
+      { text: "First Half", onPress: () => setDateSession(civil, "FIRST_HALF") },
+      { text: "Second Half", onPress: () => setDateSession(civil, "SECOND_HALF") },
       { text: "Cancel", style: "cancel" },
     ]);
   }
@@ -283,6 +325,10 @@ export default function ApplyLeaveScreen() {
       setError("Select at least one date.");
       return;
     }
+    if (!attested) {
+      setError("Manager notification attestation is required.");
+      return;
+    }
     setSubmitting(true);
     setError(null);
     setMessage(null);
@@ -293,6 +339,13 @@ export default function ApplyLeaveScreen() {
     };
     try {
       const result = kind === "draft" ? await createLeaveDraft(body) : await createLeave(body);
+      if (pickedFile) {
+        try {
+          await uploadLeaveDocument(result.leaveId, pickedFile);
+        } catch (uploadErr) {
+          setToast(apiErrorMessage(uploadErr));
+        }
+      }
       setMessage(`${kind === "draft" ? "Draft saved" : "Submitted"} (#${result.leaveId}, ${result.status}).`);
     } catch (err) {
       setToast(apiErrorMessage(err));
@@ -307,29 +360,15 @@ export default function ApplyLeaveScreen() {
   });
 
   return (
+    <ScreenGradient>
     <SafeAreaView style={styles.safeArea}>
-      <View style={styles.header}>
-        <View style={styles.headerLeft}>
-          <TouchableOpacity style={styles.iconButton} onPress={() => router.back()}>
-            <MaterialIcons name="arrow-back" size={20} color={colors.onSurface} />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Apply Leave Request</Text>
-        </View>
-        <View style={styles.headerRight}>
-          <TouchableOpacity style={styles.iconButton}>
-            <MaterialIcons name="more-vert" size={20} color={colors.secondary} />
-          </TouchableOpacity>
-          <View style={styles.profileAvatar}>
-            <MaterialIcons name="person" size={18} color={colors.onPrimary} />
-          </View>
-        </View>
-      </View>
+      <TopNavBar title="Apply Leave Request" showBack />
 
-      <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+      <ScrollView style={styles.container} contentContainerStyle={[styles.content, { paddingTop: topInset }]}>
         
         {/* Micro Policy Guidance Banner */}
         <View style={styles.policyBanner}>
-          <MaterialIcons name="verified-user" size={18} color={colors.secondary} style={styles.policyIcon} />
+          <MaterialIcons name="verified-user" size={12} color={colors.secondary} />
           <Text style={styles.policyText}>Advance booking limit: Max {maxAdvanceDays} calendar days forward.</Text>
         </View>
 
@@ -340,19 +379,14 @@ export default function ApplyLeaveScreen() {
               <View style={styles.empInitialsBox}>
                 <Text style={styles.empInitials}>{error ? "AC" : initials(me)}</Text>
               </View>
-              <View>
+              <View style={{ flex: 1 }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                   <Text style={styles.empName}>{error ? "Anand Chadda" : displayName(me)}</Text>
                   {error && <UIFallbackIndicator style={{ marginTop: 2 }} />}
                 </View>
                 <Text style={styles.empRole}>{error ? "Engineering & DevOps" : me?.email ?? "Sign in required for live data"}</Text>
-              </View>
-            </View>
-            <View style={styles.approverBox}>
-              <Text style={styles.approverLabel}>APPROVER</Text>
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <Text style={styles.approverName}>{error ? "Marcus Vance" : managerName}</Text>
-                {error && <UIFallbackIndicator style={{ marginTop: 2, marginLeft: 2 }} />}
+                <Text style={styles.approverLabel}>Approver</Text>
+                <Text style={styles.approverName}>{HARDCODED_APPROVER}</Text>
               </View>
             </View>
           </View>
@@ -360,8 +394,7 @@ export default function ApplyLeaveScreen() {
 
         <View style={styles.formSection}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Leave Type</Text>
-            <Text style={styles.requiredLabel}>REQUIRED</Text>
+            <Text style={styles.sectionTitle}>Leave Type <Text style={styles.requiredStar}>*</Text></Text>
           </View>
 
           <View style={styles.leaveTypeGrid}>
@@ -437,7 +470,12 @@ export default function ApplyLeaveScreen() {
 
           <View style={styles.calendarBox}>
             <View style={styles.calendarNav}>
-              <Text style={styles.calendarMonthText}>{monthLabel}</Text>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                <Text style={styles.calendarMonthText}>{monthLabel}</Text>
+                <TouchableOpacity style={styles.infoDot} onPress={() => setDurationInfoOpen(true)}>
+                  <MaterialIcons name="info-outline" size={12} color="rgba(88,95,108,0.45)" />
+                </TouchableOpacity>
+              </View>
               <View style={styles.calendarNavBtns}>
                 <TouchableOpacity
                   onPress={() =>
@@ -469,73 +507,66 @@ export default function ApplyLeaveScreen() {
             <View style={styles.calendarGrid}>
               {cells.map((cell) => {
                 if (!cell.inMonth) {
-                  return <Text key={cell.civil} style={styles.calTextOff}>{cell.day}</Text>;
+                  return (
+                    <View key={cell.civil} style={styles.calCell}>
+                      <Text style={styles.calTextOff} numberOfLines={1}>{pad2(cell.day)}</Text>
+                    </View>
+                  );
                 }
                 if (cell.selected) {
-                  const isHalf = dateSessions[cell.civil] === "FIRST_HALF";
+                  const isHalf = dateSessions[cell.civil] === "FIRST_HALF" || dateSessions[cell.civil] === "SECOND_HALF";
                   return (
                     <TouchableOpacity
                       key={cell.civil}
-                      style={isHalf ? styles.calTextSelHalf : styles.calTextSelMid}
+                      style={[styles.calCell, isHalf ? styles.calTextSelHalf : styles.calTextSelMid]}
                       onPress={() => toggleDate(cell.civil)}
                       onLongPress={() => openDateSessionMenu(cell.civil)}
                       delayLongPress={400}
                     >
-                      <Text style={isHalf ? styles.calTextSelHalfStr : styles.calTextSelStr}>{cell.day}</Text>
+                      <Text style={isHalf ? styles.calTextSelHalfStr : styles.calTextSelStr} numberOfLines={1}>{pad2(cell.day)}</Text>
                     </TouchableOpacity>
                   );
                 }
                 if (cell.isToday) {
                   return (
-                    <TouchableOpacity key={cell.civil} style={styles.calTextToday} onPress={() => toggleDate(cell.civil)}>
-                      <Text style={styles.calTextTodayStr}>{cell.day}</Text>
+                    <TouchableOpacity key={cell.civil} style={styles.calCell} onPress={() => toggleDate(cell.civil)}>
+                      <Text style={styles.calTextTodayStr} numberOfLines={1}>{pad2(cell.day)}</Text>
                     </TouchableOpacity>
                   );
                 }
                 return (
-                  <TouchableOpacity key={cell.civil} style={{ width: "14%" }} onPress={() => toggleDate(cell.civil)}>
-                    <Text style={cell.isWeekend ? styles.calTextWeekend : styles.calText}>{cell.day}</Text>
+                  <TouchableOpacity key={cell.civil} style={styles.calCell} onPress={() => toggleDate(cell.civil)}>
+                    <Text style={cell.isWeekend ? styles.calTextWeekend : styles.calText} numberOfLines={1}>{pad2(cell.day)}</Text>
                   </TouchableOpacity>
                 );
               })}
             </View>
             <View style={styles.calendarLegend}>
-              <TouchableOpacity style={styles.legendItem} onPress={() => setSessionMenuOpen((open) => !open)}>
-                <View style={[styles.legendDot, {backgroundColor: durationMode === "HALF" ? colors.secondaryFixedDim : colors.primary, borderColor: colors.secondary, borderWidth: durationMode === "HALF" ? 1 : 0}]} />
-                <Text style={styles.legendText}>{durationMode === "HALF" ? "Half Day" : "Full Day"}</Text>
-                <MaterialIcons name="expand-more" size={18} color={colors.secondary} />
+              <TouchableOpacity style={styles.legendItem} onPress={() => applyDurationMode("FULL")}>
+                <View style={[styles.legendDot, {backgroundColor: colors.primary}]} />
+                <Text style={styles.legendText}>Full Day Leave</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.legendItem} onPress={requestHalfDayMode}>
+                <View style={[styles.legendDot, {backgroundColor: colors.secondaryFixedDim, borderColor: colors.secondary, borderWidth: 1}]} />
+                <Text style={styles.legendText}>Half Day Leave</Text>
               </TouchableOpacity>
             </View>
-            {sessionMenuOpen ? (
-              <View style={styles.calendarLegend}>
-                <TouchableOpacity style={styles.legendItem} onPress={() => applyDurationMode("FULL")}>
-                  <View style={[styles.legendDot, {backgroundColor: colors.primary}]} />
-                  <Text style={styles.legendText}>Full Day</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.legendItem} onPress={() => applyDurationMode("HALF")}>
-                  <View style={[styles.legendDot, {backgroundColor: colors.secondaryFixedDim, borderColor: colors.secondary, borderWidth: 1}]} />
-                  <Text style={styles.legendText}>Half Day</Text>
-                </TouchableOpacity>
-              </View>
-            ) : null}
           </View>
 
           <View style={styles.dateRangeBox}>
             <View style={styles.dateRangeItem}>
               <Text style={styles.dateRangeLabel}>FROM (INCLUSIVE)</Text>
               <View style={styles.dateRangeValRow}>
-                <MaterialIcons name="calendar-today" size={18} color={colors.secondary} />
                 <Text style={styles.dateRangeVal}>{fromDate ? formatLong(fromDate) : "Select date"}</Text>
               </View>
-              <Text style={styles.dateRangeDay}>{fromDate ? weekdayName(fromDate) : "—"}</Text>
+              <Text style={styles.dateRangeDay}>{fromDate ? weekdayName(fromDate) : ""}</Text>
             </View>
             <View style={styles.dateRangeItem}>
               <Text style={styles.dateRangeLabel}>TO (INCLUSIVE)</Text>
               <View style={styles.dateRangeValRow}>
-                <MaterialIcons name="event" size={18} color={colors.secondary} />
                 <Text style={styles.dateRangeVal}>{toDate ? formatLong(toDate) : "Select date"}</Text>
               </View>
-              <Text style={styles.dateRangeDay}>{toDate ? weekdayName(toDate) : "—"}</Text>
+              <Text style={styles.dateRangeDay}>{toDate ? weekdayName(toDate) : ""}</Text>
             </View>
           </View>
 
@@ -543,7 +574,7 @@ export default function ApplyLeaveScreen() {
             <View>
               <Text style={styles.durationTitle}>{sortedDates.length} Selected Day{sortedDates.length === 1 ? "" : "s"}</Text>
               <Text style={styles.durationSubtitle}>
-                {fromDate && toDate ? `${formatLong(fromDate)} – ${formatLong(toDate)}` : fromDate ? `${formatLong(fromDate)} – Select date` : "Tap calendar days"}
+                {fromDate && toDate ? `${formatLong(fromDate)} to ${formatLong(toDate)}` : fromDate ? `${formatLong(fromDate)} to Select date` : "Tap calendar days"}
               </Text>
             </View>
             <View style={styles.durationBadge}>
@@ -567,7 +598,7 @@ export default function ApplyLeaveScreen() {
           <Text style={styles.charCount}>{reason.length} / 500</Text>
         </View>
 
-        <View style={styles.uploadCard}>
+        <TouchableOpacity style={styles.uploadCard} onPress={() => void pickMedicalFile()} activeOpacity={0.8}>
           <View style={styles.uploadHeader}>
             <View style={styles.uploadTitleRow}>
               <MaterialIcons name="attachment" size={18} color={colors.primary} />
@@ -575,7 +606,7 @@ export default function ApplyLeaveScreen() {
             </View>
             <Text style={styles.uploadSubtitle}>
               {selectedType?.requiresMedicalDocument
-                ? "This type may require a medical document on the server (upload API needs a file picker; not wired)."
+                ? "This type may require a medical document. Tap to choose a local file."
                 : "Medical upload applies only when the selected type requires a document."}
             </Text>
           </View>
@@ -585,27 +616,22 @@ export default function ApplyLeaveScreen() {
                 <MaterialIcons name="picture-as-pdf" size={20} color={colors.onPrimary} />
               </View>
               <View>
-                <Text style={styles.fileName}>No file attached</Text>
-                <Text style={styles.fileSize}>Use draft + documents API later</Text>
+                <Text style={styles.fileName}>{pickedFile?.name ?? "No file attached"}</Text>
+                <Text style={styles.fileSize}>{pickedFile ? "Ready to upload with submit or draft" : "PDF, JPG, PNG"}</Text>
               </View>
             </View>
           </View>
           <Text style={styles.uploadFormats}>Accepted Formats: PDF, JPG, PNG (server cap LEAVE_DOCUMENT_MAX_BYTES)</Text>
-        </View>
+        </TouchableOpacity>
 
         <View style={styles.attestCard}>
-          <View style={styles.attestHeaderRow}>
-            <Text style={styles.attestTitle}>Operational Notification</Text>
-            <View style={styles.attestBadge}>
-              <Text style={styles.attestBadgeText}>MANAGER_PROOF_REQUIRED</Text>
-            </View>
-          </View>
+          <Text style={styles.attestTitle}>Operational Notification</Text>
           <View style={styles.checkboxRow}>
-            <View style={styles.checkbox}>
-              <MaterialIcons name="check" size={16} color={colors.onPrimary} />
-            </View>
+            <TouchableOpacity style={[styles.checkbox, !attested && { backgroundColor: colors.surfaceContainerHigh }]} onPress={() => setAttested((value) => !value)}>
+              {attested ? <MaterialIcons name="check" size={16} color={colors.onPrimary} /> : null}
+            </TouchableOpacity>
             <Text style={styles.checkboxText}>
-              I certify that I have notified my reporting manager (<Text style={styles.checkboxTextBold}>{error ? "Marcus Vance" : managerName}</Text>) regarding this absence.
+              I certify that I have notified my reporting manager {managerName || "your manager"} regarding this absence.
             </Text>
           </View>
         </View>
@@ -630,12 +656,31 @@ export default function ApplyLeaveScreen() {
           <Text style={styles.toastText}>{toast}</Text>
         </View>
       ) : null}
+      <Modal visible={durationInfoOpen} transparent animationType="fade" onRequestClose={() => setDurationInfoOpen(false)}>
+        <View style={styles.modalBackdrop}>
+          <View style={styles.modalCard}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.calendarTitle}>Leave Duration Mode</Text>
+              <TouchableOpacity onPress={() => setDurationInfoOpen(false)}>
+                <MaterialIcons name="close" size={18} color={colors.secondary} />
+              </TouchableOpacity>
+            </View>
+            <Text style={styles.policyText}>Full Day (1.0): entire working day.</Text>
+            <Text style={styles.policyText}>First Half (0.5): morning shift.</Text>
+            <Text style={styles.policyText}>Second Half (0.5): afternoon shift. Long-press a selected date to override.</Text>
+            <TouchableOpacity style={styles.submitBtn} onPress={() => setDurationInfoOpen(false)}>
+              <Text style={styles.submitBtnText}>Got it</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
+    </ScreenGradient>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: colors.surface },
+  safeArea: { flex: 1, backgroundColor: "transparent" },
   header: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
     paddingHorizontal: 16, height: 56, backgroundColor: 'rgba(252, 249, 248, 0.9)',
@@ -644,36 +689,36 @@ const styles = StyleSheet.create({
   headerLeft: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   headerRight: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   iconButton: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center', marginLeft: -8 },
-  headerTitle: { fontSize: 18, fontWeight: '600', color: colors.onSurface },
+  headerTitle: { fontSize: 18, fontWeight: '700', color: colors.primary, letterSpacing: -0.2 },
   profileAvatar: { width: 32, height: 32, borderRadius: 16, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center' },
   container: { flex: 1 },
   content: { padding: 16, paddingBottom: 64, gap: 12 },
-  policyBanner: { flexDirection: 'row', alignItems: 'flex-start', padding: 12, backgroundColor: colors.surfaceContainerLow, borderRadius: 12, gap: 8, marginTop: 12 },
+  policyBanner: { flexDirection: 'row', alignItems: 'center', paddingVertical: 8, paddingHorizontal: 10, backgroundColor: '#ececec', borderRadius: 10, gap: 6 },
   policyIcon: { marginTop: 2 },
   policyText: { fontSize: 12, color: colors.onSurfaceVariant, flex: 1, lineHeight: 16 },
-  empCard: { padding: 16, backgroundColor: colors.surfaceContainerLowest, borderRadius: 12 },
+  empCard: { padding: 16, backgroundColor: colors.glass, borderRadius: 16, borderWidth: 1, borderColor: colors.glassBorder },
   empCardRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  empInfoLeft: { flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1 },
+  empInfoLeft: { flexDirection: 'row', alignItems: 'flex-start', gap: 12, flex: 1 },
   empInitialsBox: { width: 40, height: 40, borderRadius: 20, backgroundColor: colors.surfaceContainerHigh, alignItems: 'center', justifyContent: 'center' },
   empInitials: { fontSize: 18, fontWeight: '600', color: colors.onSurface },
   empName: { fontSize: 18, fontWeight: '600', color: colors.onSurface },
   empRole: { fontSize: 12, color: colors.secondary },
   approverBox: { alignItems: 'flex-end', paddingLeft: 8 },
-  approverLabel: { fontSize: 11, fontWeight: '600', color: colors.secondary },
-  approverName: { fontSize: 12, fontWeight: '500', color: colors.onSurface },
+  approverLabel: { fontSize: 12, fontWeight: '600', color: colors.secondary, marginTop: 8 },
+  approverName: { fontSize: 14, fontWeight: '600', color: colors.onSurface },
   formSection: { marginTop: 16, gap: 8 },
   sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   sectionTitle: { fontSize: 12, fontWeight: '500', color: colors.onSurface },
-  requiredLabel: { fontSize: 11, fontWeight: '600', color: colors.secondary },
-  leaveTypeGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, justifyContent: 'space-between' },
-  leaveTypeItemActive: { width: '48%', backgroundColor: colors.primary, padding: 12, borderRadius: 8 },
-  leaveTypeItem: { width: '48%', backgroundColor: colors.surfaceContainerLowest, padding: 12, borderRadius: 8 },
+  requiredStar: { color: colors.error, fontWeight: '700' },
+  leaveTypeGrid: { flexDirection: 'row', gap: 6 },
+  leaveTypeItemActive: { flex: 1, backgroundColor: colors.primary, padding: 8, borderRadius: 8, minWidth: 0 },
+  leaveTypeItem: { flex: 1, backgroundColor: colors.surfaceContainerLowest, padding: 8, borderRadius: 8, minWidth: 0 },
   leaveTypeIconRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  leaveTypeTextActive: { fontSize: 14, fontWeight: '500', color: colors.onPrimary, marginTop: 8 },
-  leaveTypeText: { fontSize: 14, fontWeight: '500', color: colors.onSurface, marginTop: 8 },
+  leaveTypeTextActive: { fontSize: 11, fontWeight: '500', color: colors.onPrimary, marginTop: 6 },
+  leaveTypeText: { fontSize: 11, fontWeight: '500', color: colors.onSurface, marginTop: 6 },
   radioDot: { width: 12, height: 12, borderRadius: 6, backgroundColor: colors.surfaceContainerHigh },
   radioSelected: { width: 12, height: 12, borderRadius: 6, backgroundColor: colors.primary },
-  calendarCard: { backgroundColor: colors.surfaceContainerLowest, padding: 16, borderRadius: 12, gap: 16 },
+  calendarCard: { backgroundColor: colors.glass, padding: 16, borderRadius: 16, gap: 16, borderWidth: 1, borderColor: colors.glassBorder },
   calendarHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderBottomWidth: 1, borderBottomColor: colors.surfaceContainer, paddingBottom: 8 },
   calendarTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   calendarTitle: { fontSize: 14, fontWeight: '500', color: colors.onSurface },
@@ -682,25 +727,25 @@ const styles = StyleSheet.create({
   monthBadgeText: { fontSize: 11, fontWeight: '600', color: colors.secondary },
   calendarBox: { backgroundColor: colors.surfaceContainerLow, padding: 12, borderRadius: 12, gap: 12 },
   calendarNav: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 4 },
-  calendarMonthText: { fontSize: 18, fontWeight: '600', color: colors.onSurface },
+  calendarMonthText: { fontSize: 20, fontWeight: '600', color: colors.onSurface },
   calendarNavBtns: { flexDirection: 'row', gap: 4 },
   calendarDaysRow: { flexDirection: 'row', justifyContent: 'space-between', paddingBottom: 4 },
-  calendarDayHeader: { width: '14%', textAlign: 'center', fontSize: 11, fontWeight: '600', color: colors.secondary },
+  calendarDayHeader: { width: '14.28%', textAlign: 'center', fontSize: 11, fontWeight: '600', color: colors.secondary },
   calendarDayHeaderWeekend: { color: colors.onSurfaceVariant },
   calendarGrid: { flexDirection: 'row', flexWrap: 'wrap' },
-  calTextOff: { width: '14%', textAlign: 'center', paddingVertical: 8, fontSize: 12, color: 'rgba(88, 95, 108, 0.4)' },
-  calText: { width: '14%', textAlign: 'center', paddingVertical: 8, fontSize: 12, color: colors.onSurface },
-  calTextWeekend: { width: '14%', textAlign: 'center', paddingVertical: 8, fontSize: 12, color: 'rgba(88, 95, 108, 0.7)', backgroundColor: 'rgba(235, 231, 231, 0.4)' },
-  calTextToday: { width: '14%', alignItems: 'center', justifyContent: 'center' },
+  calCell: { width: '14.28%', minHeight: 32, alignItems: 'center', justifyContent: 'center' },
+  calTextOff: { textAlign: 'center', fontSize: 12, color: 'rgba(88, 95, 108, 0.4)' },
+  calText: { textAlign: 'center', fontSize: 12, color: colors.onSurface },
+  calTextWeekend: { textAlign: 'center', fontSize: 12, color: 'rgba(88, 95, 108, 0.7)' },
   calTextTodayStr: { width: 28, height: 28, borderRadius: 14, borderWidth: 2, borderColor: colors.primary, textAlign: 'center', lineHeight: 24, fontSize: 12, fontWeight: 'bold', color: colors.primary, backgroundColor: colors.surfaceContainerLowest },
-  calTextSelLeft: { width: '14%', backgroundColor: colors.primary, borderTopLeftRadius: 16, borderBottomLeftRadius: 16, alignItems: 'center', justifyContent: 'center' },
-  calTextSelMid: { width: '14%', backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center' },
-  calTextSelHalf: { width: '14%', backgroundColor: colors.secondaryFixedDim, alignItems: 'center', justifyContent: 'center' },
-  calTextSelRight: { width: '14%', backgroundColor: colors.primary, borderTopRightRadius: 16, borderBottomRightRadius: 16, alignItems: 'center', justifyContent: 'center' },
-  calTextSelStr: { color: colors.onPrimary, fontSize: 12, fontWeight: '500', paddingVertical: 8 },
-  calTextSelHalfStr: { color: colors.onSurface, fontSize: 12, fontWeight: '500', paddingVertical: 8 },
-  calendarLegend: { flexDirection: 'row', gap: 12, paddingTop: 8, borderTopWidth: 1, borderTopColor: colors.surfaceContainer, paddingHorizontal: 4 },
-  legendItem: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  calTextSelLeft: { backgroundColor: colors.primary, borderTopLeftRadius: 16, borderBottomLeftRadius: 16 },
+  calTextSelMid: { backgroundColor: colors.primary },
+  calTextSelHalf: { backgroundColor: colors.secondaryFixedDim },
+  calTextSelRight: { backgroundColor: colors.primary, borderTopRightRadius: 16, borderBottomRightRadius: 16 },
+  calTextSelStr: { color: colors.onPrimary, fontSize: 12, fontWeight: '500' },
+  calTextSelHalfStr: { color: colors.onSurface, fontSize: 12, fontWeight: '500' },
+  calendarLegend: { flexDirection: 'row', gap: 8, paddingTop: 8, borderTopWidth: 1, borderTopColor: colors.surfaceContainer, paddingHorizontal: 4 },
+  legendItem: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 4 },
   legendDot: { width: 12, height: 12, borderRadius: 6 },
   legendText: { fontSize: 12, color: colors.onSurface },
   dateRangeBox: { flexDirection: 'row', gap: 8, justifyContent: 'space-between' },
@@ -714,11 +759,11 @@ const styles = StyleSheet.create({
   durationSubtitle: { fontSize: 12, color: colors.onSurfaceVariant, marginTop: 2 },
   durationBadge: { width: 40, height: 40, borderRadius: 20, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center' },
   durationBadgeText: { fontSize: 16, fontWeight: '600', color: colors.onPrimary },
-  reasonCard: { backgroundColor: colors.surfaceContainerLowest, borderRadius: 12, padding: 16, gap: 8 },
+  reasonCard: { backgroundColor: colors.glass, borderRadius: 16, padding: 16, gap: 8, borderWidth: 1, borderColor: colors.glassBorder },
   reasonTitle: { fontSize: 12, fontWeight: '500', color: colors.onSurface },
   reasonInput: { backgroundColor: colors.surfaceContainerLow, color: colors.onSurface, fontSize: 14, borderRadius: 8, padding: 12, minHeight: 80, textAlignVertical: 'top' },
   charCount: { fontSize: 11, fontWeight: '600', color: colors.secondary },
-  uploadCard: { backgroundColor: colors.surfaceContainerLowest, borderRadius: 12, padding: 16, gap: 12 },
+  uploadCard: { backgroundColor: colors.glass, borderRadius: 16, padding: 16, gap: 12, borderWidth: 1, borderColor: colors.glassBorder },
   uploadHeader: { gap: 4 },
   uploadTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   uploadTitle: { fontSize: 12, fontWeight: '500', color: colors.onSurface },
@@ -729,14 +774,14 @@ const styles = StyleSheet.create({
   fileName: { fontSize: 14, fontWeight: '500', color: colors.onSurface },
   fileSize: { fontSize: 12, color: colors.secondary },
   uploadFormats: { fontSize: 12, color: colors.secondary, paddingHorizontal: 4 },
-  attestCard: { backgroundColor: colors.surfaceContainerLowest, borderRadius: 12, padding: 16, gap: 12 },
+  attestCard: { backgroundColor: colors.glass, borderRadius: 16, padding: 16, gap: 12, borderWidth: 1, borderColor: colors.glassBorder },
   attestHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   attestTitle: { fontSize: 12, fontWeight: '500', color: colors.onSurface },
   attestBadge: { backgroundColor: colors.surfaceContainer, paddingHorizontal: 8, paddingVertical: 2, borderRadius: 4 },
   attestBadgeText: { fontSize: 11, fontWeight: '600', color: colors.secondary },
   checkboxRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 12 },
   checkbox: { width: 20, height: 20, borderRadius: 4, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center', marginTop: 2 },
-  checkboxText: { flex: 1, fontSize: 12, color: colors.onSurface, lineHeight: 18 },
+  checkboxText: { flex: 1, fontSize: 12, color: colors.error, lineHeight: 18 },
   checkboxTextBold: { fontWeight: '500' },
   submitActions: { marginTop: 8, gap: 8 },
   submitBtn: { width: '100%', height: 48, backgroundColor: colors.primary, borderRadius: 8, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },
@@ -745,4 +790,9 @@ const styles = StyleSheet.create({
   draftBtnText: { fontSize: 14, fontWeight: '500', color: colors.onSurface },
   toastBox: { position: 'absolute', left: 16, right: 16, top: 64, backgroundColor: colors.onSurface, borderRadius: 8, padding: 12 },
   toastText: { fontSize: 12, color: colors.onPrimary, lineHeight: 16 },
+  infoDot: { width: 16, height: 16, borderRadius: 8, alignItems: "center", justifyContent: "center" },
+  infoDotText: { fontSize: 11, fontWeight: "600", color: colors.primary },
+  modalBackdrop: { flex: 1, backgroundColor: "rgba(49,48,48,0.6)", justifyContent: "center", padding: 16 },
+  modalCard: { backgroundColor: colors.glass, borderRadius: 16, padding: 16, gap: 12, borderWidth: 1, borderColor: colors.glassBorder },
+  modalHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
 });

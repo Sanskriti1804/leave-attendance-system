@@ -5,36 +5,25 @@ import { useRouter } from "expo-router";
 import { getSession } from "../../../services/auth";
 import {
   apiErrorMessage,
-  displayName,
   getMe,
   getOrgSettings,
   type EmployeePublic,
   type OrganisationSettings,
 } from "../../../services/resources";
 import { UIFallbackIndicator } from "../../components/ui/UIFallback";
-
-const colors = {
-  surface: "#fcf9f8",
-  surfaceContainerLowest: "#ffffff",
-  surfaceContainerLow: "#f6f3f2",
-  surfaceContainer: "#f0edec",
-  surfaceContainerHigh: "#ebe7e7",
-  surfaceContainerHighest: "#e5e2e1",
-  onSurface: "#1c1b1b",
-  onSurfaceVariant: "#4c4546",
-  primary: "#000000",
-  onPrimary: "#ffffff",
-  secondary: "#585f6c",
-  error: "#ba1a1a",
-};
+import { EmployeeBottomNavBar } from "../../components/ui/EmployeeComponents";
+import { ScreenGradient } from "../../components/ui/AppChrome";
+import { TopNavBar, useTopNavContentInset } from "../../components/ui/AdminComponents";
+import { colors } from "../../theme";
 
 export default function EmployeeHomeScreen() {
   const router = useRouter();
+  const topInset = useTopNavContentInset();
   const applyHref = (process.env.EXPO_PUBLIC_APPLY_LEAVE as string | undefined) || "/leave/apply";
-  const listHref = (process.env.EXPO_PUBLIC_MY_LEAVE as string | undefined) || "/leave/list";
   const [me, setMe] = useState<EmployeePublic | null>(null);
   const [settings, setSettings] = useState<OrganisationSettings | null>(null);
   const [clock, setClock] = useState("");
+  const [clockPeriod, setClockPeriod] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -77,14 +66,16 @@ export default function EmployeeHomeScreen() {
   useEffect(() => {
     const zone = settings?.timezone ?? "America/New_York";
     const tick = () => {
-      setClock(
-        new Date().toLocaleTimeString(undefined, {
+      const formatted = new Date().toLocaleTimeString(undefined, {
           timeZone: zone,
           hour: "2-digit",
           minute: "2-digit",
           second: "2-digit",
-        }),
-      );
+          hour12: true,
+        });
+      const [timePart, periodPart] = formatted.split(" ");
+      setClock(timePart ?? formatted);
+      setClockPeriod(periodPart ?? "");
     };
     tick();
     const id = setInterval(tick, 1000);
@@ -101,10 +92,11 @@ export default function EmployeeHomeScreen() {
   const role = me?.role ?? "employee";
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.header}>
-        <View style={styles.headerLeft}>
-          <Text style={styles.headerTitle}>Home</Text>
+    <ScreenGradient>
+      <SafeAreaView style={styles.safeArea}>
+      <TopNavBar
+        title="Home"
+        right={
           <View style={styles.badgeContainer}>
             <View style={styles.badgeActive}>
               <Text style={styles.badgeTextActive}>{role === "employee" ? "EMP" : role === "admin" ? "ADM" : "GST"}</Text>
@@ -120,13 +112,10 @@ export default function EmployeeHomeScreen() {
               <Text style={styles.badgeTextInactive}>ADM</Text>
             </TouchableOpacity>
           </View>
-        </View>
-        <TouchableOpacity style={styles.profileIcon} onPress={() => router.push("/(tabs)/profile" as never)}>
-          <MaterialIcons name="person" size={18} color={colors.onPrimary} />
-        </TouchableOpacity>
-      </View>
+        }
+      />
 
-      <ScrollView style={styles.scrollContainer} contentContainerStyle={styles.contentContainer}>
+      <ScrollView style={styles.scrollContainer} contentContainerStyle={[styles.contentContainer, { paddingTop: topInset }]}>
         {/* Timezone & Operational Header Strip */}
         <View style={styles.timezoneCard}>
           <View style={styles.timezoneLeft}>
@@ -152,7 +141,7 @@ export default function EmployeeHomeScreen() {
               </View>
               <View style={styles.clockRow}>
                 <Text style={styles.clockText}>{clock || "--:--:--"}</Text>
-                <Text style={styles.amPmText}>{error ? "EMP-8492" : displayName(me)}</Text>
+                <Text style={styles.amPmText}>{clockPeriod || "EST"}</Text>
               </View>
             </View>
             <View style={styles.shiftBadge}>
@@ -250,14 +239,14 @@ export default function EmployeeHomeScreen() {
               <MaterialIcons name="arrow-forward" size={18} color={colors.secondary} />
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.quickActionCard} onPress={() => router.push(listHref as never)}>
+            <TouchableOpacity style={styles.quickActionCard} onPress={() => router.push("/(tabs)/attendance" as never)}>
               <View style={styles.quickActionLeft}>
                 <View style={styles.quickActionIcon}>
                   <MaterialIcons name="edit-calendar" size={20} color={colors.onSurface} />
                 </View>
                 <View style={styles.quickActionTexts}>
-                  <Text style={styles.quickActionCardTitle}>My Leave</Text>
-                  <Text style={styles.quickActionCardSubtitle}>List and withdraw applications</Text>
+                  <Text style={styles.quickActionCardTitle}>Request Correction</Text>
+                  <Text style={styles.quickActionCardSubtitle}>Missed punch or regularize</Text>
                 </View>
               </View>
               <MaterialIcons name="arrow-forward" size={18} color={colors.secondary} />
@@ -302,22 +291,22 @@ export default function EmployeeHomeScreen() {
           <View style={styles.footerTexts}>
             <Text style={styles.footerTitle}>AUTH-02 DATA ISOLATION ENFORCED</Text>
             <Text style={styles.footerBody}>
-              {error
-                ? error
-                : "Attendance punch APIs are not implemented on the server. Leave actions use live /api/v1 routes. Scoped to the signed-in employee."}
+              Scoped strictly to the employee's own records. Payroll widgets and team balance meters are masked under the active role profile.
             </Text>
           </View>
         </View>
 
       </ScrollView>
+      <EmployeeBottomNavBar activeRoute="home" />
     </SafeAreaView>
+    </ScreenGradient>
   );
 }
 
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: colors.surface,
+    backgroundColor: 'transparent',
   },
   header: {
     height: 64,
@@ -380,7 +369,7 @@ const styles = StyleSheet.create({
   contentContainer: {
     padding: 16,
     gap: 16,
-    paddingBottom: 80,
+    paddingBottom: 110,
   },
   timezoneCard: {
     flexDirection: 'row',

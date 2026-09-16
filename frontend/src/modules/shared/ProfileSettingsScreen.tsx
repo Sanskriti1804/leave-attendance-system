@@ -14,6 +14,9 @@ import {
   type OrganisationSettings,
 } from "../../../services/resources";
 import { UIFallbackIndicator } from "../../components/ui/UIFallback";
+import { ScreenGradient } from "../../components/ui/AppChrome";
+import { TopNavBar, useTopNavContentInset } from "../../components/ui/AdminComponents";
+import { EmployeeBottomNavBar } from "../../components/ui/EmployeeComponents";
 
 const colors = {
   surface: "#fcf9f8",
@@ -24,13 +27,14 @@ const colors = {
   surfaceContainerHighest: "#e5e2e1",
   onSurface: "#1c1b1b",
   onSurfaceVariant: "#4c4546",
-  primary: "#000000",
+  primary: "#242424",
   onPrimary: "#ffffff",
   secondary: "#585f6c",
 };
 
 export default function ProfileSettingsScreen() {
   const router = useRouter();
+  const topInset = useTopNavContentInset();
   const [me, setMe] = useState<EmployeePublic | null>(null);
   const [departmentName, setDepartmentName] = useState("—");
   const [managerName, setManagerName] = useState("—");
@@ -102,17 +106,18 @@ export default function ProfileSettingsScreen() {
   const isFallback = !me || !!error;
 
   return (
+    <ScreenGradient>
     <SafeAreaView style={styles.safeArea}>
-      <View style={styles.header}>
-        <View style={styles.headerLeft}>
-          <Text style={styles.headerTitle}>PROFILE</Text>
-        </View>
-        <TouchableOpacity style={styles.headerIcon} onPress={() => router.push("/(tabs)/settings" as never)}>
-          <MaterialIcons name="settings" size={20} color={colors.onSurface} />
-        </TouchableOpacity>
-      </View>
+      <TopNavBar
+        title="Profile"
+        right={
+          <TouchableOpacity style={styles.headerIcon} onPress={() => router.push("/(tabs)/settings" as never)}>
+            <MaterialIcons name="settings" size={20} color={colors.onSurface} />
+          </TouchableOpacity>
+        }
+      />
 
-      <ScrollView style={styles.scrollContainer} contentContainerStyle={styles.contentContainer}>
+      <ScrollView style={styles.scrollContainer} contentContainerStyle={[styles.contentContainer, { paddingTop: topInset }]}>
         {/* Profile Header Card */}
         <View style={styles.card}>
           <View style={styles.profileHeaderRow}>
@@ -226,14 +231,16 @@ export default function ProfileSettingsScreen() {
           <MaterialIcons name="chevron-right" size={20} color={colors.secondary} />
         </TouchableOpacity>
       </ScrollView>
+      <EmployeeBottomNavBar activeRoute="profile" />
     </SafeAreaView>
+    </ScreenGradient>
   );
 }
 
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: colors.surface,
+    backgroundColor: 'transparent',
   },
   header: {
     height: 56,
@@ -268,7 +275,7 @@ const styles = StyleSheet.create({
   contentContainer: {
     padding: 16,
     gap: 16,
-    paddingBottom: 80,
+    paddingBottom: 110,
   },
   card: {
     backgroundColor: colors.surfaceContainerLowest,
