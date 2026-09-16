@@ -26,7 +26,7 @@ npm start
 
 Automated suite (needs DB): `npm test`
 
-Leave dates must fall in **today … today + 14 calendar days** in `APP_TIMEZONE` (default `America/New_York`). Use `YYYY-MM-DD`.
+Leave dates must fall in **today … today + 14 calendar days** in `APP_TIMEZONE` (default `Asia/Kolkata`). Use `YYYY-MM-DD`.
 
 ---
 

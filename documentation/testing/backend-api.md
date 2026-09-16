@@ -19,7 +19,7 @@ npx prisma migrate deploy
 npm run seed
 ```
 
-Leave dates must fall in **today … today + maxAdvanceDays** in `APP_TIMEZONE` (default `America/New_York`). Use `YYYY-MM-DD`.
+Leave dates must fall in **today … today + maxAdvanceDays** in `APP_TIMEZONE` (default `Asia/Kolkata`). Use `YYYY-MM-DD`.
 
 ---
 

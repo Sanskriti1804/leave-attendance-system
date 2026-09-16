@@ -4,6 +4,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { ScreenGradient } from '../../components/ui/AppChrome';
 import { TopNavBar, useTopNavContentInset } from '../../components/ui/AdminComponents';
 import { getSession } from '../../../services/auth';
+import { getTodayIST } from '../../utils/date';
 import {
   apiErrorMessage,
   createLeave,
@@ -131,8 +132,9 @@ export default function ApplyLeaveScreen() {
   const [attested, setAttested] = useState(true);
   const [toast, setToast] = useState<string | null>(null);
   const [viewMonth, setViewMonth] = useState(() => {
-    const now = new Date();
-    return { year: now.getFullYear(), month: now.getMonth() };
+    const todayStr = getTodayIST();
+    const [y, m] = todayStr.split("-").map(Number);
+    return { year: y, month: (m ?? 1) - 1 };
   });
   const [maxAdvanceDays, setMaxAdvanceDays] = useState(14);
   const [loading, setLoading] = useState(true);
@@ -141,7 +143,7 @@ export default function ApplyLeaveScreen() {
   const [error, setError] = useState<string | null>(null);
   const [pickedFile, setPickedFile] = useState<{ uri: string; name: string; type: string } | null>(null);
 
-  const today = toCivil(new Date());
+  const today = getTodayIST();
 
   const load = useCallback(async () => {
     setLoading(true);

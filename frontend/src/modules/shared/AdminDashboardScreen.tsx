@@ -3,6 +3,7 @@ import { View, Text, ScrollView, TouchableOpacity, SafeAreaView, TextInput } fro
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from "expo-router";
 import { getSession } from "../../../services/auth";
+import { getTodayIST } from "../../utils/date";
 import {
   displayName,
   getMe,
@@ -73,7 +74,7 @@ export default function AdminDashboardScreen() {
     );
   }, [employees, query]);
 
-  const today = new Date().toISOString().slice(0, 10);
+  const today = getTodayIST();
   const onLeaveToday = approved.filter((row) => row.startDate <= today && row.endDate >= today).length;
 
   return (

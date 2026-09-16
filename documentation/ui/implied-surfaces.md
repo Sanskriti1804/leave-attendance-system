@@ -8,7 +8,7 @@ Derived from **Confirmed** requirements. This is **not** a signed wireframe or v
 - Leave apply: auto name/department/manager when present; type; start/end; half/full/multi; first/second half; reason; medical upload; submit; status list
 - Proof of external manager approval on submit when a manager exists
 - Check-in / check-out controls (stakeholder: disable to prevent double punch)
-- Attendance dashboard: today, login/logout times, monthly present/absent/leave, late, missing; timezone EST
+- Attendance dashboard: today, login/logout times, monthly present/absent/leave, late, missing; timezone IST
 - Attendance correction request form
 - In-app notifications list
 
@@ -16,7 +16,7 @@ Derived from **Confirmed** requirements. This is **not** a signed wireframe or v
 
 - Employee management
 - Leave review: approve, reject, request clarification; view/download medical docs
-- HR dashboard counts (employees, present, on leave, absent, unmarked, late, missing checkout, pending leave) in EST
+- HR dashboard counts (employees, present, on leave, absent, unmarked, late, missing checkout, pending leave) in IST
 - Reports with Excel/CSV/PDF export
 - Leave type / holiday / weekly-off / working-hours configuration
 - Attendance correction review

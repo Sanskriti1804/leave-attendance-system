@@ -6,6 +6,7 @@ import { TopNavBar, useTopNavContentInset } from "../../components/ui/AdminCompo
 import { EmployeeBottomNavBar } from "../../components/ui/EmployeeComponents";
 import { useRouter } from "expo-router";
 import { getSession } from "../../../services/auth";
+import { formatDateTimeIST } from "../../utils/date";
 import {
   apiErrorMessage,
   displayName,
@@ -316,7 +317,7 @@ export default function MyLeaveListScreen() {
                     <View style={styles.cardFooter}>
                       <View style={styles.footerTime}>
                         <MaterialIcons name="history" size={16} color={colors.secondary} />
-                        <Text style={styles.footerTimeText}>{relativeSubmitted(leave.createdAt)}</Text>
+                        <Text style={styles.footerTimeText}>{formatDateTimeIST(leave.createdAt)}</Text>
                       </View>
                       <TouchableOpacity style={styles.actionBtn} onPress={() => router.push(applyHref as never)}>
                         <Text style={styles.actionBtnText}>Resubmit New</Text>

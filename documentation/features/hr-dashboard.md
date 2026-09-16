@@ -6,7 +6,7 @@ Confirmed HR-DASH-01–09. **Not implemented.**
 
 ## Purpose
 
-Organization snapshot for HR/Admin: totals for employees, present, on leave, absent, unmarked, late, missing checkout, pending leave. Timezone EST (HR-DASH-09).
+Organization snapshot for HR/Admin: totals for employees, present, on leave, absent, unmarked, late, missing checkout, pending leave. Timezone IST (`Asia/Kolkata`, UTC+05:30).
 
 ## Users and Roles
 

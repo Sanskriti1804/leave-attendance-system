@@ -13,9 +13,10 @@ Stack (header hidden)
   /                 splash (~1800ms) → replace /login
   /login            email/password + Login + Pass (dev)
   /(tabs)
-    index           Home placeholder
-    profile         Profile placeholder
-    settings        Settings placeholder
+    index           Employee attendance home
+    profile         Profile
+    settings        Settings
+  /attendance       Employee attendance ledger
 ```
 
 Files: `mobile/app/_layout.tsx`, `mobile/app/index.tsx`, `mobile/app/login.tsx`, `mobile/app/(tabs)/`.
@@ -41,12 +42,10 @@ MaxStarter owns `src/maxstarter/` and `MAXSTARTER:BEGIN/END` regions.
 `frontend/` Expo Router app (Stitch-aligned):
 
 - Splash `/` and Login `/login`
-- Employee: Home `/(tabs)`, Leave `/leave/list`, Apply `/leave/apply`, Attendance `/(tabs)/attendance`, Alerts `/(tabs)/notifications` (Stitch in-app notifications layout; notification APIs not implemented), Profile `/(tabs)/profile`
-- Admin / guest_admin: Dashboard `/admin`, Leave review `/leave/admin-review`, People `/people`, Reports `/reports`, More `/settings` (Stitch More/Settings). From More: Admin/Guest profile `/admin-profile`, Organisation Settings `/org-settings` (GET live; PATCH admin-only, guest_admin read-only AUTH-09).
+- Employee: Home `/(tabs)`, Leave `/leave/list`, Apply `/leave/apply`, Attendance `/(tabs)/attendance` and `/attendance` (monthly ledger via `/api/v1/attendance/me`), corrections `/attendance-corrections`, Alerts `/(tabs)/notifications`, Profile `/(tabs)/profile`
+- Admin / guest_admin: Dashboard `/admin`, Leave review `/leave/admin-review`, People `/people`, Reports `/reports`, More `/settings`. From More: `/admin-profile`, `/org-settings` (GET live; PATCH admin-only).
 
-Expo tab bar is hidden. All roles use the admin pill bottom nav styling with role-specific destinations.
-
-Leave list and apply keep live `/api/v1` leave calls. Admin review approve/reject is admin-only; guest_admin is read-only. Medical document bytes are not fetched for employees (MED-09). File picker upload is still not wired. Punch and reports APIs are not implemented.
+Expo tab bar is hidden. Roles use the shared pill bottom nav. Leave APIs are live. Guest admin leave review is read-only. Medical GET remains forbidden for employees (MED-09). Home punch buttons are still local simulation; attendance history/corrections call live endpoints.
 
 ## Theme tokens (from design.md)
 

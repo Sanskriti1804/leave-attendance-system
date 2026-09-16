@@ -52,7 +52,7 @@ Employee JSON never includes `passwordHash`. `isActive=true` maps to `obsolete=f
 
 Implemented (no JWT/RBAC). Holidays use Prisma `Holiday` (`holidayId`, `holidayName`, `holidayDate` UNIQUE). POST body is pack `{date, name}`. Duplicate date → 409 `CONFLICT`. DELETE → 204.
 
-Org settings use Prisma `ConfigurationSetting` key-value (`settingCategory` = `organisation`), not a pack `org_settings` table. GET returns defaults when keys are missing (`timezone` from `APP_TIMEZONE` / `America/New_York`, `graceMinutes` 0, `medicalDocOptional1To2Days` true, `medicalDocExceedsDays` 2, `maxAdvanceDays` from `LEAVE_MAX_ADVANCE_DAYS` / **14**). `workStart`/`workEnd` are `HH:MM` or null. `weeklyOffDow` is ISO 1–7. Weekend/holiday leave exclusion flags are applied by leave application via the leave-policies config facade.
+Org settings use Prisma `ConfigurationSetting` key-value (`settingCategory` = `organisation`), not a pack `org_settings` table. GET returns defaults when keys are missing (`timezone` from `APP_TIMEZONE` / `Asia/Kolkata`, `graceMinutes` 0, `medicalDocOptional1To2Days` true, `medicalDocExceedsDays` 2, `maxAdvanceDays` from `LEAVE_MAX_ADVANCE_DAYS` / **14**). `workStart`/`workEnd` are `HH:MM` or null. `weeklyOffDow` is ISO 1–7. Weekend/holiday leave exclusion flags are applied by leave application via the leave-policies config facade.
 
 | Method | Path | Purpose | Auth |
 | --- | --- | --- | --- |

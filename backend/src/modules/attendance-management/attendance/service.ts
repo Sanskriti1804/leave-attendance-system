@@ -1,7 +1,14 @@
 import type { Attendance } from "../../../generated/prisma/client.js";
 import { createAuditLog } from "../../shared/audit-logs/repository.js";
 import { getOrganisationSettings } from "../../shared/organisation-settings/service.js";
-import { fromCivilDate, toCivilDate } from "../../shared/utils/dates.js";
+import {
+  fromCivilDate,
+  toCivilDate,
+  toIsoWithIstOffset,
+  getWorkDate,
+  calculateLateMinutes as datesCalculateLateMinutes,
+  DEFAULT_TIMEZONE,
+} from "../../shared/utils/dates.js";
 import { HttpError } from "../../shared/utils/http-error.js";
 import * as attendanceRepository from "./repository.js";
 import type { AttendanceWithEmployee } from "./repository.js";
@@ -12,78 +19,34 @@ import type {
 } from "./validation.js";
 
 /**
- * Returns the current UTC date as:
+ * Returns the work date in IST (or configured timezone) as:
  * - civilDate: YYYY-MM-DD
  * - dateObj: UTC Date representing midnight of that civil date
  */
 export function getUtcWorkDate(
   date: Date = new Date(),
+  timeZone: string = DEFAULT_TIMEZONE,
 ): { civilDate: string; dateObj: Date } {
-  const civilDate = date.toISOString().slice(0, 10);
-  const dateObj = fromCivilDate(civilDate);
-
-  return {
-    civilDate,
-    dateObj,
-  };
+  return getWorkDate(date, timeZone);
 }
 
 /**
- * Calculates late minutes using UTC check-in time.
- *
- * workStart must be in HH:mm format.
- * graceMinutes is added to the configured work start time.
- *
- * Example:
- * workStart = 09:00
- * graceMinutes = 15
- * checkIn = 09:20 UTC
- *
- * lateMinutes = 20
+ * Calculates late minutes against a configured work start time (HH:mm)
+ * evaluated in the organization's time zone (default Asia/Kolkata / IST).
  */
 export function calculateLateMinutes(
   checkIn: Date,
   workStart: string | null,
   graceMinutes = 0,
+  timeZone: string = DEFAULT_TIMEZONE,
 ): number {
-  if (!workStart) {
-    return 0;
-  }
-
-  const [startHourStr, startMinStr] = workStart.split(":");
-
-  const startHour = Number.parseInt(startHourStr, 10);
-  const startMin = Number.parseInt(startMinStr, 10);
-
-  if (
-    Number.isNaN(startHour) ||
-    Number.isNaN(startMin) ||
-    startHour < 0 ||
-    startHour > 23 ||
-    startMin < 0 ||
-    startMin > 59
-  ) {
-    return 0;
-  }
-
-  const workStartMinutes = startHour * 60 + startMin;
-
-  const checkInMinutes =
-    checkIn.getUTCHours() * 60 + checkIn.getUTCMinutes();
-
-  const allowedThreshold = workStartMinutes + graceMinutes;
-
-  if (checkInMinutes > allowedThreshold) {
-    return checkInMinutes - workStartMinutes;
-  }
-
-  return 0;
+  return datesCalculateLateMinutes(checkIn, workStart, graceMinutes, timeZone);
 }
 
 /**
  * Converts a database Attendance record into the API response format.
  *
- * All dates/timestamps returned by this function are UTC.
+ * Timestamps are stored in UTC and formatted with an IST (+05:30) offset.
  */
 export function toAttendanceResponse(
   record: AttendanceWithEmployee | Attendance,
@@ -94,18 +57,18 @@ export function toAttendanceResponse(
     attendanceId: record.attendanceId,
     employeeId: record.employeeId,
 
-    // attendanceDate is a UTC civil date.
+    // attendanceDate is a civil date YYYY-MM-DD.
     attendanceDate: toCivilDate(record.attendanceDate),
 
-    // Date#toISOString() always returns UTC with Z suffix.
-    checkIn: record.checkIn ? record.checkIn.toISOString() : null,
-    checkOut: record.checkOut ? record.checkOut.toISOString() : null,
+    // Stored in UTC, formatted with IST offset (+05:30)
+    checkIn: toIsoWithIstOffset(record.checkIn),
+    checkOut: toIsoWithIstOffset(record.checkOut),
 
     status: record.status,
     lateMinutes: record.lateMinutes,
 
-    createdAt: record.createdAt.toISOString(),
-    updatedAt: record.updatedAt.toISOString(),
+    createdAt: toIsoWithIstOffset(record.createdAt)!,
+    updatedAt: toIsoWithIstOffset(record.updatedAt)!,
 
     ...(withEmp.employee
       ? {
@@ -118,13 +81,15 @@ export function toAttendanceResponse(
 /**
  * Employee check-in.
  *
- * Attendance date is always derived from the current UTC date.
- * Check-in timestamp is stored as the current UTC instant.
+ * Attendance date is derived from the current work date in IST.
+ * Check-in timestamp is stored in the database as UTC.
  */
 export async function checkIn(employeeId: number) {
   const now = new Date();
+  const settings = await getOrganisationSettings();
+  const timeZone = settings.timezone || DEFAULT_TIMEZONE;
 
-  const { dateObj } = getUtcWorkDate(now);
+  const { dateObj } = getWorkDate(now, timeZone);
 
   const existing =
     await attendanceRepository.findByEmployeeAndDate(
@@ -140,12 +105,11 @@ export async function checkIn(employeeId: number) {
     );
   }
 
-  const settings = await getOrganisationSettings();
-
   const lateMinutes = calculateLateMinutes(
     now,
     settings.workStart,
     settings.graceMinutes,
+    timeZone,
   );
 
   let record: Attendance;
@@ -175,12 +139,15 @@ export async function checkIn(employeeId: number) {
 /**
  * Employee check-out.
  *
- * The attendance record is searched using today's UTC date.
+ * The attendance record is searched using today's work date in IST.
+ * Check-out timestamp is stored in the database as UTC.
  */
 export async function checkOut(employeeId: number) {
   const now = new Date();
+  const settings = await getOrganisationSettings();
+  const timeZone = settings.timezone || DEFAULT_TIMEZONE;
 
-  const { dateObj } = getUtcWorkDate(now);
+  const { dateObj } = getWorkDate(now, timeZone);
 
   const existing =
     await attendanceRepository.findByEmployeeAndDate(
@@ -215,12 +182,14 @@ export async function checkOut(employeeId: number) {
 }
 
 /**
- * Returns the employee's attendance dashboard for the current UTC date.
+ * Returns the employee's attendance dashboard for the current work date in IST.
  */
 export async function getMyDashboard(employeeId: number) {
   const now = new Date();
+  const settings = await getOrganisationSettings();
+  const timeZone = settings.timezone || DEFAULT_TIMEZONE;
 
-  const { civilDate, dateObj } = getUtcWorkDate(now);
+  const { civilDate, dateObj } = getWorkDate(now, timeZone);
 
   const record =
     await attendanceRepository.findByEmployeeAndDate(
@@ -233,7 +202,7 @@ export async function getMyDashboard(employeeId: number) {
 
   return {
     date: civilDate,
-    timezone: "UTC",
+    timezone: timeZone,
 
     canCheckIn: !checkedIn,
     canCheckOut: checkedIn && !checkedOut,
@@ -256,7 +225,7 @@ export async function getMyDashboard(employeeId: number) {
  * Supported filters:
  * - startDate + endDate
  * - month
- * - default: current UTC month
+ * - default: current IST month
  */
 export async function getMyAttendanceHistory(
   employeeId: number,
@@ -285,23 +254,21 @@ export async function getMyAttendanceHistory(
     );
   } else {
     const now = new Date();
+    const parts = new Intl.DateTimeFormat("en-US", {
+      timeZone: DEFAULT_TIMEZONE,
+      year: "numeric",
+      month: "numeric",
+    }).formatToParts(now);
 
-    // First day of current UTC month.
+    const year = Number.parseInt(parts.find((p) => p.type === "year")?.value ?? "2026", 10);
+    const month = Number.parseInt(parts.find((p) => p.type === "month")?.value ?? "1", 10);
+
     startDate = new Date(
-      Date.UTC(
-        now.getUTCFullYear(),
-        now.getUTCMonth(),
-        1,
-      ),
+      Date.UTC(year, month - 1, 1),
     );
 
-    // Last day of current UTC month.
     endDate = new Date(
-      Date.UTC(
-        now.getUTCFullYear(),
-        now.getUTCMonth() + 1,
-        0,
-      ),
+      Date.UTC(year, month, 0),
     );
   }
 
@@ -399,9 +366,6 @@ export async function listOrgAttendance(
 /**
  * Admin directly edits an attendance record.
  *
- * All incoming checkIn/checkOut values are required by validation
- * to be UTC ISO timestamps ending with Z.
- *
  * Every admin mutation is recorded in the AuditLog.
  */
 export async function adminUpdateAttendance(
@@ -424,22 +388,12 @@ export async function adminUpdateAttendance(
     typeof attendanceRepository.updateAttendance
   >[1] = {};
 
-  /**
-   * Update check-in.
-   *
-   * The validation layer guarantees UTC timestamps.
-   */
   if (body.checkIn !== undefined) {
     updateData.checkIn = body.checkIn
       ? new Date(body.checkIn)
       : null;
   }
 
-  /**
-   * Update check-out.
-   *
-   * The validation layer guarantees UTC timestamps.
-   */
   if (body.checkOut !== undefined) {
     updateData.checkOut = body.checkOut
       ? new Date(body.checkOut)
@@ -450,21 +404,17 @@ export async function adminUpdateAttendance(
     updateData.status = body.status;
   }
 
-  /**
-   * If lateMinutes is explicitly supplied, respect the admin value.
-   *
-   * Otherwise, if checkIn is being changed, recalculate it using
-   * the organisation's UTC workStart and graceMinutes.
-   */
   if (body.lateMinutes !== undefined) {
     updateData.lateMinutes = body.lateMinutes;
   } else if (body.checkIn) {
     const settings = await getOrganisationSettings();
+    const timeZone = settings.timezone || DEFAULT_TIMEZONE;
 
     updateData.lateMinutes = calculateLateMinutes(
       new Date(body.checkIn),
       settings.workStart,
       settings.graceMinutes,
+      timeZone,
     );
   }
 
@@ -474,39 +424,24 @@ export async function adminUpdateAttendance(
       updateData,
     );
 
-  /**
-   * Audit log for Admin attendance modification.
-   */
   await createAuditLog({
     userId: adminUserId,
     action: "ATTENDANCE_ADMIN_EDIT",
     entityType: "Attendance",
     entityId: attendanceId,
-
-    oldValue: {
-      checkIn: existing.checkIn
-        ? existing.checkIn.toISOString()
-        : null,
-
-      checkOut: existing.checkOut
-        ? existing.checkOut.toISOString()
-        : null,
-
-      status: existing.status,
-      lateMinutes: existing.lateMinutes,
-    },
-
-    newValue: {
-      checkIn: updated.checkIn
-        ? updated.checkIn.toISOString()
-        : null,
-
-      checkOut: updated.checkOut
-        ? updated.checkOut.toISOString()
-        : null,
-
-      status: updated.status,
-      lateMinutes: updated.lateMinutes,
+    details: {
+      previous: {
+        checkIn: toIsoWithIstOffset(existing.checkIn),
+        checkOut: toIsoWithIstOffset(existing.checkOut),
+        status: existing.status,
+        lateMinutes: existing.lateMinutes,
+      },
+      updated: {
+        checkIn: toIsoWithIstOffset(updated.checkIn),
+        checkOut: toIsoWithIstOffset(updated.checkOut),
+        status: updated.status,
+        lateMinutes: updated.lateMinutes,
+      },
     },
   });
 

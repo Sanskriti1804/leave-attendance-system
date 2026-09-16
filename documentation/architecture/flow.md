@@ -51,7 +51,7 @@ These APIs exist. They feed leave day-count and (later) attendance.
 | Employees | Name, email, role, department, manager, sex (maternity eligibility), status | Admin create/patch; guest **GET** |
 | Leave types | Casual, Sick, etc.; medical flag; `allowedSex` | Admin CRUD; all roles **GET** |
 | Leave policies | Per-type medical-after-N-days, weekend/holiday flags, max days | Admin write; all **GET** |
-| Holidays + org settings | Holiday calendar; timezone EST; weekly offs; work hours; advance window (default 14 days); medical 1–2 day optionality | Admin write (**RBAC on holidays/settings still incomplete** in code) |
+| Holidays + org settings | Holiday calendar; timezone IST; weekly offs; work hours; advance window (default 14 days); medical 1–2 day optionality | Admin write (**RBAC on holidays/settings still incomplete** in code) |
 
 Employees with **no manager** skip manager review (LV-WF-13). Employees with **no department** are allowed in the BRD; live Prisma currently requires a department.
 
@@ -128,14 +128,14 @@ Same **screens/data** as admin for **reading**: HR snapshot (when built), org le
 
 ## 8. Employee journey — attendance (**not implemented**)
 
-Confirmed intent (AT-01–05, dashboards in EST):
+Confirmed intent (AT-01–05, dashboards in IST):
 
 1. Check-in stores **date + exact time** on the employee (server clock Proposed, not device).
 2. Check-out closes that day. Duplicate punch / out-without-in is **Proposed**; stakeholder note: **disable buttons** instead.
 3. Own dashboard: today, in/out, monthly present / absent / leave, late, missing checkout.
 4. Employee **cannot PATCH** days (BR-10). Wrong punch → **correction request**; HR approves/rejects times.
 
-**HR attendance (not implemented):** org list; HR dashboard counts (employees, present, on leave, absent, unmarked, late, missing checkout, pending leave) in EST; optional direct edit vs request-only — **Conflict** (ADR-0007). Do not invent a stored “Unauthorized Absence”.
+**HR attendance (not implemented):** org list; HR dashboard counts (employees, present, on leave, absent, unmarked, late, missing checkout, pending leave) in IST; optional direct edit vs request-only — **Conflict** (ADR-0007). Do not invent a stored “Unauthorized Absence”.
 
 ---
 
@@ -174,7 +174,7 @@ flowchart TD
 ```mermaid
 flowchart LR
   P[Check-in / check-out]
-  D[Own dashboard EST]
+  D[Own dashboard IST]
   C[Correction request]
   H[HR review]
   P --> D

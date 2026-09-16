@@ -22,7 +22,7 @@ export const env = {
       : "dev_server_side_pepper_secret_never_stored_in_db"),
   authRateLimitWindowMs: Number.parseInt(process.env.AUTH_RATE_LIMIT_WINDOW_MS ?? "900000", 10), // 15 mins
   authRateLimitMax: Number.parseInt(process.env.AUTH_RATE_LIMIT_MAX ?? "20", 10),
-  appTimezone: process.env.APP_TIMEZONE ?? "America/New_York",
+  appTimezone: process.env.APP_TIMEZONE ?? "Asia/Kolkata",
   leaveMaxAdvanceDays: Number.parseInt(process.env.LEAVE_MAX_ADVANCE_DAYS ?? "14", 10),
   leaveDocumentsDir: process.env.LEAVE_DOCUMENTS_DIR ?? "uploads/leave-documents",
   leaveDocumentMaxBytes: Number.parseInt(process.env.LEAVE_DOCUMENT_MAX_BYTES ?? "10485760", 10),

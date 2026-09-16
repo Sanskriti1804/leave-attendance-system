@@ -8,6 +8,7 @@ import {
   fromCivilDate,
   isoWeekday,
   toCivilDate,
+  toIsoWithIstOffset,
   todayInTimeZone,
 } from "../../shared/utils/dates.js";
 import { prisma } from "../../shared/db/index.js";
@@ -67,13 +68,13 @@ function toLeaveResponse(leave: LeaveWithSelections, warnings: Warning[] = []) {
     status: leave.status,
     hrComments: leave.hrComments,
     reviewedBy: leave.reviewedBy,
-    reviewedAt: leave.reviewedAt ? leave.reviewedAt.toISOString() : null,
+    reviewedAt: toIsoWithIstOffset(leave.reviewedAt),
     reportingManagerEmployeeId: leave.reportingManagerEmployeeId,
     managerApprovalStatus: leave.managerApprovalStatus,
-    managerReviewedAt: leave.managerReviewedAt ? leave.managerReviewedAt.toISOString() : null,
+    managerReviewedAt: toIsoWithIstOffset(leave.managerReviewedAt),
     managerComments: leave.managerComments,
-    createdAt: leave.createdAt.toISOString(),
-    updatedAt: leave.updatedAt.toISOString(),
+    createdAt: toIsoWithIstOffset(leave.createdAt)!,
+    updatedAt: toIsoWithIstOffset(leave.updatedAt)!,
     selectedDates: leave.dateSelections.map((row) => ({
       date: toCivilDate(row.leaveDate),
       session: row.session,

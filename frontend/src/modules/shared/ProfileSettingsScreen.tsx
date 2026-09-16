@@ -196,13 +196,15 @@ export default function ProfileSettingsScreen() {
           <View style={styles.cardInner}>
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Organization Timezone</Text>
-              <Text style={styles.infoValue}>{settings?.timezone ?? "America/New_York (EST / UTC-5)"}</Text>
+              <Text style={styles.infoValue}>{settings?.timezone ?? "Asia/Kolkata (IST)"}</Text>
             </View>
             <View style={styles.divider} />
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Shift Timing</Text>
               <Text style={styles.infoValue}>
-                {settings?.workStart ?? "09:00"} - {settings?.workEnd ?? "18:00 EST"}
+                {settings?.workStart
+                  ? `${settings.workStart} - ${settings.workEnd ?? "—"}`
+                  : "09:00 - 18:00"}
               </Text>
             </View>
             <View style={styles.divider} />

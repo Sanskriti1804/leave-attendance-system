@@ -24,7 +24,7 @@ model Employee {
   role         String
   managerId    Int?
   joiningDate  DateTime? @db.Date
-  createdAt    DateTime  @default(now())
+  createdAt    DateTime  @default(now()) @db.Timestamptz(3)
   status       String
   obsolete     Boolean   @default(false)
   sex          String?   @db.VarChar(20)
@@ -51,12 +51,12 @@ model Attendance {
   attendanceId   Int       @id @default(autoincrement())
   employeeId     Int
   attendanceDate DateTime  @db.Date
-  checkIn        DateTime?
-  checkOut       DateTime?
+  checkIn        DateTime? @db.Timestamptz(3)
+  checkOut       DateTime? @db.Timestamptz(3)
   status         String    @db.VarChar(30)
   lateMinutes    Int       @default(0)
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+  createdAt      DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt      DateTime  @updatedAt @db.Timestamptz(3)
 
   employee    Employee               @relation(fields: [employeeId], references: [employeeId])
   corrections AttendanceCorrection[]
@@ -72,15 +72,15 @@ model AttendanceCorrection {
   attendanceId       Int
   correctionDate     DateTime  @db.Date
   correctionType     String    @db.VarChar(50)
-  correctLoginTime   DateTime?
-  correctLogoutTime  DateTime?
+  correctLoginTime   DateTime? @db.Timestamptz(3)
+  correctLogoutTime  DateTime? @db.Timestamptz(3)
   reason             String
   supportingDocument String?
   status             String    @default("PENDING") @db.VarChar(30)
   reviewedBy         Int?
   hrComments         String?
-  createdAt          DateTime  @default(now())
-  reviewedAt         DateTime?
+  createdAt          DateTime  @default(now()) @db.Timestamptz(3)
+  reviewedAt         DateTime? @db.Timestamptz(3)
 
   employee   Employee   @relation(fields: [employeeId], references: [employeeId])
   attendance Attendance @relation(fields: [attendanceId], references: [attendanceId])
@@ -94,8 +94,8 @@ model LeaveType {
   requiresMedicalDocument Boolean  @default(false)
   allowedSex              String?  @db.VarChar(20)
   obsolete                Boolean  @default(false)
-  createdAt               DateTime @default(now())
-  updatedAt               DateTime @updatedAt
+  createdAt               DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt               DateTime @updatedAt @db.Timestamptz(3)
 
   leaveApplications LeaveApplication[]
   policies          LeavePolicy[]
@@ -126,13 +126,13 @@ model LeaveApplication {
   status                     String    @default("DRAFT") @db.VarChar(30)
   hrComments                 String?
   reviewedBy                 Int?
-  reviewedAt                 DateTime?
+  reviewedAt                 DateTime? @db.Timestamptz(3)
   reportingManagerEmployeeId Int?
   managerApprovalStatus      String?   @db.VarChar(30)
-  managerReviewedAt          DateTime?
+  managerReviewedAt          DateTime? @db.Timestamptz(3)
   managerComments            String?
-  createdAt                  DateTime  @default(now())
-  updatedAt                  DateTime  @updatedAt
+  createdAt                  DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt                  DateTime  @updatedAt @db.Timestamptz(3)
 
   employee           Employee  @relation(fields: [employeeId], references: [employeeId])
   leaveType          LeaveType @relation(fields: [leaveTypeId], references: [leaveTypeId])
@@ -166,7 +166,7 @@ model LeaveStatusHistory {
   oldStatus   String?  @db.VarChar(30)
   newStatus   String   @db.VarChar(30)
   reason      String?
-  changedAt   DateTime @default(now())
+  changedAt   DateTime @default(now()) @db.Timestamptz(3)
 
   leave     LeaveApplication @relation(fields: [leaveId], references: [leaveId], onDelete: Cascade)
   changedBy Employee?        @relation("LeaveStatusChangedBy", fields: [changedById], references: [employeeId])
@@ -183,7 +183,7 @@ model LeaveDocument {
   contentType String   @db.VarChar(100)
   fileSize    Int
   uploadedBy  Int
-  uploadedAt  DateTime @default(now())
+  uploadedAt  DateTime @default(now()) @db.Timestamptz(3)
 
   leave    LeaveApplication @relation(fields: [leaveId], references: [leaveId], onDelete: Cascade)
   uploader Employee         @relation(fields: [uploadedBy], references: [employeeId])
@@ -198,7 +198,7 @@ model Notification {
   title          String   @db.VarChar(50)
   message        String   @db.VarChar(100)
   isRead         Boolean  @default(false)
-  createdAt      DateTime @default(now())
+  createdAt      DateTime @default(now()) @db.Timestamptz(3)
 
   user Employee @relation(fields: [userId], references: [employeeId], onDelete: Cascade)
 
@@ -213,7 +213,7 @@ model AuditLog {
   entityId   Int?
   oldValue   Json?
   newValue   Json?
-  createdAt  DateTime @default(now())
+  createdAt  DateTime @default(now()) @db.Timestamptz(3)
 
   user Employee @relation(fields: [userId], references: [employeeId])
 
@@ -242,9 +242,9 @@ model RefreshToken {
   tokenHash      String   @db.VarChar(255)
   family         String   @db.VarChar(100)
   isRevoked      Boolean  @default(false)
-  expiresAt      DateTime
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  expiresAt      DateTime @db.Timestamptz(3)
+  createdAt      DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt      DateTime @updatedAt @db.Timestamptz(3)
 
   employee Employee @relation(fields: [employeeId], references: [employeeId], onDelete: Cascade)
 
@@ -258,8 +258,8 @@ model PasswordResetToken {
   employeeId   Int
   tokenHash    String   @db.VarChar(255)
   isUsed       Boolean  @default(false)
-  expiresAt    DateTime
-  createdAt    DateTime @default(now())
+  expiresAt    DateTime @db.Timestamptz(3)
+  createdAt    DateTime @default(now()) @db.Timestamptz(3)
 
   employee Employee @relation(fields: [employeeId], references: [employeeId], onDelete: Cascade)
 
