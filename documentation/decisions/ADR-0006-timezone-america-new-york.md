@@ -1,22 +1,22 @@
-# ADR-0006: Organization timezone EST / America/New_York
+# ADR-0006: Organization timezone IST / Asia/Kolkata
 
 ## Status
 
-Dashboards, reports, and notifications in **EST**: Confirmed (TZ-04, AT-DASH-10, HR-DASH-09). Mapping EST → IANA `America/New_York` (including EDT): **TD-03, Pending Confirmation**. Authoritative punch clock on the server: **Proposed** (TZ-01 / BR-21).
+**Superseded** by the 2026-09-15 global IST timezone change. Dashboards, reports, notifications, civil work dates, and shift calculations use `Asia/Kolkata` (IST, UTC+05:30). The authoritative punch clock on the server remains **Proposed** (TZ-01 / BR-21).
 
 ## Context
 
-The BRD says EST. Device/phone date must not automatically be treated as the source of truth.
+The prior BRD-derived EST setting has been replaced by the user's explicit global IST requirement. Device/phone date must not automatically be treated as the source of truth.
 
 ## Decision
 
-- Display and report in Eastern Time as Confirmed.
-- Until TD-03 is signed, document the IANA zone as a technical recommendation, not a silent extra requirement.
+- Display and report in IST using IANA `Asia/Kolkata`.
+- Store instants in UTC and serialize API timestamps with the explicit `+05:30` offset.
 - Do not implement per-employee timezones.
 
 ## Alternatives Considered
 
-- Store and display only UTC (would violate Confirmed EST dashboards).
+- Store and display only UTC (would violate the required IST dashboards).
 - Trust device clock (rejected as final policy by requirements notes).
 
 ## Security Impact
@@ -33,7 +33,7 @@ Overnight shift `work_date` = Eastern date of check-in is TD-05; full shift mast
 
 ## Consequences
 
-`org_settings.timezone` default `'America/New_York'` in the Proposed schema follows TD-03.
+`org_settings.timezone` defaults to `Asia/Kolkata`.
 
 ## Rollback / Migration Path
 
@@ -45,4 +45,4 @@ Changing org TZ later needs a data/display review.
 
 ## Approved By
 
-EST display: Confirmed. IANA identifier and server clock: not fully approved.
+IST display and IANA identifier: implemented from the 2026-09-15 user requirement. Server clock: not fully approved.

@@ -56,6 +56,53 @@ export type LeaveApplication = {
   selectedDates: { date: string; session: string; unit: number }[];
 };
 
+export type AttendanceRecord = {
+  attendanceId: number;
+  employeeId: number;
+  attendanceDate: string;
+  checkIn: string | null;
+  checkOut: string | null;
+  status: string;
+  lateMinutes: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type AttendanceHistory = {
+  items: AttendanceRecord[];
+  summary: {
+    totalPresent: number;
+    totalHalfDay: number;
+    totalAbsent: number;
+    totalOnLeave: number;
+    totalLate: number;
+  };
+  page: number;
+  pageSize: number;
+  total: number;
+};
+
+export type AttendanceCorrection = {
+  correctionId: number;
+  employeeId: number;
+  attendanceId: number;
+  correctionDate: string;
+  correctionType: string;
+  correctLoginTime: string | null;
+  correctLogoutTime: string | null;
+  reason: string;
+  supportingDocument: string | null;
+  status: "PENDING" | "APPROVED" | "REJECTED";
+  reviewedBy: number | null;
+  hrComments: string | null;
+  createdAt: string;
+  reviewedAt: string | null;
+  reviewer?: Pick<EmployeePublic, "employeeId" | "firstName" | "lastName" | "email"> | null;
+  attendance?: Pick<AttendanceRecord, "attendanceId" | "attendanceDate" | "checkIn" | "checkOut" | "status" | "lateMinutes">;
+};
+
+export type CorrectionList = { items: AttendanceCorrection[]; page: number; pageSize: number; total: number };
+
 type ItemList<T> = { items: T[]; total?: number };
 
 export function displayName(employee: { firstName: string; lastName: string | null } | null | undefined): string {
@@ -99,6 +146,27 @@ export function listLeaveTypes(): Promise<ItemList<LeaveType>> {
 export function listLeaves(status?: string): Promise<ItemList<LeaveApplication>> {
   const query = status ? `?page=1&pageSize=100&status=${encodeURIComponent(status)}` : "?page=1&pageSize=100";
   return authorizedRequest<ItemList<LeaveApplication>>(`/api/v1/leaves${query}`);
+}
+
+export function getMyAttendance(month: string, page = 1, pageSize = 10): Promise<AttendanceHistory> {
+  const query = new URLSearchParams({ month, page: String(page), pageSize: String(pageSize) });
+  return authorizedRequest<AttendanceHistory>(`/api/v1/attendance/me?${query.toString()}`);
+}
+
+export function listMyCorrections(status?: AttendanceCorrection["status"]): Promise<CorrectionList> {
+  const query = new URLSearchParams({ page: "1", pageSize: "100" });
+  if (status) query.set("status", status);
+  return authorizedRequest<CorrectionList>(`/api/v1/attendance/corrections?${query.toString()}`);
+}
+
+export function createAttendanceCorrection(body: {
+  correctionDate: string;
+  correctionType: string;
+  correctLoginTime?: string | null;
+  correctLogoutTime?: string | null;
+  reason: string;
+}): Promise<AttendanceCorrection> {
+  return authorizedRequest<AttendanceCorrection>("/api/v1/attendance/corrections", { method: "POST", body });
 }
 
 export function createLeave(body: {

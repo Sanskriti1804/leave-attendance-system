@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, Act
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { getSession } from '../../../services/auth';
+import { formatDateTimeIST } from '../../utils/date';
 import {
   apiErrorMessage,
   displayName,
@@ -237,7 +238,7 @@ export default function MyLeaveListScreen() {
                   <View style={styles.cardFooter}>
                     <View style={styles.footerTime}>
                       <MaterialIcons name="schedule" size={16} color={colors.secondary} />
-                      <Text style={styles.footerTimeText}>{new Date(leave.createdAt).toLocaleString()}</Text>
+                      <Text style={styles.footerTimeText}>{formatDateTimeIST(leave.createdAt)}</Text>
                     </View>
                     <TouchableOpacity
                       style={styles.actionBtn}

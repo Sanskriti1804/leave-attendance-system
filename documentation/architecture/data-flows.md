@@ -20,7 +20,7 @@ All server-side writes below are **not implemented**. Flows combine Confirmed bu
 
 1. Employee check-in stores date + exact time tied to the employee.
 2. Check-out requires an in (Proposed AT-08 / BR-19). Duplicate in/out prevention is Proposed; stakeholder note asks to **disable buttons**.
-3. Authoritative clock: do not treat device time as final (Proposed TZ-01). Dashboards use EST (TZ-04 Confirmed).
+3. Authoritative clock: do not treat device time as final (Proposed TZ-01). Dashboards use IST (`Asia/Kolkata`, UTC+05:30).
 
 ## Attendance correction (Confirmed AT-COR)
 

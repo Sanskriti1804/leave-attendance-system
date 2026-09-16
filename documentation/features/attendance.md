@@ -6,7 +6,7 @@ Confirmed AT-01–05, dashboard AT-DASH-01–10, status **labels** Confirmed; qu
 
 ## Purpose
 
-Daily check-in/check-out with date and exact times; employee dashboard in EST.
+Daily check-in/check-out with date and exact times; employee dashboard in IST.
 
 ## Users and Roles
 
@@ -32,7 +32,7 @@ Overtime. Multiple punch events per day. Biometric devices. Treating device cloc
 
 ## Business Rules
 
-AT-01–05 Confirmed (daily in/out, date + times, tied to employee). AT-06–08 duplicate / out-without-in **Proposed**. TZ-04 / AT-DASH-10 dashboards in EST **Confirmed**.
+AT-01–05 Confirmed (daily in/out, date + times, tied to employee). AT-06–08 duplicate / out-without-in **Proposed**. The 2026-09-15 global timezone requirement makes dashboards IST (`Asia/Kolkata`).
 
 ## API Endpoints
 

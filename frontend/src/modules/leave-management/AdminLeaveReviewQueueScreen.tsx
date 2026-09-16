@@ -15,6 +15,7 @@ import {
   type LeaveApplication,
   type LeaveType,
 } from '../../../services/resources';
+import { formatDateTimeIST } from '../../utils/date';
 
 const colors = {
   surface: "#fcf9f8",
@@ -182,6 +183,10 @@ export default function AdminLeaveReviewQueueScreen() {
             <View style={styles.detailItem}>
               <Text style={styles.detailLabel}>STATUTORY DURATION</Text>
               <Text style={styles.detailValue}>{leave.numberOfDays} Days · {leave.startDate}–{leave.endDate}</Text>
+            </View>
+            <View style={styles.detailItem}>
+              <Text style={styles.detailLabel}>APPLICATION TIME</Text>
+              <Text style={styles.detailValue}>{formatDateTimeIST(leave.createdAt)}</Text>
             </View>
             <View style={styles.detailFullRow}>
               <Text style={styles.detailLabel}>ATTESTED JUSTIFICATION</Text>

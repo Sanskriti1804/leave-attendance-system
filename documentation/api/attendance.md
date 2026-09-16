@@ -7,7 +7,7 @@ Not implemented. Punch uniqueness and HR PATCH are not fully signed. See ADR-000
 | POST | `/attendance/check-in` | Punch in; Idempotency-Key | E |
 | POST | `/attendance/check-out` | Punch out | E |
 | GET | `/attendance/me` | History + month summary | E |
-| GET | `/attendance/me/dashboard` | Today + late/missing EST | E |
+| GET | `/attendance/me/dashboard` | Today + late/missing IST | E |
 | GET | `/attendance` | Org attendance | A G |
 | PATCH | `/attendance/{id}` | Admin direct edit (AT-COR-11) | A — **Conflict** |
 | GET | `/hr/dashboard` | HR-DASH-01–08 | A G |

@@ -2,7 +2,7 @@ import type { AttendanceCorrection } from "../../../generated/prisma/client.js";
 
 import { createAuditLog } from "../../shared/audit-logs/repository.js";
 import { getOrganisationSettings } from "../../shared/organisation-settings/service.js";
-import { fromCivilDate, toCivilDate } from "../../shared/utils/dates.js";
+import { fromCivilDate, toCivilDate, toIsoWithIstOffset } from "../../shared/utils/dates.js";
 import { HttpError } from "../../shared/utils/http-error.js";
 import type { AuthTokenPayload } from "../../shared/utils/security.js";
 
@@ -24,7 +24,7 @@ import type {
  * Converts an attendance correction record into
  * an API-safe response.
  *
- * All datetime values are returned as UTC ISO strings.
+ * All datetime values are stored in UTC and returned with an IST (+05:30) offset.
  */
 export function toCorrectionResponse(
   record: AttendanceCorrectionWithDetails | AttendanceCorrection,
@@ -36,19 +36,14 @@ export function toCorrectionResponse(
     employeeId: record.employeeId,
     attendanceId: record.attendanceId,
 
-    // UTC civil date: YYYY-MM-DD
+    // Civil date: YYYY-MM-DD
     correctionDate: toCivilDate(record.correctionDate),
 
     correctionType: record.correctionType,
 
-    // UTC ISO timestamps
-    correctLoginTime: record.correctLoginTime
-      ? record.correctLoginTime.toISOString()
-      : null,
-
-    correctLogoutTime: record.correctLogoutTime
-      ? record.correctLogoutTime.toISOString()
-      : null,
+    // ISO timestamps with IST offset
+    correctLoginTime: toIsoWithIstOffset(record.correctLoginTime),
+    correctLogoutTime: toIsoWithIstOffset(record.correctLogoutTime),
 
     reason: record.reason,
     supportingDocument: record.supportingDocument,
@@ -56,11 +51,8 @@ export function toCorrectionResponse(
     reviewedBy: record.reviewedBy,
     hrComments: record.hrComments,
 
-    createdAt: record.createdAt.toISOString(),
-
-    reviewedAt: record.reviewedAt
-      ? record.reviewedAt.toISOString()
-      : null,
+    createdAt: toIsoWithIstOffset(record.createdAt)!,
+    reviewedAt: toIsoWithIstOffset(record.reviewedAt),
 
     ...(withDetails.employee
       ? {
@@ -83,13 +75,8 @@ export function toCorrectionResponse(
               withDetails.attendance.attendanceDate,
             ),
 
-            checkIn: withDetails.attendance.checkIn
-              ? withDetails.attendance.checkIn.toISOString()
-              : null,
-
-            checkOut: withDetails.attendance.checkOut
-              ? withDetails.attendance.checkOut.toISOString()
-              : null,
+            checkIn: toIsoWithIstOffset(withDetails.attendance.checkIn),
+            checkOut: toIsoWithIstOffset(withDetails.attendance.checkOut),
           },
         }
       : {}),

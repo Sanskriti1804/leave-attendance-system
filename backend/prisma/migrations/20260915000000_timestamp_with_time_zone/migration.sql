@@ -1,0 +1,47 @@
+-- Existing timestamp values were written by the application as UTC instants.
+-- Interpret them as UTC while converting the storage type to TIMESTAMPTZ.
+ALTER TABLE "Employee"
+  ALTER COLUMN "createdAt" TYPE TIMESTAMPTZ(3) USING "createdAt" AT TIME ZONE 'UTC';
+
+ALTER TABLE "Attendance"
+  ALTER COLUMN "checkIn" TYPE TIMESTAMPTZ(3) USING "checkIn" AT TIME ZONE 'UTC',
+  ALTER COLUMN "checkOut" TYPE TIMESTAMPTZ(3) USING "checkOut" AT TIME ZONE 'UTC',
+  ALTER COLUMN "createdAt" TYPE TIMESTAMPTZ(3) USING "createdAt" AT TIME ZONE 'UTC',
+  ALTER COLUMN "updatedAt" TYPE TIMESTAMPTZ(3) USING "updatedAt" AT TIME ZONE 'UTC';
+
+ALTER TABLE "AttendanceCorrection"
+  ALTER COLUMN "correctLoginTime" TYPE TIMESTAMPTZ(3) USING "correctLoginTime" AT TIME ZONE 'UTC',
+  ALTER COLUMN "correctLogoutTime" TYPE TIMESTAMPTZ(3) USING "correctLogoutTime" AT TIME ZONE 'UTC',
+  ALTER COLUMN "createdAt" TYPE TIMESTAMPTZ(3) USING "createdAt" AT TIME ZONE 'UTC',
+  ALTER COLUMN "reviewedAt" TYPE TIMESTAMPTZ(3) USING "reviewedAt" AT TIME ZONE 'UTC';
+
+ALTER TABLE "LeaveType"
+  ALTER COLUMN "createdAt" TYPE TIMESTAMPTZ(3) USING "createdAt" AT TIME ZONE 'UTC',
+  ALTER COLUMN "updatedAt" TYPE TIMESTAMPTZ(3) USING "updatedAt" AT TIME ZONE 'UTC';
+
+ALTER TABLE "LeaveApplication"
+  ALTER COLUMN "reviewedAt" TYPE TIMESTAMPTZ(3) USING "reviewedAt" AT TIME ZONE 'UTC',
+  ALTER COLUMN "managerReviewedAt" TYPE TIMESTAMPTZ(3) USING "managerReviewedAt" AT TIME ZONE 'UTC',
+  ALTER COLUMN "createdAt" TYPE TIMESTAMPTZ(3) USING "createdAt" AT TIME ZONE 'UTC',
+  ALTER COLUMN "updatedAt" TYPE TIMESTAMPTZ(3) USING "updatedAt" AT TIME ZONE 'UTC';
+
+ALTER TABLE "LeaveStatusHistory"
+  ALTER COLUMN "changedAt" TYPE TIMESTAMPTZ(3) USING "changedAt" AT TIME ZONE 'UTC';
+
+ALTER TABLE "LeaveDocument"
+  ALTER COLUMN "uploadedAt" TYPE TIMESTAMPTZ(3) USING "uploadedAt" AT TIME ZONE 'UTC';
+
+ALTER TABLE "Notification"
+  ALTER COLUMN "createdAt" TYPE TIMESTAMPTZ(3) USING "createdAt" AT TIME ZONE 'UTC';
+
+ALTER TABLE "AuditLog"
+  ALTER COLUMN "createdAt" TYPE TIMESTAMPTZ(3) USING "createdAt" AT TIME ZONE 'UTC';
+
+ALTER TABLE "RefreshToken"
+  ALTER COLUMN "expiresAt" TYPE TIMESTAMPTZ(3) USING "expiresAt" AT TIME ZONE 'UTC',
+  ALTER COLUMN "createdAt" TYPE TIMESTAMPTZ(3) USING "createdAt" AT TIME ZONE 'UTC',
+  ALTER COLUMN "updatedAt" TYPE TIMESTAMPTZ(3) USING "updatedAt" AT TIME ZONE 'UTC';
+
+ALTER TABLE "PasswordResetToken"
+  ALTER COLUMN "expiresAt" TYPE TIMESTAMPTZ(3) USING "expiresAt" AT TIME ZONE 'UTC',
+  ALTER COLUMN "createdAt" TYPE TIMESTAMPTZ(3) USING "createdAt" AT TIME ZONE 'UTC';

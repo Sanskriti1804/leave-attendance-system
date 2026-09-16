@@ -13,9 +13,10 @@ Stack (header hidden)
   /                 splash (~1800ms) → replace /login
   /login            email/password + Login + Pass (dev)
   /(tabs)
-    index           Home placeholder
-    profile         Profile placeholder
-    settings        Settings placeholder
+    index           Employee attendance home
+    profile         Profile
+    settings        Settings
+  /attendance       Employee attendance ledger
 ```
 
 Files: `mobile/app/_layout.tsx`, `mobile/app/index.tsx`, `mobile/app/login.tsx`, `mobile/app/(tabs)/`.
@@ -38,7 +39,7 @@ MaxStarter owns `src/maxstarter/` and `MAXSTARTER:BEGIN/END` regions.
 
 ## Domain UI
 
-No leave, attendance, HR, reports, or notification screens exist.
+The employee attendance home shows the IST clock, shift state, punch controls, today’s metrics, and workforce actions. Its **View All Attendance** action opens `/attendance`, an IST-formatted monthly ledger with month navigation, status filters, pagination, and an attendance-detail sheet. It reads the employee-only `/api/v1/attendance/me` endpoint.
 
 ## Theme tokens (from design.md)
 

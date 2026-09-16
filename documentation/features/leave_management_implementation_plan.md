@@ -171,7 +171,7 @@ fileSize    Int                       // File size in bytes
 ### Planned Configuration
 
 ```
-APP_TIMEZONE=America/New_York
+APP_TIMEZONE=Asia/Kolkata
 LEAVE_MAX_ADVANCE_DAYS=14
 ```
 
@@ -306,13 +306,13 @@ model LeaveDateSelection {
 
 ## 14. Timezone
 
-**Decision:** Use `APP_TIMEZONE=America/New_York`.
+**Decision:** Use `APP_TIMEZONE=Asia/Kolkata` (IST, UTC+05:30).
 
 ### Planned Configuration
 
 Add to `env.ts`:
 ```typescript
-appTimezone: process.env.APP_TIMEZONE ?? "America/New_York",
+appTimezone: process.env.APP_TIMEZONE ?? "Asia/Kolkata",
 ```
 
 ### Existing Rules (Unchanged)
@@ -373,7 +373,7 @@ After migration:
 
 | Variable | Default | Purpose |
 |----------|---------|---------|
-| `APP_TIMEZONE` | `America/New_York` | Display/reporting timezone |
+| `APP_TIMEZONE` | `Asia/Kolkata` | Display/reporting timezone |
 | `LEAVE_MAX_ADVANCE_DAYS` | `14` | Maximum calendar days in advance for leave applications |
 
 Add to:
@@ -404,7 +404,7 @@ Add to:
 | 11 | Single-day duration (unchanged, restated for clarity) |
 | 12 | Multiple-day calculation uses Indian holidays |
 | 13 | Zigzag/non-consecutive leave-date support (`LeaveDateSelection`) |
-| 14 | `America/New_York` timezone configuration |
+| 14 | `Asia/Kolkata` timezone configuration |
 | 15 | No automated document retention |
 | 16 | Database migration for schema additions |
 | 17 | Migration approach (forward only) |

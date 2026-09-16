@@ -4,7 +4,9 @@ Columns below are from the engineering pack only. Do not add fields in code that
 
 ## org_settings (single row)
 
-`id`, `timezone` default `'America/New_York'`, `work_start`, `work_end` (may be before start for overnight), `grace_minutes` ≥ 0, `weekly_off_dow` int[] ISO 1–7, `leave_count_excludes_weekends`, `leave_count_excludes_holidays`, `medical_doc_optional_1_to_2_days` default true, `medical_doc_exceeds_days` default 2, `max_advance_days` default **14**, `updated_at`, `row_version`.
+`id`, `timezone` default `'Asia/Kolkata'`, `work_start`, `work_end` (may be before start for overnight), `grace_minutes` ≥ 0, `weekly_off_dow` int[] ISO 1–7, `leave_count_excludes_weekends`, `leave_count_excludes_holidays`, `medical_doc_optional_1_to_2_days` default true, `medical_doc_exceeds_days` default 2, `max_advance_days` default **14**, `updated_at`, `row_version`.
+
+Instant timestamps use PostgreSQL `TIMESTAMPTZ(3)` and are written as UTC. Civil leave and attendance dates remain PostgreSQL `DATE` values.
 
 ## users
 

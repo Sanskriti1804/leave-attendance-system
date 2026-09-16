@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, SafeAr
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { getSession } from '../../../services/auth';
+import { getTodayIST } from '../../utils/date';
 import {
   apiErrorMessage,
   createLeave,
@@ -90,8 +91,9 @@ export default function ApplyLeaveScreen() {
   const [reason, setReason] = useState("");
   const [selectedDates, setSelectedDates] = useState<string[]>([]);
   const [viewMonth, setViewMonth] = useState(() => {
-    const now = new Date();
-    return { year: now.getFullYear(), month: now.getMonth() };
+    const todayStr = getTodayIST();
+    const [y, m] = todayStr.split("-").map(Number);
+    return { year: y, month: (m ?? 1) - 1 };
   });
   const [maxAdvanceDays, setMaxAdvanceDays] = useState(14);
   const [loading, setLoading] = useState(true);
@@ -99,7 +101,7 @@ export default function ApplyLeaveScreen() {
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const today = toCivil(new Date());
+  const today = getTodayIST();
 
   const load = useCallback(async () => {
     setLoading(true);

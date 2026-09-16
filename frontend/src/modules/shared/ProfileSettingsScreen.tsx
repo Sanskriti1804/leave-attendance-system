@@ -171,13 +171,15 @@ export default function ProfileSettingsScreen() {
           <View style={styles.cardInner}>
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Organization Timezone</Text>
-              <Text style={styles.infoValue}>{settings?.timezone ?? "—"}</Text>
+              <Text style={styles.infoValue}>Asia/Kolkata (IST)</Text>
             </View>
             <View style={styles.divider} />
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Shift Timing</Text>
               <Text style={styles.infoValue}>
-                {settings?.workStart ?? "—"} - {settings?.workEnd ?? "—"}
+                {settings?.workStart
+                  ? `${settings.workStart} - ${settings.workEnd ?? "—"} IST`
+                  : "09:00 - 18:00 IST"}
               </Text>
             </View>
             <View style={styles.divider} />

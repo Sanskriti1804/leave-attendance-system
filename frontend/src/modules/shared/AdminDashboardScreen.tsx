@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, Tex
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from "expo-router";
 import { getSession } from "../../../services/auth";
+import { formatDateIST, getTodayIST } from "../../utils/date";
 import {
   apiErrorMessage,
   displayName,
@@ -102,7 +103,7 @@ export default function AdminDashboardScreen() {
     );
   }, [employees, query]);
 
-  const today = new Date().toISOString().slice(0, 10);
+  const today = getTodayIST();
   const onLeaveToday = approved.filter((row) => row.startDate <= today && row.endDate >= today).length;
   const isGuest = me?.role === "guest_admin";
 
@@ -135,7 +136,7 @@ export default function AdminDashboardScreen() {
             <Text style={styles.hrNameText}>{displayName(me)}</Text>
             <View style={styles.dateRow}>
               <MaterialIcons name="schedule" size={16} color={colors.secondary} />
-              <Text style={styles.dateText}>{new Date().toLocaleDateString()}</Text>
+              <Text style={styles.dateText}>{formatDateIST(new Date(), "full")}</Text>
             </View>
           </View>
         </View>
