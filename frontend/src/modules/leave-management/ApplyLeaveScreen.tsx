@@ -1,8 +1,9 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, SafeAreaView, ActivityIndicator, Alert, Modal } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, SafeAreaView, ActivityIndicator } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import { ScreenGradient } from '../../components/ui/AppChrome';
+import { ScreenGradient, ThemedDialog, ThemedToast } from '../../components/ui/AppChrome';
 import { TopNavBar, useTopNavContentInset } from '../../components/ui/AdminComponents';
+import { colors as themeColors } from '../../theme';
 import { getSession } from '../../../services/auth';
 import { getTodayIST } from '../../utils/date';
 import {
@@ -38,6 +39,10 @@ const colors = {
   secondaryFixedDim: "#c0c7d6",
   glass: "rgb(222, 223, 227)",
   glassBorder: "rgba(0, 0, 0, 0.15)",
+  sessionFullDay: themeColors.sessionFullDay,
+  sessionHalfDay: themeColors.sessionHalfDay,
+  sessionFirstHalf: themeColors.sessionFirstHalf,
+  sessionSecondHalf: themeColors.sessionSecondHalf,
 };
 
 function pad2(value: number): string {
@@ -114,7 +119,7 @@ function sessionForMode(mode: DurationMode, half: DaySession = "FIRST_HALF"): Da
   return mode === "HALF" ? half : "FULL_DAY";
 }
 
-const HARDCODED_APPROVER = "S. Raman";
+const HARDCODED_APPROVER = "S Raman";
 
 export default function ApplyLeaveScreen() {
   const topInset = useTopNavContentInset();
@@ -129,6 +134,9 @@ export default function ApplyLeaveScreen() {
   const [durationMode, setDurationMode] = useState<DurationMode>("FULL");
   const [waitingForTo, setWaitingForTo] = useState(false);
   const [durationInfoOpen, setDurationInfoOpen] = useState(false);
+  const [sessionDialog, setSessionDialog] = useState<{ kind: "date"; civil: string } | { kind: "bulk" } | null>(null);
+  const [dialogDuration, setDialogDuration] = useState<DurationMode>("FULL");
+  const [dialogHalf, setDialogHalf] = useState<DaySession>("FIRST_HALF");
   const [attested, setAttested] = useState(true);
   const [toast, setToast] = useState<string | null>(null);
   const [viewMonth, setViewMonth] = useState(() => {
@@ -248,36 +256,30 @@ export default function ApplyLeaveScreen() {
   }
 
   function requestHalfDayMode() {
-    Alert.alert("Half Day", "Choose First Half or Second Half", [
-      { text: "First Half", onPress: () => applyDurationMode("HALF", "FIRST_HALF") },
-      { text: "Second Half", onPress: () => applyDurationMode("HALF", "SECOND_HALF") },
-      { text: "Cancel", style: "cancel" },
-    ]);
+    setDialogDuration("HALF");
+    setDialogHalf("FIRST_HALF");
+    setSessionDialog({ kind: "bulk" });
   }
 
   async function pickMedicalFile() {
-    Alert.alert("Medical documentation", "Select a local file (PDF, JPG, PNG). Paste is available where the system file sheet supports it.", [
-      {
-        text: "Choose file",
-        onPress: async () => {
-          const result = await DocumentPicker.getDocumentAsync({
-            type: ["application/pdf", "image/jpeg", "image/png", "image/jpg"],
-            copyToCacheDirectory: true,
-            multiple: false,
-          });
-          if (result.canceled || !result.assets?.[0]) {
-            return;
-          }
-          const asset = result.assets[0];
-          setPickedFile({
-            uri: asset.uri,
-            name: asset.name ?? "medical-document",
-            type: asset.mimeType ?? "application/octet-stream",
-          });
-        },
-      },
-      { text: "Cancel", style: "cancel" },
-    ]);
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: ["application/pdf", "image/jpeg", "image/png", "image/jpg"],
+        copyToCacheDirectory: true,
+        multiple: false,
+      });
+      if (result.canceled || !result.assets?.[0]) {
+        return;
+      }
+      const asset = result.assets[0];
+      setPickedFile({
+        uri: asset.uri,
+        name: asset.name ?? "medical-document",
+        type: asset.mimeType ?? "application/octet-stream",
+      });
+    } catch (err) {
+      setToast(apiErrorMessage(err));
+    }
   }
 
   function setDateSession(civil: string, session: DaySession) {
@@ -286,12 +288,20 @@ export default function ApplyLeaveScreen() {
   }
 
   function openDateSessionMenu(civil: string) {
-    Alert.alert(formatLong(civil), "Session type for this date", [
-      { text: "Full Day", onPress: () => setDateSession(civil, "FULL_DAY") },
-      { text: "First Half", onPress: () => setDateSession(civil, "FIRST_HALF") },
-      { text: "Second Half", onPress: () => setDateSession(civil, "SECOND_HALF") },
-      { text: "Cancel", style: "cancel" },
-    ]);
+    const current = dateSessions[civil] ?? "FULL_DAY";
+    setDialogDuration(current === "FULL_DAY" ? "FULL" : "HALF");
+    setDialogHalf(current === "SECOND_HALF" ? "SECOND_HALF" : "FIRST_HALF");
+    setSessionDialog({ kind: "date", civil });
+  }
+
+  function confirmSessionDialog() {
+    const session = sessionForMode(dialogDuration, dialogHalf);
+    if (sessionDialog?.kind === "date") {
+      setDateSession(sessionDialog.civil, session);
+    } else if (sessionDialog?.kind === "bulk") {
+      applyDurationMode(dialogDuration, dialogHalf);
+    }
+    setSessionDialog(null);
   }
 
   function toggleDate(civil: string) {
@@ -305,6 +315,18 @@ export default function ApplyLeaveScreen() {
       return;
     }
     if (selectedDates.includes(civil)) {
+      const next = selectedDates.filter((date) => date !== civil);
+      setSelectedDates(next);
+      setDateSessions((current) => {
+        const copy = { ...current };
+        delete copy[civil];
+        return copy;
+      });
+      setDateOverrides((current) => {
+        const copy = { ...current };
+        delete copy[civil];
+        return copy;
+      });
       return;
     }
     setSelectedDates([civil]);
@@ -387,8 +409,8 @@ export default function ApplyLeaveScreen() {
                   {error && <UIFallbackIndicator style={{ marginTop: 2 }} />}
                 </View>
                 <Text style={styles.empRole}>{error ? "Engineering & DevOps" : me?.email ?? "Sign in required for live data"}</Text>
-                <Text style={styles.approverLabel}>Approver</Text>
-                <Text style={styles.approverName}>{HARDCODED_APPROVER}</Text>
+                <View style={styles.approverDivider} />
+                <Text style={styles.approverLabel}>Approver — {HARDCODED_APPROVER}</Text>
               </View>
             </View>
           </View>
@@ -516,7 +538,8 @@ export default function ApplyLeaveScreen() {
                   );
                 }
                 if (cell.selected) {
-                  const isHalf = dateSessions[cell.civil] === "FIRST_HALF" || dateSessions[cell.civil] === "SECOND_HALF";
+                  const session = dateSessions[cell.civil] ?? "FULL_DAY";
+                  const isHalf = session === "FIRST_HALF" || session === "SECOND_HALF";
                   return (
                     <TouchableOpacity
                       key={cell.civil}
@@ -526,18 +549,39 @@ export default function ApplyLeaveScreen() {
                       delayLongPress={400}
                     >
                       <Text style={isHalf ? styles.calTextSelHalfStr : styles.calTextSelStr} numberOfLines={1}>{pad2(cell.day)}</Text>
+                      <View style={styles.calSessionDots}>
+                        {session === "FULL_DAY" ? <View style={[styles.sessionDot, { backgroundColor: colors.onPrimary }]} /> : null}
+                        {session === "FIRST_HALF" ? <View style={[styles.sessionDot, { backgroundColor: colors.sessionFirstHalf }]} /> : null}
+                        {session === "SECOND_HALF" ? <View style={[styles.sessionDot, { backgroundColor: colors.sessionSecondHalf }]} /> : null}
+                      </View>
                     </TouchableOpacity>
                   );
                 }
                 if (cell.isToday) {
                   return (
-                    <TouchableOpacity key={cell.civil} style={styles.calCell} onPress={() => toggleDate(cell.civil)}>
+                    <TouchableOpacity
+                      key={cell.civil}
+                      style={styles.calCell}
+                      onPress={() => toggleDate(cell.civil)}
+                      onLongPress={() => {
+                        toggleDate(cell.civil);
+                        openDateSessionMenu(cell.civil);
+                      }}
+                    >
                       <Text style={styles.calTextTodayStr} numberOfLines={1}>{pad2(cell.day)}</Text>
                     </TouchableOpacity>
                   );
                 }
                 return (
-                  <TouchableOpacity key={cell.civil} style={styles.calCell} onPress={() => toggleDate(cell.civil)}>
+                  <TouchableOpacity
+                    key={cell.civil}
+                    style={styles.calCell}
+                    onPress={() => toggleDate(cell.civil)}
+                    onLongPress={() => {
+                      toggleDate(cell.civil);
+                      openDateSessionMenu(cell.civil);
+                    }}
+                  >
                     <Text style={cell.isWeekend ? styles.calTextWeekend : styles.calText} numberOfLines={1}>{pad2(cell.day)}</Text>
                   </TouchableOpacity>
                 );
@@ -545,13 +589,21 @@ export default function ApplyLeaveScreen() {
             </View>
             <View style={styles.calendarLegend}>
               <TouchableOpacity style={styles.legendItem} onPress={() => applyDurationMode("FULL")}>
-                <View style={[styles.legendDot, {backgroundColor: colors.primary}]} />
-                <Text style={styles.legendText}>Full Day Leave</Text>
+                <View style={[styles.legendDot, {backgroundColor: colors.sessionFullDay}]} />
+                <Text style={styles.legendText}>Full Day</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.legendItem} onPress={requestHalfDayMode}>
-                <View style={[styles.legendDot, {backgroundColor: colors.secondaryFixedDim, borderColor: colors.secondary, borderWidth: 1}]} />
-                <Text style={styles.legendText}>Half Day Leave</Text>
+                <View style={[styles.legendDot, {backgroundColor: colors.sessionHalfDay, borderColor: colors.secondary, borderWidth: 1}]} />
+                <Text style={styles.legendText}>Half Day</Text>
               </TouchableOpacity>
+              <View style={styles.legendItem}>
+                <View style={[styles.legendDot, {backgroundColor: colors.sessionFirstHalf}]} />
+                <Text style={styles.legendText}>First Half</Text>
+              </View>
+              <View style={styles.legendItem}>
+                <View style={[styles.legendDot, {backgroundColor: colors.sessionSecondHalf}]} />
+                <Text style={styles.legendText}>Second Half</Text>
+              </View>
             </View>
           </View>
 
@@ -627,14 +679,12 @@ export default function ApplyLeaveScreen() {
         </TouchableOpacity>
 
         <View style={styles.attestCard}>
-          <Text style={styles.attestTitle}>Operational Notification</Text>
-          <View style={styles.checkboxRow}>
-            <TouchableOpacity style={[styles.checkbox, !attested && { backgroundColor: colors.surfaceContainerHigh }]} onPress={() => setAttested((value) => !value)}>
-              {attested ? <MaterialIcons name="check" size={16} color={colors.onPrimary} /> : null}
-            </TouchableOpacity>
-            <Text style={styles.checkboxText}>
-              I certify that I have notified my reporting manager {managerName || "your manager"} regarding this absence.
-            </Text>
+          <View style={styles.attestHeaderRow}>
+            <Text style={styles.attestTitle}>Operational Notification</Text>
+            <View style={styles.verifyTag}>
+              <View style={styles.verifyDot} />
+              <Text style={styles.verifyTagText}>Approver verification required</Text>
+            </View>
           </View>
         </View>
 
@@ -653,29 +703,61 @@ export default function ApplyLeaveScreen() {
         </View>
 
       </ScrollView>
-      {toast ? (
-        <View pointerEvents="none" style={styles.toastBox}>
-          <Text style={styles.toastText}>{toast}</Text>
-        </View>
-      ) : null}
-      <Modal visible={durationInfoOpen} transparent animationType="fade" onRequestClose={() => setDurationInfoOpen(false)}>
-        <View style={styles.modalBackdrop}>
-          <View style={styles.modalCard}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.calendarTitle}>Leave Duration Mode</Text>
-              <TouchableOpacity onPress={() => setDurationInfoOpen(false)}>
-                <MaterialIcons name="close" size={18} color={colors.secondary} />
-              </TouchableOpacity>
-            </View>
-            <Text style={styles.policyText}>Full Day (1.0): entire working day.</Text>
-            <Text style={styles.policyText}>First Half (0.5): morning shift.</Text>
-            <Text style={styles.policyText}>Second Half (0.5): afternoon shift. Long-press a selected date to override.</Text>
-            <TouchableOpacity style={styles.submitBtn} onPress={() => setDurationInfoOpen(false)}>
-              <Text style={styles.submitBtnText}>Got it</Text>
+      <ThemedToast message={toast} />
+      <ThemedDialog
+        visible={durationInfoOpen}
+        title="Leave Duration Mode"
+        onRequestClose={() => setDurationInfoOpen(false)}
+        actions={[{ label: "Got it", onPress: () => setDurationInfoOpen(false), primary: true }]}
+      >
+        <Text style={styles.policyText}>Full Day uses the dark indicator and counts as 1.0 day.</Text>
+        <Text style={styles.policyText}>Half Day uses the muted indicator and counts as 0.5 day.</Text>
+        <Text style={styles.policyText}>First Half uses the teal indicator (morning). Second Half uses the blue indicator (afternoon).</Text>
+        <Text style={styles.policyText}>Tap a date to select or deselect. Long-press a date to set Full Day or Half Day.</Text>
+      </ThemedDialog>
+      <ThemedDialog
+        visible={sessionDialog != null}
+        title={sessionDialog?.kind === "date" ? formatLong(sessionDialog.civil) : "Half Day"}
+        message={sessionDialog?.kind === "date" ? "Session type for this date" : "Choose First Half or Second Half"}
+        onRequestClose={() => setSessionDialog(null)}
+        actions={[
+          { label: "Cancel", onPress: () => setSessionDialog(null) },
+          { label: "Apply", onPress: confirmSessionDialog, primary: true },
+        ]}
+      >
+        <TouchableOpacity style={styles.radioRow} onPress={() => setDialogDuration("FULL")}>
+          <View style={[styles.radioOuter, dialogDuration === "FULL" && styles.radioOuterOn]}>
+            {dialogDuration === "FULL" ? <View style={styles.radioInner} /> : null}
+          </View>
+          <Text style={styles.radioLabel}>Full Day</Text>
+          <View style={[styles.legendDot, { backgroundColor: colors.sessionFullDay }]} />
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.radioRow} onPress={() => setDialogDuration("HALF")}>
+          <View style={[styles.radioOuter, dialogDuration === "HALF" && styles.radioOuterOn]}>
+            {dialogDuration === "HALF" ? <View style={styles.radioInner} /> : null}
+          </View>
+          <Text style={styles.radioLabel}>Half Day</Text>
+          <View style={[styles.legendDot, { backgroundColor: colors.sessionHalfDay, borderColor: colors.secondary, borderWidth: 1 }]} />
+        </TouchableOpacity>
+        {dialogDuration === "HALF" ? (
+          <View style={styles.halfOptions}>
+            <TouchableOpacity style={styles.radioRow} onPress={() => setDialogHalf("FIRST_HALF")}>
+              <View style={[styles.radioOuter, dialogHalf === "FIRST_HALF" && styles.radioOuterOn]}>
+                {dialogHalf === "FIRST_HALF" ? <View style={styles.radioInner} /> : null}
+              </View>
+              <Text style={styles.radioLabel}>First Half</Text>
+              <View style={[styles.legendDot, { backgroundColor: colors.sessionFirstHalf }]} />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.radioRow} onPress={() => setDialogHalf("SECOND_HALF")}>
+              <View style={[styles.radioOuter, dialogHalf === "SECOND_HALF" && styles.radioOuterOn]}>
+                {dialogHalf === "SECOND_HALF" ? <View style={styles.radioInner} /> : null}
+              </View>
+              <Text style={styles.radioLabel}>Second Half</Text>
+              <View style={[styles.legendDot, { backgroundColor: colors.sessionSecondHalf }]} />
             </TouchableOpacity>
           </View>
-        </View>
-      </Modal>
+        ) : null}
+      </ThemedDialog>
     </SafeAreaView>
     </ScreenGradient>
   );
@@ -705,8 +787,8 @@ const styles = StyleSheet.create({
   empInitials: { fontSize: 18, fontWeight: '600', color: colors.onSurface },
   empName: { fontSize: 18, fontWeight: '600', color: colors.onSurface },
   empRole: { fontSize: 12, color: colors.secondary },
-  approverBox: { alignItems: 'flex-end', paddingLeft: 8 },
-  approverLabel: { fontSize: 12, fontWeight: '600', color: colors.secondary, marginTop: 8 },
+  approverDivider: { height: 1, backgroundColor: colors.surfaceContainerHighest, marginTop: 10, marginBottom: 8 },
+  approverLabel: { fontSize: 12, fontWeight: '600', color: colors.onSurface },
   approverName: { fontSize: 14, fontWeight: '600', color: colors.onSurface },
   formSection: { marginTop: 16, gap: 8 },
   sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
@@ -735,7 +817,7 @@ const styles = StyleSheet.create({
   calendarDayHeader: { width: '14.28%', textAlign: 'center', fontSize: 11, fontWeight: '600', color: colors.secondary },
   calendarDayHeaderWeekend: { color: colors.onSurfaceVariant },
   calendarGrid: { flexDirection: 'row', flexWrap: 'wrap' },
-  calCell: { width: '14.28%', minHeight: 32, alignItems: 'center', justifyContent: 'center' },
+  calCell: { width: '14.28%', minHeight: 36, alignItems: 'center', justifyContent: 'center', paddingVertical: 2 },
   calTextOff: { textAlign: 'center', fontSize: 12, color: 'rgba(88, 95, 108, 0.4)' },
   calText: { textAlign: 'center', fontSize: 12, color: colors.onSurface },
   calTextWeekend: { textAlign: 'center', fontSize: 12, color: 'rgba(88, 95, 108, 0.7)' },
@@ -746,8 +828,10 @@ const styles = StyleSheet.create({
   calTextSelRight: { backgroundColor: colors.primary, borderTopRightRadius: 16, borderBottomRightRadius: 16 },
   calTextSelStr: { color: colors.onPrimary, fontSize: 12, fontWeight: '500' },
   calTextSelHalfStr: { color: colors.onSurface, fontSize: 12, fontWeight: '500' },
-  calendarLegend: { flexDirection: 'row', gap: 8, paddingTop: 8, borderTopWidth: 1, borderTopColor: colors.surfaceContainer, paddingHorizontal: 4 },
-  legendItem: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 4 },
+  calSessionDots: { flexDirection: 'row', gap: 2, height: 6, alignItems: 'center', marginTop: 2 },
+  sessionDot: { width: 5, height: 5, borderRadius: 3 },
+  calendarLegend: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, paddingTop: 8, borderTopWidth: 1, borderTopColor: colors.surfaceContainer, paddingHorizontal: 4 },
+  legendItem: { minWidth: '45%', flexGrow: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 4 },
   legendDot: { width: 12, height: 12, borderRadius: 6 },
   legendText: { fontSize: 12, color: colors.onSurface },
   dateRangeBox: { flexDirection: 'row', gap: 8, justifyContent: 'space-between' },
@@ -777,8 +861,20 @@ const styles = StyleSheet.create({
   fileSize: { fontSize: 12, color: colors.secondary },
   uploadFormats: { fontSize: 12, color: colors.secondary, paddingHorizontal: 4 },
   attestCard: { backgroundColor: colors.glass, borderRadius: 16, padding: 16, gap: 12, borderWidth: 1, borderColor: colors.glassBorder },
-  attestHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  attestTitle: { fontSize: 12, fontWeight: '500', color: colors.onSurface },
+  attestHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 8 },
+  attestTitle: { fontSize: 12, fontWeight: '500', color: colors.onSurface, flex: 1 },
+  verifyTag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: 'rgba(186, 26, 26, 0.12)',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    maxWidth: '62%',
+  },
+  verifyDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: colors.error },
+  verifyTagText: { fontSize: 10, fontWeight: '700', color: colors.error },
   attestBadge: { backgroundColor: colors.surfaceContainer, paddingHorizontal: 8, paddingVertical: 2, borderRadius: 4 },
   attestBadgeText: { fontSize: 11, fontWeight: '600', color: colors.secondary },
   checkboxRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 12 },
@@ -794,7 +890,18 @@ const styles = StyleSheet.create({
   toastText: { fontSize: 12, color: colors.onPrimary, lineHeight: 16 },
   infoDot: { width: 16, height: 16, borderRadius: 8, alignItems: "center", justifyContent: "center" },
   infoDotText: { fontSize: 11, fontWeight: "600", color: colors.primary },
-  modalBackdrop: { flex: 1, backgroundColor: "rgba(49,48,48,0.6)", justifyContent: "center", padding: 16 },
-  modalCard: { backgroundColor: colors.glass, borderRadius: 16, padding: 16, gap: 12, borderWidth: 1, borderColor: colors.glassBorder },
-  modalHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
+  radioRow: { flexDirection: "row", alignItems: "center", gap: 10, paddingVertical: 6 },
+  radioLabel: { flex: 1, fontSize: 14, fontWeight: "500", color: colors.onSurface },
+  radioOuter: {
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    borderWidth: 2,
+    borderColor: colors.secondary,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  radioOuterOn: { borderColor: colors.primary },
+  radioInner: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.primary },
+  halfOptions: { marginLeft: 8, gap: 2, paddingLeft: 8, borderLeftWidth: 2, borderLeftColor: colors.surfaceContainerHighest },
 });

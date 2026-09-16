@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, KeyboardAvoidingView, Platform, SafeAreaView, Image } from "react-native";
 import { useRouter } from "expo-router";
 import { MaterialIcons } from '@expo/vector-icons';
-import { ScreenGradient } from "../../components/ui/AppChrome";
+import { ScreenGradient, ThemedDialog, ThemedToast } from "../../components/ui/AppChrome";
 import { login as authLogin, passLogin } from "../../../services/auth";
-import { getMe } from "../../../services/resources";
+import { getMe, requestPasswordReset, apiErrorMessage } from "../../../services/resources";
 import { getPostLoginRoute } from "./SplashScreen";
 
 // Stitch Design Colors & Token Map
@@ -30,6 +30,9 @@ export default function LoginScreen() {
   const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
+  const [forgotOpen, setForgotOpen] = useState(false);
+  const [forgotBusy, setForgotBusy] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
 
   const handleLogin = async () => {
     setError(null);
@@ -81,6 +84,38 @@ export default function LoginScreen() {
     }
   };
 
+  const openForgotPassword = () => {
+    const value = email.trim();
+    if (!value || !value.includes("@")) {
+      setError("Enter a valid email address to send a reset link.");
+      return;
+    }
+    setError(null);
+    setForgotOpen(true);
+  };
+
+  const sendResetLink = async () => {
+    setForgotBusy(true);
+    try {
+      const result = await requestPasswordReset(email.trim());
+      setForgotOpen(false);
+      setToast(result.message);
+    } catch (err) {
+      setForgotOpen(false);
+      setToast(apiErrorMessage(err));
+    } finally {
+      setForgotBusy(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!toast) {
+      return;
+    }
+    const timer = setTimeout(() => setToast(null), 4000);
+    return () => clearTimeout(timer);
+  }, [toast]);
+
   return (
     <ScreenGradient>
       <SafeAreaView style={styles.safeArea}>
@@ -102,7 +137,7 @@ export default function LoginScreen() {
             </View>
           </View>
 
-          {/* Screen Heading */}
+          <View style={styles.mainBlock}>
           <View style={styles.titleContainer}>
             <Text style={styles.title}>Enterprise Sign In</Text>
             <Text style={styles.subtitle}>Authenticate with your corporate credentials to access workforce ledgers and attendance punches.</Text>
@@ -135,7 +170,7 @@ export default function LoginScreen() {
                 <Text style={styles.label}>
                   Password <Text style={styles.errorText}>*</Text>
                 </Text>
-                <TouchableOpacity>
+                <TouchableOpacity onPress={openForgotPassword}>
                   <Text style={styles.forgotPassword}>Forgot Password?</Text>
                 </TouchableOpacity>
               </View>
@@ -182,11 +217,9 @@ export default function LoginScreen() {
               {!loading && <MaterialIcons name="north-east" size={16} color={colors.onPrimary} />}
             </TouchableOpacity>
           </View>
+          </View>
 
-          {/* Operational Security & IT Help Desk Footer */}
           <View style={styles.footer}>
-            <Text style={styles.versionText}>V4.12.0</Text>
-            
             <TouchableOpacity 
               style={styles.passButton} 
               onPress={handlePass}
@@ -194,9 +227,21 @@ export default function LoginScreen() {
             >
               <Text style={styles.passButtonText}>Pass (Dev)</Text>
             </TouchableOpacity>
+            <Text style={styles.versionText}>Version 4.12.0</Text>
           </View>
 
         </KeyboardAvoidingView>
+        <ThemedDialog
+          visible={forgotOpen}
+          title="Forgot Password"
+          message={`A password-reset link can be sent to ${email.trim()}.`}
+          onRequestClose={() => setForgotOpen(false)}
+          actions={[
+            { label: "Cancel", onPress: () => setForgotOpen(false) },
+            { label: forgotBusy ? "Sending…" : "Send Link", onPress: () => void sendResetLink(), primary: true },
+          ]}
+        />
+        <ThemedToast message={toast} />
       </SafeAreaView>
     </ScreenGradient>
   );
@@ -211,10 +256,9 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    paddingHorizontal: 16,
-    paddingTop: 16,
-    paddingBottom: 32,
-    justifyContent: 'center',
+    paddingHorizontal: 24,
+    paddingTop: 28,
+    paddingBottom: 28,
     alignItems: 'center',
     maxWidth: 390,
     marginHorizontal: 'auto',
@@ -224,8 +268,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 20,
+    marginBottom: 8,
     width: '100%',
+    paddingTop: 8,
   },
   logoContainer: {
     flexDirection: 'row',
@@ -258,7 +303,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary,
   },
   titleContainer: {
-    marginTop: 16,
+    marginTop: 28,
     marginBottom: 24,
     width: '100%',
   },
@@ -408,17 +453,24 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   footer: {
-    marginTop: 24,
+    marginTop: 28,
+    width: '100%',
     alignItems: 'center',
-    gap: 12,
+    gap: 16,
+    paddingBottom: 8,
   },
   versionText: {
     fontFamily: 'Inter',
     fontSize: 12,
-    fontWeight: '700',
+    fontWeight: '600',
     color: colors.textVariant,
-    letterSpacing: 1.2,
-    textTransform: 'uppercase',
+    letterSpacing: 0.4,
+    textAlign: 'center',
+  },
+  mainBlock: {
+    flex: 1,
+    width: '100%',
+    justifyContent: 'center',
   },
   passButton: {
     paddingVertical: 8,

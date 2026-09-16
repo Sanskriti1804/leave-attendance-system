@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView } from "react-native";
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, Image } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { getSession } from "../../../services/auth";
+import { getSession, logout } from "../../../services/auth";
 import {
   apiErrorMessage,
   displayName,
@@ -11,21 +11,11 @@ import {
   getMe,
   type EmployeePublic,
 } from "../../../services/resources";
+import { getLocalProfilePhotoUri, pickLocalProfilePhoto, roleTagsFor } from "../../../services/profilePhoto";
 import { colors } from "../../theme";
-import { ScreenGradient } from "../../components/ui/AppChrome";
+import { ScreenGradient, ThemedToast } from "../../components/ui/AppChrome";
 import { BottomNavBar, TopNavBar, useTopNavContentInset } from "../../components/ui/AdminComponents";
 import { UIFallbackIndicator } from "../../components/ui/UIFallback";
-
-function formatJoining(value: string | null | undefined): string {
-  if (!value) {
-    return "—";
-  }
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    return value;
-  }
-  return date.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
-}
 
 export default function AdminProfileScreen() {
   const router = useRouter();
@@ -34,6 +24,8 @@ export default function AdminProfileScreen() {
   const [departmentName, setDepartmentName] = useState("—");
   const [managerName, setManagerName] = useState("—");
   const [error, setError] = useState<string | null>(null);
+  const [photoUri, setPhotoUri] = useState<string | null>(null);
+  const [toast, setToast] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -50,6 +42,7 @@ export default function AdminProfileScreen() {
           return;
         }
         setMe(profile);
+        setPhotoUri(getLocalProfilePhotoUri(profile?.employeeId));
         if (profile?.departmentId) {
           try {
             const department = await getDepartment(profile.departmentId);
@@ -85,6 +78,34 @@ export default function AdminProfileScreen() {
   const name = me ? displayName(me) : "Preeti Kaur";
   const initials = me ? `${me.firstName[0] ?? ""}${me.lastName?.[0] ?? ""}`.toUpperCase() : "PK";
   const fallback = !me || !!error;
+  const tags = roleTagsFor(me?.role ?? "admin");
+  const roleTag = tags.includes("Employee") ? "Employee" : (tags[0] ?? "Admin");
+  const email = me?.email ?? "—";
+  const phone = me?.phone ?? "+91 98765 43210";
+
+  async function onPickPhoto() {
+    const id = me?.employeeId;
+    if (id == null) {
+      setToast("Sign in to update your profile photo.");
+      return;
+    }
+    const result = await pickLocalProfilePhoto(id);
+    if (result === "ok") {
+      setPhotoUri(getLocalProfilePhotoUri(id));
+      return;
+    }
+    if (result === "error") {
+      setToast("Could not select a profile image.");
+    }
+  }
+
+  useEffect(() => {
+    if (!toast) {
+      return;
+    }
+    const timer = setTimeout(() => setToast(null), 4000);
+    return () => clearTimeout(timer);
+  }, [toast]);
 
   return (
     <ScreenGradient>
@@ -103,41 +124,45 @@ export default function AdminProfileScreen() {
             </View>
           ) : null}
 
-          <View style={styles.card}>
-            <View style={styles.hero}>
-              <View style={styles.avatar}>
+          <View style={styles.profileHero}>
+            <TouchableOpacity style={styles.avatar} onPress={() => void onPickPhoto()} activeOpacity={0.8}>
+              {photoUri ? (
+                <Image source={{ uri: photoUri }} style={styles.avatarImage} />
+              ) : (
                 <Text style={styles.avatarText}>{initials}</Text>
-              </View>
-              <View style={{ flex: 1 }}>
-                <View style={styles.nameRow}>
-                  <Text style={styles.name}>{name}</Text>
-                  {fallback ? <UIFallbackIndicator /> : null}
-                </View>
-                <Text style={styles.emp}>EMP-{me?.employeeId ?? 1024}</Text>
-                <View style={styles.statusRow}>
-                  <View style={styles.dot} />
-                  <Text style={styles.status}>{me?.status ?? "Active"}</Text>
-                </View>
-              </View>
-            </View>
-            <Text style={styles.headline}>
-              {isGuest ? "Guest Admin / Org-wide read" : "Head of HR & People Ops"}
-            </Text>
-            <View style={styles.chip}>
-              <Text style={styles.chipText}>{(me?.role ?? "ADMIN").toUpperCase()} /auth/me</Text>
+              )}
+            </TouchableOpacity>
+            <View style={styles.nameRow}>
+              <Text style={styles.name}>{name}</Text>
+              {fallback ? <UIFallbackIndicator /> : null}
             </View>
           </View>
 
           <View style={styles.card}>
             <View style={styles.cardHead}>
               <Text style={styles.cardTitle}>Work Information</Text>
-              <Text style={styles.lock}>Read-Only</Text>
+              <View style={styles.pill}>
+                <View style={styles.pillDot} />
+                <Text style={styles.pillText}>{roleTag}</Text>
+              </View>
             </View>
-            <InfoRow label="Role" value={isGuest ? "Guest Admin" : "Head of HR / Org Admin"} />
             <InfoRow label="Department" value={departmentName === "—" ? "Human Resources & Ops" : departmentName} />
-            <InfoRow label="Reporting Manager" value={managerName === "—" ? "—" : managerName} />
-            <InfoRow label="Official Email" value={me?.email ?? "—"} />
-            <InfoRow label="Joining Date" value={formatJoining(me?.joiningDate)} last />
+            <InfoRow label="Reporting Manager" value={managerName === "—" || /employee 2/i.test(managerName) ? "S Raman" : managerName} last />
+          </View>
+
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>Contact Information</Text>
+            <View style={styles.contactSplit}>
+              <View style={styles.contactPane}>
+                <Text style={styles.infoLabel}>Email</Text>
+                <Text style={styles.emailValue}>{email}</Text>
+              </View>
+              <View style={styles.contactDivider} />
+              <View style={styles.contactPane}>
+                <Text style={styles.infoLabel}>Phone</Text>
+                <Text style={styles.infoValue}>{phone}</Text>
+              </View>
+            </View>
           </View>
 
           <View style={styles.card}>
@@ -158,18 +183,38 @@ export default function AdminProfileScreen() {
             </View>
             <MaterialIcons name="chevron-right" size={22} color={colors.secondary} />
           </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.logout}
+            onPress={async () => {
+              await logout();
+              router.replace("/login");
+            }}
+          >
+            <Text style={styles.logoutText}>Log out</Text>
+          </TouchableOpacity>
         </ScrollView>
+        <ThemedToast message={toast} />
         <BottomNavBar activeRoute="more" />
       </SafeAreaView>
     </ScreenGradient>
   );
 }
 
-function InfoRow({ label, value, last }: { label: string; value: string; last?: boolean }) {
+function InfoRow({
+  label,
+  value,
+  last,
+  highlight,
+}: {
+  label: string;
+  value: string;
+  last?: boolean;
+  highlight?: boolean;
+}) {
   return (
     <View style={[styles.infoRow, !last && styles.infoBorder]}>
       <Text style={styles.infoLabel}>{label}</Text>
-      <Text style={styles.infoValue}>{value}</Text>
+      <Text style={highlight ? styles.emailValue : styles.infoValue}>{value}</Text>
     </View>
   );
 }
@@ -229,7 +274,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 4,
     backgroundColor: colors.surfaceContainer,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
   },
+  pillDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: colors.primary },
   pillOn: { backgroundColor: colors.primary },
   pillText: { fontFamily: "Inter", fontSize: 10, fontWeight: "700", color: colors.onSurface },
   pillTextOn: { color: colors.onPrimary },
@@ -253,18 +302,21 @@ const styles = StyleSheet.create({
     padding: 16,
     gap: 10,
   },
-  hero: { flexDirection: "row", gap: 12, alignItems: "center" },
+  profileHero: { alignItems: "center", justifyContent: "center", paddingVertical: 24, gap: 12, minHeight: 180 },
   avatar: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
+    width: 112,
+    height: 112,
+    borderRadius: 56,
     backgroundColor: colors.primary,
     alignItems: "center",
     justifyContent: "center",
+    overflow: "hidden",
   },
-  avatarText: { fontFamily: "Inter", fontSize: 22, fontWeight: "700", color: colors.onPrimary },
-  nameRow: { flexDirection: "row", alignItems: "center" },
-  name: { fontFamily: "Inter", fontSize: 20, fontWeight: "700", color: colors.onSurface },
+  avatarImage: { width: 112, height: 112 },
+  avatarText: { fontFamily: "Inter", fontSize: 36, fontWeight: "700", color: colors.onPrimary },
+  nameRow: { flexDirection: "row", alignItems: "center", justifyContent: "center" },
+  name: { fontFamily: "Inter", fontSize: 20, fontWeight: "800", color: colors.onSurface },
+  tagRow: { flexDirection: "row", flexWrap: "wrap", gap: 6, marginTop: 6 },
   emp: { fontFamily: "Inter", fontSize: 12, color: colors.secondary, marginTop: 2 },
   statusRow: { flexDirection: "row", alignItems: "center", gap: 6, marginTop: 4 },
   dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: "#16a34a" },
@@ -297,4 +349,18 @@ const styles = StyleSheet.create({
   },
   navTitle: { fontFamily: "Inter", fontSize: 15, fontWeight: "700", color: colors.onSurface },
   navSub: { fontFamily: "Inter", fontSize: 12, color: colors.secondary, marginTop: 2 },
+  emailValue: { fontFamily: "Inter", fontSize: 13, fontWeight: "700", color: colors.primary, textAlign: "right", flex: 1 },
+  contactSplit: { flexDirection: "row", alignItems: "stretch", paddingTop: 8 },
+  contactPane: { flex: 1, gap: 4 },
+  contactDivider: { width: 1, backgroundColor: "rgba(0,0,0,0.08)", marginHorizontal: 12 },
+  logout: {
+    minHeight: 48,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: colors.glassBorder,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: colors.glass,
+  },
+  logoutText: { fontFamily: "Inter", fontSize: 14, fontWeight: "700", color: colors.primary },
 });

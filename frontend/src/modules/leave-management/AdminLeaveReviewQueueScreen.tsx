@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, ActivityIndicator, Alert, TextInput, Modal } from "react-native";
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, ActivityIndicator, TextInput, Modal } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
-import { ScreenGradient } from "../../components/ui/AppChrome";
+import { ScreenGradient, ThemedDialog } from "../../components/ui/AppChrome";
 import { TopNavBar, useTopNavContentInset, BottomNavBar } from "../../components/ui/AdminComponents";
 import { getSession } from "../../../services/auth";
 import {
@@ -83,6 +83,7 @@ export default function AdminLeaveReviewQueueScreen() {
   const [rejectTarget, setRejectTarget] = useState<number | null>(null);
   const [rejectComment, setRejectComment] = useState("");
   const [noteVisible, setNoteVisible] = useState(false);
+  const [guestDialog, setGuestDialog] = useState(false);
 
   const actualGuest = me?.role === "guest_admin";
   const isGuest = actualGuest || previewGuest;
@@ -199,7 +200,7 @@ export default function AdminLeaveReviewQueueScreen() {
               style={styles.toggleBtn}
               onPress={() => {
                 if (actualGuest) {
-                  Alert.alert("Guest admin", "Write actions stay disabled (AUTH-08). Preview only.");
+                  setGuestDialog(true);
                   return;
                 }
                 setPreviewGuest((value) => !value);
@@ -392,6 +393,13 @@ export default function AdminLeaveReviewQueueScreen() {
             </View>
           </View>
         </Modal>
+        <ThemedDialog
+          visible={guestDialog}
+          title="Guest admin"
+          message="Write actions stay disabled. Preview only."
+          onRequestClose={() => setGuestDialog(false)}
+          actions={[{ label: "OK", onPress: () => setGuestDialog(false), primary: true }]}
+        />
       </SafeAreaView>
     </ScreenGradient>
   );

@@ -47,6 +47,8 @@ MaxStarter owns `src/maxstarter/` and `MAXSTARTER:BEGIN/END` regions.
 
 Expo tab bar is hidden. Roles use the shared pill bottom nav. Leave APIs are live. Guest admin leave review is read-only. Medical GET remains forbidden for employees (MED-09). Home punch buttons are still local simulation; attendance history/corrections call live endpoints.
 
+Sticky `TopNavBar` uses the page gradient plus a bottom boundary so scrolled content sits under the header, not over title/controls. Login shows **LAMS SCG** at the top with **Version 4.12.0** at the bottom and a themed Forgot Password dialog (existing `/forgot-password` API). Apply Leave shows **Approver — S Raman**. Profile hero is a large centered photo/initials with name below; Employee tag is on Work Information. Employee Leave lists name then Leave Records without a gray wrap around chips. Alerts keep My Updates / Yesterday with simpler attendance copy.
+
 ## Theme tokens (from design.md)
 
 primary `#000000`, background/secondary `#FFFFFF`, text `#111111`, muted `#6B7280`, error `#DC2626`, border `#E5E7EB`. System fonts.

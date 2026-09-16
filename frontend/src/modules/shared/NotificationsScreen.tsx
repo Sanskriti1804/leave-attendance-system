@@ -13,7 +13,10 @@ export default function NotificationsScreen() {
       <SafeAreaView style={styles.safe}>
         <TopNavBar title="Notifications" />
         <ScrollView contentContainerStyle={[styles.scroll, { paddingTop: topInset }]} showsVerticalScrollIndicator={false}>
-          <Text style={styles.section}>My Updates</Text>
+          <View style={styles.sectionHead}>
+            <Text style={styles.section}>My Updates</Text>
+            <View style={styles.sectionLine} />
+          </View>
           <View style={styles.card}>
             <View style={styles.rowTop}>
               <View style={styles.iconWrap}>
@@ -24,12 +27,7 @@ export default function NotificationsScreen() {
                 <Text style={styles.itemTime}>2h ago</Text>
               </View>
             </View>
-            <Text style={styles.itemCopy}>
-              Your Casual Leave for Oct 21, 2026 has been authorized by S. Raman (Product Eng) and validated by HR.
-            </Text>
-            <View style={styles.chip}>
-              <Text style={styles.chipText}>Status: Approved • Quota deducted: 1.0 Day</Text>
-            </View>
+            <Text style={styles.itemCopy}>Casual Leave for Oct 21, 2026 was approved.</Text>
           </View>
           <View style={styles.card}>
             <View style={styles.rowTop}>
@@ -37,16 +35,17 @@ export default function NotificationsScreen() {
                 <MaterialIcons name="schedule" size={20} color={colors.onSurface} />
               </View>
               <View style={styles.rowBody}>
-                <Text style={styles.itemTitle}>Shift Check-In Verified</Text>
-                <Text style={styles.itemTime}>08:58 AM</Text>
+                <Text style={styles.itemTitle}>Logged in at 09:12 AM</Text>
+                <Text style={styles.itemTime}>Today</Text>
               </View>
             </View>
-            <Text style={styles.itemCopy}>
-              Biometric punch logged at 08:58:12 AM EST. Geofence location: New York HQ Floor 4. Shift window active.
-            </Text>
+            <Text style={styles.itemCopy}>Wednesday, 16 Sep 2026</Text>
           </View>
 
-          <Text style={styles.section}>Yesterday</Text>
+          <View style={styles.sectionHead}>
+            <Text style={styles.section}>Yesterday</Text>
+            <View style={styles.sectionLine} />
+          </View>
           <View style={styles.card}>
             <View style={styles.rowTop}>
               <View style={styles.iconWrap}>
@@ -57,14 +56,9 @@ export default function NotificationsScreen() {
               </View>
             </View>
             <Text style={styles.itemCopy}>
-              Corporate office will remain closed on Friday, Nov 27 for Thanksgiving weekend. Punch clocks will be set to
-              holiday bypass.
+              Corporate office will remain closed on Friday, Nov 27 for Thanksgiving weekend.
             </Text>
           </View>
-          <Text style={styles.note}>
-            Notification APIs are not implemented. This layout matches the employee Stitch alerts screen; live feed is not
-            available.
-          </Text>
         </ScrollView>
         <EmployeeBottomNavBar activeRoute="notifications" />
       </SafeAreaView>
@@ -74,40 +68,15 @@ export default function NotificationsScreen() {
 
 const styles = StyleSheet.create({
   safe: { flex: 1 },
-  header: {
-    paddingHorizontal: 16,
-    paddingTop: 8,
-    paddingBottom: 8,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-  },
-  kicker: {
-    fontFamily: "Inter",
-    fontSize: 11,
-    fontWeight: "700",
-    letterSpacing: 0.6,
-    textTransform: "uppercase",
-    color: colors.secondary,
-  },
-  title: {
-    fontFamily: "Inter",
-    fontSize: 22,
-    fontWeight: "800",
-    color: colors.onSurface,
-    letterSpacing: -0.4,
-  },
-  subtitle: { fontFamily: "Inter", fontSize: 12, color: colors.secondary, marginTop: 2 },
   scroll: { paddingHorizontal: 16, paddingBottom: 120, gap: 12 },
+  sectionHead: { marginTop: 8, gap: 8 },
   section: {
     fontFamily: "Inter",
-    fontSize: 12,
-    fontWeight: "700",
-    color: colors.secondary,
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
-    marginTop: 8,
+    fontSize: 16,
+    fontWeight: "800",
+    color: colors.onSurface,
   },
+  sectionLine: { height: 1, backgroundColor: colors.glassBorder },
   card: {
     backgroundColor: colors.glass,
     borderRadius: 16,
@@ -134,13 +103,4 @@ const styles = StyleSheet.create({
   itemTitle: { fontFamily: "Inter", fontSize: 14, fontWeight: "700", color: colors.onSurface, flex: 1 },
   itemTime: { fontFamily: "Inter", fontSize: 11, color: colors.secondary, marginLeft: 8 },
   itemCopy: { fontFamily: "Inter", fontSize: 13, color: colors.onSurfaceVariant, lineHeight: 18 },
-  chip: {
-    alignSelf: "flex-start",
-    backgroundColor: colors.surfaceContainer,
-    borderRadius: 8,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-  },
-  chipText: { fontFamily: "Inter", fontSize: 11, fontWeight: "600", color: colors.onSurface },
-  note: { fontFamily: "Inter", fontSize: 11, color: colors.secondary, lineHeight: 16, marginTop: 4 },
 });

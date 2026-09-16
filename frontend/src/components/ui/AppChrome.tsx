@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet, ViewProps } from "react-native";
+import { Modal, View, Text, TouchableOpacity, StyleSheet, ViewProps } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -99,8 +99,114 @@ export function RoleBottomNav({
   );
 }
 
+export function ThemedDialog({
+  visible,
+  title,
+  message,
+  children,
+  onRequestClose,
+  actions,
+}: {
+  visible: boolean;
+  title: string;
+  message?: string;
+  children?: React.ReactNode;
+  onRequestClose: () => void;
+  actions?: { label: string; onPress: () => void; primary?: boolean }[];
+}) {
+  return (
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={onRequestClose}>
+      <View style={styles.dialogBackdrop}>
+        <View style={styles.dialogCard}>
+          <View style={styles.dialogHeader}>
+            <Text style={styles.dialogTitle}>{title}</Text>
+            <TouchableOpacity onPress={onRequestClose} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+              <MaterialIcons name="close" size={18} color={colors.secondary} />
+            </TouchableOpacity>
+          </View>
+          {message ? <Text style={styles.dialogMessage}>{message}</Text> : null}
+          {children}
+          {actions?.length ? (
+            <View style={styles.dialogActions}>
+              {actions.map((action) => (
+                <TouchableOpacity
+                  key={action.label}
+                  style={action.primary ? styles.dialogPrimaryBtn : styles.dialogGhostBtn}
+                  onPress={action.onPress}
+                >
+                  <Text style={action.primary ? styles.dialogPrimaryBtnText : styles.dialogGhostBtnText}>
+                    {action.label}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          ) : null}
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
+export function ThemedToast({ message }: { message: string | null }) {
+  if (!message) {
+    return null;
+  }
+  return (
+    <View pointerEvents="none" style={styles.toastBox}>
+      <Text style={styles.toastText}>{message}</Text>
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
   fill: { flex: 1 },
+  dialogBackdrop: {
+    flex: 1,
+    backgroundColor: "rgba(49,48,48,0.6)",
+    justifyContent: "center",
+    padding: 16,
+  },
+  dialogCard: {
+    backgroundColor: colors.glass,
+    borderRadius: 16,
+    padding: 16,
+    gap: 12,
+    borderWidth: 1,
+    borderColor: colors.glassBorder,
+  },
+  dialogHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
+  dialogTitle: { fontFamily: "Inter", fontSize: 14, fontWeight: "600", color: colors.onSurface, flex: 1, paddingRight: 8 },
+  dialogMessage: { fontFamily: "Inter", fontSize: 12, color: colors.onSurfaceVariant, lineHeight: 16 },
+  dialogActions: { gap: 8 },
+  dialogPrimaryBtn: {
+    minHeight: 48,
+    backgroundColor: colors.primary,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  dialogPrimaryBtnText: { fontFamily: "Inter", fontSize: 14, fontWeight: "500", color: colors.onPrimary },
+  dialogGhostBtn: {
+    minHeight: 48,
+    backgroundColor: colors.surfaceContainerLowest,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  dialogGhostBtnText: { fontFamily: "Inter", fontSize: 14, fontWeight: "500", color: colors.onSurface },
+  toastBox: {
+    position: "absolute",
+    left: 16,
+    right: 16,
+    top: 72,
+    backgroundColor: colors.glass,
+    borderRadius: 8,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: colors.glassBorder,
+    zIndex: 80,
+  },
+  toastText: { fontFamily: "Inter", fontSize: 12, color: colors.onSurface, lineHeight: 16 },
   bottomNavContainer: {
     position: "absolute",
     left: 16,

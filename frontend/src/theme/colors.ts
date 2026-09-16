@@ -24,6 +24,12 @@ export const colors = {
   navInactive: "#9ca3af",
   navActiveIconBg: "#3a3a3e",
   navBorder: "rgba(255, 255, 255, 0.08)",
+  secondaryFixedDim: "#c0c7d6",
+  sessionFullDay: "#242424",
+  sessionHalfDay: "#c0c7d6",
+  sessionFirstHalf: "#00a899",
+  sessionSecondHalf: "#26a9e1",
+  headerScrim: "rgba(252, 249, 248, 0.96)",
 };
 
 export const pageGradient = {

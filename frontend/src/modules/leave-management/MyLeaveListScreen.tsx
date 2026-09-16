@@ -199,12 +199,12 @@ export default function MyLeaveListScreen() {
 
         <ScrollView style={styles.container} contentContainerStyle={[styles.content, { paddingTop: topInset }]}>
           <View style={styles.topRow}>
-            <View>
-              <Text style={styles.topLabel}>LEAVE RECORDS</Text>
+            <View style={{ flex: 1, paddingRight: 12 }}>
               <View style={{ flexDirection: "row", alignItems: "center" }}>
                 <Text style={styles.empName}>{error ? "Priya Khanna" : displayName(me)}</Text>
                 {error ? <UIFallbackIndicator style={{ marginTop: 4 }} /> : null}
               </View>
+              <Text style={styles.topLabel}>Leave Records</Text>
             </View>
             <TouchableOpacity style={styles.applyBtn} onPress={() => router.push(applyHref as never)}>
               <MaterialIcons name="add" size={18} color={colors.onPrimary} />
@@ -368,18 +368,14 @@ const styles = StyleSheet.create({
   container: { flex: 1 },
   content: { paddingBottom: 100, gap: 16 },
   topRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingHorizontal: 16, paddingTop: 8 },
-  topLabel: { fontSize: 11, fontWeight: "600", color: colors.secondary, letterSpacing: 0.66 },
-  empName: { fontSize: 20, fontWeight: "600", color: colors.onSurface, marginTop: 4 },
+  topLabel: { fontSize: 16, fontWeight: "700", color: colors.onSurface, marginTop: 4 },
+  empName: { fontSize: 22, fontWeight: "800", color: colors.onSurface },
   applyBtn: { flexDirection: "row", alignItems: "center", backgroundColor: colors.primary, paddingHorizontal: 16, height: 44, borderRadius: 8, gap: 8 },
   applyBtnText: { fontSize: 14, fontWeight: "500", color: colors.onPrimary },
   filtersScroll: { flexGrow: 0, marginHorizontal: 16 },
   filtersContainer: {
     gap: 8,
-    padding: 8,
-    backgroundColor: colors.glass,
-    borderWidth: 1,
-    borderColor: colors.glassBorder,
-    borderRadius: 16,
+    paddingVertical: 4,
   },
   filterChipActive: { flexDirection: "row", alignItems: "center", backgroundColor: colors.primary, height: 36, paddingHorizontal: 12, borderRadius: 8, gap: 8 },
   filterChipTextActive: { fontSize: 12, fontWeight: "500", color: colors.onPrimary },

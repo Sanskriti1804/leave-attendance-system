@@ -61,6 +61,8 @@ LV-OVR-03/04 which statuses block overlap. LV-APP-18 HR-absent path. MED-12 “e
 
 ## Change History
 
+2026-09-16 — Apply Leave: Approver — S Raman with divider; operational notice tag (certify copy removed). Leave APIs unchanged.
+2026-09-16 — Apply Leave: tap select/deselect; long-press themed Full/Half session dialog with First/Second Half radios; calendar session indicators and legend. Leave APIs unchanged.
 2026-09-15 — My Leave List, Apply Leave, and Admin Leave Review Queue aligned to Stitch layouts (gradient, glass cards, queue chips, duration info, manager attestation). Live leave APIs unchanged.
 2026-09-14 — Apply Leave: From–To range defaults to Full Day; session dropdown; long-press per-date session override; submit errors as toast.
 2026-09-04 — Medical document requirement on submit; duration uses selected-date `numberOfDays`.

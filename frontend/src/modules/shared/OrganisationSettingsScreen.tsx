@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   SafeAreaView,
   TextInput,
-  Alert,
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import {
@@ -18,7 +17,7 @@ import {
   type OrganisationSettings,
 } from "../../../services/resources";
 import { colors } from "../../theme";
-import { ScreenGradient } from "../../components/ui/AppChrome";
+import { ScreenGradient, ThemedDialog } from "../../components/ui/AppChrome";
 import { BottomNavBar, TopNavBar, useTopNavContentInset } from "../../components/ui/AdminComponents";
 import { UIFallbackIndicator } from "../../components/ui/UIFallback";
 
@@ -57,6 +56,7 @@ export default function OrganisationSettingsScreen() {
   const [weeklyOff, setWeeklyOff] = useState<number[]>([6, 7]);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [dialog, setDialog] = useState<{ title: string; message: string } | null>(null);
 
   const isGuest = role === "guest_admin";
   const canEdit = role === "admin";
@@ -110,15 +110,15 @@ export default function OrganisationSettingsScreen() {
     const graceMinutes = Number(grace);
     const maxAdvanceDays = Number(maxAdvance);
     if (!/^\d{2}:\d{2}$/.test(workStart) || !/^\d{2}:\d{2}$/.test(workEnd)) {
-      Alert.alert("Invalid time", "Use HH:MM for shift start and end.");
+      setDialog({ title: "Invalid time", message: "Use HH:MM for shift start and end." });
       return;
     }
     if (!Number.isInteger(graceMinutes) || graceMinutes < 0) {
-      Alert.alert("Invalid grace", "Grace minutes must be a whole number ≥ 0.");
+      setDialog({ title: "Invalid grace", message: "Grace minutes must be a whole number ≥ 0." });
       return;
     }
     if (!Number.isInteger(maxAdvanceDays) || maxAdvanceDays < 1) {
-      Alert.alert("Invalid advance days", "Max advance days must be a whole number ≥ 1.");
+      setDialog({ title: "Invalid advance days", message: "Max advance days must be a whole number ≥ 1." });
       return;
     }
     setSaving(true);
@@ -131,9 +131,9 @@ export default function OrganisationSettingsScreen() {
         maxAdvanceDays,
       });
       setSettings(next);
-      Alert.alert("Saved", "Organisation settings updated.");
+      setDialog({ title: "Saved", message: "Organisation settings updated." });
     } catch (err) {
-      Alert.alert("Could not save", apiErrorMessage(err));
+      setDialog({ title: "Could not save", message: apiErrorMessage(err) });
     } finally {
       setSaving(false);
     }
@@ -248,12 +248,19 @@ export default function OrganisationSettingsScreen() {
             <View style={styles.lockedBar}>
               <MaterialIcons name="lock" size={16} color={colors.secondary} />
               <Text style={styles.lockedText}>
-                {isGuest ? "Guest Admin cannot PATCH organisation settings (AUTH-09)." : "Editing locked."}
+                {isGuest ? "Guest Admin cannot change organisation settings." : "Editing locked."}
               </Text>
             </View>
           )}
         </ScrollView>
         <BottomNavBar activeRoute="more" />
+        <ThemedDialog
+          visible={dialog != null}
+          title={dialog?.title ?? ""}
+          message={dialog?.message}
+          onRequestClose={() => setDialog(null)}
+          actions={[{ label: "OK", onPress: () => setDialog(null), primary: true }]}
+        />
       </SafeAreaView>
     </ScreenGradient>
   );

@@ -1,10 +1,8 @@
 import React, { useEffect, useState } from "react";
 import {
-  Alert,
   SafeAreaView,
   ScrollView,
   StyleSheet,
-  Switch,
   Text,
   TextInput,
   TouchableOpacity,
@@ -21,7 +19,7 @@ import {
   type OrganisationSettings,
 } from "../../../services/resources";
 import { colors } from "../../theme";
-import { ScreenGradient } from "../../components/ui/AppChrome";
+import { ScreenGradient, ThemedDialog } from "../../components/ui/AppChrome";
 import { BottomNavBar, TopNavBar, useTopNavContentInset } from "../../components/ui/AdminComponents";
 import { EmployeeBottomNavBar } from "../../components/ui/EmployeeComponents";
 
@@ -30,13 +28,11 @@ export default function MoreSettingsScreen() {
   const topInset = useTopNavContentInset();
   const [role, setRole] = useState<string>("employee");
   const [settings, setSettings] = useState<OrganisationSettings | null>(null);
-  const [leaveAlerts, setLeaveAlerts] = useState(true);
-  const [attendanceReminders, setAttendanceReminders] = useState(true);
-  const [hrAnnouncements, setHrAnnouncements] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [savingPassword, setSavingPassword] = useState(false);
+  const [dialog, setDialog] = useState<{ title: string; message: string } | null>(null);
 
   const adminNav = role === "admin" || role === "guest_admin";
 
@@ -56,9 +52,9 @@ export default function MoreSettingsScreen() {
       setCurrentPassword("");
       setNewPassword("");
       setShowPassword(false);
-      Alert.alert("Password updated", "Use the new password the next time you sign in.");
+      setDialog({ title: "Password updated", message: "Use the new password the next time you sign in." });
     } catch (err) {
-      Alert.alert("Could not change password", apiErrorMessage(err));
+      setDialog({ title: "Could not change password", message: apiErrorMessage(err) });
     } finally {
       setSavingPassword(false);
     }
@@ -78,7 +74,7 @@ export default function MoreSettingsScreen() {
                 </View>
                 <View style={{ flex: 1 }}>
                   <Text style={styles.rowTitle}>Admin / Guest Admin Profile</Text>
-                  <Text style={styles.rowSub}>Role, privileges, and /auth/me identity</Text>
+                  <Text style={styles.rowSub}>Role, privileges, and identity</Text>
                 </View>
                 <MaterialIcons name="chevron-right" size={20} color={colors.secondary} />
               </TouchableOpacity>
@@ -94,30 +90,6 @@ export default function MoreSettingsScreen() {
               </TouchableOpacity>
             </View>
           ) : null}
-
-          <View style={styles.card}>
-            <Text style={styles.section}>Notification Preferences</Text>
-            <PrefRow
-              title="Leave status updates"
-              subtitle="Get updates when leave requests are approved, rejected, or changed."
-              value={leaveAlerts}
-              onValueChange={setLeaveAlerts}
-            />
-            <PrefRow
-              title="Attendance & Missed Punch Reminders"
-              subtitle="Receive reminders for missed check-ins, check-outs, or attendance issues."
-              value={attendanceReminders}
-              onValueChange={setAttendanceReminders}
-            />
-            <PrefRow
-              title="HR Announcements"
-              subtitle="Receive important HR and company announcements."
-              value={hrAnnouncements}
-              onValueChange={setHrAnnouncements}
-              last
-            />
-            <Text style={styles.hint}>Preference switches are local until a notification API exists.</Text>
-          </View>
 
           <View style={styles.card}>
             <View style={styles.cardHead}>
@@ -157,7 +129,6 @@ export default function MoreSettingsScreen() {
           </View>
 
           <View style={styles.card}>
-            <Text style={styles.kickerSmall}>Identity & Sessions</Text>
             <Text style={styles.section}>Security</Text>
             <TouchableOpacity style={styles.row} onPress={() => setShowPassword((v) => !v)}>
               <View style={styles.iconWrap}>
@@ -165,7 +136,7 @@ export default function MoreSettingsScreen() {
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={styles.rowTitle}>Change Password</Text>
-                <Text style={styles.rowSub}>POST /api/v1/auth/change-password</Text>
+                <Text style={styles.rowSub}>Update the password used to sign in.</Text>
               </View>
               <MaterialIcons name={showPassword ? "expand-less" : "expand-more"} size={20} color={colors.secondary} />
             </TouchableOpacity>
@@ -196,7 +167,7 @@ export default function MoreSettingsScreen() {
               <MaterialIcons name="devices" size={18} color={colors.onSurface} />
               <View style={{ flex: 1 }}>
                 <Text style={styles.rowTitle}>Active Sessions & Devices</Text>
-                <Text style={styles.rowSub}>This device • Current session (session list API is not implemented)</Text>
+                <Text style={styles.rowSub}>This device • Current session</Text>
               </View>
             </View>
           </View>
@@ -212,32 +183,15 @@ export default function MoreSettingsScreen() {
           </TouchableOpacity>
         </ScrollView>
         {adminNav ? <BottomNavBar activeRoute="more" /> : <EmployeeBottomNavBar activeRoute="profile" />}
+        <ThemedDialog
+          visible={dialog != null}
+          title={dialog?.title ?? ""}
+          message={dialog?.message}
+          onRequestClose={() => setDialog(null)}
+          actions={[{ label: "OK", onPress: () => setDialog(null), primary: true }]}
+        />
       </SafeAreaView>
     </ScreenGradient>
-  );
-}
-
-function PrefRow({
-  title,
-  subtitle,
-  value,
-  onValueChange,
-  last,
-}: {
-  title: string;
-  subtitle: string;
-  value: boolean;
-  onValueChange: (next: boolean) => void;
-  last?: boolean;
-}) {
-  return (
-    <View style={[styles.pref, !last && styles.prefBorder]}>
-      <View style={{ flex: 1, paddingRight: 12 }}>
-        <Text style={styles.rowTitle}>{title}</Text>
-        <Text style={styles.rowSub}>{subtitle}</Text>
-      </View>
-      <Switch value={value} onValueChange={onValueChange} trackColor={{ false: colors.surfaceContainerHighest, true: colors.primary }} />
-    </View>
   );
 }
 

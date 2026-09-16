@@ -4,7 +4,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { colors } from "../../theme";
+import { colors, pageGradient } from "../../theme";
 import { RoleBottomNav } from "./AppChrome";
 
 export const TOP_NAV_EXTRA_PAD = 10;
@@ -35,7 +35,13 @@ export function TopNavBar({
   const insets = useSafeAreaInsets();
   const router = useRouter();
   return (
-    <View style={[styles.navContainer, { paddingTop: insets.top + TOP_NAV_EXTRA_PAD }]}>
+    <LinearGradient
+      colors={[...pageGradient.colors]}
+      locations={[...pageGradient.locations]}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={[styles.navContainer, { paddingTop: insets.top + TOP_NAV_EXTRA_PAD }]}
+    >
       <View style={styles.navContent}>
         <View style={styles.navRow}>
           <View style={styles.navTitleContainer}>
@@ -51,7 +57,7 @@ export function TopNavBar({
           <View style={styles.navProfileContainer}>{right ?? <ProfileIcon />}</View>
         </View>
       </View>
-    </View>
+    </LinearGradient>
   );
 }
 
@@ -138,7 +144,14 @@ const styles = StyleSheet.create({
     top: 0,
     width: '100%',
     zIndex: 50,
-    backgroundColor: 'transparent'
+    overflow: 'hidden',
+    borderBottomWidth: 1,
+    borderBottomColor: colors.glassBorder,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 6,
   },
   backBtn: {
     width: 36,

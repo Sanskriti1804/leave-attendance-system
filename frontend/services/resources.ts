@@ -1,4 +1,4 @@
-import { authPath } from "./api";
+import { apiRequest, authPath } from "./api";
 import { authorizedRequest } from "./auth";
 
 export type EmployeePublic = {
@@ -6,6 +6,7 @@ export type EmployeePublic = {
   firstName: string;
   lastName: string | null;
   email: string;
+  phone?: string | null;
   departmentId: number;
   role: string;
   managerId: number | null;
@@ -149,6 +150,10 @@ export function patchOrgSettings(body: Partial<OrganisationSettings>): Promise<O
 
 export function changePassword(body: { currentPassword: string; newPassword: string }): Promise<{ message: string }> {
   return authorizedRequest<{ message: string }>(authPath("/change-password"), { method: "POST", body });
+}
+
+export function requestPasswordReset(email: string): Promise<{ message: string }> {
+  return apiRequest<{ message: string }>(authPath("/forgot-password"), { method: "POST", body: { email } });
 }
 
 export function uploadLeaveDocument(leaveId: number, file: { uri: string; name: string; type: string }): Promise<unknown> {
