@@ -41,8 +41,8 @@ MaxStarter owns `src/maxstarter/` and `MAXSTARTER:BEGIN/END` regions.
 `frontend/` Expo Router app (Stitch-aligned):
 
 - Splash `/` and Login `/login`
-- Employee: Home `/(tabs)`, Leave `/leave/list`, Apply `/leave/apply`, Attendance `/(tabs)/attendance`, Alerts `/(tabs)/notifications`, Profile `/(tabs)/profile`
-- Admin / guest_admin: Dashboard `/admin`, Leave review `/leave/admin-review`, People `/people`, Reports `/reports`, More `/settings`
+- Employee: Home `/(tabs)`, Leave `/leave/list`, Apply `/leave/apply`, Attendance `/(tabs)/attendance`, Alerts `/(tabs)/notifications` (Stitch in-app notifications layout; notification APIs not implemented), Profile `/(tabs)/profile`
+- Admin / guest_admin: Dashboard `/admin`, Leave review `/leave/admin-review`, People `/people`, Reports `/reports`, More `/settings` (Stitch More/Settings). From More: Admin/Guest profile `/admin-profile`, Organisation Settings `/org-settings` (GET live; PATCH admin-only, guest_admin read-only AUTH-09).
 
 Expo tab bar is hidden. All roles use the admin pill bottom nav styling with role-specific destinations.
 

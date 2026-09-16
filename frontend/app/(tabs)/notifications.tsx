@@ -1,13 +1,5 @@
-import { RoleStubScreen } from "../../src/modules/shared/RoleStubScreen";
+import NotificationsScreen from "../../src/modules/shared/NotificationsScreen";
 
 export default function NotificationsRoute() {
-  return (
-    <RoleStubScreen
-      variant="employee"
-      activeRoute="notifications"
-      title="Alerts"
-      icon="notifications"
-      body="Notification APIs are not implemented. This tab is registered so employee navigation matches the Stitch destinations."
-    />
-  );
+  return <NotificationsScreen />;
 }

@@ -28,6 +28,10 @@ export type OrganisationSettings = {
   workEnd: string | null;
   graceMinutes: number;
   weeklyOffDow: number[];
+  leaveCountExcludesWeekends?: boolean;
+  leaveCountExcludesHolidays?: boolean;
+  medicalDocOptional1To2Days?: boolean;
+  medicalDocExceedsDays?: number;
   maxAdvanceDays: number;
 };
 
@@ -90,6 +94,14 @@ export function getDepartment(departmentId: number): Promise<Department> {
 
 export function getOrgSettings(): Promise<OrganisationSettings> {
   return authorizedRequest<OrganisationSettings>("/api/v1/org-settings");
+}
+
+export function patchOrgSettings(body: Partial<OrganisationSettings>): Promise<OrganisationSettings> {
+  return authorizedRequest<OrganisationSettings>("/api/v1/org-settings", { method: "PATCH", body });
+}
+
+export function changePassword(body: { currentPassword: string; newPassword: string }): Promise<{ message: string }> {
+  return authorizedRequest<{ message: string }>(authPath("/change-password"), { method: "POST", body });
 }
 
 export function listLeaveTypes(): Promise<ItemList<LeaveType>> {

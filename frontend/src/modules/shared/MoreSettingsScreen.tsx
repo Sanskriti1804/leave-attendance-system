@@ -1,28 +1,208 @@
 import React, { useEffect, useState } from "react";
-import { SafeAreaView, StyleSheet, TouchableOpacity, Text } from "react-native";
+import {
+  Alert,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Switch,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { logout } from "../../../services/auth";
-import { getMe } from "../../../services/resources";
+import {
+  apiErrorMessage,
+  changePassword,
+  getMe,
+  getOrgSettings,
+  type OrganisationSettings,
+} from "../../../services/resources";
 import { colors } from "../../theme";
-import { GlassCard, RoleBottomNav, ScreenGradient } from "../../components/ui/AppChrome";
+import { ScreenGradient } from "../../components/ui/AppChrome";
+import { BottomNavBar } from "../../components/ui/AdminComponents";
+import { EmployeeBottomNavBar } from "../../components/ui/EmployeeComponents";
 
 export default function MoreSettingsScreen() {
   const router = useRouter();
-  const [adminNav, setAdminNav] = useState(true);
+  const [role, setRole] = useState<string>("employee");
+  const [settings, setSettings] = useState<OrganisationSettings | null>(null);
+  const [leaveAlerts, setLeaveAlerts] = useState(true);
+  const [attendanceReminders, setAttendanceReminders] = useState(true);
+  const [hrAnnouncements, setHrAnnouncements] = useState(true);
+  const [showPassword, setShowPassword] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [savingPassword, setSavingPassword] = useState(false);
+
+  const adminNav = role === "admin" || role === "guest_admin";
 
   useEffect(() => {
     getMe()
-      .then((me) => setAdminNav(me.role === "admin" || me.role === "guest_admin"))
-      .catch(() => setAdminNav(false));
+      .then((me) => setRole(me.role))
+      .catch(() => setRole("employee"));
+    getOrgSettings()
+      .then(setSettings)
+      .catch(() => setSettings(null));
   }, []);
+
+  const onChangePassword = async () => {
+    setSavingPassword(true);
+    try {
+      await changePassword({ currentPassword, newPassword });
+      setCurrentPassword("");
+      setNewPassword("");
+      setShowPassword(false);
+      Alert.alert("Password updated", "Use the new password the next time you sign in.");
+    } catch (err) {
+      Alert.alert("Could not change password", apiErrorMessage(err));
+    } finally {
+      setSavingPassword(false);
+    }
+  };
 
   return (
     <ScreenGradient>
       <SafeAreaView style={styles.safe}>
-        <Text style={styles.header}>{adminNav ? "MORE" : "SETTINGS"}</Text>
-        <GlassCard style={styles.card}>
-          <Text style={styles.title}>Account</Text>
-          <Text style={styles.body}>Session uses the existing auth service. Attendance punch APIs are not available.</Text>
+        <View style={styles.header}>
+          <Text style={styles.kicker}>HRMS Enterprise Portal</Text>
+          <Text style={styles.title}>{adminNav ? "More" : "Settings"}</Text>
+        </View>
+        <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+          {adminNav ? (
+            <View style={styles.card}>
+              <Text style={styles.section}>Account & organisation</Text>
+              <TouchableOpacity style={styles.row} onPress={() => router.push("/admin-profile" as never)}>
+                <View style={styles.iconWrap}>
+                  <MaterialIcons name="badge" size={18} color={colors.onSurface} />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.rowTitle}>Admin / Guest Admin Profile</Text>
+                  <Text style={styles.rowSub}>Role, privileges, and /auth/me identity</Text>
+                </View>
+                <MaterialIcons name="chevron-right" size={20} color={colors.secondary} />
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.row} onPress={() => router.push("/org-settings" as never)}>
+                <View style={styles.iconWrap}>
+                  <MaterialIcons name="apartment" size={18} color={colors.onSurface} />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.rowTitle}>Organisation Settings</Text>
+                  <Text style={styles.rowSub}>Timezone, shifts, grace periods & leave policies</Text>
+                </View>
+                <MaterialIcons name="chevron-right" size={20} color={colors.secondary} />
+              </TouchableOpacity>
+            </View>
+          ) : null}
+
+          <View style={styles.card}>
+            <Text style={styles.section}>Notification Preferences</Text>
+            <PrefRow
+              title="Leave status updates"
+              subtitle="Get updates when leave requests are approved, rejected, or changed."
+              value={leaveAlerts}
+              onValueChange={setLeaveAlerts}
+            />
+            <PrefRow
+              title="Attendance & Missed Punch Reminders"
+              subtitle="Receive reminders for missed check-ins, check-outs, or attendance issues."
+              value={attendanceReminders}
+              onValueChange={setAttendanceReminders}
+            />
+            <PrefRow
+              title="HR Announcements"
+              subtitle="Receive important HR and company announcements."
+              value={hrAnnouncements}
+              onValueChange={setHrAnnouncements}
+              last
+            />
+            <Text style={styles.hint}>Preference switches are local until a notification API exists.</Text>
+          </View>
+
+          <View style={styles.card}>
+            <View style={styles.cardHead}>
+              <Text style={styles.section}>Attendance Preferences</Text>
+              <View style={styles.lockRow}>
+                <MaterialIcons name="lock" size={14} color={colors.secondary} />
+                <Text style={styles.lock}>Configured and managed by organization policy</Text>
+              </View>
+            </View>
+            <View style={styles.infoRow}>
+              <MaterialIcons name="public" size={18} color={colors.onSurface} />
+              <View style={{ flex: 1 }}>
+                <Text style={styles.rowTitle}>Organization Timezone</Text>
+                <Text style={styles.rowSub}>{settings?.timezone ?? "America/New_York (EST)"}</Text>
+              </View>
+            </View>
+            <View style={styles.infoRow}>
+              <MaterialIcons name="schedule" size={18} color={colors.onSurface} />
+              <View style={{ flex: 1 }}>
+                <Text style={styles.rowTitle}>Standard Shift</Text>
+                <Text style={styles.rowSub}>
+                  {settings?.workStart ?? "09:00"} - {settings?.workEnd ?? "18:00"} EST
+                </Text>
+              </View>
+            </View>
+            <View style={[styles.infoRow, { borderBottomWidth: 0 }]}>
+              <MaterialIcons name="date-range" size={18} color={colors.onSurface} />
+              <View style={{ flex: 1 }}>
+                <Text style={styles.rowTitle}>Work Week</Text>
+                <Text style={styles.rowSub}>
+                  {settings?.weeklyOffDow?.length
+                    ? `Weekly off ISO DOW: ${settings.weeklyOffDow.join(", ")}`
+                    : "Monday – Friday 5D"}
+                </Text>
+              </View>
+            </View>
+          </View>
+
+          <View style={styles.card}>
+            <Text style={styles.kickerSmall}>Identity & Sessions</Text>
+            <Text style={styles.section}>Security</Text>
+            <TouchableOpacity style={styles.row} onPress={() => setShowPassword((v) => !v)}>
+              <View style={styles.iconWrap}>
+                <MaterialIcons name="key" size={18} color={colors.onSurface} />
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.rowTitle}>Change Password</Text>
+                <Text style={styles.rowSub}>POST /api/v1/auth/change-password</Text>
+              </View>
+              <MaterialIcons name={showPassword ? "expand-less" : "expand-more"} size={20} color={colors.secondary} />
+            </TouchableOpacity>
+            {showPassword ? (
+              <View style={styles.passwordBox}>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Current password"
+                  placeholderTextColor={colors.secondary}
+                  secureTextEntry
+                  value={currentPassword}
+                  onChangeText={setCurrentPassword}
+                />
+                <TextInput
+                  style={styles.input}
+                  placeholder="New password"
+                  placeholderTextColor={colors.secondary}
+                  secureTextEntry
+                  value={newPassword}
+                  onChangeText={setNewPassword}
+                />
+                <TouchableOpacity style={styles.save} onPress={onChangePassword} disabled={savingPassword}>
+                  <Text style={styles.saveText}>{savingPassword ? "Updating…" : "Update password"}</Text>
+                </TouchableOpacity>
+              </View>
+            ) : null}
+            <View style={styles.infoRow}>
+              <MaterialIcons name="devices" size={18} color={colors.onSurface} />
+              <View style={{ flex: 1 }}>
+                <Text style={styles.rowTitle}>Active Sessions & Devices</Text>
+                <Text style={styles.rowSub}>This device • Current session (session list API is not implemented)</Text>
+              </View>
+            </View>
+          </View>
+
           <TouchableOpacity
             style={styles.logout}
             onPress={async () => {
@@ -32,31 +212,127 @@ export default function MoreSettingsScreen() {
           >
             <Text style={styles.logoutText}>Log out</Text>
           </TouchableOpacity>
-        </GlassCard>
-        <RoleBottomNav
-          variant={adminNav ? "admin" : "employee"}
-          activeRoute={adminNav ? "more" : "profile"}
-        />
+        </ScrollView>
+        {adminNav ? <BottomNavBar activeRoute="more" /> : <EmployeeBottomNavBar activeRoute="profile" />}
       </SafeAreaView>
     </ScreenGradient>
   );
 }
 
+function PrefRow({
+  title,
+  subtitle,
+  value,
+  onValueChange,
+  last,
+}: {
+  title: string;
+  subtitle: string;
+  value: boolean;
+  onValueChange: (next: boolean) => void;
+  last?: boolean;
+}) {
+  return (
+    <View style={[styles.pref, !last && styles.prefBorder]}>
+      <View style={{ flex: 1, paddingRight: 12 }}>
+        <Text style={styles.rowTitle}>{title}</Text>
+        <Text style={styles.rowSub}>{subtitle}</Text>
+      </View>
+      <Switch value={value} onValueChange={onValueChange} trackColor={{ false: colors.surfaceContainerHighest, true: colors.primary }} />
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
-  safe: { flex: 1, paddingHorizontal: 16 },
-  header: {
+  safe: { flex: 1 },
+  header: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 8 },
+  kicker: {
     fontFamily: "Inter",
-    fontSize: 20,
-    fontWeight: "900",
+    fontSize: 11,
+    fontWeight: "700",
+    letterSpacing: 0.5,
     textTransform: "uppercase",
-    color: colors.onSurface,
-    letterSpacing: -0.3,
-    paddingTop: 8,
-    marginBottom: 16,
+    color: colors.secondary,
   },
-  card: { gap: 8 },
-  title: { fontFamily: "Inter", fontSize: 16, fontWeight: "600", color: colors.onSurface },
-  body: { fontFamily: "Inter", fontSize: 12, color: colors.secondary, lineHeight: 18 },
-  logout: { marginTop: 8, minHeight: 44, justifyContent: "center" },
-  logoutText: { fontFamily: "Inter", fontSize: 14, fontWeight: "600", color: colors.primary },
+  kickerSmall: {
+    fontFamily: "Inter",
+    fontSize: 10,
+    fontWeight: "700",
+    letterSpacing: 0.8,
+    textTransform: "uppercase",
+    color: colors.secondary,
+  },
+  title: { fontFamily: "Inter", fontSize: 22, fontWeight: "800", color: colors.onSurface },
+  scroll: { paddingHorizontal: 16, paddingBottom: 120, gap: 12 },
+  card: {
+    backgroundColor: colors.glass,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: colors.glassBorder,
+    padding: 16,
+    gap: 4,
+  },
+  cardHead: { gap: 6, marginBottom: 8 },
+  section: { fontFamily: "Inter", fontSize: 16, fontWeight: "700", color: colors.onSurface, marginBottom: 6 },
+  row: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(0,0,0,0.08)",
+  },
+  iconWrap: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: colors.surfaceContainerHigh,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  rowTitle: { fontFamily: "Inter", fontSize: 14, fontWeight: "700", color: colors.onSurface },
+  rowSub: { fontFamily: "Inter", fontSize: 12, color: colors.secondary, marginTop: 2, lineHeight: 16 },
+  hint: { fontFamily: "Inter", fontSize: 11, color: colors.secondary, marginTop: 8 },
+  lockRow: { flexDirection: "row", alignItems: "center", gap: 4 },
+  lock: { fontFamily: "Inter", fontSize: 11, color: colors.secondary, flex: 1 },
+  infoRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(0,0,0,0.08)",
+  },
+  pref: { flexDirection: "row", alignItems: "center", paddingVertical: 10 },
+  prefBorder: { borderBottomWidth: 1, borderBottomColor: "rgba(0,0,0,0.08)" },
+  passwordBox: { gap: 8, paddingBottom: 8 },
+  input: {
+    minHeight: 44,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: colors.glassBorder,
+    backgroundColor: colors.surfaceContainerLowest,
+    paddingHorizontal: 12,
+    fontFamily: "Inter",
+    fontSize: 14,
+    color: colors.onSurface,
+  },
+  save: {
+    minHeight: 44,
+    borderRadius: 12,
+    backgroundColor: colors.primary,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  saveText: { fontFamily: "Inter", fontSize: 14, fontWeight: "700", color: colors.onPrimary },
+  logout: {
+    minHeight: 48,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: colors.glassBorder,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: colors.glass,
+  },
+  logoutText: { fontFamily: "Inter", fontSize: 14, fontWeight: "700", color: colors.primary },
 });
