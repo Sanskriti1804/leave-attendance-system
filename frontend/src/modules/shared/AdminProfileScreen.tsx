@@ -13,7 +13,7 @@ import {
 } from "../../../services/resources";
 import { colors } from "../../theme";
 import { ScreenGradient } from "../../components/ui/AppChrome";
-import { BottomNavBar } from "../../components/ui/AdminComponents";
+import { BottomNavBar, TopNavBar, useTopNavContentInset } from "../../components/ui/AdminComponents";
 import { UIFallbackIndicator } from "../../components/ui/UIFallback";
 
 function formatJoining(value: string | null | undefined): string {
@@ -29,6 +29,7 @@ function formatJoining(value: string | null | undefined): string {
 
 export default function AdminProfileScreen() {
   const router = useRouter();
+  const topInset = useTopNavContentInset();
   const [me, setMe] = useState<EmployeePublic | null>(null);
   const [departmentName, setDepartmentName] = useState("—");
   const [managerName, setManagerName] = useState("—");
@@ -88,25 +89,8 @@ export default function AdminProfileScreen() {
   return (
     <ScreenGradient>
       <SafeAreaView style={styles.safe}>
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.back}>
-            <MaterialIcons name="arrow-back" size={20} color={colors.onSurface} />
-          </TouchableOpacity>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.kicker}>Admin / Guest Admin Profile</Text>
-            <Text style={styles.title}>Profile</Text>
-          </View>
-          <View style={styles.rolePills}>
-            <View style={[styles.pill, !isGuest && styles.pillOn]}>
-              <Text style={[styles.pillText, !isGuest && styles.pillTextOn]}>Admin</Text>
-            </View>
-            <View style={[styles.pill, isGuest && styles.pillOn]}>
-              <Text style={[styles.pillText, isGuest && styles.pillTextOn]}>Guest</Text>
-            </View>
-          </View>
-        </View>
-
-        <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+        <TopNavBar title="Profile" showBack />
+        <ScrollView contentContainerStyle={[styles.scroll, { paddingTop: topInset }]} showsVerticalScrollIndicator={false}>
           {isGuest ? (
             <View style={styles.banner}>
               <MaterialIcons name="lock" size={18} color={colors.onSurface} />

@@ -2,6 +2,8 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, ActivityIndicator } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { ScreenGradient } from "../../components/ui/AppChrome";
+import { TopNavBar, useTopNavContentInset } from "../../components/ui/AdminComponents";
+import { EmployeeBottomNavBar } from "../../components/ui/EmployeeComponents";
 import { useRouter } from "expo-router";
 import { getSession } from "../../../services/auth";
 import {
@@ -17,11 +19,10 @@ import {
   type LeaveType,
 } from "../../../services/resources";
 import { UIFallbackIndicator } from "../../components/ui/UIFallback";
-import { EmployeeBottomNavBar } from "../../components/ui/EmployeeComponents";
 
 const colors = {
   surface: "#fcf9f8",
-  primary: "#000000",
+  primary: "#242424",
   onPrimary: "#ffffff",
   surfaceContainerLowest: "#ffffff",
   surfaceContainerLow: "#f6f3f2",
@@ -111,6 +112,7 @@ const FALLBACK_LEAVES: LeaveApplication[] = [
 
 export default function MyLeaveListScreen() {
   const router = useRouter();
+  const topInset = useTopNavContentInset();
   const applyHref = (process.env.EXPO_PUBLIC_APPLY_LEAVE as string | undefined) || "/leave/apply";
   const [activeFilter, setActiveFilter] = useState("all");
   const [me, setMe] = useState<EmployeePublic | null>(null);
@@ -192,14 +194,9 @@ export default function MyLeaveListScreen() {
   return (
     <ScreenGradient>
       <SafeAreaView style={styles.safeArea}>
-        <View style={styles.header}>
-          <Text style={styles.headerTitle}>LEAVE LIST</Text>
-          <View style={styles.profileAvatar}>
-            <MaterialIcons name="person" size={18} color={colors.onPrimary} />
-          </View>
-        </View>
+        <TopNavBar title="Leave List" />
 
-        <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+        <ScrollView style={styles.container} contentContainerStyle={[styles.content, { paddingTop: topInset }]}>
           <View style={styles.topRow}>
             <View>
               <Text style={styles.topLabel}>LEAVE RECORDS</Text>

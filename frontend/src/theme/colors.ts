@@ -1,5 +1,5 @@
 export const colors = {
-  primary: "#000000",
+  primary: "#242424",
   onPrimary: "#ffffff",
   secondary: "#585f6c",
   background: "#fcf9f8",
@@ -16,13 +16,13 @@ export const colors = {
   border: "rgba(0, 0, 0, 0.15)",
   error: "#ba1a1a",
   white: "#ffffff",
-  black: "#000000",
+  black: "#242424",
   transparent: "transparent",
   glass: "rgb(222, 223, 227)",
   glassBorder: "rgba(0, 0, 0, 0.15)",
-  navBg: "#111111",
+  navBg: "#1c1c1c",
   navInactive: "#9ca3af",
-  navActiveIconBg: "#2A2A2E",
+  navActiveIconBg: "#3a3a3e",
   navBorder: "rgba(255, 255, 255, 0.08)",
 };
 

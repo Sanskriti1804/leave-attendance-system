@@ -5,8 +5,10 @@ import { getSession } from "../../../services/auth";
 import { displayName, getMe, listEmployees, type EmployeePublic } from "../../../services/resources";
 import { colors } from "../../theme";
 import { GlassCard, RoleBottomNav, ScreenGradient } from "../../components/ui/AppChrome";
+import { TopNavBar, useTopNavContentInset } from "../../components/ui/AdminComponents";
 
 export default function PeopleDirectoryScreen() {
+  const topInset = useTopNavContentInset();
   const [items, setItems] = useState<EmployeePublic[]>([]);
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
@@ -48,8 +50,8 @@ export default function PeopleDirectoryScreen() {
   return (
     <ScreenGradient>
       <SafeAreaView style={styles.safe}>
-        <Text style={styles.header}>PEOPLE</Text>
-        <ScrollView contentContainerStyle={styles.content}>
+        <TopNavBar title="People" />
+        <ScrollView contentContainerStyle={[styles.content, { paddingTop: topInset }]}>
           <GlassCard style={styles.search}>
             <MaterialIcons name="search" size={20} color={colors.secondary} />
             <TextInput

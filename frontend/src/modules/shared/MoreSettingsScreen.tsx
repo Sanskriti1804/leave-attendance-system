@@ -22,11 +22,12 @@ import {
 } from "../../../services/resources";
 import { colors } from "../../theme";
 import { ScreenGradient } from "../../components/ui/AppChrome";
-import { BottomNavBar } from "../../components/ui/AdminComponents";
+import { BottomNavBar, TopNavBar, useTopNavContentInset } from "../../components/ui/AdminComponents";
 import { EmployeeBottomNavBar } from "../../components/ui/EmployeeComponents";
 
 export default function MoreSettingsScreen() {
   const router = useRouter();
+  const topInset = useTopNavContentInset();
   const [role, setRole] = useState<string>("employee");
   const [settings, setSettings] = useState<OrganisationSettings | null>(null);
   const [leaveAlerts, setLeaveAlerts] = useState(true);
@@ -66,11 +67,8 @@ export default function MoreSettingsScreen() {
   return (
     <ScreenGradient>
       <SafeAreaView style={styles.safe}>
-        <View style={styles.header}>
-          <Text style={styles.kicker}>HRMS Enterprise Portal</Text>
-          <Text style={styles.title}>{adminNav ? "More" : "Settings"}</Text>
-        </View>
-        <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+        <TopNavBar title={adminNav ? "More" : "Settings"} />
+        <ScrollView contentContainerStyle={[styles.scroll, { paddingTop: topInset }]} showsVerticalScrollIndicator={false}>
           {adminNav ? (
             <View style={styles.card}>
               <Text style={styles.section}>Account & organisation</Text>

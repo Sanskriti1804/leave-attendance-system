@@ -9,7 +9,7 @@ import { getPostLoginRoute } from "./SplashScreen";
 
 // Stitch Design Colors & Token Map
 const colors = {
-  primary: "#000000",
+  primary: "#242424",
   onPrimary: "#ffffff",
   secondary: "#374151", // text-secondary
   error: "#ba1a1a",
@@ -17,9 +17,9 @@ const colors = {
   cardBorder: "rgba(0, 0, 0, 0.15)",
   inputBg: "#f6f3f2",
   inputBorder: "#374151",
-  textMain: "rgb(0, 0, 0)",
+  textMain: "rgb(36, 36, 36)",
   textVariant: "rgb(28, 27, 27)",
-  indicatorPulse: "#000000",
+  indicatorPulse: "#242424",
 };
 
 export default function LoginScreen() {

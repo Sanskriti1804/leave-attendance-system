@@ -13,10 +13,12 @@ import {
 import { UIFallbackIndicator } from "../../components/ui/UIFallback";
 import { EmployeeBottomNavBar } from "../../components/ui/EmployeeComponents";
 import { ScreenGradient } from "../../components/ui/AppChrome";
+import { TopNavBar, useTopNavContentInset } from "../../components/ui/AdminComponents";
 import { colors } from "../../theme";
 
 export default function EmployeeHomeScreen() {
   const router = useRouter();
+  const topInset = useTopNavContentInset();
   const applyHref = (process.env.EXPO_PUBLIC_APPLY_LEAVE as string | undefined) || "/leave/apply";
   const [me, setMe] = useState<EmployeePublic | null>(null);
   const [settings, setSettings] = useState<OrganisationSettings | null>(null);
@@ -92,9 +94,9 @@ export default function EmployeeHomeScreen() {
   return (
     <ScreenGradient>
       <SafeAreaView style={styles.safeArea}>
-      <View style={styles.header}>
-        <View style={styles.headerLeft}>
-          <Text style={styles.headerTitle}>Home</Text>
+      <TopNavBar
+        title="Home"
+        right={
           <View style={styles.badgeContainer}>
             <View style={styles.badgeActive}>
               <Text style={styles.badgeTextActive}>{role === "employee" ? "EMP" : role === "admin" ? "ADM" : "GST"}</Text>
@@ -110,13 +112,10 @@ export default function EmployeeHomeScreen() {
               <Text style={styles.badgeTextInactive}>ADM</Text>
             </TouchableOpacity>
           </View>
-        </View>
-        <TouchableOpacity style={styles.profileIcon} onPress={() => router.push("/(tabs)/profile" as never)}>
-          <MaterialIcons name="person" size={18} color={colors.onPrimary} />
-        </TouchableOpacity>
-      </View>
+        }
+      />
 
-      <ScrollView style={styles.scrollContainer} contentContainerStyle={styles.contentContainer}>
+      <ScrollView style={styles.scrollContainer} contentContainerStyle={[styles.contentContainer, { paddingTop: topInset }]}>
         {/* Timezone & Operational Header Strip */}
         <View style={styles.timezoneCard}>
           <View style={styles.timezoneLeft}>

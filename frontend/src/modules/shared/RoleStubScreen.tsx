@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, SafeAreaView } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { colors } from "../../theme";
 import { GlassCard, RoleBottomNav, ScreenGradient, type AdminNavId, type EmployeeNavId } from "../../components/ui/AppChrome";
+import { TopNavBar, useTopNavContentInset } from "../../components/ui/AdminComponents";
 
 export function RoleStubScreen({
   title,
@@ -17,11 +18,12 @@ export function RoleStubScreen({
   activeRoute: AdminNavId | EmployeeNavId;
   icon?: keyof typeof MaterialIcons.glyphMap;
 }) {
+  const topInset = useTopNavContentInset();
   return (
     <ScreenGradient>
       <SafeAreaView style={styles.safe}>
-        <Text style={styles.header}>{title}</Text>
-        <View style={styles.body}>
+        <TopNavBar title={title} />
+        <View style={[styles.body, { paddingTop: topInset }]}>
           <GlassCard style={styles.card}>
             <MaterialIcons name={icon} size={22} color={colors.secondary} />
             <Text style={styles.title}>{title}</Text>

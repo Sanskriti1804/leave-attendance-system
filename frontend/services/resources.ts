@@ -104,6 +104,17 @@ export function changePassword(body: { currentPassword: string; newPassword: str
   return authorizedRequest<{ message: string }>(authPath("/change-password"), { method: "POST", body });
 }
 
+export function uploadLeaveDocument(leaveId: number, file: { uri: string; name: string; type: string }): Promise<unknown> {
+  const body = new FormData();
+  body.append("leaveId", String(leaveId));
+  body.append("file", {
+    uri: file.uri,
+    name: file.name,
+    type: file.type,
+  } as unknown as Blob);
+  return authorizedRequest("/api/v1/documents", { method: "POST", body });
+}
+
 export function listLeaveTypes(): Promise<ItemList<LeaveType>> {
   return authorizedRequest<ItemList<LeaveType>>("/api/v1/leave-types");
 }

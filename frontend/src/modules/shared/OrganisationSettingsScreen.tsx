@@ -10,7 +10,6 @@ import {
   Alert,
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
 import {
   apiErrorMessage,
   getMe,
@@ -20,7 +19,7 @@ import {
 } from "../../../services/resources";
 import { colors } from "../../theme";
 import { ScreenGradient } from "../../components/ui/AppChrome";
-import { BottomNavBar } from "../../components/ui/AdminComponents";
+import { BottomNavBar, TopNavBar, useTopNavContentInset } from "../../components/ui/AdminComponents";
 import { UIFallbackIndicator } from "../../components/ui/UIFallback";
 
 const DOW: { id: number; label: string }[] = [
@@ -48,7 +47,7 @@ function formatOffs(weeklyOffDow: number[]): string {
 }
 
 export default function OrganisationSettingsScreen() {
-  const router = useRouter();
+  const topInset = useTopNavContentInset();
   const [role, setRole] = useState<string>("admin");
   const [settings, setSettings] = useState<OrganisationSettings | null>(null);
   const [workStart, setWorkStart] = useState("09:00");
@@ -145,17 +144,8 @@ export default function OrganisationSettingsScreen() {
   return (
     <ScreenGradient>
       <SafeAreaView style={styles.safe}>
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.back}>
-            <MaterialIcons name="arrow-back" size={20} color={colors.onSurface} />
-          </TouchableOpacity>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.kicker}>Organisation Settings - Admin & Guest Admin</Text>
-            <Text style={styles.title}>Organisation Settings</Text>
-            <Text style={styles.api}>GET /api/v1/org-settings</Text>
-          </View>
-        </View>
-        <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+        <TopNavBar title="Organisation Settings" showBack />
+        <ScrollView contentContainerStyle={[styles.scroll, { paddingTop: topInset }]} showsVerticalScrollIndicator={false}>
           <View style={styles.card}>
             <Text style={styles.cardTitle}>Standard Timezone</Text>
             <Text style={styles.cardSub}>Enterprise operational baseline (HR-DASH-09, TZ-04)</Text>

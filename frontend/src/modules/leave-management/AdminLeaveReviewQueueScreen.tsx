@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, ActivityIndicator, Alert, TextInput, Modal } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { ScreenGradient } from "../../components/ui/AppChrome";
+import { TopNavBar, useTopNavContentInset, BottomNavBar } from "../../components/ui/AdminComponents";
 import { getSession } from "../../../services/auth";
 import {
   apiErrorMessage,
@@ -17,11 +18,10 @@ import {
   type LeaveType,
 } from "../../../services/resources";
 import { UIFallbackIndicator } from "../../components/ui/UIFallback";
-import { BottomNavBar } from "../../components/ui/AdminComponents";
 
 const colors = {
   surface: "#fcf9f8",
-  primary: "#000000",
+  primary: "#242424",
   onPrimary: "#ffffff",
   surfaceContainerLowest: "#ffffff",
   surfaceContainerLow: "#f6f3f2",
@@ -70,6 +70,7 @@ function matchesQueue(leave: LeaveApplication, type: LeaveType | undefined, filt
 }
 
 export default function AdminLeaveReviewQueueScreen() {
+  const topInset = useTopNavContentInset();
   const [me, setMe] = useState<EmployeePublic | null>(null);
   const [previewGuest, setPreviewGuest] = useState(false);
   const [filter, setFilter] = useState<QueueFilter>("pending");
@@ -180,14 +181,9 @@ export default function AdminLeaveReviewQueueScreen() {
   return (
     <ScreenGradient>
       <SafeAreaView style={styles.safeArea}>
-        <View style={styles.header}>
-          <Text style={styles.headerTitle}>LEAVE REVIEW QUEUE</Text>
-          <View style={styles.profileAvatar}>
-            <MaterialIcons name="person" size={20} color={colors.onPrimary} />
-          </View>
-        </View>
+        <TopNavBar title="Leave Review Queue" />
 
-        <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+        <ScrollView style={styles.container} contentContainerStyle={[styles.content, { paddingTop: topInset }]}>
           <View style={styles.roleToggle}>
             <View style={styles.roleInfo}>
               <View style={[styles.roleDot, { backgroundColor: isGuest ? colors.error : colors.primary }]} />

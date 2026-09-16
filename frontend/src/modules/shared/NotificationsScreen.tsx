@@ -4,21 +4,15 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { colors } from "../../theme";
 import { ScreenGradient } from "../../components/ui/AppChrome";
 import { EmployeeBottomNavBar } from "../../components/ui/EmployeeComponents";
-import { UIFallbackIndicator } from "../../components/ui/UIFallback";
+import { TopNavBar, useTopNavContentInset } from "../../components/ui/AdminComponents";
 
 export default function NotificationsScreen() {
+  const topInset = useTopNavContentInset();
   return (
     <ScreenGradient>
       <SafeAreaView style={styles.safe}>
-        <View style={styles.header}>
-          <View>
-            <Text style={styles.kicker}>Notifications & Alerts</Text>
-            <Text style={styles.title}>Notifications</Text>
-            <Text style={styles.subtitle}>Real-time operational & workflow dispatch</Text>
-          </View>
-          <UIFallbackIndicator />
-        </View>
-        <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+        <TopNavBar title="Notifications" />
+        <ScrollView contentContainerStyle={[styles.scroll, { paddingTop: topInset }]} showsVerticalScrollIndicator={false}>
           <Text style={styles.section}>My Updates</Text>
           <View style={styles.card}>
             <View style={styles.rowTop}>

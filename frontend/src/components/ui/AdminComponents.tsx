@@ -2,8 +2,18 @@ import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet, ViewProps } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
+import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { colors } from "../../theme";
 import { RoleBottomNav } from "./AppChrome";
+
+export const TOP_NAV_EXTRA_PAD = 10;
+export const TOP_NAV_INNER_HEIGHT = 72;
+
+export function useTopNavContentInset(): number {
+  const insets = useSafeAreaInsets();
+  return insets.top + TOP_NAV_EXTRA_PAD + TOP_NAV_INNER_HEIGHT;
+}
 
 export function ProfileIcon() {
   return (
@@ -13,18 +23,32 @@ export function ProfileIcon() {
   );
 }
 
-export function TopNavBar() {
+export function TopNavBar({
+  title = "ADMIN Dashboard",
+  showBack = false,
+  right,
+}: {
+  title?: string;
+  showBack?: boolean;
+  right?: React.ReactNode;
+}) {
   const insets = useSafeAreaInsets();
+  const router = useRouter();
   return (
-    <View style={[styles.navContainer, { paddingTop: insets.top }]}>
+    <View style={[styles.navContainer, { paddingTop: insets.top + TOP_NAV_EXTRA_PAD }]}>
       <View style={styles.navContent}>
         <View style={styles.navRow}>
           <View style={styles.navTitleContainer}>
-            <Text style={styles.navTitle}>ADMIN Dashboard</Text>
+            {showBack ? (
+              <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
+                <MaterialIcons name="arrow-back" size={20} color={colors.onSurface} />
+              </TouchableOpacity>
+            ) : null}
+            <Text style={styles.navTitle} numberOfLines={1}>
+              {title}
+            </Text>
           </View>
-          <View style={styles.navProfileContainer}>
-            <ProfileIcon />
-          </View>
+          <View style={styles.navProfileContainer}>{right ?? <ProfileIcon />}</View>
         </View>
       </View>
     </View>
@@ -104,7 +128,7 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#000000',
+    backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden'
@@ -116,8 +140,15 @@ const styles = StyleSheet.create({
     zIndex: 50,
     backgroundColor: 'transparent'
   },
+  backBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   navContent: {
-    height: 80,
+    height: TOP_NAV_INNER_HEIGHT,
     paddingHorizontal: 16,
     justifyContent: 'center'
   },
@@ -129,7 +160,9 @@ const styles = StyleSheet.create({
   navTitleContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8
+    gap: 8,
+    flex: 1,
+    paddingRight: 8,
   },
   navTitle: {
     fontFamily: 'Inter',
@@ -137,7 +170,9 @@ const styles = StyleSheet.create({
     fontWeight: '900',
     textTransform: 'uppercase',
     color: '#1c1b1b',
-    letterSpacing: -0.3
+    letterSpacing: -0.3,
+    flex: 1,
+    flexShrink: 1,
   },
   navProfileContainer: {
     flexDirection: 'row',

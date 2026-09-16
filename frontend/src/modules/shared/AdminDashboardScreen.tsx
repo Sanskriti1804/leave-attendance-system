@@ -12,11 +12,12 @@ import {
   type LeaveApplication,
 } from "../../../services/resources";
 import { ScreenGradient } from "../../components/ui/AppChrome";
-import { TopNavBar, HROperationsCard, ContentCard, StatsCard, BottomNavBar } from "../../components/ui/AdminComponents";
+import { TopNavBar, HROperationsCard, ContentCard, StatsCard, BottomNavBar, useTopNavContentInset } from "../../components/ui/AdminComponents";
 import { UIFallbackIndicator } from "../../components/ui/UIFallback";
 
 export default function AdminDashboardScreen() {
   const router = useRouter();
+  const topInset = useTopNavContentInset();
   const reviewHref = (process.env.EXPO_PUBLIC_ADMIN_LEAVE_REVIEW as string | undefined) || "/leave/admin-review";
   const [me, setMe] = useState<EmployeePublic | null>(null);
   const [employees, setEmployees] = useState<EmployeePublic[]>([]);
@@ -78,9 +79,9 @@ export default function AdminDashboardScreen() {
   return (
     <ScreenGradient>
       <SafeAreaView style={{ flex: 1 }}>
-        <TopNavBar />
+        <TopNavBar title="Admin Dashboard" />
         
-        <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingTop: 80, paddingHorizontal: 16, paddingBottom: 100, gap: 16 }}>
+        <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingTop: topInset, paddingHorizontal: 16, paddingBottom: 100, gap: 16 }}>
           <HROperationsCard 
             name={me ? displayName(me).toUpperCase() : "PREETI KAUR"}
             role={me?.role ?? "Human Resource"}
