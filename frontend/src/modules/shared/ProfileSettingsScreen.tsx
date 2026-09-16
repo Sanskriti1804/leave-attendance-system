@@ -14,6 +14,8 @@ import {
   type OrganisationSettings,
 } from "../../../services/resources";
 import { UIFallbackIndicator } from "../../components/ui/UIFallback";
+import { EmployeeBottomNavBar } from "../../components/ui/EmployeeComponents";
+import { ScreenGradient } from "../../components/ui/AppChrome";
 
 const colors = {
   surface: "#fcf9f8",
@@ -102,6 +104,7 @@ export default function ProfileSettingsScreen() {
   const isFallback = !me || !!error;
 
   return (
+    <ScreenGradient>
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.header}>
         <View style={styles.headerLeft}>
@@ -226,14 +229,16 @@ export default function ProfileSettingsScreen() {
           <MaterialIcons name="chevron-right" size={20} color={colors.secondary} />
         </TouchableOpacity>
       </ScrollView>
+      <EmployeeBottomNavBar activeRoute="profile" />
     </SafeAreaView>
+    </ScreenGradient>
   );
 }
 
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: colors.surface,
+    backgroundColor: 'transparent',
   },
   header: {
     height: 56,
@@ -268,7 +273,7 @@ const styles = StyleSheet.create({
   contentContainer: {
     padding: 16,
     gap: 16,
-    paddingBottom: 80,
+    paddingBottom: 110,
   },
   card: {
     backgroundColor: colors.surfaceContainerLowest,

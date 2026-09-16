@@ -18,10 +18,12 @@
       "adaptiveIcon": {
         "backgroundColor": "#FFFFFF"
       },
-      "package": "com.maxstarter.leaveattendance"
+      "package": "com.maxstarter.leaveattendance",
+      "usesCleartextTraffic": true
     },
     "plugins": [
-      "expo-router"
+      "expo-router",
+      "expo-dev-client"
     ],
     "experiments": {
       "typedRoutes": true

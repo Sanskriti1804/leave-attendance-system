@@ -1,6 +1,6 @@
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { colors } from "../src/maxstarter/theme";
+import { colors } from "../src/theme";
 
 export default function RootLayout() {
   return (

@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, SafeAreaView, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, SafeAreaView, ActivityIndicator, Alert, Modal } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+import { ScreenGradient } from '../../components/ui/AppChrome';
 import { useRouter } from 'expo-router';
 import { getSession } from '../../../services/auth';
 import {
@@ -32,6 +33,8 @@ const colors = {
   onSurface: "#1c1b1b",
   onSurfaceVariant: "#4c4546",
   secondaryFixedDim: "#c0c7d6",
+  glass: "rgb(222, 223, 227)",
+  glassBorder: "rgba(0, 0, 0, 0.15)",
 };
 
 function pad2(value: number): string {
@@ -89,7 +92,7 @@ const FALLBACK_LEAVE_TYPES: LeaveType[] = [
   { leaveTypeId: 4, name: "Planned", description: "Planned leave", requiresMedicalDocument: false, allowedSex: null, obsolete: false },
 ];
 
-type DaySession = "FULL_DAY" | "FIRST_HALF";
+type DaySession = "FULL_DAY" | "FIRST_HALF" | "SECOND_HALF";
 type DurationMode = "FULL" | "HALF";
 
 function enumerateRange(from: string, to: string): string[] {
@@ -120,7 +123,8 @@ export default function ApplyLeaveScreen() {
   const [dateOverrides, setDateOverrides] = useState<Record<string, true>>({});
   const [durationMode, setDurationMode] = useState<DurationMode>("FULL");
   const [waitingForTo, setWaitingForTo] = useState(false);
-  const [sessionMenuOpen, setSessionMenuOpen] = useState(false);
+  const [durationInfoOpen, setDurationInfoOpen] = useState(false);
+  const [attested, setAttested] = useState(true);
   const [toast, setToast] = useState<string | null>(null);
   const [viewMonth, setViewMonth] = useState(() => {
     const now = new Date();
@@ -218,13 +222,12 @@ export default function ApplyLeaveScreen() {
   const toDate = waitingForTo ? undefined : sortedDates[sortedDates.length - 1];
   const selectedType = types.find((row) => row.leaveTypeId === leaveTypeId);
   const leaveDayCount = sortedDates.reduce(
-    (sum, date) => sum + (dateSessions[date] === "FIRST_HALF" ? 0.5 : 1),
+    (sum, date) => sum + (dateSessions[date] === "FIRST_HALF" || dateSessions[date] === "SECOND_HALF" ? 0.5 : 1),
     0,
   );
 
   function applyDurationMode(mode: DurationMode) {
     setDurationMode(mode);
-    setSessionMenuOpen(false);
     const session = sessionForMode(mode);
     setDateSessions((current) => {
       const next = { ...current };
@@ -245,7 +248,8 @@ export default function ApplyLeaveScreen() {
   function openDateSessionMenu(civil: string) {
     Alert.alert(formatLong(civil), "Session type for this date", [
       { text: "Full Day", onPress: () => setDateSession(civil, "FULL_DAY") },
-      { text: "Half Day", onPress: () => setDateSession(civil, "FIRST_HALF") },
+      { text: "First Half", onPress: () => setDateSession(civil, "FIRST_HALF") },
+      { text: "Second Half", onPress: () => setDateSession(civil, "SECOND_HALF") },
       { text: "Cancel", style: "cancel" },
     ]);
   }
@@ -283,6 +287,10 @@ export default function ApplyLeaveScreen() {
       setError("Select at least one date.");
       return;
     }
+    if (!attested) {
+      setError("Manager notification attestation is required.");
+      return;
+    }
     setSubmitting(true);
     setError(null);
     setMessage(null);
@@ -307,18 +315,16 @@ export default function ApplyLeaveScreen() {
   });
 
   return (
+    <ScreenGradient>
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.header}>
         <View style={styles.headerLeft}>
           <TouchableOpacity style={styles.iconButton} onPress={() => router.back()}>
             <MaterialIcons name="arrow-back" size={20} color={colors.onSurface} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Apply Leave Request</Text>
+          <Text style={styles.headerTitle}>APPLY LEAVE REQUEST</Text>
         </View>
         <View style={styles.headerRight}>
-          <TouchableOpacity style={styles.iconButton}>
-            <MaterialIcons name="more-vert" size={20} color={colors.secondary} />
-          </TouchableOpacity>
           <View style={styles.profileAvatar}>
             <MaterialIcons name="person" size={18} color={colors.onPrimary} />
           </View>
@@ -437,7 +443,12 @@ export default function ApplyLeaveScreen() {
 
           <View style={styles.calendarBox}>
             <View style={styles.calendarNav}>
-              <Text style={styles.calendarMonthText}>{monthLabel}</Text>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                <Text style={styles.calendarMonthText}>{monthLabel}</Text>
+                <TouchableOpacity style={styles.infoDot} onPress={() => setDurationInfoOpen(true)}>
+                  <Text style={styles.infoDotText}>i</Text>
+                </TouchableOpacity>
+              </View>
               <View style={styles.calendarNavBtns}>
                 <TouchableOpacity
                   onPress={() =>
@@ -472,7 +483,7 @@ export default function ApplyLeaveScreen() {
                   return <Text key={cell.civil} style={styles.calTextOff}>{cell.day}</Text>;
                 }
                 if (cell.selected) {
-                  const isHalf = dateSessions[cell.civil] === "FIRST_HALF";
+                  const isHalf = dateSessions[cell.civil] === "FIRST_HALF" || dateSessions[cell.civil] === "SECOND_HALF";
                   return (
                     <TouchableOpacity
                       key={cell.civil}
@@ -500,24 +511,18 @@ export default function ApplyLeaveScreen() {
               })}
             </View>
             <View style={styles.calendarLegend}>
-              <TouchableOpacity style={styles.legendItem} onPress={() => setSessionMenuOpen((open) => !open)}>
-                <View style={[styles.legendDot, {backgroundColor: durationMode === "HALF" ? colors.secondaryFixedDim : colors.primary, borderColor: colors.secondary, borderWidth: durationMode === "HALF" ? 1 : 0}]} />
-                <Text style={styles.legendText}>{durationMode === "HALF" ? "Half Day" : "Full Day"}</Text>
-                <MaterialIcons name="expand-more" size={18} color={colors.secondary} />
+              <TouchableOpacity style={styles.legendItem} onPress={() => applyDurationMode("FULL")}>
+                <View style={[styles.legendDot, {backgroundColor: colors.primary}]} />
+                <Text style={styles.legendText}>Full Day Leave</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.legendItem} onPress={() => applyDurationMode("HALF")}>
+                <View style={[styles.legendDot, {backgroundColor: colors.secondaryFixedDim, borderColor: colors.secondary, borderWidth: 1}]} />
+                <Text style={styles.legendText}>Half Day Leave</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.infoDot} onPress={() => setDurationInfoOpen(true)}>
+                <Text style={styles.infoDotText}>i</Text>
               </TouchableOpacity>
             </View>
-            {sessionMenuOpen ? (
-              <View style={styles.calendarLegend}>
-                <TouchableOpacity style={styles.legendItem} onPress={() => applyDurationMode("FULL")}>
-                  <View style={[styles.legendDot, {backgroundColor: colors.primary}]} />
-                  <Text style={styles.legendText}>Full Day</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.legendItem} onPress={() => applyDurationMode("HALF")}>
-                  <View style={[styles.legendDot, {backgroundColor: colors.secondaryFixedDim, borderColor: colors.secondary, borderWidth: 1}]} />
-                  <Text style={styles.legendText}>Half Day</Text>
-                </TouchableOpacity>
-              </View>
-            ) : null}
           </View>
 
           <View style={styles.dateRangeBox}>
@@ -601,9 +606,9 @@ export default function ApplyLeaveScreen() {
             </View>
           </View>
           <View style={styles.checkboxRow}>
-            <View style={styles.checkbox}>
-              <MaterialIcons name="check" size={16} color={colors.onPrimary} />
-            </View>
+            <TouchableOpacity style={[styles.checkbox, !attested && { backgroundColor: colors.surfaceContainerHigh }]} onPress={() => setAttested((value) => !value)}>
+              {attested ? <MaterialIcons name="check" size={16} color={colors.onPrimary} /> : null}
+            </TouchableOpacity>
             <Text style={styles.checkboxText}>
               I certify that I have notified my reporting manager (<Text style={styles.checkboxTextBold}>{error ? "Marcus Vance" : managerName}</Text>) regarding this absence.
             </Text>
@@ -630,12 +635,31 @@ export default function ApplyLeaveScreen() {
           <Text style={styles.toastText}>{toast}</Text>
         </View>
       ) : null}
+      <Modal visible={durationInfoOpen} transparent animationType="fade" onRequestClose={() => setDurationInfoOpen(false)}>
+        <View style={styles.modalBackdrop}>
+          <View style={styles.modalCard}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.calendarTitle}>Leave Duration Mode</Text>
+              <TouchableOpacity onPress={() => setDurationInfoOpen(false)}>
+                <MaterialIcons name="close" size={18} color={colors.secondary} />
+              </TouchableOpacity>
+            </View>
+            <Text style={styles.policyText}>Full Day (1.0): entire working day.</Text>
+            <Text style={styles.policyText}>First Half (0.5): morning shift.</Text>
+            <Text style={styles.policyText}>Second Half (0.5): afternoon shift. Long-press a selected date to override.</Text>
+            <TouchableOpacity style={styles.submitBtn} onPress={() => setDurationInfoOpen(false)}>
+              <Text style={styles.submitBtnText}>Got it</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
+    </ScreenGradient>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: colors.surface },
+  safeArea: { flex: 1, backgroundColor: "transparent" },
   header: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
     paddingHorizontal: 16, height: 56, backgroundColor: 'rgba(252, 249, 248, 0.9)',
@@ -644,14 +668,14 @@ const styles = StyleSheet.create({
   headerLeft: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   headerRight: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   iconButton: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center', marginLeft: -8 },
-  headerTitle: { fontSize: 18, fontWeight: '600', color: colors.onSurface },
+  headerTitle: { fontSize: 18, fontWeight: '700', color: colors.primary, letterSpacing: -0.2 },
   profileAvatar: { width: 32, height: 32, borderRadius: 16, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center' },
   container: { flex: 1 },
   content: { padding: 16, paddingBottom: 64, gap: 12 },
-  policyBanner: { flexDirection: 'row', alignItems: 'flex-start', padding: 12, backgroundColor: colors.surfaceContainerLow, borderRadius: 12, gap: 8, marginTop: 12 },
+  policyBanner: { flexDirection: 'row', alignItems: 'flex-start', padding: 12, backgroundColor: colors.glass, borderRadius: 16, gap: 8, marginTop: 12, borderWidth: 1, borderColor: colors.glassBorder },
   policyIcon: { marginTop: 2 },
   policyText: { fontSize: 12, color: colors.onSurfaceVariant, flex: 1, lineHeight: 16 },
-  empCard: { padding: 16, backgroundColor: colors.surfaceContainerLowest, borderRadius: 12 },
+  empCard: { padding: 16, backgroundColor: colors.glass, borderRadius: 16, borderWidth: 1, borderColor: colors.glassBorder },
   empCardRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   empInfoLeft: { flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1 },
   empInitialsBox: { width: 40, height: 40, borderRadius: 20, backgroundColor: colors.surfaceContainerHigh, alignItems: 'center', justifyContent: 'center' },
@@ -673,7 +697,7 @@ const styles = StyleSheet.create({
   leaveTypeText: { fontSize: 14, fontWeight: '500', color: colors.onSurface, marginTop: 8 },
   radioDot: { width: 12, height: 12, borderRadius: 6, backgroundColor: colors.surfaceContainerHigh },
   radioSelected: { width: 12, height: 12, borderRadius: 6, backgroundColor: colors.primary },
-  calendarCard: { backgroundColor: colors.surfaceContainerLowest, padding: 16, borderRadius: 12, gap: 16 },
+  calendarCard: { backgroundColor: colors.glass, padding: 16, borderRadius: 16, gap: 16, borderWidth: 1, borderColor: colors.glassBorder },
   calendarHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', borderBottomWidth: 1, borderBottomColor: colors.surfaceContainer, paddingBottom: 8 },
   calendarTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   calendarTitle: { fontSize: 14, fontWeight: '500', color: colors.onSurface },
@@ -714,11 +738,11 @@ const styles = StyleSheet.create({
   durationSubtitle: { fontSize: 12, color: colors.onSurfaceVariant, marginTop: 2 },
   durationBadge: { width: 40, height: 40, borderRadius: 20, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center' },
   durationBadgeText: { fontSize: 16, fontWeight: '600', color: colors.onPrimary },
-  reasonCard: { backgroundColor: colors.surfaceContainerLowest, borderRadius: 12, padding: 16, gap: 8 },
+  reasonCard: { backgroundColor: colors.glass, borderRadius: 16, padding: 16, gap: 8, borderWidth: 1, borderColor: colors.glassBorder },
   reasonTitle: { fontSize: 12, fontWeight: '500', color: colors.onSurface },
   reasonInput: { backgroundColor: colors.surfaceContainerLow, color: colors.onSurface, fontSize: 14, borderRadius: 8, padding: 12, minHeight: 80, textAlignVertical: 'top' },
   charCount: { fontSize: 11, fontWeight: '600', color: colors.secondary },
-  uploadCard: { backgroundColor: colors.surfaceContainerLowest, borderRadius: 12, padding: 16, gap: 12 },
+  uploadCard: { backgroundColor: colors.glass, borderRadius: 16, padding: 16, gap: 12, borderWidth: 1, borderColor: colors.glassBorder },
   uploadHeader: { gap: 4 },
   uploadTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   uploadTitle: { fontSize: 12, fontWeight: '500', color: colors.onSurface },
@@ -729,7 +753,7 @@ const styles = StyleSheet.create({
   fileName: { fontSize: 14, fontWeight: '500', color: colors.onSurface },
   fileSize: { fontSize: 12, color: colors.secondary },
   uploadFormats: { fontSize: 12, color: colors.secondary, paddingHorizontal: 4 },
-  attestCard: { backgroundColor: colors.surfaceContainerLowest, borderRadius: 12, padding: 16, gap: 12 },
+  attestCard: { backgroundColor: colors.glass, borderRadius: 16, padding: 16, gap: 12, borderWidth: 1, borderColor: colors.glassBorder },
   attestHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   attestTitle: { fontSize: 12, fontWeight: '500', color: colors.onSurface },
   attestBadge: { backgroundColor: colors.surfaceContainer, paddingHorizontal: 8, paddingVertical: 2, borderRadius: 4 },
@@ -745,4 +769,9 @@ const styles = StyleSheet.create({
   draftBtnText: { fontSize: 14, fontWeight: '500', color: colors.onSurface },
   toastBox: { position: 'absolute', left: 16, right: 16, top: 64, backgroundColor: colors.onSurface, borderRadius: 8, padding: 12 },
   toastText: { fontSize: 12, color: colors.onPrimary, lineHeight: 16 },
+  infoDot: { width: 20, height: 20, borderRadius: 10, borderWidth: 1, borderColor: colors.primary, alignItems: "center", justifyContent: "center", backgroundColor: colors.surfaceContainerLowest },
+  infoDotText: { fontSize: 11, fontWeight: "600", color: colors.primary },
+  modalBackdrop: { flex: 1, backgroundColor: "rgba(49,48,48,0.6)", justifyContent: "center", padding: 16 },
+  modalCard: { backgroundColor: colors.glass, borderRadius: 16, padding: 16, gap: 12, borderWidth: 1, borderColor: colors.glassBorder },
+  modalHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
 });

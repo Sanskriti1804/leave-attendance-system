@@ -1,7 +1,7 @@
 import { useEffect } from "react";
-import { View, Text, StyleSheet, Image, Dimensions } from "react-native";
+import { View, Text, StyleSheet, Image } from "react-native";
 import { useRouter, type Href } from "expo-router";
-import { LinearGradient } from "expo-linear-gradient";
+import { ScreenGradient } from "../../components/ui/AppChrome";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { getSession } from "../../../services/auth";
 import { designContent } from "../../maxstarter/design";
@@ -58,13 +58,8 @@ export default function SplashScreen() {
   }, [router, splashDuration]);
 
   return (
-    <LinearGradient
-      colors={['rgba(0, 168, 153, 0.45)', 'rgba(240, 248, 252, 0.75)', 'rgba(38, 169, 225, 0.48)']}
-      locations={[0, 0.5, 1]}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 1 }}
-      style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}
-    >
+    <ScreenGradient>
+      <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
       <View style={styles.content}>
         <View style={styles.centerContainer}>
           <View style={styles.logoContainer}>
@@ -83,7 +78,8 @@ export default function SplashScreen() {
           <Text style={styles.footerTextBottom}>Symbiotic Consulting Group</Text>
         </View>
       </View>
-    </LinearGradient>
+      </View>
+    </ScreenGradient>
   );
 }
 

@@ -2,8 +2,8 @@ import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet, ViewProps } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { RoleBottomNav } from "./AppChrome";
 
 export function ProfileIcon() {
   return (
@@ -95,46 +95,8 @@ export function StatsCard({ title, iconName, iconColor, count, countColor = '#1c
   );
 }
 
-export function BottomNavBar({ activeRoute }: { activeRoute: 'home' | 'leave' | 'people' | 'reports' | 'more' }) {
-  const router = useRouter();
-  const insets = useSafeAreaInsets();
-  
-  const navItems = [
-    { id: 'home', label: 'Home', icon: 'dashboard', route: '/admin' },
-    { id: 'leave', label: 'Leave', icon: 'event-available', route: '/leave/admin-review' },
-    { id: 'people', label: 'People', icon: 'group', route: '/people' },
-    { id: 'reports', label: 'Reports', icon: 'query-stats', route: '/reports' },
-    { id: 'more', label: 'More', icon: 'more-horiz', route: '/settings' },
-  ];
-
-  return (
-    <View style={[styles.bottomNavContainer, { bottom: Math.max(insets.bottom, 16) }]}>
-      <View style={styles.bottomNavContent}>
-        {navItems.map((item) => {
-          const isActive = activeRoute === item.id;
-          return (
-            <TouchableOpacity 
-              key={item.id} 
-              style={styles.bottomNavItem}
-              onPress={() => router.push(item.route as never)}
-              activeOpacity={0.7}
-            >
-              <View style={[styles.bottomNavIconContainer, isActive && styles.bottomNavIconContainerActive]}>
-                <MaterialIcons 
-                  name={item.icon as keyof typeof MaterialIcons.glyphMap} 
-                  size={20} 
-                  color={isActive ? "#ffffff" : "#9ca3af"} 
-                />
-              </View>
-              <Text style={[styles.bottomNavLabel, isActive && styles.bottomNavLabelActive]}>
-                {item.label}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
-      </View>
-    </View>
-  );
+export function BottomNavBar({ activeRoute }: { activeRoute: "home" | "leave" | "people" | "reports" | "more" }) {
+  return <RoleBottomNav variant="admin" activeRoute={activeRoute} />;
 }
 
 const styles = StyleSheet.create({
@@ -299,54 +261,4 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#585f6c'
   },
-  bottomNavContainer: {
-    position: 'absolute',
-    left: 16,
-    right: 16,
-    zIndex: 50,
-    backgroundColor: '#111111',
-    borderRadius: 9999,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.35,
-    shadowRadius: 30,
-    elevation: 8,
-  },
-  bottomNavContent: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    height: 56,
-  },
-  bottomNavItem: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  bottomNavIconContainer: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  bottomNavIconContainerActive: {
-    backgroundColor: '#2A2A2E',
-  },
-  bottomNavLabel: {
-    fontFamily: 'Inter',
-    fontSize: 10,
-    fontWeight: '600',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-    color: '#9ca3af',
-    marginTop: 2,
-  },
-  bottomNavLabelActive: {
-    color: '#ffffff',
-  }
 });

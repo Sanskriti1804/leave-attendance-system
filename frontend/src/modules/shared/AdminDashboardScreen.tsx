@@ -1,8 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, TextInput } from "react-native";
+import { View, Text, ScrollView, TouchableOpacity, SafeAreaView, TextInput } from "react-native";
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from "expo-router";
-import { LinearGradient } from "expo-linear-gradient";
 import { getSession } from "../../../services/auth";
 import {
   displayName,
@@ -12,6 +11,7 @@ import {
   type EmployeePublic,
   type LeaveApplication,
 } from "../../../services/resources";
+import { ScreenGradient } from "../../components/ui/AppChrome";
 import { TopNavBar, HROperationsCard, ContentCard, StatsCard, BottomNavBar } from "../../components/ui/AdminComponents";
 import { UIFallbackIndicator } from "../../components/ui/UIFallback";
 
@@ -76,13 +76,7 @@ export default function AdminDashboardScreen() {
   const onLeaveToday = approved.filter((row) => row.startDate <= today && row.endDate >= today).length;
 
   return (
-    <LinearGradient
-      colors={['rgba(0, 168, 153, 0.45)', 'rgba(240, 248, 252, 0.75)', 'rgba(38, 169, 225, 0.48)']}
-      locations={[0, 0.5, 1]}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 1 }}
-      style={{ flex: 1 }}
-    >
+    <ScreenGradient>
       <SafeAreaView style={{ flex: 1 }}>
         <TopNavBar />
         
@@ -197,6 +191,6 @@ export default function AdminDashboardScreen() {
         </ScrollView>
         <BottomNavBar activeRoute="home" />
       </SafeAreaView>
-    </LinearGradient>
+    </ScreenGradient>
   );
 }
