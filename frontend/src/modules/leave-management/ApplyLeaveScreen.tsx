@@ -18,7 +18,6 @@ import {
   type LeaveType,
 } from '../../../services/resources';
 import { UIFallbackIndicator } from '../../components/ui/UIFallback';
-import * as DocumentPicker from 'expo-document-picker';
 
 const colors = {
   surface: "#fcf9f8",
@@ -258,6 +257,13 @@ export default function ApplyLeaveScreen() {
       {
         text: "Choose file",
         onPress: async () => {
+          let DocumentPicker: typeof import("expo-document-picker");
+          try {
+            DocumentPicker = require("expo-document-picker");
+          } catch {
+            Alert.alert("File picker unavailable", "Rebuild the Android app to enable document selection.");
+            return;
+          }
           const result = await DocumentPicker.getDocumentAsync({
             type: ["application/pdf", "image/jpeg", "image/png", "image/jpg"],
             copyToCacheDirectory: true,

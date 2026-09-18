@@ -46,6 +46,8 @@ MaxStarter owns `src/maxstarter/` and `MAXSTARTER:BEGIN/END` regions.
 
 Expo tab bar is hidden. All roles use the admin pill bottom nav styling with role-specific destinations.
 
+On **web** (`expo start --web`), the same routes render a separate desktop UI under `frontend/src/web/` (sidebar + content canvas). Mobile screen files under `frontend/src/modules/` are unchanged. Shared services and `/api/v1` calls are reused.
+
 Leave list and apply keep live `/api/v1` leave calls. Admin review approve/reject is admin-only; guest_admin is read-only. Medical document bytes are not fetched for employees (MED-09). File picker upload is still not wired. Punch and reports APIs are not implemented.
 
 ## Theme tokens (from design.md)

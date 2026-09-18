@@ -1,5 +1,5 @@
-import LoginScreen from '../src/modules/shared/LoginScreen';
+import { selectScreen } from "../src/web/selectScreen";
+import LoginScreen from "../src/modules/shared/LoginScreen";
+import WebLoginScreen from "../src/web/WebLoginScreen";
 
-export default function LoginRoute() {
-  return <LoginScreen />;
-}
+export default selectScreen(LoginScreen, WebLoginScreen);

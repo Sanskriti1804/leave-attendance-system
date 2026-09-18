@@ -1,5 +1,5 @@
+import { selectScreen } from "../src/web/selectScreen";
 import PeopleDirectoryScreen from "../src/modules/shared/PeopleDirectoryScreen";
+import WebPeopleDirectoryScreen from "../src/web/WebPeopleDirectoryScreen";
 
-export default function PeopleRoute() {
-  return <PeopleDirectoryScreen />;
-}
+export default selectScreen(PeopleDirectoryScreen, WebPeopleDirectoryScreen);
