@@ -48,12 +48,13 @@ export default function AdminDashboardScreen() {
           // Keep the HR action list usable; do not surface auth/fetch errors here.
         }
         try {
-          const [pendingLeaves, approvedLeaves] = await Promise.all([
+          const [pendingLeaves, submittedLeaves, approvedLeaves] = await Promise.all([
             listLeaves("PENDING_HR_REVIEW"),
+            listLeaves("SUBMITTED"),
             listLeaves("APPROVED"),
           ]);
           if (!cancelled) {
-            setPending(pendingLeaves.items);
+            setPending([...pendingLeaves.items, ...submittedLeaves.items]);
             setApproved(approvedLeaves.items);
           }
         } catch {

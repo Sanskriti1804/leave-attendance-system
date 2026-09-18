@@ -429,19 +429,17 @@ export async function adminUpdateAttendance(
     action: "ATTENDANCE_ADMIN_EDIT",
     entityType: "Attendance",
     entityId: attendanceId,
-    details: {
-      previous: {
-        checkIn: toIsoWithIstOffset(existing.checkIn),
-        checkOut: toIsoWithIstOffset(existing.checkOut),
-        status: existing.status,
-        lateMinutes: existing.lateMinutes,
-      },
-      updated: {
-        checkIn: toIsoWithIstOffset(updated.checkIn),
-        checkOut: toIsoWithIstOffset(updated.checkOut),
-        status: updated.status,
-        lateMinutes: updated.lateMinutes,
-      },
+    oldValue: {
+      checkIn: toIsoWithIstOffset(existing.checkIn),
+      checkOut: toIsoWithIstOffset(existing.checkOut),
+      status: existing.status,
+      lateMinutes: existing.lateMinutes,
+    },
+    newValue: {
+      checkIn: toIsoWithIstOffset(updated.checkIn),
+      checkOut: toIsoWithIstOffset(updated.checkOut),
+      status: updated.status,
+      lateMinutes: updated.lateMinutes,
     },
   });
 

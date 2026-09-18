@@ -50,4 +50,6 @@ Correction types; docs required when; HR direct-edit policy.
 
 ## Change History
 
+2026-09-18 — Employee correction create/list screens exist on mobile and web against `/api/v1/attendance/corrections`. Admin review of corrections is not a frontend screen.
+
 2026-08-27 — Extracted from source documentation.

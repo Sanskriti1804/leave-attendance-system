@@ -1,6 +1,5 @@
-import React from "react";
+import { selectScreen } from "../src/web/selectScreen";
 import AdminDashboardScreen from "../src/modules/shared/AdminDashboardScreen";
+import WebAdminDashboardScreen from "../src/web/WebAdminDashboardScreen";
 
-export default function AdminScreen() {
-  return <AdminDashboardScreen />;
-}
+export default selectScreen(AdminDashboardScreen, WebAdminDashboardScreen);

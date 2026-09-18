@@ -153,17 +153,33 @@ export function changePassword(body: { currentPassword: string; newPassword: str
 }
 
 export function requestPasswordReset(email: string): Promise<{ message: string }> {
-  return apiRequest<{ message: string }>(authPath("/forgot-password"), { method: "POST", body: { email } });
+  return apiRequest<{ message: string }>(authPath("/forgot-password"), {
+    method: "POST",
+    body: { email },
+  });
 }
 
-export function uploadLeaveDocument(leaveId: number, file: { uri: string; name: string; type: string }): Promise<unknown> {
+export function uploadLeaveDocument(
+  leaveId: number,
+  file: {
+    uri: string;
+    name: string;
+    type: string;
+    blob?: Blob;
+  },
+): Promise<unknown> {
+
   const body = new FormData();
   body.append("leaveId", String(leaveId));
-  body.append("file", {
-    uri: file.uri,
-    name: file.name,
-    type: file.type,
-  } as unknown as Blob);
+  if (file.blob) {
+    body.append("file", file.blob, file.name);
+  } else {
+    body.append("file", {
+      uri: file.uri,
+      name: file.name,
+      type: file.type,
+    } as unknown as Blob);
+  }
   return authorizedRequest("/api/v1/documents", { method: "POST", body });
 }
 

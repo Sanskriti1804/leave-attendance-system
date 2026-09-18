@@ -56,4 +56,6 @@ Absent vs Missing Check-In when no punch and no leave. Exact missing in/out trig
 
 ## Change History
 
+2026-09-18 — Employee attendance ledger and correction requests are live on mobile and web via existing `/api/v1/attendance` endpoints. Home punch buttons remain local simulation.
+
 2026-08-27 — Extracted from source documentation.

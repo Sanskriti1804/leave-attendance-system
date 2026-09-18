@@ -1,7 +1,5 @@
-import React from "react";
+import { selectScreen } from "../../src/web/selectScreen";
 import EmployeeHomeScreen from "../../src/modules/attendance-management/EmployeeHomeScreen";
+import WebEmployeeHomeScreen from "../../src/web/WebEmployeeHomeScreen";
 
-export default function HomeScreen() {
-  return <EmployeeHomeScreen />;
-}
-
+export default selectScreen(EmployeeHomeScreen, WebEmployeeHomeScreen);

@@ -1,0 +1,175 @@
+import { useState } from "react";
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, Image } from "react-native";
+import { useRouter } from "expo-router";
+import { MaterialIcons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
+import { login as authLogin, passLogin } from "../../services/auth";
+import { getMe } from "../../services/resources";
+import { getPostLoginRoute } from "../modules/shared/SplashScreen";
+import { colors, pageGradient } from "../theme";
+import { WebCard } from "./WebShell";
+
+const LOGO =
+  "https://lh3.googleusercontent.com/aida/AEtjO1WvXJpikhF3ORODpwSEf_WIYP1zR6qGd9BgV3Iq-mpFkjyJTAq2tzwCOahKanD6vR9cVHrKQpPZExVLPa1vVTYzHTqbo_n04_lyUjB3PQzr12t5gX2klg8tbXAC12uQYQpc3rGVlJwSfgI7_RgpbsgKr5yBVDasxep8sO0RqzB2uMpl0tnBVZrfAYpwwWmsbv4J7_cT5kxTOU6QO3NantBvxeIijfJj7aN2kBLvGNqWIHIraU3I13Vcoxo";
+
+export default function WebLoginScreen() {
+  const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(true);
+
+  const handleLogin = async () => {
+    setError(null);
+    if (!email.trim() || !password.trim()) {
+      setError("Email and password are required.");
+      return;
+    }
+    if (!email.includes("@")) {
+      setError("Enter a valid email address.");
+      return;
+    }
+    setLoading(true);
+    try {
+      const session = await authLogin({ email: email.trim(), password });
+      try {
+        const me = await getMe();
+        if (me.role === "admin" || me.role === "guest_admin") {
+          router.replace("/admin");
+        } else {
+          router.replace("/(tabs)");
+        }
+      } catch {
+        if (session.email?.includes("admin")) {
+          router.replace("/admin");
+        } else {
+          router.replace(getPostLoginRoute());
+        }
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Login failed.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePass = async () => {
+    setError(null);
+    setLoading(true);
+    try {
+      await passLogin();
+      router.replace("/admin");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Pass failed.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <LinearGradient colors={[...pageGradient.colors]} locations={[...pageGradient.locations]} style={styles.page}>
+      <View style={styles.split}>
+        <View style={styles.brandPane}>
+          <Image source={{ uri: LOGO }} style={styles.logo} />
+          <Text style={styles.brand}>LAMS SCG</Text>
+          <Text style={styles.tagline}>Leave & Attendance Management System</Text>
+          <Text style={styles.copy}>
+            Authenticate with your corporate credentials to access workforce ledgers and attendance punches.
+          </Text>
+        </View>
+        <View style={styles.formPane}>
+          <WebCard>
+            <Text style={styles.heading}>Enterprise Sign In</Text>
+            <Text style={styles.label}>Corporate Email / Employee ID *</Text>
+            <View style={styles.inputRow}>
+              <MaterialIcons name="badge" size={18} color={colors.secondary} />
+              <TextInput
+                style={styles.input}
+                value={email}
+                onChangeText={setEmail}
+                autoCapitalize="none"
+                keyboardType="email-address"
+                placeholder="alex.chen@scg.enterprise.internal"
+                placeholderTextColor="rgba(88, 95, 108, 0.6)"
+              />
+            </View>
+            <View style={styles.pwHead}>
+              <Text style={styles.label}>Password *</Text>
+              <Text style={styles.link}>Forgot Password?</Text>
+            </View>
+            <View style={styles.inputRow}>
+              <MaterialIcons name="lock" size={18} color={colors.secondary} />
+              <TextInput
+                style={styles.input}
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry={!showPassword}
+                placeholder="••••••••••••"
+                placeholderTextColor="rgba(88, 95, 108, 0.6)"
+              />
+              <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                <MaterialIcons name={showPassword ? "visibility" : "visibility-off"} size={18} color={colors.secondary} />
+              </TouchableOpacity>
+            </View>
+            <TouchableOpacity style={styles.remember} onPress={() => setRememberMe(!rememberMe)}>
+              <View style={[styles.track, rememberMe && styles.trackOn]}>
+                <View style={[styles.thumb, rememberMe && styles.thumbOn]} />
+              </View>
+              <Text style={styles.rememberText}>Remember this device for 30 days</Text>
+            </TouchableOpacity>
+            {error ? <Text style={styles.error}>{error}</Text> : null}
+            <TouchableOpacity style={styles.cta} onPress={() => void handleLogin()} disabled={loading}>
+              <Text style={styles.ctaText}>{loading ? "Verifying..." : "Sign in"}</Text>
+            </TouchableOpacity>
+            <View style={styles.footer}>
+              <Text style={styles.version}>V4.12.0</Text>
+              <TouchableOpacity onPress={() => void handlePass()} disabled={loading}>
+                <Text style={styles.link}>Pass (Dev)</Text>
+              </TouchableOpacity>
+            </View>
+          </WebCard>
+        </View>
+      </View>
+    </LinearGradient>
+  );
+}
+
+const styles = StyleSheet.create({
+  page: { flex: 1, minHeight: 640 },
+  split: { flex: 1, flexDirection: "row", flexWrap: "wrap", maxWidth: 1100, width: "100%", alignSelf: "center", padding: 32, gap: 32, alignItems: "center" },
+  brandPane: { flex: 1, minWidth: 280, gap: 8 },
+  formPane: { flex: 1, minWidth: 320, maxWidth: 480 },
+  logo: { width: 72, height: 72, borderRadius: 36, marginBottom: 8 },
+  brand: { fontSize: 28, fontWeight: "800", color: colors.onSurface, letterSpacing: 1 },
+  tagline: { fontSize: 16, fontWeight: "600", color: colors.onSurfaceVariant },
+  copy: { fontSize: 14, color: colors.secondary, lineHeight: 20, maxWidth: 420 },
+  heading: { fontSize: 22, fontWeight: "700", color: colors.onSurface, marginBottom: 16 },
+  label: { fontSize: 12, fontWeight: "600", color: colors.onSurface, marginBottom: 6, marginTop: 10 },
+  inputRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    backgroundColor: colors.surfaceContainerLow,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: colors.border,
+    paddingHorizontal: 12,
+    minHeight: 44,
+  },
+  input: { flex: 1, fontSize: 14, color: colors.onSurface, outlineStyle: "none" as never },
+  pwHead: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-end" },
+  link: { fontSize: 12, fontWeight: "600", color: colors.secondary },
+  remember: { flexDirection: "row", alignItems: "center", gap: 10, marginTop: 14 },
+  track: { width: 36, height: 20, borderRadius: 10, backgroundColor: colors.surfaceContainerHigh, justifyContent: "center" },
+  trackOn: { backgroundColor: colors.primary },
+  thumb: { width: 16, height: 16, borderRadius: 8, backgroundColor: "#fff", marginLeft: 2 },
+  thumbOn: { marginLeft: 18 },
+  rememberText: { fontSize: 13, color: colors.onSurface },
+  error: { color: colors.error, marginTop: 10, fontSize: 13 },
+  cta: { marginTop: 18, backgroundColor: colors.primary, minHeight: 46, borderRadius: 10, alignItems: "center", justifyContent: "center" },
+  ctaText: { color: colors.onPrimary, fontWeight: "700" },
+  footer: { flexDirection: "row", justifyContent: "space-between", marginTop: 16 },
+  version: { fontSize: 12, color: colors.secondary },
+});
