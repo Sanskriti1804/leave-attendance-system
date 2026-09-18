@@ -1,12 +1,22 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { View, Text, StyleSheet, TextInput, ActivityIndicator } from "react-native";
 import { getSession } from "../../services/auth";
-import { displayName, getMe, listEmployees, type EmployeePublic } from "../../services/resources";
+import {
+  displayName,
+  getMe,
+  listDepartments,
+  listEmployees,
+  type Department,
+  type EmployeePublic,
+} from "../../services/resources";
 import { colors } from "../theme";
 import { WebCard, WebShell } from "./WebShell";
+import { UserAvatar } from "../components/ui/UserAvatar";
+import { matchesPeopleQuery } from "../utils/workforce";
 
 export default function WebPeopleDirectoryScreen() {
   const [items, setItems] = useState<EmployeePublic[]>([]);
+  const [departments, setDepartments] = useState<Department[]>([]);
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -17,8 +27,14 @@ export default function WebPeopleDirectoryScreen() {
       try {
         await getSession();
         await getMe().catch(() => null);
-        const people = await listEmployees();
-        if (!cancelled) setItems(people.items);
+        const [people, depts] = await Promise.all([
+          listEmployees(),
+          listDepartments().catch(() => ({ items: [] as Department[] })),
+        ]);
+        if (!cancelled) {
+          setItems(people.items);
+          setDepartments(depts.items);
+        }
       } catch (err) {
         if (!cancelled) setError(err instanceof Error ? err.message : "Unable to load directory.");
       } finally {
@@ -30,33 +46,50 @@ export default function WebPeopleDirectoryScreen() {
     };
   }, []);
 
-  const filtered = useMemo(() => {
-    const term = query.trim().toLowerCase();
-    if (!term) return items;
-    return items.filter((row) => `${row.firstName} ${row.lastName ?? ""} ${row.email}`.toLowerCase().includes(term));
-  }, [items, query]);
+  const deptName = (id: number) => departments.find((row) => row.departmentId === id)?.departmentName ?? `Department ${id}`;
+  const groups = useMemo(() => {
+    const filtered = items.filter((row) => matchesPeopleQuery(row, query, deptName(row.departmentId)));
+    const byDept = new Map<string, EmployeePublic[]>();
+    for (const row of filtered) {
+      const name = deptName(row.departmentId);
+      const list = byDept.get(name) ?? [];
+      list.push(row);
+      byDept.set(name, list);
+    }
+    return [...byDept.entries()].sort(([a], [b]) => a.localeCompare(b));
+  }, [departments, items, query]);
 
   return (
     <WebShell title="People" variant="admin" activeRoute="people">
-      <TextInput style={styles.search} placeholder="Search employees" value={query} onChangeText={setQuery} placeholderTextColor={colors.secondary} />
+      <TextInput
+        style={styles.search}
+        placeholder="Search name, email, role, or team"
+        value={query}
+        onChangeText={setQuery}
+        placeholderTextColor={colors.secondary}
+      />
+      <Text style={styles.meta}>
+        {items.length} people · {departments.length || "—"} teams
+      </Text>
       {loading ? <ActivityIndicator color={colors.primary} /> : null}
       {error ? <Text style={styles.meta}>{error}</Text> : null}
-      <WebCard>
-        <View style={styles.head}>
-          <Text style={[styles.th, { flex: 1.4 }]}>Name</Text>
-          <Text style={[styles.th, { flex: 0.8 }]}>ID</Text>
-          <Text style={[styles.th, { flex: 1 }]}>Role</Text>
-          <Text style={[styles.th, { flex: 2 }]}>Email</Text>
-        </View>
-        {filtered.map((row) => (
-          <View key={row.employeeId} style={styles.tr}>
-            <Text style={[styles.td, { flex: 1.4 }]}>{displayName(row)}</Text>
-            <Text style={[styles.td, { flex: 0.8 }]}>EMP-{row.employeeId}</Text>
-            <Text style={[styles.td, { flex: 1 }]}>{row.role}</Text>
-            <Text style={[styles.td, { flex: 2 }]}>{row.email}</Text>
-          </View>
-        ))}
-      </WebCard>
+      {groups.map(([department, people]) => (
+        <WebCard key={department}>
+          <Text style={styles.group}>{department} · {people.length}</Text>
+          {people.map((row) => (
+            <View key={row.employeeId} style={styles.tr}>
+              <UserAvatar employee={row} size={36} />
+              <View style={{ flex: 1.4 }}>
+                <Text style={styles.name}>{displayName(row)}</Text>
+                <Text style={styles.meta}>{row.email}</Text>
+              </View>
+              <Text style={[styles.td, { flex: 0.8 }]}>EMP-{row.employeeId}</Text>
+              <Text style={[styles.td, { flex: 1 }]}>{row.role.replaceAll("_", " ")}</Text>
+            </View>
+          ))}
+        </WebCard>
+      ))}
+      {!loading && groups.length === 0 ? <Text style={styles.meta}>No people match this search.</Text> : null}
     </WebShell>
   );
 }
@@ -64,8 +97,8 @@ export default function WebPeopleDirectoryScreen() {
 const styles = StyleSheet.create({
   search: { backgroundColor: "#fff", borderRadius: 10, borderWidth: 1, borderColor: colors.border, paddingHorizontal: 12, minHeight: 44, color: colors.onSurface },
   meta: { fontSize: 12, color: colors.secondary },
-  head: { flexDirection: "row", paddingBottom: 8, borderBottomWidth: 1, borderBottomColor: colors.surfaceContainerHighest },
-  th: { fontSize: 11, fontWeight: "700", color: colors.secondary, textTransform: "uppercase" },
-  tr: { flexDirection: "row", paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: colors.surfaceContainerHighest },
+  group: { fontSize: 12, fontWeight: "700", color: colors.secondary, textTransform: "uppercase", marginBottom: 8 },
+  tr: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: colors.surfaceContainerHighest },
+  name: { fontSize: 14, fontWeight: "700", color: colors.onSurface },
   td: { fontSize: 13, color: colors.onSurface },
 });

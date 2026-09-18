@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView } fr
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from "expo-router";
 import { getSession } from "../../../services/auth";
+import { pickAndSaveProfilePhoto } from "../../../services/profilePhoto";
 import {
   apiErrorMessage,
   displayName,
@@ -14,6 +15,7 @@ import {
   type OrganisationSettings,
 } from "../../../services/resources";
 import { UIFallbackIndicator } from "../../components/ui/UIFallback";
+import { UserAvatar } from "../../components/ui/UserAvatar";
 import { ScreenGradient } from "../../components/ui/AppChrome";
 import { TopNavBar, useTopNavContentInset } from "../../components/ui/AdminComponents";
 import { EmployeeBottomNavBar } from "../../components/ui/EmployeeComponents";
@@ -93,7 +95,6 @@ export default function ProfileSettingsScreen() {
   }, []);
 
   const name = me ? displayName(me) : "Alex Chen";
-  const initials = me ? `${me.firstName[0] ?? ""}${me.lastName?.[0] ?? ""}`.toUpperCase() : "AC";
   const role = me?.role ?? "Senior Software Engineer";
   const empId = me?.employeeId ?? "8492";
   const email = me?.email ?? "dev@enterprisehrms.internal";
@@ -121,9 +122,18 @@ export default function ProfileSettingsScreen() {
         {/* Profile Header Card */}
         <View style={styles.card}>
           <View style={styles.profileHeaderRow}>
-            <View style={styles.avatar}>
-              <Text style={styles.avatarText}>{initials}</Text>
-            </View>
+            <UserAvatar
+              employee={me}
+              size={72}
+              fallback="AC"
+              onPress={
+                me
+                  ? () => {
+                      void pickAndSaveProfilePhoto(me.employeeId);
+                    }
+                  : undefined
+              }
+            />
             <View style={styles.profileInfo}>
               <View style={styles.nameRow}>
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>

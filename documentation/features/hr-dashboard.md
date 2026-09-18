@@ -22,4 +22,6 @@ Exact “unmarked” vs Absent vs Missing Check-In (depends on attendance status
 
 ## Change History
 
+2026-09-18 — Admin dashboard workforce uses live employee list plus approved leave covering today. Search filters the directory. Present = active employees not on approved leave (org punch APIs are not available).
+
 2026-08-27 — Extracted from source documentation.

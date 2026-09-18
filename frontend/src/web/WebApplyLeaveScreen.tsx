@@ -52,7 +52,7 @@ export default function WebApplyLeaveScreen() {
   const [fromDate, setFromDate] = useState(toCivil(new Date()));
   const [toDate, setToDate] = useState(toCivil(new Date()));
   const [session, setSession] = useState<DaySession>("FULL_DAY");
-  const [attested, setAttested] = useState(true);
+  const [attested, setAttested] = useState(false);
   const [maxAdvanceDays, setMaxAdvanceDays] = useState(14);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -89,7 +89,8 @@ export default function WebApplyLeaveScreen() {
           const listed = await listLeaveTypes();
           if (!cancelled) {
             setTypes(listed.items);
-            setLeaveTypeId(listed.items[0]?.leaveTypeId ?? null);
+            const casual = listed.items.find((row) => /casual/i.test(row.name));
+            setLeaveTypeId((casual ?? listed.items[0])?.leaveTypeId ?? null);
           }
         } catch (err) {
           if (!cancelled) setError(apiErrorMessage(err));
@@ -145,7 +146,11 @@ export default function WebApplyLeaveScreen() {
           setError(apiErrorMessage(uploadErr));
         }
       }
-      setMessage(`${kind === "draft" ? "Draft saved" : "Submitted"} (#${result.leaveId}, ${result.status}).`);
+      setMessage(
+        kind === "draft"
+          ? "Draft saved successfully."
+          : "Leave request submitted successfully.",
+      );
     } catch (err) {
       setError(apiErrorMessage(err));
     } finally {
@@ -190,7 +195,9 @@ export default function WebApplyLeaveScreen() {
           <Text style={styles.h}>Reason</Text>
           <TextInput style={[styles.input, styles.area]} value={reason} onChangeText={setReason} multiline />
           <TouchableOpacity onPress={() => setAttested(!attested)}>
-            <Text style={styles.body}>{attested ? "☑" : "☐"} Manager notification attestation</Text>
+            <Text style={styles.body}>
+              {attested ? "☑" : "☐"} I have notified my reporting manager and received approval for this leave.
+            </Text>
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => {

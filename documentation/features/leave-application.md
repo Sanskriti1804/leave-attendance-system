@@ -61,6 +61,8 @@ LV-OVR-03/04 which statuses block overlap. LV-APP-18 HR-absent path. MED-12 “e
 
 ## Change History
 
+2026-09-18 — Apply Leave defaults to Casual; operational notification checkbox; success toast after submit/draft. Review primary actions are Approve and Reject; HR Note is secondary.
+
 2026-09-15 — My Leave List, Apply Leave, and Admin Leave Review Queue aligned to Stitch layouts (gradient, glass cards, queue chips, duration info, manager attestation). Live leave APIs unchanged.
 2026-09-14 — Apply Leave: From–To range defaults to Full Day; session dropdown; long-press per-date session override; submit errors as toast.
 2026-09-04 — Medical document requirement on submit; duration uses selected-date `numberOfDays`.

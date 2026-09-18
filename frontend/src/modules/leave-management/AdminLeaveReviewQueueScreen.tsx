@@ -2,7 +2,8 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, ActivityIndicator, Alert, TextInput, Modal } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { ScreenGradient } from "../../components/ui/AppChrome";
-import { TopNavBar, useTopNavContentInset, BottomNavBar } from "../../components/ui/AdminComponents";
+import { BottomNavBar, TopNavBar, useTopNavContentInset } from "../../components/ui/AdminComponents";
+import { UserAvatar } from "../../components/ui/UserAvatar";
 import { getSession } from "../../../services/auth";
 import {
   apiErrorMessage,
@@ -236,9 +237,10 @@ export default function AdminLeaveReviewQueueScreen() {
               <View key={leave.leaveId} style={styles.card}>
                 <View style={styles.cardHeader}>
                   <View style={styles.empInfo}>
-                    <View style={styles.avatarPlaceholder}>
-                      <MaterialIcons name="person" size={22} color={colors.secondary} />
-                    </View>
+                    <UserAvatar
+                      employee={employees.find((row) => row.employeeId === leave.employeeId) ?? { employeeId: leave.employeeId, firstName: employeeName(leave.employeeId), lastName: null }}
+                      size={48}
+                    />
                     <View>
                       <View style={styles.nameRow}>
                         <Text style={styles.empName}>{employeeName(leave.employeeId)}</Text>
@@ -311,7 +313,7 @@ export default function AdminLeaveReviewQueueScreen() {
 
                 {leave.hrComments ? (
                   <View style={styles.threadBox}>
-                    <Text style={styles.detailLabel}>CLARIFICATION THREAD</Text>
+                    <Text style={styles.detailLabel}>HR NOTE</Text>
                     <View style={styles.threadBubble}>
                       <Text style={styles.threadAuthor}>HR OPERATIONS</Text>
                       <Text style={styles.threadBody}>“{leave.hrComments}”</Text>
@@ -327,13 +329,13 @@ export default function AdminLeaveReviewQueueScreen() {
                         <Text style={styles.approveBtnText}>{busyId === leave.leaveId ? "..." : "Approve Leave"}</Text>
                       </TouchableOpacity>
                       <TouchableOpacity style={styles.rejectBtn} onPress={() => setRejectTarget(leave.leaveId)} disabled={busyId === leave.leaveId}>
-                        <MaterialIcons name="chat-bubble-outline" size={18} color={colors.onSurface} />
-                        <Text style={styles.rejectBtnText}>Reject / Clarify</Text>
+                        <MaterialIcons name="close" size={18} color={colors.onSurface} />
+                        <Text style={styles.rejectBtnText}>Reject</Text>
                       </TouchableOpacity>
                     </View>
                     <TouchableOpacity style={styles.noteBtn} onPress={() => setNoteVisible(true)}>
                       <MaterialIcons name="note-add" size={16} color={colors.secondary} />
-                      <Text style={styles.noteBtnText}>Add Internal HR Note (Private)</Text>
+                      <Text style={styles.noteBtnText}>Add HR Note</Text>
                     </TouchableOpacity>
                   </View>
                 ) : (
@@ -361,13 +363,13 @@ export default function AdminLeaveReviewQueueScreen() {
         <Modal visible={rejectTarget != null} transparent animationType="fade" onRequestClose={() => setRejectTarget(null)}>
           <View style={styles.modalBackdrop}>
             <View style={styles.modalCard}>
-              <Text style={styles.empName}>Reject / Clarify</Text>
+              <Text style={styles.empName}>Reject</Text>
               <TextInput
                 style={styles.reasonInput}
                 multiline
                 value={rejectComment}
                 onChangeText={setRejectComment}
-                placeholder="HR clarification comment"
+                placeholder="HR comment (optional)"
                 placeholderTextColor={colors.secondary}
               />
               <View style={styles.actionRow}>
@@ -384,8 +386,8 @@ export default function AdminLeaveReviewQueueScreen() {
         <Modal visible={noteVisible} transparent animationType="fade" onRequestClose={() => setNoteVisible(false)}>
           <View style={styles.modalBackdrop}>
             <View style={styles.modalCard}>
-              <Text style={styles.empName}>Internal HR note</Text>
-              <Text style={styles.empRole}>Private notes are not stored yet (audit API pending). This control matches the Stitch layout only.</Text>
+              <Text style={styles.empName}>HR Note</Text>
+              <Text style={styles.empRole}>HR notes are not stored yet (audit API pending). This control matches the Stitch layout only.</Text>
               <TouchableOpacity style={styles.approveBtn} onPress={() => setNoteVisible(false)}>
                 <Text style={styles.approveBtnText}>Got it</Text>
               </TouchableOpacity>

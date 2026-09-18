@@ -18,6 +18,7 @@ import {
   type LeaveType,
 } from '../../../services/resources';
 import { UIFallbackIndicator } from '../../components/ui/UIFallback';
+import { UserAvatar } from '../../components/ui/UserAvatar';
 
 const colors = {
   surface: "#fcf9f8",
@@ -79,13 +80,6 @@ function iconForLeaveType(name: string): "medical-services" | "beach-access" | "
   return "event-available";
 }
 
-function initials(employee: EmployeePublic | null): string {
-  if (!employee) {
-    return "—";
-  }
-  return `${employee.firstName[0] ?? ""}${employee.lastName?.[0] ?? ""}`.toUpperCase();
-}
-
 const FALLBACK_LEAVE_TYPES: LeaveType[] = [
   { leaveTypeId: 1, name: "Casual", description: "Casual leave", requiresMedicalDocument: false, allowedSex: null, obsolete: false },
   { leaveTypeId: 2, name: "Sick", description: "Medical leave", requiresMedicalDocument: true, allowedSex: null, obsolete: false },
@@ -127,7 +121,7 @@ export default function ApplyLeaveScreen() {
   const [durationMode, setDurationMode] = useState<DurationMode>("FULL");
   const [waitingForTo, setWaitingForTo] = useState(false);
   const [durationInfoOpen, setDurationInfoOpen] = useState(false);
-  const [attested, setAttested] = useState(true);
+  const [attested, setAttested] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const [viewMonth, setViewMonth] = useState(() => {
     const now = new Date();
@@ -155,13 +149,13 @@ export default function ApplyLeaveScreen() {
       const resolvedTypes = leaveTypes.items.length > 0 ? leaveTypes.items : FALLBACK_LEAVE_TYPES;
       setTypes(resolvedTypes);
       const sick = resolvedTypes.find((row) => /sick|medical/i.test(row.name));
-      setLeaveTypeId((sick ?? resolvedTypes[0])?.leaveTypeId ?? null);
-      const tomorrow = addDays(today, 1);
-      setSelectedDates([tomorrow]);
-      setDateSessions({ [tomorrow]: "FULL_DAY" });
+      const casual = resolvedTypes.find((row) => /casual/i.test(row.name));
+      setLeaveTypeId((casual ?? resolvedTypes[0] ?? sick)?.leaveTypeId ?? null);
+      setSelectedDates([]);
+      setDateSessions({});
       setDateOverrides({});
       setDurationMode("FULL");
-      setWaitingForTo(true);
+      setWaitingForTo(false);
 
       let profile = session?.user as EmployeePublic | undefined;
       try {
@@ -353,6 +347,7 @@ export default function ApplyLeaveScreen() {
         }
       }
       setMessage(`${kind === "draft" ? "Draft saved" : "Submitted"} (#${result.leaveId}, ${result.status}).`);
+      setToast(kind === "draft" ? "Draft saved successfully." : "Leave request submitted successfully.");
     } catch (err) {
       setToast(apiErrorMessage(err));
     } finally {
@@ -382,9 +377,7 @@ export default function ApplyLeaveScreen() {
         <View style={styles.empCard}>
           <View style={styles.empCardRow}>
             <View style={styles.empInfoLeft}>
-              <View style={styles.empInitialsBox}>
-                <Text style={styles.empInitials}>{error ? "AC" : initials(me)}</Text>
-              </View>
+              <UserAvatar employee={error ? null : me} size={40} fallback={error ? "AC" : "—"} />
               <View style={{ flex: 1 }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                   <Text style={styles.empName}>{error ? "Anand Chadda" : displayName(me)}</Text>
@@ -637,7 +630,7 @@ export default function ApplyLeaveScreen() {
               {attested ? <MaterialIcons name="check" size={16} color={colors.onPrimary} /> : null}
             </TouchableOpacity>
             <Text style={styles.checkboxText}>
-              I certify that I have notified my reporting manager {managerName || "your manager"} regarding this absence.
+              I have notified my reporting manager and received approval for this leave.
             </Text>
           </View>
         </View>

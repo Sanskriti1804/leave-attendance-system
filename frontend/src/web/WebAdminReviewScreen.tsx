@@ -123,6 +123,9 @@ export default function WebAdminReviewScreen() {
                 <TouchableOpacity onPress={() => setRejectTarget(leave.leaveId)}>
                   <Text style={styles.link}>Reject</Text>
                 </TouchableOpacity>
+                <TouchableOpacity onPress={() => setRejectTarget(leave.leaveId)}>
+                  <Text style={styles.meta}>Add note</Text>
+                </TouchableOpacity>
               </View>
             ) : null}
           </View>

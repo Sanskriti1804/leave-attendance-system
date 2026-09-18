@@ -14,7 +14,9 @@ import {
 import { colors } from "../../theme";
 import { ScreenGradient } from "../../components/ui/AppChrome";
 import { BottomNavBar, TopNavBar, useTopNavContentInset } from "../../components/ui/AdminComponents";
+import { UserAvatar } from "../../components/ui/UserAvatar";
 import { UIFallbackIndicator } from "../../components/ui/UIFallback";
+import { pickAndSaveProfilePhoto } from "../../../services/profilePhoto";
 
 function formatJoining(value: string | null | undefined): string {
   if (!value) {
@@ -83,7 +85,6 @@ export default function AdminProfileScreen() {
 
   const isGuest = me?.role === "guest_admin";
   const name = me ? displayName(me) : "Preeti Kaur";
-  const initials = me ? `${me.firstName[0] ?? ""}${me.lastName?.[0] ?? ""}`.toUpperCase() : "PK";
   const fallback = !me || !!error;
 
   return (
@@ -105,9 +106,18 @@ export default function AdminProfileScreen() {
 
           <View style={styles.card}>
             <View style={styles.hero}>
-              <View style={styles.avatar}>
-                <Text style={styles.avatarText}>{initials}</Text>
-              </View>
+              <UserAvatar
+                employee={me}
+                size={56}
+                fallback="PK"
+                onPress={
+                  me
+                    ? () => {
+                        void pickAndSaveProfilePhoto(me.employeeId);
+                      }
+                    : undefined
+                }
+              />
               <View style={{ flex: 1 }}>
                 <View style={styles.nameRow}>
                   <Text style={styles.name}>{name}</Text>
