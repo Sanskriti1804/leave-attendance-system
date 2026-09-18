@@ -50,5 +50,7 @@ Provisioning method (invite vs temp password).
 
 ## Change History
 
+2026-09-18 — People directory groups `listEmployees` by department. Seed includes additional HR, Operations, and Product employees (re-run `npm run seed`). Profile photos are local device storage, not an employee photo API.
+
 2026-09-01 — Implemented department and employee Express APIs (Prisma integer IDs; no RBAC/audit yet).
 2026-08-27 — Extracted from source documentation.

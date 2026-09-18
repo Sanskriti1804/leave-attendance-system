@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, Image } from "react-native";
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView } from "react-native";
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from "expo-router";
-import { getSession, logout } from "../../../services/auth";
+import { getSession } from "../../../services/auth";
+import { pickAndSaveProfilePhoto } from "../../../services/profilePhoto";
 import {
   apiErrorMessage,
   displayName,
@@ -13,12 +14,25 @@ import {
   type EmployeePublic,
   type OrganisationSettings,
 } from "../../../services/resources";
-import { getLocalProfilePhotoUri, pickLocalProfilePhoto, roleTagsFor } from "../../../services/profilePhoto";
 import { UIFallbackIndicator } from "../../components/ui/UIFallback";
-import { ScreenGradient, ThemedToast } from "../../components/ui/AppChrome";
+import { UserAvatar } from "../../components/ui/UserAvatar";
+import { ScreenGradient } from "../../components/ui/AppChrome";
 import { TopNavBar, useTopNavContentInset } from "../../components/ui/AdminComponents";
 import { EmployeeBottomNavBar } from "../../components/ui/EmployeeComponents";
-import { colors } from "../../theme";
+
+const colors = {
+  surface: "#fcf9f8",
+  surfaceContainerLowest: "#ffffff",
+  surfaceContainerLow: "#f6f3f2",
+  surfaceContainer: "#f0edec",
+  surfaceContainerHigh: "#ebe7e7",
+  surfaceContainerHighest: "#e5e2e1",
+  onSurface: "#1c1b1b",
+  onSurfaceVariant: "#4c4546",
+  primary: "#242424",
+  onPrimary: "#ffffff",
+  secondary: "#585f6c",
+};
 
 export default function ProfileSettingsScreen() {
   const router = useRouter();
@@ -28,8 +42,6 @@ export default function ProfileSettingsScreen() {
   const [managerName, setManagerName] = useState("—");
   const [settings, setSettings] = useState<OrganisationSettings | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [photoUri, setPhotoUri] = useState<string | null>(null);
-  const [toast, setToast] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -46,7 +58,6 @@ export default function ProfileSettingsScreen() {
           return;
         }
         setMe(profile);
-        setPhotoUri(getLocalProfilePhotoUri(profile?.employeeId));
         try {
           setSettings(await getOrgSettings());
         } catch (err) {
@@ -84,44 +95,16 @@ export default function ProfileSettingsScreen() {
   }, []);
 
   const name = me ? displayName(me) : "Alex Chen";
-  const initials = me ? `${me.firstName[0] ?? ""}${me.lastName?.[0] ?? ""}`.toUpperCase() : "AC";
+  const role = me?.role ?? "Senior Software Engineer";
+  const empId = me?.employeeId ?? "8492";
   const email = me?.email ?? "dev@enterprisehrms.internal";
-  const phone = me?.phone ?? "+91 98765 43210";
+  const joiningDate = me?.joiningDate ?? "March 15, 2022";
+  const status = me?.status ?? "Active";
   const deptFallback = error || !me?.departmentId ? "Engineering & DevOps" : departmentName;
-  const tags = roleTagsFor(me?.role ?? "employee");
-  const isBob = me?.email === "bob.employee@example.com" || /bob smith/i.test(name);
-  const managerFallback = isBob || /employee 2/i.test(managerName)
-    ? "S Raman"
-    : error || !me?.managerId
-      ? "Marcus Vance (VP, Eng)"
-      : managerName;
+  const managerFallback = error || !me?.managerId ? "Marcus Vance (VP, Eng)" : managerName;
+  const locationFallback = "NY HQ (Floor 4) / Hybrid";
+
   const isFallback = !me || !!error;
-  const roleTag = tags[0] ?? "Employee";
-
-  async function onPickPhoto() {
-    const id = me?.employeeId;
-    if (id == null) {
-      setToast("Sign in to update your profile photo.");
-      return;
-    }
-    const result = await pickLocalProfilePhoto(id);
-    if (result === "ok") {
-      setPhotoUri(getLocalProfilePhotoUri(id));
-      return;
-    }
-    if (result === "error") {
-      setToast("Could not select a profile image.");
-      return;
-    }
-  }
-
-  useEffect(() => {
-    if (!toast) {
-      return;
-    }
-    const timer = setTimeout(() => setToast(null), 4000);
-    return () => clearTimeout(timer);
-  }, [toast]);
 
   return (
     <ScreenGradient>
@@ -136,32 +119,51 @@ export default function ProfileSettingsScreen() {
       />
 
       <ScrollView style={styles.scrollContainer} contentContainerStyle={[styles.contentContainer, { paddingTop: topInset }]}>
-        <View style={styles.profileHero}>
-          <TouchableOpacity style={styles.avatar} onPress={() => void onPickPhoto()} activeOpacity={0.8}>
-            {photoUri ? (
-              <Image source={{ uri: photoUri }} style={styles.avatarImage} />
-            ) : (
-              <Text style={styles.avatarText}>{initials}</Text>
-            )}
-          </TouchableOpacity>
-          <View style={styles.nameRow}>
-            <Text style={styles.nameText}>{name}</Text>
-            {isFallback && <UIFallbackIndicator />}
+        {/* Profile Header Card */}
+        <View style={styles.card}>
+          <View style={styles.profileHeaderRow}>
+            <UserAvatar
+              employee={me}
+              size={72}
+              fallback="AC"
+              onPress={
+                me
+                  ? () => {
+                      void pickAndSaveProfilePhoto(me.employeeId);
+                    }
+                  : undefined
+              }
+            />
+            <View style={styles.profileInfo}>
+              <View style={styles.nameRow}>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <Text style={styles.nameText}>{name}</Text>
+                  {isFallback && <UIFallbackIndicator />}
+                </View>
+                <View style={styles.tag}>
+                  <Text style={styles.tagText}>{role.toUpperCase()}</Text>
+                </View>
+              </View>
+              <Text style={styles.empText}>EMP-{empId}</Text>
+              <View style={styles.statusRow}>
+                <Text style={styles.statusText}>{status}</Text>
+              </View>
+            </View>
           </View>
         </View>
 
+        {/* Work Information Card */}
         <View style={styles.card}>
-          <View style={styles.workHead}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
-              <Text style={styles.cardTitle}>Work Information</Text>
-              {isFallback && <UIFallbackIndicator />}
-            </View>
-            <View style={styles.tag}>
-              <View style={styles.tagDot} />
-              <Text style={styles.tagText}>{roleTag}</Text>
-            </View>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Text style={styles.cardTitle}>Work Information</Text>
+            {isFallback && <UIFallbackIndicator />}
           </View>
           <View style={styles.cardInner}>
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Role</Text>
+              <Text style={styles.infoValue}>{role}</Text>
+            </View>
+            <View style={styles.divider} />
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Department</Text>
               <Text style={styles.infoValue}>{deptFallback}</Text>
@@ -171,22 +173,20 @@ export default function ProfileSettingsScreen() {
               <Text style={styles.infoLabel}>Reporting Manager</Text>
               <Text style={styles.infoValue}>{managerFallback}</Text>
             </View>
-          </View>
-        </View>
-
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Contact Information</Text>
-          <View style={styles.cardInner}>
-            <View style={styles.contactSplit}>
-              <View style={styles.contactPane}>
-                <Text style={styles.infoLabel}>Email</Text>
-                <Text style={styles.emailValue}>{email}</Text>
-              </View>
-              <View style={styles.contactDivider} />
-              <View style={styles.contactPane}>
-                <Text style={styles.infoLabel}>Phone</Text>
-                <Text style={styles.infoValue}>{phone}</Text>
-              </View>
+            <View style={styles.divider} />
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Work Location</Text>
+              <Text style={styles.infoValue}>{locationFallback}</Text>
+            </View>
+            <View style={styles.divider} />
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Official Email</Text>
+              <Text style={styles.infoValue}>{email}</Text>
+            </View>
+            <View style={styles.divider} />
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Joining Date</Text>
+              <Text style={styles.infoValue}>{joiningDate}</Text>
             </View>
           </View>
         </View>
@@ -206,15 +206,13 @@ export default function ProfileSettingsScreen() {
           <View style={styles.cardInner}>
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Organization Timezone</Text>
-              <Text style={styles.infoValue}>{settings?.timezone ?? "Asia/Kolkata (IST)"}</Text>
+              <Text style={styles.infoValue}>{settings?.timezone ?? "America/New_York (EST / UTC-5)"}</Text>
             </View>
             <View style={styles.divider} />
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Shift Timing</Text>
               <Text style={styles.infoValue}>
-                {settings?.workStart
-                  ? `${settings.workStart} - ${settings.workEnd ?? "—"}`
-                  : "09:00 - 18:00"}
+                {settings?.workStart ?? "09:00"} - {settings?.workEnd ?? "18:00 EST"}
               </Text>
             </View>
             <View style={styles.divider} />
@@ -237,22 +235,12 @@ export default function ProfileSettingsScreen() {
             </View>
             <View style={styles.navTextContainer}>
               <Text style={styles.navTitle}>App & Account Settings</Text>
-              <Text style={styles.navSubtitle} numberOfLines={1}>Security, active session & preferences</Text>
+              <Text style={styles.navSubtitle} numberOfLines={1}>Notifications, Security, Active Devices & Preferences</Text>
             </View>
           </View>
           <MaterialIcons name="chevron-right" size={20} color={colors.secondary} />
         </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.logout}
-          onPress={async () => {
-            await logout();
-            router.replace("/login");
-          }}
-        >
-          <Text style={styles.logoutText}>Log out</Text>
-        </TouchableOpacity>
       </ScrollView>
-      <ThemedToast message={toast} />
       <EmployeeBottomNavBar activeRoute="profile" />
     </SafeAreaView>
     </ScreenGradient>
@@ -310,63 +298,43 @@ const styles = StyleSheet.create({
     elevation: 2,
     gap: 12,
   },
-  profileHero: {
+  profileHeaderRow: {
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 24,
-    gap: 12,
-    minHeight: 180,
+    gap: 16,
   },
   avatar: {
-    width: 112,
-    height: 112,
-    borderRadius: 56,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     backgroundColor: colors.surfaceContainerHigh,
     alignItems: 'center',
     justifyContent: 'center',
-    overflow: 'hidden',
-  },
-  avatarImage: {
-    width: 112,
-    height: 112,
   },
   avatarText: {
-    fontSize: 36,
-    fontWeight: '700',
+    fontSize: 20,
+    fontWeight: '600',
     color: colors.onSurface,
+  },
+  profileInfo: {
+    flex: 1,
   },
   nameRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-  },
-  nameText: {
-    fontSize: 22,
-    fontWeight: '800',
-    color: colors.onSurface,
-    textAlign: 'center',
-  },
-  workHead: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: 8,
   },
+  nameText: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: colors.onSurface,
+  },
   tag: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
     backgroundColor: colors.surfaceContainer,
     paddingHorizontal: 8,
-    paddingVertical: 4,
+    paddingVertical: 2,
     borderRadius: 12,
-  },
-  tagDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: colors.primary,
   },
   tagText: {
     fontSize: 11,
@@ -469,39 +437,5 @@ const styles = StyleSheet.create({
   navSubtitle: {
     fontSize: 12,
     color: colors.secondary,
-  },
-  emailValue: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: colors.primary,
-    textAlign: 'right',
-    flex: 1,
-  },
-  contactSplit: {
-    flexDirection: 'row',
-    alignItems: 'stretch',
-  },
-  contactPane: {
-    flex: 1,
-    gap: 4,
-  },
-  contactDivider: {
-    width: 1,
-    backgroundColor: colors.surfaceContainerHighest,
-    marginHorizontal: 12,
-  },
-  logout: {
-    minHeight: 48,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: colors.glassBorder,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.glass,
-  },
-  logoutText: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: colors.primary,
-  },
+  }
 });

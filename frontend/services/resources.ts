@@ -140,6 +140,10 @@ export function getDepartment(departmentId: number): Promise<Department> {
   return authorizedRequest<Department>(`/api/v1/departments/${departmentId}`);
 }
 
+export function listDepartments(): Promise<ItemList<Department>> {
+  return authorizedRequest<ItemList<Department>>("/api/v1/departments?page=1&pageSize=100");
+}
+
 export function getOrgSettings(): Promise<OrganisationSettings> {
   return authorizedRequest<OrganisationSettings>("/api/v1/org-settings");
 }

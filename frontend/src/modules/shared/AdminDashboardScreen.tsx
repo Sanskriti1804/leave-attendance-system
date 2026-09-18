@@ -3,7 +3,6 @@ import { View, Text, ScrollView, TouchableOpacity, SafeAreaView, TextInput } fro
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from "expo-router";
 import { getSession } from "../../../services/auth";
-import { getTodayIST } from "../../utils/date";
 import {
   displayName,
   getMe,
@@ -15,6 +14,7 @@ import {
 import { ScreenGradient } from "../../components/ui/AppChrome";
 import { TopNavBar, HROperationsCard, ContentCard, StatsCard, BottomNavBar, useTopNavContentInset } from "../../components/ui/AdminComponents";
 import { UIFallbackIndicator } from "../../components/ui/UIFallback";
+import { computeWorkforce, civilToday } from "../../utils/workforce";
 
 export default function AdminDashboardScreen() {
   const router = useRouter();
@@ -48,13 +48,12 @@ export default function AdminDashboardScreen() {
           // Keep the HR action list usable; do not surface auth/fetch errors here.
         }
         try {
-          const [pendingLeaves, submittedLeaves, approvedLeaves] = await Promise.all([
+          const [pendingLeaves, approvedLeaves] = await Promise.all([
             listLeaves("PENDING_HR_REVIEW"),
-            listLeaves("SUBMITTED"),
             listLeaves("APPROVED"),
           ]);
           if (!cancelled) {
-            setPending([...pendingLeaves.items, ...submittedLeaves.items]);
+            setPending(pendingLeaves.items);
             setApproved(approvedLeaves.items);
           }
         } catch {
@@ -75,8 +74,8 @@ export default function AdminDashboardScreen() {
     );
   }, [employees, query]);
 
-  const today = getTodayIST();
-  const onLeaveToday = approved.filter((row) => row.startDate <= today && row.endDate >= today).length;
+  const todayCivil = civilToday();
+  const workforce = useMemo(() => computeWorkforce(employees, approved, todayCivil), [employees, approved, todayCivil]);
 
   return (
     <ScreenGradient>
@@ -109,30 +108,29 @@ export default function AdminDashboardScreen() {
               <View>
                 <Text style={{ fontFamily: 'Inter', fontSize: 11, fontWeight: '600', color: '#585f6c', textTransform: 'uppercase', letterSpacing: 0.6 }}>Live Workforce</Text>
                 <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 8, marginTop: 4 }}>
-                  <Text style={{ fontFamily: 'Inter', fontSize: 30, fontWeight: '600', color: '#1c1b1b' }}>{employeeTotal ?? "67"}</Text>
+                  <Text style={{ fontFamily: 'Inter', fontSize: 30, fontWeight: '600', color: '#1c1b1b' }}>{employeeTotal === null ? "..." : workforce.active}</Text>
                   <Text style={{ fontFamily: 'Inter', fontSize: 12, fontWeight: '500', color: '#585f6c' }}>Active Entities (IN)</Text>
                   {employeeTotal === null && <UIFallbackIndicator />}
                 </View>
               </View>
               <View style={{ alignItems: 'flex-end' }}>
-                <Text style={{ fontFamily: 'Inter', fontSize: 16, fontWeight: '600', color: '#1c1b1b' }}>86.3%</Text>
+                <Text style={{ fontFamily: 'Inter', fontSize: 16, fontWeight: '600', color: '#1c1b1b' }}>{employeeTotal === null ? "..." : `${workforce.percent}%`}</Text>
                 <Text style={{ fontFamily: 'Inter', fontSize: 11, fontWeight: '700', color: '#000', textTransform: 'uppercase' }}>Net Present</Text>
               </View>
             </View>
 
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 4 }}>
               <View style={{ width: '48%' }}>
-                <StatsCard title="Present" iconName="how-to-reg" iconColor="#1c1b1b" count="62" subtitle="86.3%" borderColor="rgb(0, 168, 153)" />
+                <StatsCard title="Present" iconName="how-to-reg" iconColor="#1c1b1b" count={employeeTotal === null ? "..." : workforce.present.toString()} subtitle={`${workforce.percent}%`} borderColor="rgb(0, 168, 153)" />
               </View>
               <View style={{ width: '48%' }}>
-                <StatsCard title="On Leave" iconName="event-busy" iconColor="#1c1b1b" count={onLeaveToday > 0 ? onLeaveToday.toString() : "6"} subtitle="Approved" borderColor="rgb(38, 169, 225)" />
-                {onLeaveToday === 0 && <UIFallbackIndicator style={{ position: 'absolute', top: 8, right: 8 }} />}
+                <StatsCard title="On Leave" iconName="event-busy" iconColor="#1c1b1b" count={employeeTotal === null ? "..." : workforce.onLeave.toString()} subtitle="Approved" borderColor="rgb(38, 169, 225)" />
               </View>
               <View style={{ width: '48%' }}>
-                <StatsCard title="Absent" iconName="person-off" iconColor="#ba1a1a" countColor="#ba1a1a" count="6" subtitle=" " borderColor="rgb(239, 68, 68)" />
+                <StatsCard title="Inactive" iconName="person-off" iconColor="#ba1a1a" countColor="#ba1a1a" count={employeeTotal === null ? "..." : workforce.inactive.toString()} subtitle="Not Active" borderColor="rgb(239, 68, 68)" />
               </View>
               <View style={{ width: '48%' }}>
-                <StatsCard title="Unmarked" iconName="pending" iconColor="#585f6c" count="2" subtitle="No Punch" borderColor="rgb(107, 114, 128)" />
+                <StatsCard title="Unmarked" iconName="pending" iconColor="#585f6c" count="—" subtitle="Pending API" borderColor="rgb(107, 114, 128)" />
               </View>
             </View>
 

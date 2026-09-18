@@ -5,7 +5,9 @@ import { getSession } from "../../services/auth";
 import { apiErrorMessage, displayName, getDepartment, getEmployee, getMe, getOrgSettings, type EmployeePublic, type OrganisationSettings } from "../../services/resources";
 import { colors } from "../theme";
 import { WebCard, WebShell } from "./WebShell";
+import { UserAvatar } from "../components/ui/UserAvatar";
 import { UIFallbackIndicator } from "../components/ui/UIFallback";
+import { pickAndSaveProfilePhoto } from "../../services/profilePhoto";
 
 export default function WebProfileScreen() {
   const router = useRouter();
@@ -65,9 +67,18 @@ export default function WebProfileScreen() {
     <WebShell title="Profile" variant="employee" activeRoute="profile">
       <View style={styles.cols}>
         <WebCard style={styles.col}>
-          <View style={styles.avatar}>
-            <Text style={styles.avatarText}>{me ? `${me.firstName[0]}${me.lastName?.[0] ?? ""}`.toUpperCase() : "AC"}</Text>
-          </View>
+          <UserAvatar
+            employee={me}
+            size={72}
+            fallback="AC"
+            onPress={
+              me
+                ? () => {
+                    void pickAndSaveProfilePhoto(me.employeeId);
+                  }
+                : undefined
+            }
+          />
           <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
             <Text style={styles.name}>{name}</Text>
             {fallback ? <UIFallbackIndicator /> : null}

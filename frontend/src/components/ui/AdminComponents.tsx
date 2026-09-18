@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, ViewProps } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
@@ -6,6 +6,8 @@ import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { colors, pageGradient } from "../../theme";
 import { RoleBottomNav } from "./AppChrome";
+import { UserAvatar } from "./UserAvatar";
+import { getMe, type EmployeePublic } from "../../../services/resources";
 
 export const TOP_NAV_EXTRA_PAD = 10;
 export const TOP_NAV_INNER_HEIGHT = 72;
@@ -16,9 +18,15 @@ export function useTopNavContentInset(): number {
 }
 
 export function ProfileIcon() {
+  const [me, setMe] = useState<EmployeePublic | null>(null);
+  useEffect(() => {
+    void getMe()
+      .then(setMe)
+      .catch(() => setMe(null));
+  }, []);
   return (
     <View style={styles.profileIconContainer}>
-      <MaterialIcons name="person" size={18} color="#ffffff" />
+      <UserAvatar employee={me} size={32} fallback="HR" />
     </View>
   );
 }

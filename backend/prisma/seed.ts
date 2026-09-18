@@ -4,22 +4,22 @@ import { hashPassword } from "../src/modules/shared/utils/security.js";
 
 const ORG_CATEGORY = "organisation";
 
+async function ensureDepartment(name: string) {
+  let department = await prisma.department.findFirst({ where: { departmentName: name } });
+  if (!department) {
+    department = await prisma.department.create({ data: { departmentName: name, obsolete: false } });
+    console.log(`Created Department: ${name} (ID: ${department.departmentId})`);
+  }
+  return department;
+}
+
 async function main() {
   console.log("Seeding database with initial department and dummy employees...");
 
-  let engineeringDept = await prisma.department.findFirst({
-    where: { departmentName: "Engineering" },
-  });
-
-  if (!engineeringDept) {
-    engineeringDept = await prisma.department.create({
-      data: {
-        departmentName: "Engineering",
-        obsolete: false,
-      },
-    });
-    console.log(`Created Department: Engineering (ID: ${engineeringDept.departmentId})`);
-  }
+  const engineeringDept = await ensureDepartment("Engineering");
+  const hrDept = await ensureDepartment("Human Resources");
+  const opsDept = await ensureDepartment("Operations");
+  const productDept = await ensureDepartment("Product");
 
   const dummyEmployees = [
     {
@@ -76,6 +76,105 @@ async function main() {
       status: "ACTIVE",
       sex: "female",
       joiningDate: fromCivilDate("2025-01-06"),
+    },
+    {
+      firstName: "Farah",
+      lastName: "Khan",
+      email: "farah.hr@example.com",
+      password: "EmployeePassword123!",
+      role: "employee",
+      departmentId: hrDept.departmentId,
+      status: "ACTIVE",
+      sex: "female",
+      joiningDate: fromCivilDate("2023-11-02"),
+    },
+    {
+      firstName: "Gio",
+      lastName: "Marchetti",
+      email: "gio.ops@example.com",
+      password: "EmployeePassword123!",
+      role: "employee",
+      departmentId: opsDept.departmentId,
+      status: "ACTIVE",
+      sex: "male",
+      joiningDate: fromCivilDate("2024-04-18"),
+    },
+    {
+      firstName: "Hana",
+      lastName: "Liu",
+      email: "hana.product@example.com",
+      password: "EmployeePassword123!",
+      role: "employee",
+      departmentId: productDept.departmentId,
+      status: "ACTIVE",
+      sex: "female",
+      joiningDate: fromCivilDate("2024-09-09"),
+    },
+    {
+      firstName: "Ibrahim",
+      lastName: "Nair",
+      email: "ibrahim.eng@example.com",
+      password: "EmployeePassword123!",
+      role: "employee",
+      departmentId: engineeringDept.departmentId,
+      status: "ACTIVE",
+      sex: "male",
+      joiningDate: fromCivilDate("2025-03-12"),
+    },
+    {
+      firstName: "Jules",
+      lastName: "Okeke",
+      email: "jules.ops@example.com",
+      password: "EmployeePassword123!",
+      role: "employee",
+      departmentId: opsDept.departmentId,
+      status: "ACTIVE",
+      sex: "unspecified",
+      joiningDate: fromCivilDate("2025-05-20"),
+    },
+    {
+      firstName: "Keiko",
+      lastName: "Mori",
+      email: "keiko.product@example.com",
+      password: "EmployeePassword123!",
+      role: "employee",
+      departmentId: productDept.departmentId,
+      status: "ACTIVE",
+      sex: "female",
+      joiningDate: fromCivilDate("2025-07-01"),
+    },
+    {
+      firstName: "Leo",
+      lastName: "Anders",
+      email: "leo.hr@example.com",
+      password: "EmployeePassword123!",
+      role: "employee",
+      departmentId: hrDept.departmentId,
+      status: "ACTIVE",
+      sex: "male",
+      joiningDate: fromCivilDate("2023-06-14"),
+    },
+    {
+      firstName: "Maya",
+      lastName: "Singh",
+      email: "maya.eng@example.com",
+      password: "EmployeePassword123!",
+      role: "employee",
+      departmentId: engineeringDept.departmentId,
+      status: "ACTIVE",
+      sex: "female",
+      joiningDate: fromCivilDate("2024-02-22"),
+    },
+    {
+      firstName: "Noah",
+      lastName: "Berg",
+      email: "noah.ops@example.com",
+      password: "EmployeePassword123!",
+      role: "employee",
+      departmentId: opsDept.departmentId,
+      status: "INACTIVE",
+      sex: "male",
+      joiningDate: fromCivilDate("2022-10-03"),
     },
   ];
 
