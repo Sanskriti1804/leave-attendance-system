@@ -34,4 +34,6 @@ NOTIF-12 clock times for reminders. NOTIF-08/09/11 rows unrecoverable — do not
 
 ## Change History
 
+2026-09-18 — Employee Alerts screens show an empty state. No notification HTTP API exists; sample leave/punch events were removed so the UI does not imply live data.
+
 2026-08-27 — Extracted from source documentation.

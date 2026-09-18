@@ -112,3 +112,20 @@ export function formatDateTimeIST(
 export function getLiveClockIST(): string {
   return formatTimeIST(new Date(), true);
 }
+
+export function formatDurationMinutes(minutes: number): string {
+  const safe = Math.max(0, Math.floor(minutes));
+  return `${Math.floor(safe / 60)}h ${String(safe % 60).padStart(2, "0")}m`;
+}
+
+export function workingMinutes(
+  checkIn: string | null | undefined,
+  checkOut?: string | null,
+): number {
+  if (!checkIn) return 0;
+  const start = new Date(checkIn).getTime();
+  if (Number.isNaN(start)) return 0;
+  const end = checkOut ? new Date(checkOut).getTime() : Date.now();
+  if (Number.isNaN(end)) return 0;
+  return Math.max(0, Math.floor((end - start) / 60000));
+}

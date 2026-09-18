@@ -2,7 +2,7 @@
 
 ## Status
 
-Confirmed AT-01–05, dashboard AT-DASH-01–10, status **labels** Confirmed; qualification of statuses Clarification Required. Punch uniqueness Proposed. **Not implemented.**
+Confirmed AT-01–05, dashboard AT-DASH-01–10, status **labels** Confirmed; qualification of statuses Clarification Required. Punch uniqueness Proposed. **Implemented for employee punch, dashboard, history, and correction requests** (HR org list/PATCH exist on API; report exports not in this UI).
 
 ## Purpose
 
@@ -55,6 +55,8 @@ Overnight 18:30–02:30: pack TD-05 `work_date` = Eastern date of check-in; full
 Absent vs Missing Check-In when no punch and no leave. Exact missing in/out triggers. AT-06/07/08 vs button-disable extra.
 
 ## Change History
+
+2026-09-18 — Employee Home (mobile and web) punches via existing `/api/v1/attendance/check-in`, `/check-out`, and `/me/dashboard`. Duplicate punches stay disabled in the UI and 409 on the server. Ledger and corrections remain live.
 
 2026-09-18 — Employee attendance ledger and correction requests are live on mobile and web via existing `/api/v1/attendance` endpoints. Home punch buttons remain local simulation.
 

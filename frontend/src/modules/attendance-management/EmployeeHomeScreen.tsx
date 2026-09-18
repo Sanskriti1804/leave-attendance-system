@@ -9,19 +9,12 @@ import {
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { getSession } from "../../../services/auth";
-import {
-  apiErrorMessage,
-  getMe,
-  getOrgSettings,
-  type EmployeePublic,
-  type OrganisationSettings,
-} from "../../../services/resources";
 import { EmployeeBottomNavBar } from "../../components/ui/EmployeeComponents";
 import { ScreenGradient } from "../../components/ui/AppChrome";
 import { TopNavBar, useTopNavContentInset } from "../../components/ui/AdminComponents";
 import { colors } from "../../theme";
-import { formatDateIST, formatTimeIST } from "../../utils/date";
+import { formatDateIST, formatDurationMinutes, formatTimeIST, workingMinutes } from "../../utils/date";
+import { useTodayAttendance } from "./useTodayAttendance";
 
 export type ShiftState = "pending" | "active" | "completed";
 
@@ -31,13 +24,17 @@ export default function EmployeeHomeScreen() {
   const applyHref = (process.env.EXPO_PUBLIC_APPLY_LEAVE as string | undefined) || "/leave/apply";
   const attendanceHref = "/(tabs)/attendance";
   const correctionsHref = "/attendance-corrections";
-  const [me, setMe] = useState<EmployeePublic | null>(null);
-  const [settings, setSettings] = useState<OrganisationSettings | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  // The reference dashboard opens in the not-started state.
-  const [shiftState, setShiftState] = useState<ShiftState>("pending");
+  const {
+    settings,
+    dashboard,
+    pendingCorrections,
+    loading,
+    error,
+    punchError,
+    punching,
+    punchIn,
+    punchOut,
+  } = useTodayAttendance();
 
   // Live Running IST Server Clock (Asia/Kolkata, UTC+05:30)
   const [istClock, setIstClock] = useState("");
@@ -55,62 +52,30 @@ export default function EmployeeHomeScreen() {
     return () => clearInterval(interval);
   }, []);
 
-  // Fetch logged in employee details and settings
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const session = await getSession();
-        try {
-          const profile = await getMe();
-          if (!cancelled) {
-            setMe(profile);
-          }
-        } catch {
-          if (!cancelled) {
-            setMe((session?.user as EmployeePublic | undefined) ?? null);
-          }
-        }
-        try {
-          const org = await getOrgSettings();
-          if (!cancelled) {
-            setSettings(org);
-          }
-        } catch (err) {
-          if (!cancelled) {
-            setError(apiErrorMessage(err));
-          }
-        }
-      } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  const handleCheckIn = () => {
-    if (shiftState === "pending") {
-      setShiftState("active");
-    }
-  };
-
-  const handleCheckOut = () => {
-    if (shiftState === "active") {
-      setShiftState("completed");
-    }
-  };
+  const shiftStart = settings?.workStart ?? "09:00";
+  const shiftEnd = settings?.workEnd ?? "18:00";
+  const attendance = dashboard?.attendance ?? null;
+  const shiftState: ShiftState = attendance?.checkOut
+    ? "completed"
+    : attendance?.checkIn
+      ? "active"
+      : "pending";
+  const worked = workingMinutes(attendance?.checkIn, attendance?.checkOut);
+  const expectedMinutes = (() => {
+    const [sh, sm] = shiftStart.split(":").map(Number);
+    const [eh, em] = shiftEnd.split(":").map(Number);
+    if ([sh, sm, eh, em].some((n) => Number.isNaN(n))) return 8 * 60;
+    return Math.max(1, eh * 60 + em - (sh * 60 + sm));
+  })();
+  const progressPct = `${Math.min(100, Math.round((worked / expectedMinutes) * 100))}%`;
 
   // State-dependent presentation data formatted in IST
   const statusConfig = {
     pending: {
       icon: "info" as const,
-      text: "Scheduled shift: 09:00 IST - 18:00 IST",
-      subtext: "Ready for biometric turnstile check-in verification.",
-      checkinEnabled: true,
+      text: `Scheduled shift: ${shiftStart} - ${shiftEnd}`,
+      subtext: loading ? "Loading today's attendance…" : "Ready to check in for today.",
+      checkinEnabled: Boolean(dashboard?.canCheckIn) && !punching,
       checkinLabel: "Check In",
       checkinIcon: "fingerprint" as const,
       checkoutEnabled: false,
@@ -121,47 +86,47 @@ export default function EmployeeHomeScreen() {
       metricCheckout: "--:-- IST",
       metricCheckoutSub: "Not checked in",
       metricLate: "-- min",
-      metricLateBadge: "Scheduled",
+      metricLateBadge: dashboard?.status ?? "Scheduled",
       metricWorktime: "0h 00m",
       progressWidth: "0%",
     },
     active: {
       icon: "sensors" as const,
-      text: "Checked in at 09:05 IST via Biometric Turnstile #04",
-      subtext: "Work session logging actively against Global Ledger #IN-DEL-449",
+      text: `Checked in at ${formatTimeIST(attendance?.checkIn, false)}`,
+      subtext: `Status: ${dashboard?.status ?? "Present"}`,
       checkinEnabled: false,
       checkinLabel: "Checked In",
       checkinIcon: "check-circle" as const,
-      checkoutEnabled: true,
+      checkoutEnabled: Boolean(dashboard?.canCheckOut) && !punching,
       checkoutLabel: "Check Out",
       checkoutIcon: "logout" as const,
-      metricCheckin: "09:05 IST",
-      metricCheckinSub: "Turnstile Gate #04",
+      metricCheckin: formatTimeIST(attendance?.checkIn, false),
+      metricCheckinSub: dashboard?.status ?? "Present",
       metricCheckout: "In Progress",
       metricCheckoutSub: "Shift underway",
-      metricLate: "05 min",
-      metricLateBadge: "Grace Applied",
-      metricWorktime: "8h 57m",
-      progressWidth: "98%",
+      metricLate: `${dashboard?.lateMinutes ?? 0} min`,
+      metricLateBadge: (dashboard?.lateMinutes ?? 0) > 0 ? "Late" : "On time",
+      metricWorktime: formatDurationMinutes(worked),
+      progressWidth: progressPct,
     },
     completed: {
       icon: "task-alt" as const,
-      text: "Shift concluded. Checked out at 18:02 IST.",
-      subtext: "Timesheet calculated and reconciled for payroll export.",
+      text: `Checked out at ${formatTimeIST(attendance?.checkOut, false)}`,
+      subtext: `Status: ${dashboard?.status ?? "Present"}`,
       checkinEnabled: false,
       checkinLabel: "Checked In",
       checkinIcon: "check-circle" as const,
       checkoutEnabled: false,
       checkoutLabel: "Checked Out",
       checkoutIcon: "done-all" as const,
-      metricCheckin: "09:05 IST",
-      metricCheckinSub: "Turnstile Gate #04",
-      metricCheckout: "18:02 IST",
-      metricCheckoutSub: "Turnstile Gate #02",
-      metricLate: "05 min",
-      metricLateBadge: "Grace Applied",
-      metricWorktime: "8h 57m",
-      progressWidth: "100%",
+      metricCheckin: formatTimeIST(attendance?.checkIn, false),
+      metricCheckinSub: dashboard?.status ?? "Present",
+      metricCheckout: formatTimeIST(attendance?.checkOut, false),
+      metricCheckoutSub: "Complete",
+      metricLate: `${dashboard?.lateMinutes ?? 0} min`,
+      metricLateBadge: (dashboard?.lateMinutes ?? 0) > 0 ? "Late" : "On time",
+      metricWorktime: formatDurationMinutes(worked),
+      progressWidth: progressPct,
     },
   }[shiftState];
 
@@ -185,66 +150,18 @@ export default function EmployeeHomeScreen() {
           <Text style={styles.istTimeDisplay}>
             {istClock || "14:35:27 IST"}
           </Text>
+          <Text style={styles.syncText}>
+            Shift {shiftStart} – {shiftEnd}
+          </Text>
         </View>
 
-        <View style={styles.simulationContainer}>
-          <Text style={styles.simulationSectionTitle}>
-            SHIFT SIMULATION MODE
-          </Text>
-          <View style={styles.simulationToggleRow}>
-            <TouchableOpacity
-              style={[
-                styles.simulationTab,
-                shiftState === "pending" && styles.simulationTabActive,
-              ]}
-              onPress={() => setShiftState("pending")}
-              activeOpacity={0.7}
-            >
-              <Text
-                style={[
-                  styles.simulationTabText,
-                  shiftState === "pending" && styles.simulationTabTextActive,
-                ]}
-              >
-                Not Started
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[
-                styles.simulationTab,
-                shiftState === "active" && styles.simulationTabActive,
-              ]}
-              onPress={() => setShiftState("active")}
-              activeOpacity={0.7}
-            >
-              <Text
-                style={[
-                  styles.simulationTabText,
-                  shiftState === "active" && styles.simulationTabTextActive,
-                ]}
-              >
-                Active Shift
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[
-                styles.simulationTab,
-                shiftState === "completed" && styles.simulationTabActive,
-              ]}
-              onPress={() => setShiftState("completed")}
-              activeOpacity={0.7}
-            >
-              <Text
-                style={[
-                  styles.simulationTabText,
-                  shiftState === "completed" && styles.simulationTabTextActive,
-                ]}
-              >
-                Completed
-              </Text>
-            </TouchableOpacity>
+        <View style={styles.statusBanner}>
+          <MaterialIcons name={statusConfig.icon} size={20} color={colors.primary} />
+          <View style={{ flex: 1 }}>
+            <Text style={styles.statusTitle}>{statusConfig.text}</Text>
+            <Text style={styles.statusSubtext}>{statusConfig.subtext}</Text>
+            {error ? <Text style={styles.statusSubtext}>{error}</Text> : null}
+            {punchError ? <Text style={styles.statusSubtext}>{punchError}</Text> : null}
           </View>
         </View>
 
@@ -258,7 +175,7 @@ export default function EmployeeHomeScreen() {
                 ? styles.punchButtonPrimary
                 : styles.punchButtonDisabled,
             ]}
-            onPress={handleCheckIn}
+            onPress={() => void punchIn()}
             disabled={!statusConfig.checkinEnabled}
             activeOpacity={0.8}
           >
@@ -291,7 +208,7 @@ export default function EmployeeHomeScreen() {
                 ? styles.punchButtonPrimary
                 : styles.punchButtonDisabled,
             ]}
-            onPress={handleCheckOut}
+            onPress={() => void punchOut()}
             disabled={!statusConfig.checkoutEnabled}
             activeOpacity={0.8}
           >
@@ -321,7 +238,7 @@ export default function EmployeeHomeScreen() {
         <View style={styles.summarySection}>
           <View style={styles.sectionHeaderRow}>
             <Text style={styles.sectionHeaderTitle}>TODAY'S ATTENDANCE</Text>
-            <Text style={styles.sectionHeaderMeta}>Target: 8h 00m</Text>
+            <Text style={styles.sectionHeaderMeta}>Target: {formatDurationMinutes(expectedMinutes)}</Text>
           </View>
 
           <View style={styles.metricGrid}>
@@ -431,9 +348,11 @@ export default function EmployeeHomeScreen() {
               <Text style={styles.actionCardTitle}>View Corrections</Text>
             </View>
             <View style={styles.actionCardRightWithBadge}>
+              {pendingCorrections > 0 ? (
               <View style={styles.pendingBadge}>
-                <Text style={styles.pendingBadgeText}>1 Pending</Text>
+                <Text style={styles.pendingBadgeText}>{pendingCorrections} Pending</Text>
               </View>
+              ) : null}
               <MaterialIcons
                 name="arrow-forward"
                 size={18}

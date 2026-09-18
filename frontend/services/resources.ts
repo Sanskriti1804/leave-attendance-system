@@ -73,6 +73,18 @@ export type AttendanceRecord = {
   updatedAt: string;
 };
 
+export type AttendanceDashboard = {
+  date: string;
+  timezone: string;
+  canCheckIn: boolean;
+  canCheckOut: boolean;
+  checkedIn: boolean;
+  checkedOut: boolean;
+  status: string;
+  lateMinutes: number;
+  attendance: AttendanceRecord | null;
+};
+
 export type AttendanceHistory = {
   items: AttendanceRecord[];
   summary: {
@@ -199,6 +211,18 @@ export function listLeaves(status?: string): Promise<ItemList<LeaveApplication>>
 export function getMyAttendance(month: string, page = 1, pageSize = 10): Promise<AttendanceHistory> {
   const query = new URLSearchParams({ month, page: String(page), pageSize: String(pageSize) });
   return authorizedRequest<AttendanceHistory>(`/api/v1/attendance/me?${query.toString()}`);
+}
+
+export function getMyAttendanceDashboard(): Promise<AttendanceDashboard> {
+  return authorizedRequest<AttendanceDashboard>("/api/v1/attendance/me/dashboard");
+}
+
+export function checkInAttendance(): Promise<AttendanceRecord> {
+  return authorizedRequest<AttendanceRecord>("/api/v1/attendance/check-in", { method: "POST", body: {} });
+}
+
+export function checkOutAttendance(): Promise<AttendanceRecord> {
+  return authorizedRequest<AttendanceRecord>("/api/v1/attendance/check-out", { method: "POST", body: {} });
 }
 
 export function listMyCorrections(status?: AttendanceCorrection["status"]): Promise<CorrectionList> {

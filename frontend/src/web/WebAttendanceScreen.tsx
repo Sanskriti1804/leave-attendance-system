@@ -99,6 +99,13 @@ export default function WebAttendanceScreen() {
       {loading ? <ActivityIndicator color={colors.primary} /> : null}
       {error ? <Text style={styles.error}>{error}</Text> : null}
       <WebCard>
+        <View style={styles.row}>
+          <Text style={[styles.head, { flex: 1.2 }]}>Date</Text>
+          <Text style={[styles.head, { flex: 1 }]}>Status</Text>
+          <Text style={[styles.head, { flex: 1 }]}>In</Text>
+          <Text style={[styles.head, { flex: 1 }]}>Out</Text>
+          <Text style={[styles.head, { flex: 0.8 }]}>Late</Text>
+        </View>
         {visibleItems.map((item) => (
           <View key={item.attendanceId} style={styles.row}>
             <Text style={[styles.cell, { flex: 1.2 }]}>{item.attendanceDate}</Text>
@@ -139,6 +146,7 @@ const styles = StyleSheet.create({
   chipOnText: { fontSize: 12, fontWeight: "600", color: colors.onPrimary },
   row: { flexDirection: "row", paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: colors.surfaceContainerHighest },
   cell: { fontSize: 13, color: colors.onSurface, paddingRight: 8 },
+  head: { fontSize: 11, fontWeight: "700", color: colors.secondary, textTransform: "uppercase", paddingRight: 8 },
   meta: { fontSize: 12, color: colors.secondary, marginTop: 8 },
   error: { color: colors.error, fontSize: 13 },
 });

@@ -7,16 +7,39 @@ export type Credentials = {
 
 export type AuthSession = {
   token: string;
+  refreshToken?: string;
   email: string;
   user?: unknown;
 };
 
-let currentSession: AuthSession | null = null;
+const SESSION_KEY = "lams.auth.session";
 
-/**
- * Placeholder authentication service.
- * Replace the body of these functions with your real API calls.
- */
+let currentSession: AuthSession | null = readStoredSession();
+
+function readStoredSession(): AuthSession | null {
+  try {
+    if (typeof localStorage === "undefined") return null;
+    const raw = localStorage.getItem(SESSION_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as AuthSession;
+    if (!parsed?.token) return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+function persistSession(session: AuthSession | null): void {
+  currentSession = session;
+  try {
+    if (typeof localStorage === "undefined") return;
+    if (!session) localStorage.removeItem(SESSION_KEY);
+    else localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+  } catch {
+    // Native runtimes without localStorage keep the in-memory session only.
+  }
+}
+
 export async function login(credentials: Credentials): Promise<AuthSession> {
   if (!credentials.email || !credentials.password) {
     throw new Error("Invalid credentials.");
@@ -24,18 +47,20 @@ export async function login(credentials: Credentials): Promise<AuthSession> {
 
   const result = await apiRequest<{
     accessToken: string;
+    refreshToken?: string;
     user?: unknown;
   }>(authPath("/login"), {
     method: "POST",
     body: { email: credentials.email, password: credentials.password },
   });
 
-  currentSession = {
+  persistSession({
     token: result.accessToken,
+    refreshToken: result.refreshToken,
     email: credentials.email,
     user: result.user,
-  };
-  return currentSession;
+  });
+  return currentSession!;
 }
 
 /**
@@ -44,19 +69,27 @@ export async function login(credentials: Credentials): Promise<AuthSession> {
  * Remove or gate this before shipping to production.
  */
 export async function passLogin(): Promise<AuthSession> {
-  // TODO: Optionally hook a real "guest" / "dev" auth endpoint here.
   await new Promise((resolve) => setTimeout(resolve, 200));
-
-  currentSession = {
+  persistSession({
     token: "dev-pass-token",
     email: "developer@local",
-  };
-  return currentSession;
+  });
+  return currentSession!;
 }
 
 export async function logout(): Promise<void> {
-  // TODO: Connect your authentication API here.
-  currentSession = null;
+  const session = currentSession;
+  try {
+    if (session?.token && session.token !== "dev-pass-token") {
+      await authorizedRequest(authPath("/logout"), {
+        method: "POST",
+        body: session.refreshToken ? { refreshToken: session.refreshToken } : {},
+      });
+    }
+  } catch {
+    // Always clear the local session even if the server logout call fails.
+  }
+  persistSession(null);
 }
 
 export async function getSession(): Promise<AuthSession | null> {

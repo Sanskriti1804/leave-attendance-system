@@ -23,17 +23,15 @@ import { ScreenGradient } from "../../components/ui/AppChrome";
 import { TopNavBar, useTopNavContentInset } from "../../components/ui/AdminComponents";
 import { EmployeeBottomNavBar } from "../../components/ui/EmployeeComponents";
 
+import { colors as themeColors } from "../../theme";
+
 const colors = {
-  surface: "#fcf9f8",
-  card: "#ffffff",
-  low: "#f6f3f2",
-  container: "#f0edec",
-  high: "#ebe7e7",
-  text: "#1c1b1b",
-  secondary: "#585f6c",
-  primary: "#000000",
-  onPrimary: "#ffffff",
-  outline: "#cfc4c5",
+  ...themeColors,
+  card: themeColors.surfaceContainerLowest,
+  low: themeColors.surfaceContainerLow,
+  high: themeColors.surfaceContainerHigh,
+  container: themeColors.surfaceContainer,
+  text: themeColors.onSurface,
 };
 
 type Filter = "all" | "Present" | "Absent" | "exceptions";

@@ -1,43 +1,24 @@
 import React from "react";
 import { Text, StyleSheet } from "react-native";
+import { MaterialIcons } from "@expo/vector-icons";
 import { colors } from "../theme";
 import { WebCard, WebShell } from "./WebShell";
 
 export default function WebNotificationsScreen() {
   return (
     <WebShell title="Notifications" variant="employee" activeRoute="notifications">
-      <Text style={styles.section}>My Updates</Text>
       <WebCard>
-        <Text style={styles.title}>Leave Request Approved</Text>
-        <Text style={styles.time}>2h ago</Text>
+        <MaterialIcons name="notifications-none" size={22} color={colors.secondary} />
+        <Text style={styles.title}>No notifications yet</Text>
         <Text style={styles.copy}>
-          Your Casual Leave for Oct 21, 2026 has been authorized by S. Raman (Product Eng) and validated by HR.
+          In-app notification APIs are not implemented. This list stays empty rather than showing sample leave or punch events.
         </Text>
       </WebCard>
-      <WebCard>
-        <Text style={styles.title}>Shift Check-In Verified</Text>
-        <Text style={styles.time}>08:58 AM</Text>
-        <Text style={styles.copy}>
-          Biometric punch logged at 08:58:12 AM EST. Geofence location: New York HQ Floor 4. Shift window active.
-        </Text>
-      </WebCard>
-      <Text style={styles.section}>Yesterday</Text>
-      <WebCard>
-        <Text style={styles.title}>HR Announcement</Text>
-        <Text style={styles.copy}>
-          Corporate office will remain closed on Friday, Nov 27 for Thanksgiving weekend. Punch clocks will be set to holiday
-          bypass.
-        </Text>
-      </WebCard>
-      <Text style={styles.note}>Notification APIs are not implemented. Live feed is not available.</Text>
     </WebShell>
   );
 }
 
 const styles = StyleSheet.create({
-  section: { fontSize: 12, fontWeight: "700", color: colors.secondary, textTransform: "uppercase", letterSpacing: 0.5 },
-  title: { fontSize: 16, fontWeight: "600", color: colors.onSurface },
-  time: { fontSize: 12, color: colors.secondary, marginTop: 2 },
-  copy: { fontSize: 14, color: colors.onSurfaceVariant, marginTop: 8, lineHeight: 20, maxWidth: 720 },
-  note: { fontSize: 12, color: colors.secondary, lineHeight: 18 },
+  title: { fontSize: 18, fontWeight: "600", color: colors.onSurface, marginTop: 8 },
+  copy: { fontSize: 14, color: colors.secondary, lineHeight: 20, marginTop: 6, maxWidth: 640 },
 });
