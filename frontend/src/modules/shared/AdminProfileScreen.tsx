@@ -8,7 +8,6 @@ import {
   changePassword,
   displayName,
   getDepartment,
-  getEmployee,
   getMe,
   getOrgSettings,
   listEmployees,
@@ -39,7 +38,6 @@ export default function AdminProfileScreen() {
   const topInset = useTopNavContentInset();
   const [me, setMe] = useState<EmployeePublic | null>(null);
   const [departmentName, setDepartmentName] = useState("—");
-  const [managerName, setManagerName] = useState("—");
   const [directory, setDirectory] = useState<EmployeePublic[]>([]);
   const [settings, setSettings] = useState<OrganisationSettings | null>(null);
   const [showPassword, setShowPassword] = useState(false);
@@ -72,16 +70,6 @@ export default function AdminProfileScreen() {
             }
           } catch {
             setDepartmentName(`Dept ${profile.departmentId}`);
-          }
-        }
-        if (profile?.managerId) {
-          try {
-            const manager = await getEmployee(profile.managerId);
-            if (!cancelled) {
-              setManagerName(displayName(manager));
-            }
-          } catch {
-            setManagerName("—");
           }
         }
         try {
@@ -149,7 +137,6 @@ export default function AdminProfileScreen() {
               <View style={styles.activeTag}><Text style={styles.activeTagText}>{me?.status ?? "—"}</Text></View>
             </View>
             <InfoRow label="Department" value={departmentName} />
-            <InfoRow label="Team Lead" value={me?.managerId ? managerName : "Not assigned"} />
             <InfoRow label="Joining Date" value={me?.joiningDate ? `${formatJoining(me.joiningDate)} · Ongoing` : formatJoining(me?.joiningDate)} last />
           </View>
 

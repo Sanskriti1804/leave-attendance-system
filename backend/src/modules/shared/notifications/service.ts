@@ -90,7 +90,10 @@ export async function notifyLeaveDecision(params: {
     userId: params.employeeId,
     type: `${type}_${params.leaveId}`,
     title,
-    message: params.kind === "APPROVED" ? "Leave request approved." : "Leave request rejected.",
+    message:
+      params.kind === "APPROVED"
+        ? "Your leave request has been approved."
+        : "Your leave request has been rejected.",
   });
 }
 
@@ -121,7 +124,7 @@ export async function notifyLeaveSubmitted(params: {
     userId: params.employeeId,
     type: `LEAVE_SUBMITTED_SELF_${params.leaveId}`,
     title: "Leave submitted",
-    message: "Leave request submitted for approval.",
+    message: "Your leave request has been submitted successfully.",
   });
   if (params.status === "SUBMITTED" && params.reportingManagerEmployeeId) {
     await notifyOnce({

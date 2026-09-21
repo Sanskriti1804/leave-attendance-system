@@ -304,10 +304,9 @@ export default function AdminLeaveReviewQueueScreen() {
                 {leave.hrComments ? (
                   <View style={styles.threadBox}>
                     <Text style={styles.detailLabel}>HR NOTE</Text>
-                    <View style={styles.threadBubble}>
-                      <Text style={styles.threadAuthor}>HR OPERATIONS</Text>
-                      <Text style={styles.threadBody}>“{leave.hrComments}”</Text>
-                    </View>
+                    <Text style={styles.threadBody} numberOfLines={1}>
+                      HR Note: {leave.hrComments.length > 72 ? `${leave.hrComments.slice(0, 72).trimEnd()}...` : leave.hrComments}
+                    </Text>
                   </View>
                 ) : null}
 

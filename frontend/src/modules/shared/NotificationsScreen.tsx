@@ -7,6 +7,7 @@ import { EmployeeBottomNavBar } from "../../components/ui/EmployeeComponents";
 import { TopNavBar, useTopNavContentInset } from "../../components/ui/AdminComponents";
 import { apiErrorMessage, listMyNotifications, markNotificationRead, type AppNotification } from "../../../services/resources";
 import { formatDateTimeIST } from "../../utils/date";
+import { displayNotification } from "../../utils/notifications";
 
 export default function NotificationsScreen() {
   const topInset = useTopNavContentInset();
@@ -45,7 +46,9 @@ export default function NotificationsScreen() {
               <Text style={styles.copy}>Leave submit, approval, and rejection updates will appear here.</Text>
             </View>
           ) : null}
-          {items.map((item) => (
+          {items.map((item) => {
+              const copy = displayNotification(item);
+              return (
             <TouchableOpacity
               key={item.notificationId}
               style={[styles.card, !item.isRead && styles.unread]}
@@ -67,11 +70,12 @@ export default function NotificationsScreen() {
                 });
               }}
             >
-              <Text style={styles.title}>{item.title}</Text>
+              <Text style={styles.title}>{copy.title}</Text>
               <Text style={styles.time}>{item.createdAt ? formatDateTimeIST(item.createdAt) : ""}</Text>
-              <Text style={styles.copy}>{item.message}</Text>
+              <Text style={styles.copy}>{copy.message}</Text>
             </TouchableOpacity>
-          ))}
+              );
+          })}
         </ScrollView>
         <EmployeeBottomNavBar activeRoute="notifications" />
       </SafeAreaView>

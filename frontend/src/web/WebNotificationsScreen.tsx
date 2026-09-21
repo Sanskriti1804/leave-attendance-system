@@ -5,6 +5,7 @@ import { colors } from "../theme";
 import { WebCard, WebShell } from "./WebShell";
 import { apiErrorMessage, listMyNotifications, markNotificationRead, type AppNotification } from "../../services/resources";
 import { formatDateTimeIST } from "../utils/date";
+import { displayNotification } from "../utils/notifications";
 
 export default function WebNotificationsScreen() {
   const [items, setItems] = useState<AppNotification[]>([]);
@@ -39,7 +40,9 @@ export default function WebNotificationsScreen() {
           <Text style={styles.copy}>Leave approvals and rejections will appear here.</Text>
         </WebCard>
       ) : null}
-      {items.map((item) => (
+      {items.map((item) => {
+        const copy = displayNotification(item);
+        return (
         <TouchableOpacity
           key={item.notificationId}
           onPress={() => {
@@ -61,12 +64,13 @@ export default function WebNotificationsScreen() {
           }}
         >
           <WebCard>
-            <Text style={styles.title}>{item.isRead ? item.title : `${item.title} · unread`}</Text>
+            <Text style={styles.title}>{item.isRead ? copy.title : `${copy.title} · unread`}</Text>
             <Text style={styles.time}>{item.createdAt ? formatDateTimeIST(item.createdAt) : ""}</Text>
-            <Text style={styles.copy}>{item.message}</Text>
+            <Text style={styles.copy}>{copy.message}</Text>
           </WebCard>
         </TouchableOpacity>
-      ))}
+        );
+      })}
     </WebShell>
   );
 }

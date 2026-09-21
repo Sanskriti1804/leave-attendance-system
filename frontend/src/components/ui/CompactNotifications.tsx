@@ -9,6 +9,7 @@ import {
   type AppNotification,
 } from "../../../services/resources";
 import { formatDateTimeIST } from "../../utils/date";
+import { displayNotification } from "../../utils/notifications";
 
 export function CompactNotifications({ limit = 6 }: { limit?: number }) {
   const [items, setItems] = useState<AppNotification[]>([]);
@@ -40,7 +41,9 @@ export function CompactNotifications({ limit = 6 }: { limit?: number }) {
       {!loading && !error && items.length === 0 ? (
         <Text style={styles.meta}>No notifications yet.</Text>
       ) : null}
-      {items.map((item) => (
+      {items.map((item) => {
+        const copy = displayNotification(item);
+        return (
         <TouchableOpacity
           key={item.notificationId}
           style={styles.row}
@@ -59,15 +62,16 @@ export function CompactNotifications({ limit = 6 }: { limit?: number }) {
           <View style={[styles.dot, { backgroundColor: item.isRead ? colors.sand : colors.accent }]} />
           <View style={styles.body}>
             <Text style={styles.title} numberOfLines={1}>
-              {item.title}
+              {copy.title}
             </Text>
             <Text style={styles.copy} numberOfLines={2}>
-              {item.message}
+              {copy.message}
             </Text>
             <Text style={styles.meta}>{item.createdAt ? formatDateTimeIST(item.createdAt) : ""}</Text>
           </View>
         </TouchableOpacity>
-      ))}
+        );
+      })}
     </View>
   );
 }

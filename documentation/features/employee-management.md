@@ -50,6 +50,8 @@ Provisioning method (invite vs temp password).
 
 ## Change History
 
+2026-09-21 — Admin Profile does not show Approver. Seed assigns Alice Stone as reporting manager for employees who had none, so Employee Profile Approver is populated.
+
 2026-09-21 — HR More opens Admin Profile directly; Leave Types, Organisation Settings, password, and logout remain below the profile. Remove Team Lead closes the person dialog after PATCH so the tag clears immediately.
 
 2026-09-21 — Admin People: Designate Team Lead sets department employees’ `managerId`; Remove Team Lead clears `managerId` for that lead’s reports. No new role.

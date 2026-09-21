@@ -34,6 +34,8 @@ NOTIF-12 clock times for reminders. NOTIF-08/09/11 rows unrecoverable — do not
 
 ## Change History
 
+2026-09-21 — Employee-facing leave notification copy: submitted successfully / approved / rejected, without leave IDs. Existing event types unchanged.
+
 2026-09-21 — Notification copy is concise (submitted / requires review / approved / rejected) without leave numbers in the message. Submit also notifies the employee. Type includes leave id for dedupe.
 
 2026-09-21 — Implemented mark-read and unreadCount. Leave notification writes are isolated from leave mutation success.

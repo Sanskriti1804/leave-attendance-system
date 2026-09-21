@@ -4,7 +4,7 @@ import { useRouter } from "expo-router";
 import { getSession, logout } from "../../services/auth";
 import { CompactNotifications } from "../components/ui/CompactNotifications";
 import { isTeamLead } from "../utils/workforce";
-import { apiErrorMessage, changePassword, displayName, getDepartment, getEmployee, getMe, getOrgSettings, listEmployees, type EmployeePublic, type OrganisationSettings } from "../../services/resources";
+import { apiErrorMessage, changePassword, displayName, getDepartment, getMe, getOrgSettings, listEmployees, type EmployeePublic, type OrganisationSettings } from "../../services/resources";
 import { colors } from "../theme";
 import { WebCard, WebShell } from "./WebShell";
 import { UserAvatar } from "../components/ui/UserAvatar";
@@ -22,7 +22,6 @@ export default function WebAdminProfileScreen() {
   const router = useRouter();
   const [me, setMe] = useState<EmployeePublic | null>(null);
   const [departmentName, setDepartmentName] = useState("—");
-  const [managerName, setManagerName] = useState("—");
   const [directory, setDirectory] = useState<EmployeePublic[]>([]);
   const [settings, setSettings] = useState<OrganisationSettings | null>(null);
   const [showPassword, setShowPassword] = useState(false);
@@ -50,14 +49,6 @@ export default function WebAdminProfileScreen() {
             if (!cancelled) setDepartmentName(department.departmentName);
           } catch {
             setDepartmentName(`Dept ${profile.departmentId}`);
-          }
-        }
-        if (profile?.managerId) {
-          try {
-            const manager = await getEmployee(profile.managerId);
-            if (!cancelled) setManagerName(displayName(manager));
-          } catch {
-            setManagerName("—");
           }
         }
         try {
@@ -111,7 +102,6 @@ export default function WebAdminProfileScreen() {
             <Text style={styles.activeTag}>{me?.status ?? "—"}</Text>
           </View>
           <Text style={styles.meta}>Department: {departmentName}</Text>
-          <Text style={styles.meta}>Team Lead: {me?.managerId ? managerName : "Not assigned"}</Text>
           <Text style={styles.meta}>Joining Date: {me?.joiningDate ? `${formatJoining(me.joiningDate)} · Ongoing` : formatJoining(me?.joiningDate)}</Text>
         </WebCard>
         <WebCard style={styles.col}>

@@ -106,6 +106,11 @@ export default function WebAdminReviewScreen() {
             <Text style={[styles.meta, { flex: 2 }]} numberOfLines={2}>
               {leave.reason}
             </Text>
+            {leave.hrComments ? (
+              <Text style={[styles.meta, { flex: 2 }]} numberOfLines={1}>
+                HR Note: {leave.hrComments.length > 72 ? `${leave.hrComments.slice(0, 72).trimEnd()}...` : leave.hrComments}
+              </Text>
+            ) : null}
             {canAct && leave.status === "PENDING_HR_REVIEW" ? (
               <View style={styles.actions}>
                 <TouchableOpacity

@@ -240,6 +240,17 @@ async function main() {
     }
   }
 
+  const otherEmployees = await prisma.employee.findMany({
+    where: { role: "employee", obsolete: false, managerId: null },
+  });
+  for (const report of otherEmployees) {
+    await prisma.employee.update({
+      where: { employeeId: report.employeeId },
+      data: { managerId: alice.employeeId },
+    });
+    console.log(`Set ${report.firstName}'s manager to Alice`);
+  }
+
   const leaveTypes = await ensureDefaultLeaveTypes();
   await ensureLeavePolicies(leaveTypes);
   await ensureOrganisationSettings();

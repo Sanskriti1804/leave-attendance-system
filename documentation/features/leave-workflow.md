@@ -54,6 +54,8 @@ LV-APP-18 HR absence. Who may cancel/withdraw already approved leave.
 
 ## Change History
 
+2026-09-21 — Leave Review cards show a truncated HR Note preview when `hrComments` exists.
+
 2026-09-21 — Employee Profile shows Approver from `managerId`. Admin More tab opens Admin Profile with existing More options below. Blocked Apply Leave dates use a themed dialog. Remove Team Lead clears reports and dialog state.
 
 2026-09-21 — Dummy profile names removed (loading/empty “—” until API). Employee Profile shows Team Lead from `managerId`. Admin People can designate or remove Team Lead via PATCH `managerId`. Apply Leave range uses shared `enumerateCivilRange`; blocked dates stay unselectable with a dismissible reason toast.
