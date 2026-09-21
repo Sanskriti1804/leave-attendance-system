@@ -6,6 +6,7 @@ import {
   approveLeave,
   displayName,
   getMe,
+  downloadLeaveDocument,
   listEmployees,
   listLeaveTypes,
   listLeaves,
@@ -35,8 +36,9 @@ export default function WebAdminReviewScreen() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<number | null>(null);
-  const [rejectTarget, setRejectTarget] = useState<number | null>(null);
-  const [rejectComment, setRejectComment] = useState("");
+  const [notes, setNotes] = useState<Record<number, string>>({});
+  const [noteTarget, setNoteTarget] = useState<number | null>(null);
+  const [hrNote, setHrNote] = useState("");
 
   const canAct = me?.role === "admin";
 
@@ -102,14 +104,14 @@ export default function WebAdminReviewScreen() {
             <Text style={[styles.meta, { flex: 2 }]} numberOfLines={2}>
               {leave.reason}
             </Text>
-            {canAct && (leave.status === "PENDING_HR_REVIEW" || leave.status === "SUBMITTED") ? (
+            {canAct && leave.status === "PENDING_HR_REVIEW" ? (
               <View style={styles.actions}>
                 <TouchableOpacity
                   disabled={busyId === leave.leaveId}
                   onPress={async () => {
                     setBusyId(leave.leaveId);
                     try {
-                      await approveLeave(leave.leaveId);
+                      await approveLeave(leave.leaveId, notes[leave.leaveId]);
                       await load();
                     } catch (err) {
                       setError(apiErrorMessage(err));
@@ -120,41 +122,57 @@ export default function WebAdminReviewScreen() {
                 >
                   <Text style={styles.link}>Approve</Text>
                 </TouchableOpacity>
-                <TouchableOpacity onPress={() => setRejectTarget(leave.leaveId)}>
+                <TouchableOpacity
+                  onPress={async () => {
+                    setBusyId(leave.leaveId);
+                    try {
+                      await rejectLeave(leave.leaveId, notes[leave.leaveId]);
+                      await load();
+                    } catch (err) {
+                      Alert.alert("Could not reject", apiErrorMessage(err));
+                    } finally {
+                      setBusyId(null);
+                    }
+                  }}
+                >
                   <Text style={styles.link}>Reject</Text>
                 </TouchableOpacity>
-                <TouchableOpacity onPress={() => setRejectTarget(leave.leaveId)}>
-                  <Text style={styles.meta}>Add note</Text>
+                <TouchableOpacity onPress={() => setNoteTarget(leave.leaveId)}>
+                  <Text style={styles.meta}>Add HR Note</Text>
                 </TouchableOpacity>
+                {leave.documents?.[0] ? (
+                  <TouchableOpacity
+                    onPress={() => {
+                      const doc = leave.documents![0]!;
+                      void downloadLeaveDocument(doc.documentId, doc.fileName).catch((err) => {
+                        setError(apiErrorMessage(err));
+                      });
+                    }}
+                  >
+                    <Text style={styles.link}>Medical file</Text>
+                  </TouchableOpacity>
+                ) : null}
               </View>
             ) : null}
           </View>
         ))}
       </WebCard>
-      {rejectTarget != null ? (
+      {noteTarget != null ? (
         <WebCard>
-          <Text style={styles.name}>Reject leave #{rejectTarget}</Text>
-          <TextInput style={styles.input} value={rejectComment} onChangeText={setRejectComment} placeholder="Comment" placeholderTextColor={colors.secondary} />
+          <Text style={styles.name}>Add HR Note for leave #{noteTarget}</Text>
+          <TextInput style={styles.input} value={hrNote} onChangeText={setHrNote} placeholder="Saved only if you choose Add HR Note" placeholderTextColor={colors.secondary} />
           <View style={styles.actions}>
-            <TouchableOpacity onPress={() => setRejectTarget(null)}>
+            <TouchableOpacity onPress={() => setNoteTarget(null)}>
               <Text style={styles.meta}>Cancel</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              onPress={async () => {
-                setBusyId(rejectTarget);
-                try {
-                  await rejectLeave(rejectTarget, rejectComment.trim() || "Rejected / clarify from review queue");
-                  setRejectTarget(null);
-                  setRejectComment("");
-                  await load();
-                } catch (err) {
-                  Alert.alert("Could not reject", apiErrorMessage(err));
-                } finally {
-                  setBusyId(null);
-                }
+              onPress={() => {
+                setNotes((current) => ({ ...current, [noteTarget]: hrNote.trim() }));
+                setNoteTarget(null);
+                setHrNote("");
               }}
             >
-              <Text style={styles.link}>Confirm</Text>
+              <Text style={styles.link}>Save note</Text>
             </TouchableOpacity>
           </View>
         </WebCard>

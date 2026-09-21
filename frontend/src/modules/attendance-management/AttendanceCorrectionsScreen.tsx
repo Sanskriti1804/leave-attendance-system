@@ -8,8 +8,17 @@ import { formatDateIST, formatDateTimeIST, formatTimeIST, getTodayIST } from "..
 import { ScreenGradient } from "../../components/ui/AppChrome";
 import { TopNavBar, useTopNavContentInset } from "../../components/ui/AdminComponents";
 import { EmployeeBottomNavBar } from "../../components/ui/EmployeeComponents";
+import { colors as themeColors } from "../../theme";
 
-const colors = { surface: "#fcf9f8", card: "#ffffff", low: "#f6f3f2", container: "#f0edec", high: "#ebe7e7", text: "#1c1b1b", variant: "#4c4546", secondary: "#585f6c", primary: "#000000", onPrimary: "#ffffff", error: "#ba1a1a" };
+const colors = {
+  ...themeColors,
+  card: themeColors.surfaceContainerLowest,
+  low: themeColors.surfaceContainerLow,
+  container: themeColors.surfaceContainer,
+  high: themeColors.surfaceContainerHigh,
+  text: themeColors.onSurface,
+  variant: themeColors.onSurfaceVariant,
+};
 const types = ["Check-In & Check-Out", "Check-In Only", "Check-Out Only"] as const;
 type CorrectionType = typeof types[number];
 type Filter = "ALL" | AttendanceCorrection["status"];

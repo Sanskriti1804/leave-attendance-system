@@ -1,21 +1,29 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, ActivityIndicator } from "react-native";
 import { getSession } from "../../services/auth";
+import { useLocalSearchParams } from "expo-router";
 import {
   apiErrorMessage,
-  createLeave,
   createLeaveDraft,
   displayName,
+  getDepartment,
   getEmployee,
+  getLeave,
   getMe,
   getOrgSettings,
+  listHolidays,
   listLeaveTypes,
+  submitLeaveDraft,
+  updateLeaveDraft,
   uploadLeaveDocument,
   type EmployeePublic,
   type LeaveType,
 } from "../../services/resources";
 import { colors } from "../theme";
 import { WebCard, WebShell } from "./WebShell";
+import { UserAvatar } from "../components/ui/UserAvatar";
+import { ThemedDialog } from "../components/ui/AppChrome";
+import { addCalendarDaysIST, getTodayIST, isoWeekdayCivil } from "../utils/date";
 
 function pad2(value: number): string {
   return String(value).padStart(2, "0");
@@ -44,21 +52,28 @@ function enumerateRange(from: string, to: string): string[] {
 type DaySession = "FULL_DAY" | "FIRST_HALF" | "SECOND_HALF";
 
 export default function WebApplyLeaveScreen() {
+  const params = useLocalSearchParams<{ draftId?: string }>();
+  const parsedDraft = Number(params.draftId);
+  const editingLeaveId = Number.isInteger(parsedDraft) && parsedDraft > 0 ? parsedDraft : null;
   const [me, setMe] = useState<EmployeePublic | null>(null);
   const [managerName, setManagerName] = useState("—");
+  const [departmentName, setDepartmentName] = useState("—");
   const [types, setTypes] = useState<LeaveType[]>([]);
   const [leaveTypeId, setLeaveTypeId] = useState<number | null>(null);
   const [reason, setReason] = useState("");
-  const [fromDate, setFromDate] = useState(toCivil(new Date()));
-  const [toDate, setToDate] = useState(toCivil(new Date()));
+  const [fromDate, setFromDate] = useState(getTodayIST());
+  const [toDate, setToDate] = useState(getTodayIST());
   const [session, setSession] = useState<DaySession>("FULL_DAY");
   const [attested, setAttested] = useState(false);
   const [maxAdvanceDays, setMaxAdvanceDays] = useState(14);
+  const [weeklyOffDow, setWeeklyOffDow] = useState<number[]>([6, 7]);
+  const [holidayDates, setHolidayDates] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [pickedFile, setPickedFile] = useState<{ uri: string; name: string; type: string; blob?: Blob } | null>(null);
+  const [dialog, setDialog] = useState<{ title: string; message: string } | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -75,13 +90,35 @@ export default function WebApplyLeaveScreen() {
             } catch {
               if (!cancelled) setManagerName(`EMP-${profile.managerId}`);
             }
+          } else if (!cancelled) {
+            setManagerName("HR review");
+          }
+          if (profile.departmentId) {
+            try {
+              const department = await getDepartment(profile.departmentId);
+              if (!cancelled) setDepartmentName(department.departmentName);
+            } catch {
+              if (!cancelled) setDepartmentName(`Dept ${profile.departmentId}`);
+            }
           }
         } catch {
           if (!cancelled) setMe((sessionAuth?.user as EmployeePublic | undefined) ?? null);
         }
         try {
           const org = await getOrgSettings();
-          if (!cancelled) setMaxAdvanceDays(org.maxAdvanceDays ?? 14);
+          if (!cancelled) {
+            setMaxAdvanceDays(org.maxAdvanceDays ?? 14);
+            setWeeklyOffDow(org.weeklyOffDow?.length ? org.weeklyOffDow : [6, 7]);
+            try {
+              const today = getTodayIST();
+              const holidays = await listHolidays(today, addCalendarDaysIST(today, Math.max(org.maxAdvanceDays ?? 14, 366)));
+              if (!cancelled) {
+                setHolidayDates(new Set(holidays.items.map((row) => row.holidayDate).filter((value): value is string => Boolean(value))));
+              }
+            } catch {
+              if (!cancelled) setHolidayDates(new Set());
+            }
+          }
         } catch {
           /* keep default */
         }
@@ -95,6 +132,23 @@ export default function WebApplyLeaveScreen() {
         } catch (err) {
           if (!cancelled) setError(apiErrorMessage(err));
         }
+        if (editingLeaveId) {
+          try {
+            const draft = await getLeave(editingLeaveId);
+            if (!cancelled && draft.status === "DRAFT") {
+              setLeaveTypeId(draft.leaveTypeId);
+              setReason(draft.reason);
+              setFromDate(draft.startDate);
+              setToDate(draft.endDate);
+              const first = draft.selectedDates[0];
+              if (first && (first.session === "FIRST_HALF" || first.session === "SECOND_HALF" || first.session === "FULL_DAY")) {
+                setSession(first.session);
+              }
+            }
+          } catch (err) {
+            if (!cancelled) setError(apiErrorMessage(err));
+          }
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -102,7 +156,17 @@ export default function WebApplyLeaveScreen() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [editingLeaveId]);
+
+  const today = getTodayIST();
+  const maxDate = addCalendarDaysIST(today, maxAdvanceDays);
+
+  function isDateUnavailable(civil: string): boolean {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(civil)) return true;
+    if (civil < today || civil > maxDate) return true;
+    if (weeklyOffDow.includes(isoWeekdayCivil(civil))) return true;
+    return holidayDates.has(civil);
+  }
 
   const selectedDates = useMemo(() => enumerateRange(fromDate, toDate), [fromDate, toDate]);
 
@@ -119,6 +183,14 @@ export default function WebApplyLeaveScreen() {
       setError("Select at least one date.");
       return;
     }
+    const blocked = selectedDates.filter((date) => isDateUnavailable(date));
+    if (blocked.length > 0) {
+      setDialog({
+        title: "Date not available",
+        message: "Leave cannot include past dates, dates beyond the advance limit, weekly offs, or holidays.",
+      });
+      return;
+    }
     if (!attested) {
       setError("Manager notification attestation is required.");
       return;
@@ -127,32 +199,39 @@ export default function WebApplyLeaveScreen() {
     setError(null);
     setMessage(null);
     try {
-      const result =
-        kind === "draft"
-          ? await createLeaveDraft({
-              leaveTypeId,
-              reason: reason.trim(),
-              selectedDates: selectedDates.map((date) => ({ date, session })),
-            })
-          : await createLeave({
-              leaveTypeId,
-              reason: reason.trim(),
-              selectedDates: selectedDates.map((date) => ({ date, session })),
-            });
+      const payload = {
+        leaveTypeId,
+        reason: reason.trim(),
+        selectedDates: selectedDates.map((date) => ({ date, session })),
+      };
+      const draft = editingLeaveId
+        ? await updateLeaveDraft(editingLeaveId, payload)
+        : await createLeaveDraft(payload);
       if (pickedFile) {
         try {
-          await uploadLeaveDocument(result.leaveId, pickedFile);
+          await uploadLeaveDocument(draft.leaveId, pickedFile);
         } catch (uploadErr) {
           setError(apiErrorMessage(uploadErr));
+          return;
         }
       }
-      setMessage(
-        kind === "draft"
-          ? "Draft saved successfully."
-          : "Leave request submitted successfully.",
-      );
+      if (kind !== "draft") {
+        await submitLeaveDraft(draft.leaveId);
+      }
+      setDialog({
+        title: kind === "draft" ? "Draft saved" : "Leave submitted",
+        message:
+          kind === "draft"
+            ? "Draft saved successfully."
+            : "Leave request submitted successfully.",
+      });
     } catch (err) {
-      setError(apiErrorMessage(err));
+      const text = apiErrorMessage(err);
+      if (/overlap/i.test(text) || /LEAVE_OVERLAP/.test(text)) {
+        setDialog({ title: "Dates overlap", message: "These dates overlap an existing leave application." });
+      } else {
+        setError(text);
+      }
     } finally {
       setSubmitting(false);
     }
@@ -164,9 +243,14 @@ export default function WebApplyLeaveScreen() {
       <Text style={styles.banner}>Advance booking limit: Max {maxAdvanceDays} calendar days forward. Approver — S. Raman</Text>
       <View style={styles.cols}>
         <WebCard style={styles.col}>
-          <Text style={styles.h}>Applicant</Text>
-          <Text style={styles.body}>{me ? displayName(me) : "—"}</Text>
-          <Text style={styles.meta}>Manager: {managerName}</Text>
+          <View style={styles.applicant}>
+            <UserAvatar employee={me} size={48} fallback="—" />
+            <View>
+              <Text style={styles.body}>{me ? displayName(me) : "—"}</Text>
+              <Text style={styles.meta}>Department: {departmentName}</Text>
+              <Text style={styles.meta}>Manager: {managerName}</Text>
+            </View>
+          </View>
           <Text style={styles.h}>Leave type</Text>
           <View style={styles.wrap}>
             {types.map((type) => {
@@ -181,7 +265,9 @@ export default function WebApplyLeaveScreen() {
           <Text style={styles.h}>Dates (YYYY-MM-DD)</Text>
           <TextInput style={styles.input} value={fromDate} onChangeText={setFromDate} />
           <TextInput style={styles.input} value={toDate} onChangeText={setToDate} />
-          <Text style={styles.meta}>{selectedDates.length} day(s) selected</Text>
+          <Text style={styles.meta}>
+            Working days only. Today: {today}. Latest: {maxDate}. Weekly offs and holidays are not selectable.
+          </Text>
           <Text style={styles.h}>Session</Text>
           <View style={styles.wrap}>
             {(["FULL_DAY", "FIRST_HALF", "SECOND_HALF"] as const).map((row) => (
@@ -194,6 +280,10 @@ export default function WebApplyLeaveScreen() {
         <WebCard style={styles.col}>
           <Text style={styles.h}>Reason</Text>
           <TextInput style={[styles.input, styles.area]} value={reason} onChangeText={setReason} multiline />
+          <View style={styles.attestHead}>
+            <Text style={styles.h}>Manager notification</Text>
+            <Text style={styles.required}>Manager proof required</Text>
+          </View>
           <TouchableOpacity onPress={() => setAttested(!attested)}>
             <Text style={styles.body}>
               {attested ? "☑" : "☐"} I have notified my reporting manager and received approval for this leave.
@@ -236,6 +326,13 @@ export default function WebApplyLeaveScreen() {
           </View>
         </WebCard>
       </View>
+      <ThemedDialog
+        visible={dialog != null}
+        title={dialog?.title ?? ""}
+        message={dialog?.message}
+        onRequestClose={() => setDialog(null)}
+        actions={[{ label: "OK", onPress: () => setDialog(null), primary: true }]}
+      />
     </WebShell>
   );
 }
@@ -244,6 +341,9 @@ const styles = StyleSheet.create({
   banner: { fontSize: 13, color: colors.secondary },
   cols: { flexDirection: "row", flexWrap: "wrap", gap: 16 },
   col: { flexGrow: 1, flexBasis: 360, gap: 10 },
+  applicant: { flexDirection: "row", alignItems: "center", gap: 12 },
+  attestHead: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
+  required: { fontSize: 11, fontWeight: "700", color: colors.error },
   h: { fontSize: 14, fontWeight: "700", color: colors.onSurface, marginTop: 8 },
   body: { fontSize: 15, color: colors.onSurface },
   meta: { fontSize: 12, color: colors.secondary },

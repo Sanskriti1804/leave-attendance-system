@@ -18,7 +18,7 @@ Leave applications are implemented under `/api/v1/leaves` against Prisma integer
 | POST | `/leaves/{id}/withdraw` | Withdraw | owner |
 | POST | `/leaves/{id}/cancel` | Cancel | owner or A |
 
-Body: `{ leaveTypeId, reason, selectedDates: [{ date, session }] }` where `session` is `FULL_DAY` \| `FIRST_HALF` \| `SECOND_HALF`. `startDate` / `endDate` / `numberOfDays` are derived from selections. Overlap of `SUBMITTED` / `PENDING_HR_REVIEW` / `APPROVED` → 409 `LEAVE_OVERLAP`. Rejected overlap returns `warnings`. Advance window from organisation `maxAdvanceDays` (default `LEAVE_MAX_ADVANCE_DAYS` / 14) and organisation `timezone` (default `APP_TIMEZONE`). Medical leave uses `LeaveType.requiresMedicalDocument`, `LeavePolicy.medicalDocumentAfterDays` (fallback `medicalDocExceedsDays`), and `medicalDocOptional1To2Days`. Weekend/holiday exclusion uses org `leaveCountExcludesWeekends` / `leaveCountExcludesHolidays` plus `Holiday` rows, overridden per type when that type’s active policy has `includeWeekends` / `includeHolidays` true. Submit is blocked with `MEDICAL_DOCUMENT_REQUIRED` when a document is mandatory and none is attached to the draft. Immediate `POST /leaves` cannot attach a file in the same request.
+Body: `{ leaveTypeId, reason, selectedDates: [{ date, session }] }` where `session` is `FULL_DAY` \| `FIRST_HALF` \| `SECOND_HALF`. `startDate` / `endDate` / `numberOfDays` are derived from selections. Leave JSON includes `documents` and `statusHistory`. Status transitions write `LeaveStatusHistory` and BR-12 `AuditLog`. Overlap of `SUBMITTED` / `PENDING_HR_REVIEW` / `APPROVED` → 409 `LEAVE_OVERLAP`. Rejected overlap returns `warnings`. Advance window from organisation `maxAdvanceDays` (default `LEAVE_MAX_ADVANCE_DAYS` / 14) and organisation `timezone` (default `APP_TIMEZONE`). Medical leave uses `LeaveType.requiresMedicalDocument`, `LeavePolicy.medicalDocumentAfterDays` (fallback `medicalDocExceedsDays`), and `medicalDocOptional1To2Days`. Weekend/holiday exclusion uses org `leaveCountExcludesWeekends` / `leaveCountExcludesHolidays` plus `Holiday` rows, overridden per type when that type’s active policy has `includeWeekends` / `includeHolidays` true. Submit is blocked with `MEDICAL_DOCUMENT_REQUIRED` when a document is mandatory and none is attached to the draft. Immediate `POST /leaves` cannot attach a file in the same request.
 
 ## Leave types
 
@@ -51,6 +51,8 @@ Body: `{ leaveTypeId, reason, selectedDates: [{ date, session }] }` where `sessi
 Stored metadata: `contentType` (MIME), `fileSize` (bytes > 0), `fileType` (extension), `fileName`, `filePath` (local disk under `LEAVE_DOCUMENTS_DIR`). Cap `LEAVE_DOCUMENT_MAX_BYTES` default 10 MiB (TD-17). No retention/deletion job.
 
 ## Change History
+
+2026-09-20 — Leave list for employees includes reporting-manager queue. Leave responses include document metadata. Submit notifies manager/HR.
 
 2026-09-09 — Leave day-count reads active `LeavePolicy.includeWeekends` / `includeHolidays` from the database (org exclude flags still apply when those are false).
 2026-09-04 — Leave types CRUD and `allowedSex` eligibility consumed by leave applications.

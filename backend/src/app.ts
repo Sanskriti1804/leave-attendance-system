@@ -14,6 +14,7 @@ import leavePolicyRouter from "./modules/leave-management/leave-policies/route.j
 import leaveTypeRouter from "./modules/leave-management/leave-types/route.js";
 import attendanceRouter from "./modules/attendance-management/attendance/route.js";
 import attendanceCorrectionRouter from "./modules/attendance-management/attendance-corrections/route.js";
+import notificationRouter from "./modules/shared/notifications/route.js";
 import healthRouter from "./modules/shared/health/route.js";
 import { errorMiddleware, notFoundMiddleware } from "./modules/shared/middlewares/error.middleware.js";
 
@@ -35,6 +36,7 @@ export function createApp() {
   app.use("/api/v1/leave-types", leaveTypeRouter);
   app.use("/api/v1/attendance", attendanceRouter);
   app.use("/api/v1/attendance/corrections", attendanceCorrectionRouter);
+  app.use("/api/v1/notifications", notificationRouter);
   app.use("/health", healthRouter);
 
   app.use(notFoundMiddleware);

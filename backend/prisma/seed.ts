@@ -339,15 +339,27 @@ async function ensureOrganisationSettings() {
 async function ensureHolidays() {
   const holidays = [
     { holidayName: "New Year's Day", holidayDate: fromCivilDate("2026-01-01") },
-    { holidayName: "Independence Day", holidayDate: fromCivilDate("2026-07-04") },
-    { holidayName: "Labor Day", holidayDate: fromCivilDate("2026-09-07") },
-    { holidayName: "Thanksgiving Day", holidayDate: fromCivilDate("2026-11-26") },
+    { holidayName: "Republic Day", holidayDate: fromCivilDate("2026-01-26") },
+    { holidayName: "Holi", holidayDate: fromCivilDate("2026-03-04") },
+    { holidayName: "Independence Day", holidayDate: fromCivilDate("2026-08-15") },
+    { holidayName: "Raksha Bandhan", holidayDate: fromCivilDate("2026-08-28") },
+    { holidayName: "Gandhi Jayanti", holidayDate: fromCivilDate("2026-10-02") },
+    { holidayName: "Dussehra", holidayDate: fromCivilDate("2026-10-20") },
+    { holidayName: "Diwali", holidayDate: fromCivilDate("2026-11-08") },
+    { holidayName: "Christmas", holidayDate: fromCivilDate("2026-12-25") },
   ];
   for (const holiday of holidays) {
     const existing = await prisma.holiday.findUnique({
       where: { holidayDate: holiday.holidayDate },
     });
     if (existing) {
+      if (existing.holidayName !== holiday.holidayName) {
+        await prisma.holiday.update({
+          where: { holidayId: existing.holidayId },
+          data: { holidayName: holiday.holidayName },
+        });
+        console.log(`Updated Holiday: ${holiday.holidayName}`);
+      }
       continue;
     }
     await prisma.holiday.create({ data: holiday });

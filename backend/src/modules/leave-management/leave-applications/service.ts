@@ -9,12 +9,17 @@ import {
   isoWeekday,
   toCivilDate,
   toIsoWithIstOffset,
-  todayInTimeZone,
+  todayInIst,
 } from "../../shared/utils/dates.js";
 import { prisma } from "../../shared/db/index.js";
 import { createStatusHistory } from "../leave-status-history/repository.js";
 import { assertMedicalDocumentsForSubmit } from "../leave-documents/service.js";
-import { getCountableDateRules, getLeaveAdvanceConfig } from "../leave-policies/service.js";
+import { getLeaveAdvanceConfig, getOrganisationLeaveConfig } from "../leave-policies/service.js";
+import {
+  notifyLeaveDecision,
+  notifyLeaveSubmitted,
+  notifyMedicalDocumentRequired,
+} from "../../shared/notifications/service.js";
 import { assertEmployeeEligibleForLeaveType } from "../leave-types/service.js";
 import * as leaveRepository from "./repository.js";
 import type { LeaveWithSelections } from "./repository.js";
@@ -80,6 +85,20 @@ function toLeaveResponse(leave: LeaveWithSelections, warnings: Warning[] = []) {
       session: row.session,
       unit: Number(row.unit),
     })),
+    documents: leave.documents.map((row) => ({
+      documentId: row.documentId,
+      fileName: row.fileName,
+      fileType: row.fileType,
+      contentType: row.contentType,
+      fileSize: row.fileSize,
+    })),
+    statusHistory: leave.statusHistory.map((row) => ({
+      historyId: row.historyId,
+      oldStatus: row.oldStatus,
+      newStatus: row.newStatus,
+      reason: row.reason,
+      changedAt: toIsoWithIstOffset(row.changedAt),
+    })),
   };
   if (warnings.length > 0) {
     return { ...body, warnings };
@@ -140,46 +159,52 @@ function deriveSummary(prepared: PreparedSelection[]) {
   return { startDate, endDate, numberOfDays, durationType, halfDayType };
 }
 
-async function assertCountableDates(prepared: PreparedSelection[], leaveTypeId: number): Promise<void> {
-  const rules = await getCountableDateRules(leaveTypeId);
+async function assertCountableDates(prepared: PreparedSelection[]): Promise<void> {
+  const settings = await getOrganisationLeaveConfig();
+  const weekendDows = settings.weeklyOffDow;
   const holidayDates = new Set<string>();
-  if (rules.excludeHolidays) {
-    const holidays = await findManyHolidays({
-      from: fromCivilDate(prepared[0]!.civilDate),
-      to: fromCivilDate(prepared[prepared.length - 1]!.civilDate),
-    });
-    for (const holiday of holidays) {
-      const civil = toCivilDate(holiday.holidayDate);
-      if (civil) {
-        holidayDates.add(civil);
-      }
+  const holidays = await findManyHolidays({
+    from: fromCivilDate(prepared[0]!.civilDate),
+    to: fromCivilDate(prepared[prepared.length - 1]!.civilDate),
+  });
+  for (const holiday of holidays) {
+    const civil = toCivilDate(holiday.holidayDate);
+    if (civil) {
+      holidayDates.add(civil);
     }
   }
 
   for (const row of prepared) {
-    if (rules.excludeWeekends && rules.weekendDows.includes(isoWeekday(row.civilDate))) {
+    if (weekendDows.includes(isoWeekday(row.civilDate))) {
       throw new HttpError(
         422,
         "VALIDATION_ERROR",
-        `Selected date ${row.civilDate} falls on a weekly off and is excluded from leave`,
+        `Selected date ${row.civilDate} falls on a weekly off and cannot be used for leave`,
       );
     }
-    if (rules.excludeHolidays && holidayDates.has(row.civilDate)) {
+    if (holidayDates.has(row.civilDate)) {
       throw new HttpError(
         422,
         "VALIDATION_ERROR",
-        `Selected date ${row.civilDate} is a holiday and is excluded from leave`,
+        `Selected date ${row.civilDate} is a holiday and cannot be used for leave`,
       );
     }
   }
 }
 
 async function assertAdvanceWindow(prepared: PreparedSelection[]): Promise<void> {
-  const { timezone, maxAdvanceDays } = await getLeaveAdvanceConfig();
-  const today = todayInTimeZone(timezone);
+  const { maxAdvanceDays } = await getLeaveAdvanceConfig();
+  const today = todayInIst();
   const maxDate = addCalendarDays(today, maxAdvanceDays);
   for (const row of prepared) {
-    if (row.civilDate < today || row.civilDate > maxDate) {
+    if (row.civilDate < today) {
+      throw new HttpError(
+        422,
+        "PAST_DATE",
+        `Leave cannot be applied for past dates (${row.civilDate})`,
+      );
+    }
+    if (row.civilDate > maxDate) {
       throw new HttpError(
         422,
         "TOO_FAR_AHEAD",
@@ -378,7 +403,7 @@ async function validatePayload(
     throw new HttpError(422, "LEAVE_DAYS_ZERO", "Leave duration must be greater than zero");
   }
   await assertAdvanceWindow(prepared);
-  await assertCountableDates(prepared, body.leaveTypeId);
+  await assertCountableDates(prepared);
   const { rejectedWarnings } = await findOverlap({
     employeeId: employee.employeeId,
     prepared,
@@ -386,11 +411,18 @@ async function validatePayload(
   });
   await assertEmployeeEligibleForLeaveType(body.leaveTypeId, employee.sex);
   if (options?.requireMedicalDocuments) {
-    await assertMedicalDocumentsForSubmit({
-      leaveTypeId: body.leaveTypeId,
-      numberOfDays: summary.numberOfDays,
-      leaveId: excludeLeaveId,
-    });
+    try {
+      await assertMedicalDocumentsForSubmit({
+        leaveTypeId: body.leaveTypeId,
+        numberOfDays: summary.numberOfDays,
+        leaveId: excludeLeaveId,
+      });
+    } catch (err) {
+      if (err instanceof HttpError && err.code === "MEDICAL_DOCUMENT_REQUIRED") {
+        await notifyMedicalDocumentRequired(employee.employeeId, excludeLeaveId);
+      }
+      throw err;
+    }
   }
   return { prepared, warnings: rejectedWarnings };
 }
@@ -434,6 +466,12 @@ export async function submitNew(actor: AuthTokenPayload, body: LeaveApplicationB
       managerApprovalStatus: null,
     });
     return applySubmitTransitions(tx, draft, actor);
+  });
+  await notifyLeaveSubmitted({
+    employeeId: leave.employeeId,
+    leaveId: leave.leaveId,
+    status: leave.status,
+    reportingManagerEmployeeId: leave.reportingManagerEmployeeId,
   });
   return toLeaveResponse(leave, warnings);
 }
@@ -506,19 +544,22 @@ export async function submitDraft(actor: AuthTokenPayload, leaveId: number) {
     });
     return applySubmitTransitions(tx, updated, actor);
   });
+  await notifyLeaveSubmitted({
+    employeeId: submitted.employeeId,
+    leaveId: submitted.leaveId,
+    status: submitted.status,
+    reportingManagerEmployeeId: submitted.reportingManagerEmployeeId,
+  });
   return toLeaveResponse(submitted, warnings);
 }
 
 export async function listLeaves(actor: AuthTokenPayload, query: ListLeavesQuery) {
-  let employeeId = query.employeeId;
-  if (actor.role === "employee") {
-    employeeId = actor.employeeId;
-  } else if (query.employeeId === undefined && actor.role !== "admin" && actor.role !== "guest_admin") {
-    employeeId = actor.employeeId;
-  }
+  const isPrivileged = actor.role === "admin" || actor.role === "guest_admin";
+  const employeeId = isPrivileged ? query.employeeId : actor.employeeId;
 
   const { rows, total } = await leaveRepository.findManyLeaves({
     employeeId,
+    reportingManagerEmployeeId: isPrivileged ? undefined : actor.employeeId,
     status: query.status,
     skip: (query.page - 1) * query.pageSize,
     take: query.pageSize,
@@ -529,7 +570,7 @@ export async function listLeaves(actor: AuthTokenPayload, query: ListLeavesQuery
     items: visible.map((row) => toLeaveResponse(row)),
     page: query.page,
     pageSize: query.pageSize,
-    total: actor.role === "employee" ? total : visible.length === rows.length ? total : visible.length,
+    total: isPrivileged ? (visible.length === rows.length ? total : visible.length) : total,
   };
 }
 
@@ -570,6 +611,12 @@ export async function managerApprove(actor: AuthTokenPayload, leaveId: number, b
     });
     return next;
   });
+  await notifyLeaveSubmitted({
+    employeeId: updated.employeeId,
+    leaveId: updated.leaveId,
+    status: updated.status,
+    reportingManagerEmployeeId: updated.reportingManagerEmployeeId,
+  });
   return toLeaveResponse(updated);
 }
 
@@ -604,6 +651,11 @@ export async function managerReject(actor: AuthTokenPayload, leaveId: number, bo
       reason: body.comment ?? "MANAGER_REJECTED",
     });
     return next;
+  });
+  await notifyLeaveDecision({
+    employeeId: leave.employeeId,
+    leaveId,
+    kind: "REJECTED",
   });
   return toLeaveResponse(updated);
 }
@@ -643,6 +695,11 @@ export async function hrApprove(actor: AuthTokenPayload, leaveId: number, body: 
     });
     return next;
   });
+  await notifyLeaveDecision({
+    employeeId: leave.employeeId,
+    leaveId,
+    kind: "APPROVED",
+  });
   return toLeaveResponse(updated);
 }
 
@@ -680,6 +737,11 @@ export async function hrReject(actor: AuthTokenPayload, leaveId: number, body: R
       reason: body.comment ?? null,
     });
     return next;
+  });
+  await notifyLeaveDecision({
+    employeeId: leave.employeeId,
+    leaveId,
+    kind: "REJECTED",
   });
   return toLeaveResponse(updated);
 }

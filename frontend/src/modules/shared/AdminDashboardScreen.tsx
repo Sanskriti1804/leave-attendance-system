@@ -15,6 +15,7 @@ import { ScreenGradient } from "../../components/ui/AppChrome";
 import { TopNavBar, HROperationsCard, ContentCard, StatsCard, BottomNavBar, useTopNavContentInset } from "../../components/ui/AdminComponents";
 import { UIFallbackIndicator } from "../../components/ui/UIFallback";
 import { computeWorkforce, civilToday } from "../../utils/workforce";
+import { colors } from "../../theme";
 
 export default function AdminDashboardScreen() {
   const router = useRouter();
@@ -48,12 +49,13 @@ export default function AdminDashboardScreen() {
           // Keep the HR action list usable; do not surface auth/fetch errors here.
         }
         try {
-          const [pendingLeaves, approvedLeaves] = await Promise.all([
+          const [pendingLeaves, submittedLeaves, approvedLeaves] = await Promise.all([
             listLeaves("PENDING_HR_REVIEW"),
+            listLeaves("SUBMITTED"),
             listLeaves("APPROVED"),
           ]);
           if (!cancelled) {
-            setPending(pendingLeaves.items);
+            setPending([...pendingLeaves.items, ...submittedLeaves.items]);
             setApproved(approvedLeaves.items);
           }
         } catch {
@@ -82,7 +84,7 @@ export default function AdminDashboardScreen() {
       <SafeAreaView style={{ flex: 1 }}>
         <TopNavBar title="Admin Dashboard" />
         
-        <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingTop: topInset, paddingHorizontal: 16, paddingBottom: 100, gap: 16 }}>
+        <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingTop: topInset, paddingHorizontal: 16, paddingBottom: 112, gap: 18 }}>
           <HROperationsCard 
             name={me ? displayName(me).toUpperCase() : "PREETI KAUR"}
             role={me?.role ?? "Human Resource"}
@@ -90,14 +92,14 @@ export default function AdminDashboardScreen() {
             date={new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
           />
 
-          <View style={{ height: 1, backgroundColor: 'rgba(0,0,0,0.15)', marginVertical: 3 }} />
+          <View style={{ height: 1, backgroundColor: colors.border, marginVertical: 4 }} />
 
-          <ContentCard style={{ padding: 12, flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-            <MaterialIcons name="search" size={20} color="#585f6c" />
+          <ContentCard style={{ padding: 14, flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+            <MaterialIcons name="search" size={20} color={colors.secondary} />
             <TextInput 
-              style={{ flex: 1, fontFamily: 'Inter', fontSize: 12, color: '#1c1b1b' }}
+              style={{ flex: 1, fontFamily: 'Inter', fontSize: 14, color: colors.onSurface }}
               placeholder="Search employees, records, or departments..."
-              placeholderTextColor="#585f6c"
+              placeholderTextColor={colors.secondary}
               value={query}
               onChangeText={setQuery}
             />
@@ -106,74 +108,93 @@ export default function AdminDashboardScreen() {
           <ContentCard style={{ gap: 12 }}>
             <View style={{ flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between' }}>
               <View>
-                <Text style={{ fontFamily: 'Inter', fontSize: 11, fontWeight: '600', color: '#585f6c', textTransform: 'uppercase', letterSpacing: 0.6 }}>Live Workforce</Text>
+                <Text style={{ fontFamily: 'Inter', fontSize: 11, fontWeight: '600', color: colors.secondary, textTransform: 'uppercase', letterSpacing: 0.8 }}>Live Workforce</Text>
                 <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 8, marginTop: 4 }}>
-                  <Text style={{ fontFamily: 'Inter', fontSize: 30, fontWeight: '600', color: '#1c1b1b' }}>{employeeTotal === null ? "..." : workforce.active}</Text>
-                  <Text style={{ fontFamily: 'Inter', fontSize: 12, fontWeight: '500', color: '#585f6c' }}>Active Entities (IN)</Text>
+                  <Text style={{ fontFamily: 'Inter', fontSize: 28, fontWeight: '600', color: colors.onSurface }}>{employeeTotal === null ? "..." : workforce.active}</Text>
+                  <Text style={{ fontFamily: 'Inter', fontSize: 13, fontWeight: '500', color: colors.secondary }}>Active Entities (IN)</Text>
                   {employeeTotal === null && <UIFallbackIndicator />}
                 </View>
               </View>
               <View style={{ alignItems: 'flex-end' }}>
-                <Text style={{ fontFamily: 'Inter', fontSize: 16, fontWeight: '600', color: '#1c1b1b' }}>{employeeTotal === null ? "..." : `${workforce.percent}%`}</Text>
-                <Text style={{ fontFamily: 'Inter', fontSize: 11, fontWeight: '700', color: '#000', textTransform: 'uppercase' }}>Net Present</Text>
+                <Text style={{ fontFamily: 'Inter', fontSize: 16, fontWeight: '600', color: colors.onSurface }}>{employeeTotal === null ? "..." : `${workforce.percent}%`}</Text>
+                <Text style={{ fontFamily: 'Inter', fontSize: 11, fontWeight: '700', color: colors.secondary, textTransform: 'uppercase' }}>Net Present</Text>
               </View>
             </View>
 
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 4 }}>
               <View style={{ width: '48%' }}>
-                <StatsCard title="Present" iconName="how-to-reg" iconColor="#1c1b1b" count={employeeTotal === null ? "..." : workforce.present.toString()} subtitle={`${workforce.percent}%`} borderColor="rgb(0, 168, 153)" />
+                <StatsCard title="Present" iconName="how-to-reg" iconColor={colors.onSurface} count={employeeTotal === null ? "..." : workforce.present.toString()} subtitle={`${workforce.percent}%`} borderColor={colors.accent} />
               </View>
               <View style={{ width: '48%' }}>
-                <StatsCard title="On Leave" iconName="event-busy" iconColor="#1c1b1b" count={employeeTotal === null ? "..." : workforce.onLeave.toString()} subtitle="Approved" borderColor="rgb(38, 169, 225)" />
+                <StatsCard title="On Leave" iconName="event-busy" iconColor={colors.onSurface} count={employeeTotal === null ? "..." : workforce.onLeave.toString()} subtitle="Approved" borderColor={colors.sessionSecondHalf} />
               </View>
               <View style={{ width: '48%' }}>
-                <StatsCard title="Inactive" iconName="person-off" iconColor="#ba1a1a" countColor="#ba1a1a" count={employeeTotal === null ? "..." : workforce.inactive.toString()} subtitle="Not Active" borderColor="rgb(239, 68, 68)" />
+                <StatsCard title="Inactive" iconName="person-off" iconColor={colors.error} countColor={colors.error} count={employeeTotal === null ? "..." : workforce.inactive.toString()} subtitle="Not Active" borderColor={colors.error} />
               </View>
               <View style={{ width: '48%' }}>
-                <StatsCard title="Unmarked" iconName="pending" iconColor="#585f6c" count="—" subtitle="Pending API" borderColor="rgb(107, 114, 128)" />
+                <StatsCard title="Pending reviews" iconName="pending" iconColor={colors.secondary} count={pending.length.toString()} subtitle="Live queue" borderColor={colors.secondary} />
               </View>
             </View>
 
-            <View style={{ backgroundColor: 'rgb(222, 223, 227)', borderWidth: 1, borderColor: 'rgba(0,0,0,0.4)', borderRadius: 12, marginTop: 4, padding: 2 }}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 8 }}>
+            <View style={{ backgroundColor: colors.surfaceContainerLow, borderWidth: 1, borderColor: colors.glassBorder, borderRadius: 14, marginTop: 4, padding: 4 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 10 }}>
                  <View style={{ flexDirection: 'column' }}>
-                    <Text style={{ fontFamily: 'Inter', fontSize: 14, fontWeight: '600', color: '#1c1b1b' }}>Pending Leave Reviews</Text>
+                    <Text style={{ fontFamily: 'Inter', fontSize: 15, fontWeight: '600', color: colors.onSurface }}>Pending Leave Reviews</Text>
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-                      <Text style={{ fontFamily: 'Inter', fontSize: 11, fontWeight: '600', color: '#585f6c', textTransform: 'uppercase' }}>{pending.length} Requests</Text>
+                      <Text style={{ fontFamily: 'Inter', fontSize: 11, fontWeight: '600', color: colors.secondary, textTransform: 'uppercase' }}>{pending.length} Requests</Text>
                     </View>
                  </View>
                  <View style={{ flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
-                    <Text style={{ backgroundColor: 'rgba(0,0,0,0.08)', borderWidth: 1, borderColor: 'rgba(0,0,0,0.15)', borderRadius: 9999, fontSize: 10, fontWeight: 'bold', paddingHorizontal: 8, paddingVertical: 2, color: '#1c1b1b', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4, overflow: 'hidden' }}>{pending.length} REQ</Text>
-                    <TouchableOpacity style={{ backgroundColor: '#000', paddingHorizontal: 12, paddingVertical: 4, borderRadius: 4, minHeight: 32, alignItems: 'center', justifyContent: 'center' }} onPress={() => router.push(reviewHref as never)}>
-                       <Text style={{ fontFamily: 'Inter', fontSize: 12, fontWeight: '600', color: '#fff' }}>Review Queue</Text>
+                    <Text style={{ backgroundColor: colors.surfaceContainerHigh, borderWidth: 1, borderColor: colors.glassBorder, borderRadius: 9999, fontSize: 10, fontWeight: 'bold', paddingHorizontal: 8, paddingVertical: 2, color: colors.onSurface, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4, overflow: 'hidden' }}>{pending.length} REQ</Text>
+                    <TouchableOpacity style={{ backgroundColor: colors.primary, paddingHorizontal: 14, paddingVertical: 6, borderRadius: 10, minHeight: 34, alignItems: 'center', justifyContent: 'center' }} onPress={() => router.push(reviewHref as never)}>
+                       <Text style={{ fontFamily: 'Inter', fontSize: 12, fontWeight: '600', color: colors.onPrimary }}>Review Queue</Text>
                     </TouchableOpacity>
                  </View>
               </View>
             </View>
           </ContentCard>
 
-          <View style={{ height: 1, backgroundColor: 'rgba(0,0,0,0.15)', marginVertical: 2 }} />
+          <View style={{ height: 1, backgroundColor: colors.border, marginVertical: 2 }} />
 
           <View style={{ flexDirection: 'column', gap: 8 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 4, marginTop: 6, marginBottom: 3, gap: 4 }}>
-              <MaterialIcons name="bolt" size={16} color="#1c1b1b" />
-              <Text style={{ fontFamily: 'Inter', fontSize: 11, fontWeight: '600', textTransform: 'uppercase', color: '#1c1b1b', letterSpacing: 0.6 }}>Requires HR Action</Text>
+              <MaterialIcons name="bolt" size={16} color={colors.onSurface} />
+              <Text style={{ fontFamily: 'Inter', fontSize: 11, fontWeight: '600', textTransform: 'uppercase', color: colors.onSurface, letterSpacing: 0.8 }}>HR Quick Actions</Text>
             </View>
-
+            {[
+              { label: "Leave approval / review", route: reviewHref, icon: "assignment-turned-in" as const },
+              { label: "Leave types", route: "/leave/types", icon: "category" as const },
+              { label: "Holiday management", route: "/org-settings", icon: "event" as const },
+              { label: "Attendance corrections", route: "/attendance-corrections", icon: "rule" as const },
+              { label: "People directory", route: "/people", icon: "groups" as const },
+              { label: "Organisation settings", route: "/org-settings", icon: "tune" as const },
+            ].map((action) => (
+              <TouchableOpacity key={action.label} onPress={() => router.push(action.route as never)} activeOpacity={0.75}>
+                <ContentCard>
+                  <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+                    <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+                      <MaterialIcons name={action.icon} size={18} color={colors.onSurface} />
+                      <Text style={{ fontFamily: "Inter", fontSize: 15, fontWeight: "600", color: colors.onSurface }}>{action.label}</Text>
+                    </View>
+                    <MaterialIcons name="arrow-forward" size={16} color={colors.secondary} />
+                  </View>
+                </ContentCard>
+              </TouchableOpacity>
+            ))}
             {pending.slice(0, 5).map(leave => {
               const employee = employees.find((row) => row.employeeId === leave.employeeId);
               return (
                 <ContentCard key={leave.leaveId}>
                   <View style={{ flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between' }}>
                     <View style={{ flexDirection: 'column' }}>
-                      <Text style={{ fontFamily: 'Inter', fontSize: 16, fontWeight: '500', color: '#1c1b1b' }}>{employee ? displayName(employee) : `EMP-${leave.employeeId}`}</Text>
-                      <Text style={{ fontFamily: 'Inter', fontSize: 12, color: '#585f6c', marginTop: 2 }}>{leave.status} • {leave.numberOfDays} Days ({leave.startDate} - {leave.endDate})</Text>
+                      <Text style={{ fontFamily: 'Inter', fontSize: 16, fontWeight: '500', color: colors.onSurface }}>{employee ? displayName(employee) : `EMP-${leave.employeeId}`}</Text>
+                      <Text style={{ fontFamily: 'Inter', fontSize: 12, color: colors.secondary, marginTop: 2 }}>{leave.status} • {leave.numberOfDays} Days ({leave.startDate} - {leave.endDate})</Text>
                     </View>
                   </View>
-                  <View style={{ backgroundColor: '#f6f3f2', padding: 8, borderRadius: 4, marginTop: 12, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <Text style={{ fontFamily: 'Inter', fontSize: 12, color: '#585f6c' }}>Awaiting Review</Text>
+                  <View style={{ backgroundColor: colors.surfaceContainerLow, padding: 10, borderRadius: 10, marginTop: 12, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <Text style={{ fontFamily: 'Inter', fontSize: 12, color: colors.secondary }}>Awaiting Review</Text>
                     <TouchableOpacity onPress={() => router.push(reviewHref as never)}>
-                      <MaterialIcons name="arrow-forward" size={16} color="#585f6c" />
+                      <MaterialIcons name="arrow-forward" size={16} color={colors.secondary} />
                     </TouchableOpacity>
                   </View>
                 </ContentCard>
@@ -183,8 +204,8 @@ export default function AdminDashboardScreen() {
             {filteredEmployees.slice(0, 3).map((row) => (
               <ContentCard key={`emp-${row.employeeId}`}>
                 <View style={{ flexDirection: 'column' }}>
-                  <Text style={{ fontFamily: 'Inter', fontSize: 16, fontWeight: '500', color: '#1c1b1b' }}>{displayName(row)}</Text>
-                  <Text style={{ fontFamily: 'Inter', fontSize: 12, color: '#585f6c', marginTop: 2 }}>{row.email} · {row.role}</Text>
+                  <Text style={{ fontFamily: 'Inter', fontSize: 16, fontWeight: '500', color: colors.onSurface }}>{displayName(row)}</Text>
+                  <Text style={{ fontFamily: 'Inter', fontSize: 12, color: colors.secondary, marginTop: 2 }}>{row.email} · {row.role}</Text>
                 </View>
               </ContentCard>
             ))}

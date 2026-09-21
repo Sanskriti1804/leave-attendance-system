@@ -72,8 +72,8 @@ export function TopNavBar({
 export function HROperationsCard({ name, role, day, date }: { name: string, role: string, day: string, date: string }) {
   return (
     <LinearGradient
-      colors={['rgba(0, 168, 153, 0.15)', 'rgba(38, 169, 225, 0.12)', 'rgba(255, 255, 255, 0.7)']}
-      locations={[0, 0.5, 1]}
+      colors={['rgba(15, 118, 110, 0.10)', 'rgba(255, 255, 255, 0.92)', 'rgba(232, 238, 242, 0.7)']}
+      locations={[0, 0.55, 1]}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
       style={styles.hrCard}
@@ -114,7 +114,7 @@ interface StatsCardProps {
   onPress?: () => void;
 }
 
-export function StatsCard({ title, iconName, iconColor, count, countColor = '#1c1b1b', subtitle, borderColor, onPress }: StatsCardProps) {
+export function StatsCard({ title, iconName, iconColor, count, countColor = colors.onSurface, subtitle, borderColor, onPress }: StatsCardProps) {
   return (
     <TouchableOpacity
       activeOpacity={0.7}
@@ -187,11 +187,10 @@ const styles = StyleSheet.create({
   },
   navTitle: {
     fontFamily: 'Inter',
-    fontSize: 20,
-    fontWeight: '900',
-    textTransform: 'uppercase',
-    color: '#1c1b1b',
-    letterSpacing: -0.3,
+    fontSize: 18,
+    fontWeight: '700',
+    color: colors.onSurface,
+    letterSpacing: -0.2,
     flex: 1,
     flexShrink: 1,
   },
@@ -201,14 +200,14 @@ const styles = StyleSheet.create({
     gap: 8
   },
   hrCard: {
-    padding: 16,
+    padding: 18,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: 'rgba(0, 0, 0, 0.12)',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.06,
-    shadowRadius: 20,
+    borderColor: colors.glassBorder,
+    shadowColor: '#161616',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.04,
+    shadowRadius: 16,
     elevation: 2,
     gap: 12
   },
@@ -219,17 +218,18 @@ const styles = StyleSheet.create({
   },
   hrCardTitle: {
     fontFamily: 'Inter',
-    color: '#6B7280',
-    fontSize: 14,
+    color: colors.secondary,
+    fontSize: 11,
     fontWeight: '700',
-    letterSpacing: 0.7
+    letterSpacing: 1.2,
+    textTransform: 'uppercase',
   },
   hrCardInner: {
     padding: 12,
     borderRadius: 12,
-    backgroundColor: 'rgba(255, 255, 255, 0.55)',
+    backgroundColor: 'rgba(255, 255, 255, 0.72)',
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.8)',
+    borderColor: colors.glassBorder,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between'
@@ -242,53 +242,53 @@ const styles = StyleSheet.create({
     fontSize: 19,
     lineHeight: 24,
     fontWeight: '700',
-    color: '#000'
+    color: colors.onSurface
   },
   hrCardRole: {
     fontFamily: 'Inter',
-    fontSize: 12,
-    color: '#000',
+    fontSize: 13,
+    color: colors.onSurfaceVariant,
     marginTop: 2
   },
   hrCardDay: {
     fontFamily: 'Inter',
     fontSize: 14,
     fontWeight: '600',
-    color: '#000'
+    color: colors.onSurface
   },
   hrCardDate: {
     fontFamily: 'Inter',
     fontSize: 12,
-    fontWeight: '700',
-    color: '#000',
+    fontWeight: '600',
+    color: colors.onSurfaceVariant,
     marginTop: 2
   },
   contentCard: {
-    backgroundColor: 'rgb(222, 223, 227)',
+    backgroundColor: colors.surfaceContainerLowest,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: 'rgba(0, 0, 0, 0.15)',
-    padding: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 20 },
-    shadowOpacity: 0.1,
-    shadowRadius: 25,
-    elevation: 5,
+    borderColor: colors.glassBorder,
+    padding: 18,
+    shadowColor: '#161616',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.04,
+    shadowRadius: 16,
+    elevation: 2,
   },
   statsCard: {
-    backgroundColor: 'rgb(222, 223, 227)',
-    borderRadius: 16,
+    backgroundColor: colors.surfaceContainerLowest,
+    borderRadius: 14,
     borderWidth: 1,
-    borderLeftWidth: 4,
-    borderColor: 'rgba(0, 0, 0, 0.15)',
-    padding: 12,
-    height: 80,
+    borderLeftWidth: 3,
+    borderColor: colors.glassBorder,
+    padding: 14,
+    minHeight: 88,
     justifyContent: 'space-between',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.1,
+    shadowColor: '#161616',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.03,
     shadowRadius: 10,
-    elevation: 3,
+    elevation: 1,
   },
   statsCardHeader: {
     flexDirection: 'row',
@@ -300,7 +300,7 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: '600',
     textTransform: 'uppercase',
-    color: '#585f6c'
+    color: colors.secondary
   },
   statsCardBody: {
     flexDirection: 'row',
@@ -315,6 +315,6 @@ const styles = StyleSheet.create({
   statsCardSubtitle: {
     fontFamily: 'Inter',
     fontSize: 12,
-    color: '#585f6c'
+    color: colors.secondary
   },
 });

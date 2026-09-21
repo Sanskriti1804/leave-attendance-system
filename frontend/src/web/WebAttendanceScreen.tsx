@@ -70,11 +70,11 @@ export default function WebAttendanceScreen() {
   return (
     <WebShell title="Attendance" variant="employee" activeRoute="attendance">
       <View style={styles.top}>
-        <TouchableOpacity onPress={() => { setMonth((current) => shiftMonth(current, -1)); setPage(1); }}>
+        <TouchableOpacity onPress={() => { setMonth((current: string) => shiftMonth(current, -1)); setPage(1); }}>
           <Text style={styles.link}>Previous</Text>
         </TouchableOpacity>
         <Text style={styles.title}>{monthTitle(month)}</Text>
-        <TouchableOpacity disabled={currentMonth} onPress={() => { if (!currentMonth) { setMonth((current) => shiftMonth(current, 1)); setPage(1); } }}>
+        <TouchableOpacity disabled={currentMonth} onPress={() => { if (!currentMonth) { setMonth((current: string) => shiftMonth(current, 1)); setPage(1); } }}>
           <Text style={[styles.link, currentMonth && styles.disabled]}>Next</Text>
         </TouchableOpacity>
       </View>

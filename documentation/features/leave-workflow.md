@@ -54,5 +54,11 @@ LV-APP-18 HR absence. Who may cancel/withdraw already approved leave.
 
 ## Change History
 
+2026-09-21 — Leave status transitions write BR-12 `AuditLog` rows with `LeaveStatusHistory`.
+
+2026-09-20 — `GET /leaves` for employees includes applications where they are the reporting manager. Submit, manager-reject, and HR decisions write in-app notifications. HR approve/reject UI is limited to `PENDING_HR_REVIEW`.
+
+2026-09-18 — HR reject does not require a comment. Optional `comment` is persisted only when the reviewer sends one. Employee receives a `LEAVE_REJECTED` / `LEAVE_APPROVED` in-app notification without duplicates.
+
 2026-09-04 — In-app manager approval and HR/Admin self-leave auto-approval implemented.
 2026-08-27 — Extracted from source documentation.

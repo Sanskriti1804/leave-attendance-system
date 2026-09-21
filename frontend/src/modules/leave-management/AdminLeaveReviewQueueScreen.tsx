@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, ActivityIndicator, Alert, TextInput, Modal } from "react-native";
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, ActivityIndicator, TextInput, Modal } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { ScreenGradient } from "../../components/ui/AppChrome";
 import { BottomNavBar, TopNavBar, useTopNavContentInset } from "../../components/ui/AdminComponents";
@@ -9,6 +9,7 @@ import {
   apiErrorMessage,
   approveLeave,
   displayName,
+  downloadLeaveDocument,
   getMe,
   listEmployees,
   listLeaveTypes,
@@ -18,24 +19,7 @@ import {
   type LeaveApplication,
   type LeaveType,
 } from "../../../services/resources";
-import { UIFallbackIndicator } from "../../components/ui/UIFallback";
-
-const colors = {
-  surface: "#fcf9f8",
-  primary: "#242424",
-  onPrimary: "#ffffff",
-  surfaceContainerLowest: "#ffffff",
-  surfaceContainerLow: "#f6f3f2",
-  surfaceContainer: "#f0edec",
-  surfaceContainerHigh: "#ebe7e7",
-  surfaceContainerHighest: "#e5e2e1",
-  secondary: "#585f6c",
-  error: "#ba1a1a",
-  onSurface: "#1c1b1b",
-  onSurfaceVariant: "#4c4546",
-  glass: "rgb(222, 223, 227)",
-  glassBorder: "rgba(0, 0, 0, 0.15)",
-};
+import { colors } from "../../theme";
 
 type QueueFilter = "pending" | "medical" | "approved" | "clarify";
 
@@ -73,7 +57,6 @@ function matchesQueue(leave: LeaveApplication, type: LeaveType | undefined, filt
 export default function AdminLeaveReviewQueueScreen() {
   const topInset = useTopNavContentInset();
   const [me, setMe] = useState<EmployeePublic | null>(null);
-  const [previewGuest, setPreviewGuest] = useState(false);
   const [filter, setFilter] = useState<QueueFilter>("pending");
   const [items, setItems] = useState<LeaveApplication[]>([]);
   const [types, setTypes] = useState<LeaveType[]>([]);
@@ -81,13 +64,12 @@ export default function AdminLeaveReviewQueueScreen() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<number | null>(null);
-  const [rejectTarget, setRejectTarget] = useState<number | null>(null);
-  const [rejectComment, setRejectComment] = useState("");
-  const [noteVisible, setNoteVisible] = useState(false);
+  const [hrNote, setHrNote] = useState("");
+  const [noteLeaveId, setNoteLeaveId] = useState<number | null>(null);
+  const [notes, setNotes] = useState<Record<number, string>>({});
 
-  const actualGuest = me?.role === "guest_admin";
-  const isGuest = actualGuest || previewGuest;
-  const canAct = me?.role === "admin" && !previewGuest;
+  const isGuest = me?.role === "guest_admin";
+  const canAct = me?.role === "admin";
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -121,12 +103,6 @@ export default function AdminLeaveReviewQueueScreen() {
     void load();
   }, [load]);
 
-  useEffect(() => {
-    if (me?.role === "guest_admin") {
-      setPreviewGuest(true);
-    }
-  }, [me?.role]);
-
   const typeOf = (leaveTypeId: number) => types.find((row) => row.leaveTypeId === leaveTypeId);
 
   const employeeName = (employeeId: number) => {
@@ -145,7 +121,7 @@ export default function AdminLeaveReviewQueueScreen() {
     setBusyId(leaveId);
     setError(null);
     try {
-      await approveLeave(leaveId);
+      await approveLeave(leaveId, notes[leaveId]);
       await load();
     } catch (err) {
       setError(apiErrorMessage(err));
@@ -154,16 +130,11 @@ export default function AdminLeaveReviewQueueScreen() {
     }
   }
 
-  async function onRejectConfirm() {
-    if (rejectTarget == null) {
-      return;
-    }
-    setBusyId(rejectTarget);
+  async function onReject(leaveId: number) {
+    setBusyId(leaveId);
     setError(null);
     try {
-      await rejectLeave(rejectTarget, rejectComment.trim() || "Rejected / clarify from review queue");
-      setRejectTarget(null);
-      setRejectComment("");
+      await rejectLeave(leaveId, notes[leaveId]);
       await load();
     } catch (err) {
       setError(apiErrorMessage(err));
@@ -189,26 +160,10 @@ export default function AdminLeaveReviewQueueScreen() {
             <View style={styles.roleInfo}>
               <View style={[styles.roleDot, { backgroundColor: isGuest ? colors.error : colors.primary }]} />
               <View>
-                <View style={{ flexDirection: "row", alignItems: "center" }}>
-                  <Text style={styles.roleName}>{isGuest ? "Guest Admin (View Only)" : "HR Admin (Full Authority)"}</Text>
-                  {error ? <UIFallbackIndicator style={{ marginTop: 2 }} /> : null}
-                </View>
-                <Text style={styles.roleUser}>{error ? "Preeti Kaur" : displayName(me)}</Text>
+                <Text style={styles.roleName}>{isGuest ? "Guest Admin (View Only)" : "HR Admin (Full Authority)"}</Text>
+                <Text style={styles.roleUser}>{error ? "—" : displayName(me)}</Text>
               </View>
             </View>
-            <TouchableOpacity
-              style={styles.toggleBtn}
-              onPress={() => {
-                if (actualGuest) {
-                  Alert.alert("Guest admin", "Write actions stay disabled (AUTH-08). Preview only.");
-                  return;
-                }
-                setPreviewGuest((value) => !value);
-              }}
-            >
-              <MaterialIcons name="swap-horiz" size={16} color={colors.onSurface} />
-              <Text style={styles.toggleBtnText}>{isGuest ? "Switch to HR Admin" : "Switch to Guest"}</Text>
-            </TouchableOpacity>
           </View>
 
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.statusChips} contentContainerStyle={styles.statusChipsContent}>
@@ -274,6 +229,14 @@ export default function AdminLeaveReviewQueueScreen() {
                     <Text style={styles.detailLabel}>ATTESTED JUSTIFICATION</Text>
                     <Text style={styles.detailDesc}>{leave.reason}</Text>
                   </View>
+                  {leave.statusHistory && leave.statusHistory.length > 0 ? (
+                    <View style={styles.detailFullRow}>
+                      <Text style={styles.detailLabel}>STATUS HISTORY</Text>
+                      <Text style={styles.detailDesc}>
+                        {leave.statusHistory.map((row) => row.newStatus.replaceAll("_", " ")).join(" → ")}
+                      </Text>
+                    </View>
+                  ) : null}
                   <View style={styles.detailFullRowFlex}>
                     <MaterialIcons name="verified" size={14} color={colors.secondary} />
                     <Text style={styles.detailNote}>Direct Manager notified / Self-attested</Text>
@@ -302,10 +265,22 @@ export default function AdminLeaveReviewQueueScreen() {
                         </View>
                       </View>
                       {canAct ? (
-                        <View style={styles.downloadBtn}>
+                        <TouchableOpacity
+                          style={styles.downloadBtn}
+                          onPress={() => {
+                            const doc = leave.documents?.[0];
+                            if (!doc) {
+                              setError("No medical file is attached to this application.");
+                              return;
+                            }
+                            void downloadLeaveDocument(doc.documentId, doc.fileName).catch((err) => {
+                              setError(apiErrorMessage(err));
+                            });
+                          }}
+                        >
                           <MaterialIcons name="download" size={16} color={colors.onPrimary} />
-                          <Text style={styles.downloadBtnText}>HR ONLY</Text>
-                        </View>
+                          <Text style={styles.downloadBtnText}>Download</Text>
+                        </TouchableOpacity>
                       ) : null}
                     </View>
                   </View>
@@ -321,19 +296,19 @@ export default function AdminLeaveReviewQueueScreen() {
                   </View>
                 ) : null}
 
-                {canAct && (leave.status === "PENDING_HR_REVIEW" || leave.status === "SUBMITTED") ? (
+                {canAct && leave.status === "PENDING_HR_REVIEW" ? (
                   <View style={styles.actionsBox}>
                     <View style={styles.actionRow}>
                       <TouchableOpacity style={styles.approveBtn} onPress={() => void onApprove(leave.leaveId)} disabled={busyId === leave.leaveId}>
                         <MaterialIcons name="done-all" size={18} color={colors.onPrimary} />
                         <Text style={styles.approveBtnText}>{busyId === leave.leaveId ? "..." : "Approve Leave"}</Text>
                       </TouchableOpacity>
-                      <TouchableOpacity style={styles.rejectBtn} onPress={() => setRejectTarget(leave.leaveId)} disabled={busyId === leave.leaveId}>
+                      <TouchableOpacity style={styles.rejectBtn} onPress={() => void onReject(leave.leaveId)} disabled={busyId === leave.leaveId}>
                         <MaterialIcons name="close" size={18} color={colors.onSurface} />
                         <Text style={styles.rejectBtnText}>Reject</Text>
                       </TouchableOpacity>
                     </View>
-                    <TouchableOpacity style={styles.noteBtn} onPress={() => setNoteVisible(true)}>
+                    <TouchableOpacity style={styles.noteBtn} onPress={() => { setNoteLeaveId(leave.leaveId); setHrNote(notes[leave.leaveId] ?? ""); }}>
                       <MaterialIcons name="note-add" size={16} color={colors.secondary} />
                       <Text style={styles.noteBtnText}>Add HR Note</Text>
                     </TouchableOpacity>
@@ -360,37 +335,34 @@ export default function AdminLeaveReviewQueueScreen() {
         </ScrollView>
         <BottomNavBar activeRoute="leave" />
 
-        <Modal visible={rejectTarget != null} transparent animationType="fade" onRequestClose={() => setRejectTarget(null)}>
+        <Modal visible={noteLeaveId != null} transparent animationType="fade" onRequestClose={() => setNoteLeaveId(null)}>
           <View style={styles.modalBackdrop}>
             <View style={styles.modalCard}>
-              <Text style={styles.empName}>Reject</Text>
+              <Text style={styles.empName}>Add HR Note</Text>
               <TextInput
                 style={styles.reasonInput}
                 multiline
-                value={rejectComment}
-                onChangeText={setRejectComment}
-                placeholder="HR comment (optional)"
+                value={hrNote}
+                onChangeText={setHrNote}
+                placeholder="Note is sent only if you save it here, then approve or reject."
                 placeholderTextColor={colors.secondary}
               />
               <View style={styles.actionRow}>
-                <TouchableOpacity style={styles.rejectBtn} onPress={() => setRejectTarget(null)}>
+                <TouchableOpacity style={styles.rejectBtn} onPress={() => setNoteLeaveId(null)}>
                   <Text style={styles.rejectBtnText}>Cancel</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.approveBtn} onPress={() => void onRejectConfirm()}>
-                  <Text style={styles.approveBtnText}>Send</Text>
+                <TouchableOpacity
+                  style={styles.approveBtn}
+                  onPress={() => {
+                    if (noteLeaveId != null) {
+                      setNotes((current) => ({ ...current, [noteLeaveId]: hrNote.trim() }));
+                    }
+                    setNoteLeaveId(null);
+                  }}
+                >
+                  <Text style={styles.approveBtnText}>Save note</Text>
                 </TouchableOpacity>
               </View>
-            </View>
-          </View>
-        </Modal>
-        <Modal visible={noteVisible} transparent animationType="fade" onRequestClose={() => setNoteVisible(false)}>
-          <View style={styles.modalBackdrop}>
-            <View style={styles.modalCard}>
-              <Text style={styles.empName}>HR Note</Text>
-              <Text style={styles.empRole}>HR notes are not stored yet (audit API pending). This control matches the Stitch layout only.</Text>
-              <TouchableOpacity style={styles.approveBtn} onPress={() => setNoteVisible(false)}>
-                <Text style={styles.approveBtnText}>Got it</Text>
-              </TouchableOpacity>
             </View>
           </View>
         </Modal>
@@ -418,7 +390,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     padding: 8,
-    backgroundColor: colors.glass,
+    backgroundColor: colors.surfaceContainerLowest,
     borderRadius: 16,
     borderWidth: 1,
     borderColor: colors.glassBorder,
@@ -464,7 +436,7 @@ const styles = StyleSheet.create({
   chipBadgeInactive: { backgroundColor: colors.surfaceContainerHigh, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4 },
   chipBadgeTextInactive: { fontSize: 11, color: colors.onSurface },
   card: {
-    backgroundColor: colors.glass,
+    backgroundColor: colors.surfaceContainerLowest,
     borderRadius: 16,
     padding: 16,
     gap: 16,
@@ -486,7 +458,7 @@ const styles = StyleSheet.create({
   empRole: { fontSize: 12, color: colors.secondary },
   clarifyBadge: { flexDirection: "row", alignItems: "center", gap: 4, backgroundColor: colors.surfaceContainerHigh, paddingHorizontal: 8, paddingVertical: 4, borderRadius: 4 },
   clarifyBadgeText: { fontSize: 11, fontWeight: "600", color: colors.onSurface },
-  detailsMatrix: { flexDirection: "row", flexWrap: "wrap", padding: 12, backgroundColor: colors.glass, borderRadius: 8, gap: 8, borderWidth: 1, borderColor: colors.glassBorder },
+  detailsMatrix: { flexDirection: "row", flexWrap: "wrap", padding: 12, backgroundColor: colors.surfaceContainerLowest, borderRadius: 8, gap: 8, borderWidth: 1, borderColor: colors.glassBorder },
   detailItem: { width: "48%" },
   detailFullRow: { width: "100%", marginTop: 8 },
   detailFullRowFlex: { width: "100%", flexDirection: "row", alignItems: "center", gap: 4, marginTop: 8 },
@@ -494,7 +466,7 @@ const styles = StyleSheet.create({
   detailValue: { fontSize: 12, fontWeight: "500", color: colors.onSurface },
   detailDesc: { fontSize: 12, color: colors.onSurface, lineHeight: 16 },
   detailNote: { fontSize: 12, color: colors.secondary },
-  attachmentBox: { padding: 12, backgroundColor: colors.glass, borderRadius: 8, gap: 12, borderWidth: 1, borderColor: colors.glassBorder },
+  attachmentBox: { padding: 12, backgroundColor: colors.surfaceContainerLowest, borderRadius: 8, gap: 12, borderWidth: 1, borderColor: colors.glassBorder },
   attachmentHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
   attachmentTitleRow: { flexDirection: "row", alignItems: "center", gap: 8 },
   attachmentTitle: { fontSize: 11, fontWeight: "600", color: colors.onSurface, letterSpacing: 0.5 },
@@ -508,7 +480,7 @@ const styles = StyleSheet.create({
   downloadBtn: { flexDirection: "row", alignItems: "center", backgroundColor: colors.primary, paddingHorizontal: 12, height: 44, borderRadius: 4, gap: 4 },
   downloadBtnText: { fontSize: 11, fontWeight: "600", color: colors.onPrimary },
   threadBox: { gap: 8 },
-  threadBubble: { padding: 8, backgroundColor: colors.glass, borderRadius: 8, borderWidth: 1, borderColor: colors.glassBorder, gap: 4 },
+  threadBubble: { padding: 8, backgroundColor: colors.surfaceContainerLowest, borderRadius: 8, borderWidth: 1, borderColor: colors.glassBorder, gap: 4 },
   threadAuthor: { fontSize: 11, fontWeight: "600", color: colors.onSurface },
   threadBody: { fontSize: 12, fontStyle: "italic", color: colors.onSurface },
   actionsBox: { gap: 8, marginTop: 8 },
@@ -526,6 +498,6 @@ const styles = StyleSheet.create({
   readOnlyBadge: { backgroundColor: colors.surfaceContainerHighest, paddingHorizontal: 8, paddingVertical: 4, borderRadius: 4 },
   readOnlyText: { fontSize: 11, fontWeight: "600", color: colors.secondary },
   modalBackdrop: { flex: 1, backgroundColor: "rgba(49,48,48,0.6)", justifyContent: "center", padding: 16 },
-  modalCard: { backgroundColor: colors.glass, borderRadius: 16, padding: 16, gap: 12, borderWidth: 1, borderColor: colors.glassBorder },
+  modalCard: { backgroundColor: colors.surfaceContainerLowest, borderRadius: 16, padding: 16, gap: 12, borderWidth: 1, borderColor: colors.glassBorder },
   reasonInput: { backgroundColor: colors.surfaceContainerLow, color: colors.onSurface, fontSize: 14, borderRadius: 8, padding: 12, minHeight: 80, textAlignVertical: "top" },
 });

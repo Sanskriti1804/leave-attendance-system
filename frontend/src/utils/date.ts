@@ -21,6 +21,18 @@ export function getTodayIST(): string {
   return formatCivilDateIST(new Date());
 }
 
+export function addCalendarDaysIST(civilDate: string, days: number): string {
+  const date = new Date(`${civilDate}T00:00:00.000Z`);
+  date.setUTCDate(date.getUTCDate() + days);
+  return date.toISOString().slice(0, 10);
+}
+
+/** ISO weekday: 1 = Monday … 7 = Sunday. Matches backend `isoWeekday`. */
+export function isoWeekdayCivil(civilDate: string): number {
+  const utcDay = new Date(`${civilDate}T00:00:00.000Z`).getUTCDay();
+  return utcDay === 0 ? 7 : utcDay;
+}
+
 /**
  * Formats a Date or ISO string in IST time.
  * e.g., "14:35:27 IST" or "14:35 IST"

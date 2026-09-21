@@ -9,6 +9,13 @@ import { UserAvatar } from "../components/ui/UserAvatar";
 import { UIFallbackIndicator } from "../components/ui/UIFallback";
 import { pickAndSaveProfilePhoto } from "../../services/profilePhoto";
 
+function formatJoining(value: string | null | undefined): string {
+  if (!value) return "—";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
+}
+
 export default function WebProfileScreen() {
   const router = useRouter();
   const [me, setMe] = useState<EmployeePublic | null>(null);
@@ -65,34 +72,38 @@ export default function WebProfileScreen() {
 
   return (
     <WebShell title="Profile" variant="employee" activeRoute="profile">
+      <View style={styles.heroBlock}>
+        <UserAvatar
+          employee={me}
+          size={96}
+          fallback="AC"
+          onPress={me ? () => { void pickAndSaveProfilePhoto(me.employeeId); } : undefined}
+        />
+        <Text style={styles.name}>{name}</Text>
+        {fallback ? <UIFallbackIndicator /> : null}
+      </View>
       <View style={styles.cols}>
         <WebCard style={styles.col}>
-          <UserAvatar
-            employee={me}
-            size={72}
-            fallback="AC"
-            onPress={
-              me
-                ? () => {
-                    void pickAndSaveProfilePhoto(me.employeeId);
-                  }
-                : undefined
-            }
-          />
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-            <Text style={styles.name}>{name}</Text>
-            {fallback ? <UIFallbackIndicator /> : null}
+          <View style={styles.cardHead}>
+            <Text style={styles.h}>Work Information</Text>
+            <Text style={styles.activeTag}>{me?.status ?? "Active"}</Text>
           </View>
-          <Text style={styles.tag}>{(me?.role ?? "employee").toUpperCase()}</Text>
-          <Text style={styles.meta}>EMP-{me?.employeeId ?? "8492"} · {me?.status ?? "Active"}</Text>
-        </WebCard>
-        <WebCard style={styles.col}>
-          <Text style={styles.h}>Work Information</Text>
-          <Row label="Role" value={me?.role ?? "Senior Software Engineer"} />
           <Row label="Department" value={departmentName} />
           <Row label="Reporting Manager" value={managerName} />
-          <Row label="Official Email" value={me?.email ?? "—"} />
-          <Row label="Joining Date" value={me?.joiningDate ?? "—"} />
+          <Row label="Joining Date" value={me?.joiningDate ? `${formatJoining(me.joiningDate)} · Ongoing` : formatJoining(me?.joiningDate)} />
+        </WebCard>
+        <WebCard style={styles.col}>
+          <View style={styles.contactRow}>
+            <View style={styles.contactCol}>
+              <Text style={styles.label}>Email</Text>
+              <Text style={styles.value}>{me?.email ?? "—"}</Text>
+            </View>
+            <View style={styles.contactDivider} />
+            <View style={styles.contactCol}>
+              <Text style={styles.label}>Phone</Text>
+              <Text style={styles.value}>{me?.phone ?? "—"}</Text>
+            </View>
+          </View>
         </WebCard>
         <WebCard style={styles.col}>
           <Text style={styles.h}>Attendance & Work Schedule</Text>
@@ -118,11 +129,17 @@ function Row({ label, value }: { label: string; value: string }) {
 
 const styles = StyleSheet.create({
   cols: { flexDirection: "row", flexWrap: "wrap", gap: 16 },
-  col: { flexGrow: 1, flexBasis: 280 },
+  col: { flexGrow: 1, flexBasis: 280, padding: 16 },
+  heroBlock: { alignItems: "center", gap: 12, paddingVertical: 16 },
   avatar: { width: 72, height: 72, borderRadius: 36, backgroundColor: colors.surfaceContainerHigh, alignItems: "center", justifyContent: "center", marginBottom: 12 },
   avatarText: { fontSize: 22, fontWeight: "700", color: colors.onSurface },
-  name: { fontSize: 22, fontWeight: "700", color: colors.onSurface },
+  name: { fontSize: 22, fontWeight: "700", color: colors.onSurface, textAlign: "center" },
   tag: { marginTop: 8, alignSelf: "flex-start", backgroundColor: colors.surfaceContainer, paddingHorizontal: 8, paddingVertical: 4, borderRadius: 12, fontSize: 11, fontWeight: "700" },
+  activeTag: { backgroundColor: colors.primary, color: colors.onPrimary, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4, fontSize: 11, fontWeight: "700", overflow: "hidden", textTransform: "uppercase" },
+  cardHead: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 8 },
+  contactRow: { flexDirection: "row", alignItems: "stretch", minHeight: 56 },
+  contactCol: { flex: 1, gap: 4, justifyContent: "center" },
+  contactDivider: { width: 1, backgroundColor: colors.surfaceContainerHighest, marginHorizontal: 16 },
   meta: { fontSize: 12, color: colors.secondary, marginTop: 6 },
   h: { fontSize: 16, fontWeight: "700", color: colors.onSurface, marginBottom: 8 },
   row: { flexDirection: "row", justifyContent: "space-between", paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: colors.surfaceContainerHighest, gap: 12 },

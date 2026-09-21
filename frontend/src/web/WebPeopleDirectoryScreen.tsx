@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { View, Text, StyleSheet, TextInput, ActivityIndicator } from "react-native";
+import { View, Text, StyleSheet, TextInput, ActivityIndicator, TouchableOpacity } from "react-native";
 import { getSession } from "../../services/auth";
 import {
   displayName,
@@ -76,17 +76,16 @@ export default function WebPeopleDirectoryScreen() {
       {groups.map(([department, people]) => (
         <WebCard key={department}>
           <Text style={styles.group}>{department} · {people.length}</Text>
-          {people.map((row) => (
-            <View key={row.employeeId} style={styles.tr}>
-              <UserAvatar employee={row} size={36} />
-              <View style={{ flex: 1.4 }}>
+          <View style={styles.grid}>
+            {people.map((row) => (
+              <TouchableOpacity key={row.employeeId} style={styles.personCard} activeOpacity={0.8}>
+                <UserAvatar employee={row} size={40} />
                 <Text style={styles.name}>{displayName(row)}</Text>
                 <Text style={styles.meta}>{row.email}</Text>
-              </View>
-              <Text style={[styles.td, { flex: 0.8 }]}>EMP-{row.employeeId}</Text>
-              <Text style={[styles.td, { flex: 1 }]}>{row.role.replaceAll("_", " ")}</Text>
-            </View>
-          ))}
+                <Text style={styles.td}>EMP-{row.employeeId} · {row.role.replaceAll("_", " ")}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
         </WebCard>
       ))}
       {!loading && groups.length === 0 ? <Text style={styles.meta}>No people match this search.</Text> : null}
@@ -98,7 +97,16 @@ const styles = StyleSheet.create({
   search: { backgroundColor: "#fff", borderRadius: 10, borderWidth: 1, borderColor: colors.border, paddingHorizontal: 12, minHeight: 44, color: colors.onSurface },
   meta: { fontSize: 12, color: colors.secondary },
   group: { fontSize: 12, fontWeight: "700", color: colors.secondary, textTransform: "uppercase", marginBottom: 8 },
-  tr: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: colors.surfaceContainerHighest },
+  grid: { flexDirection: "row", flexWrap: "wrap", gap: 12 },
+  personCard: {
+    flexGrow: 1,
+    flexBasis: 180,
+    maxWidth: 280,
+    backgroundColor: colors.surfaceContainerLow,
+    borderRadius: 12,
+    padding: 12,
+    gap: 6,
+  },
   name: { fontSize: 14, fontWeight: "700", color: colors.onSurface },
   td: { fontSize: 13, color: colors.onSurface },
 });

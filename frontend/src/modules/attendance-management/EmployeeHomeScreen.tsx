@@ -479,8 +479,10 @@ const styles = StyleSheet.create({
   },
   clockCard: {
     backgroundColor: colors.surfaceContainerLowest,
-    padding: 16,
-    borderRadius: 8,
+    padding: 18,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: colors.glassBorder,
     alignItems: "center",
     justifyContent: "center",
     shadowColor: "#000",
@@ -576,10 +578,7 @@ const styles = StyleSheet.create({
     alignItems: "flex-start",
     backgroundColor: colors.surfaceContainer,
     padding: 12,
-    borderRadius: 8,
-    gap: 8,
-  },
-  statusIcon: {
+    borderRadius: 12,
     marginTop: 2,
   },
   statusTexts: {
@@ -609,7 +608,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 8,
     paddingHorizontal: 12,
-    borderRadius: 8,
+    borderRadius: 12,
   },
   punchButtonPrimary: {
     backgroundColor: colors.primary,

@@ -59,6 +59,17 @@ export type LeaveApplication = {
   hrComments: string | null;
   createdAt: string;
   selectedDates: { date: string; session: string; unit: number }[];
+  reportingManagerEmployeeId?: number | null;
+  managerApprovalStatus?: string | null;
+  managerComments?: string | null;
+  documents?: { documentId: number; fileName: string; fileType: string; contentType: string; fileSize: number }[];
+  statusHistory?: {
+    historyId: number;
+    oldStatus: string | null;
+    newStatus: string;
+    reason: string | null;
+    changedAt: string | null;
+  }[];
 };
 
 export type AttendanceRecord = {
@@ -160,6 +171,38 @@ export function getOrgSettings(): Promise<OrganisationSettings> {
   return authorizedRequest<OrganisationSettings>("/api/v1/org-settings");
 }
 
+export type Holiday = {
+  holidayId: number;
+  holidayName: string;
+  holidayDate: string | null;
+};
+
+export function listHolidays(from?: string, to?: string): Promise<{ items: Holiday[] }> {
+  const query = new URLSearchParams();
+  if (from) query.set("from", from);
+  if (to) query.set("to", to);
+  const suffix = query.toString() ? `?${query.toString()}` : "";
+  return authorizedRequest<{ items: Holiday[] }>(`/api/v1/holidays${suffix}`);
+}
+
+export function createHoliday(body: { date: string; name: string }): Promise<Holiday> {
+  return authorizedRequest<Holiday>("/api/v1/holidays", { method: "POST", body });
+}
+
+export type AppNotification = {
+  notificationId: number;
+  userId: number;
+  type: string;
+  title: string;
+  message: string;
+  isRead: boolean;
+  createdAt: string | null;
+};
+
+export function listMyNotifications(): Promise<{ items: AppNotification[] }> {
+  return authorizedRequest<{ items: AppNotification[] }>("/api/v1/notifications");
+}
+
 export function patchOrgSettings(body: Partial<OrganisationSettings>): Promise<OrganisationSettings> {
   return authorizedRequest<OrganisationSettings>("/api/v1/org-settings", { method: "PATCH", body });
 }
@@ -199,8 +242,35 @@ export function uploadLeaveDocument(
   return authorizedRequest("/api/v1/documents", { method: "POST", body });
 }
 
-export function listLeaveTypes(): Promise<ItemList<LeaveType>> {
-  return authorizedRequest<ItemList<LeaveType>>("/api/v1/leave-types");
+export function listLeaveTypes(includeObsolete = false): Promise<ItemList<LeaveType>> {
+  const suffix = includeObsolete ? "?includeObsolete=true" : "";
+  return authorizedRequest<ItemList<LeaveType>>(`/api/v1/leave-types${suffix}`);
+}
+
+export function createLeaveType(body: {
+  name: string;
+  description?: string | null;
+  requiresMedicalDocument?: boolean;
+  allowedSex?: string | null;
+}): Promise<LeaveType> {
+  return authorizedRequest<LeaveType>("/api/v1/leave-types", { method: "POST", body });
+}
+
+export function patchLeaveType(
+  leaveTypeId: number,
+  body: Partial<{
+    name: string;
+    description: string | null;
+    requiresMedicalDocument: boolean;
+    allowedSex: string | null;
+    obsolete: boolean;
+  }>,
+): Promise<LeaveType> {
+  return authorizedRequest<LeaveType>(`/api/v1/leave-types/${leaveTypeId}`, { method: "PATCH", body });
+}
+
+export function deleteLeaveType(leaveTypeId: number): Promise<LeaveType | void> {
+  return authorizedRequest<LeaveType | void>(`/api/v1/leave-types/${leaveTypeId}`, { method: "DELETE" });
 }
 
 export function listLeaves(status?: string): Promise<ItemList<LeaveApplication>> {
@@ -257,6 +327,21 @@ export function createLeaveDraft(body: {
   return authorizedRequest<LeaveApplication>("/api/v1/leaves/drafts", { method: "POST", body });
 }
 
+export function getLeave(leaveId: number): Promise<LeaveApplication> {
+  return authorizedRequest<LeaveApplication>(`/api/v1/leaves/${leaveId}`);
+}
+
+export function updateLeaveDraft(
+  leaveId: number,
+  body: {
+    leaveTypeId: number;
+    reason: string;
+    selectedDates: { date: string; session: string }[];
+  },
+): Promise<LeaveApplication> {
+  return authorizedRequest<LeaveApplication>(`/api/v1/leaves/${leaveId}`, { method: "PATCH", body });
+}
+
 export function submitLeaveDraft(leaveId: number): Promise<LeaveApplication> {
   return authorizedRequest<LeaveApplication>(`/api/v1/leaves/${leaveId}/submit`, { method: "POST" });
 }
@@ -265,10 +350,10 @@ export function withdrawLeave(leaveId: number): Promise<LeaveApplication> {
   return authorizedRequest<LeaveApplication>(`/api/v1/leaves/${leaveId}/withdraw`, { method: "POST" });
 }
 
-export function approveLeave(leaveId: number): Promise<LeaveApplication> {
+export function approveLeave(leaveId: number, comment?: string): Promise<LeaveApplication> {
   return authorizedRequest<LeaveApplication>(`/api/v1/leaves/${leaveId}/approve`, {
     method: "POST",
-    body: {},
+    body: comment ? { comment } : {},
   });
 }
 
@@ -276,5 +361,65 @@ export function rejectLeave(leaveId: number, comment?: string): Promise<LeaveApp
   return authorizedRequest<LeaveApplication>(`/api/v1/leaves/${leaveId}/reject`, {
     method: "POST",
     body: comment ? { comment } : {},
+  });
+}
+
+export function managerApproveLeave(leaveId: number, comment?: string): Promise<LeaveApplication> {
+  return authorizedRequest<LeaveApplication>(`/api/v1/leaves/${leaveId}/manager-approve`, {
+    method: "POST",
+    body: comment ? { comment } : {},
+  });
+}
+
+export function managerRejectLeave(leaveId: number, comment?: string): Promise<LeaveApplication> {
+  return authorizedRequest<LeaveApplication>(`/api/v1/leaves/${leaveId}/manager-reject`, {
+    method: "POST",
+    body: comment ? { comment } : {},
+  });
+}
+
+export function cancelLeave(leaveId: number): Promise<LeaveApplication> {
+  return authorizedRequest<LeaveApplication>(`/api/v1/leaves/${leaveId}/cancel`, { method: "POST" });
+}
+
+export async function downloadLeaveDocument(
+  documentId: number,
+  fileName: string,
+): Promise<void> {
+  const { getApiBaseUrl } = await import("./api");
+  const { getSession } = await import("./auth");
+  const session = await getSession();
+  const response = await fetch(`${getApiBaseUrl()}/api/v1/documents/${documentId}`, {
+    headers: session?.token ? { Authorization: `Bearer ${session.token}` } : undefined,
+  });
+  if (!response.ok) {
+    throw new Error("Unable to download document.");
+  }
+  const blob = await response.blob();
+  if (typeof document !== "undefined" && typeof URL !== "undefined") {
+    const href = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = href;
+    anchor.download = fileName;
+    anchor.click();
+    URL.revokeObjectURL(href);
+    return;
+  }
+  const FileSystem = require("expo-file-system") as {
+    documentDirectory?: string | null;
+    writeAsStringAsync?: (path: string, data: string, options: { encoding: string }) => Promise<void>;
+  };
+  const dir = FileSystem.documentDirectory;
+  if (!dir || !FileSystem.writeAsStringAsync) {
+    return;
+  }
+  const bytes = new Uint8Array(await blob.arrayBuffer());
+  let binary = "";
+  for (const value of bytes) {
+    binary += String.fromCharCode(value);
+  }
+  const base64 = globalThis.btoa(binary);
+  await FileSystem.writeAsStringAsync(`${dir}Symbiotic Medical Documents/${fileName}`, base64, {
+    encoding: "base64",
   });
 }

@@ -36,6 +36,9 @@ export default function WebMoreSettingsScreen() {
           <TouchableOpacity onPress={() => router.push("/admin-profile" as never)}>
             <Text style={styles.link}>Admin / Guest Admin Profile</Text>
           </TouchableOpacity>
+          <TouchableOpacity onPress={() => router.push("/leave/types" as never)}>
+            <Text style={styles.link}>Leave Types</Text>
+          </TouchableOpacity>
           <TouchableOpacity onPress={() => router.push("/org-settings" as never)}>
             <Text style={styles.link}>Organisation Settings</Text>
           </TouchableOpacity>

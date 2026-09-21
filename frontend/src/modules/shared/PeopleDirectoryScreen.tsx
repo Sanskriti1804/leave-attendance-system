@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { View, Text, StyleSheet, ScrollView, SafeAreaView, TextInput, ActivityIndicator } from "react-native";
+import { View, Text, StyleSheet, ScrollView, SafeAreaView, TextInput, ActivityIndicator, TouchableOpacity } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { getSession } from "../../../services/auth";
 import {
@@ -93,20 +93,18 @@ export default function PeopleDirectoryScreen() {
                 <Text style={styles.groupTitle}>{department}</Text>
                 <Text style={styles.groupCount}>{people.length}</Text>
               </View>
-              <GlassCard style={{ padding: 0, overflow: 'hidden' }}>
-                {people.map((row, index) => (
-                  <View key={row.employeeId} style={[styles.row, index < people.length - 1 && styles.rowDivider]}>
-                    <UserAvatar employee={row} size={40} />
-                    <View style={{ flex: 1 }}>
-                      <Text style={styles.name}>{displayName(row)}</Text>
-                      <Text style={styles.meta} numberOfLines={1}>
-                        {row.role.replaceAll("_", " ")} · EMP-{row.employeeId}
-                      </Text>
-                      <Text style={styles.email} numberOfLines={1}>
-                        {row.email}
-                      </Text>
-                    </View>
-                  </View>
+              <GlassCard style={styles.grid}>
+                {people.map((row) => (
+                  <TouchableOpacity key={row.employeeId} style={styles.personCard} activeOpacity={0.8}>
+                    <UserAvatar employee={row} size={44} />
+                    <Text style={styles.name} numberOfLines={1}>{displayName(row)}</Text>
+                    <Text style={styles.meta} numberOfLines={1}>
+                      {row.role.replaceAll("_", " ")} · EMP-{row.employeeId}
+                    </Text>
+                    <Text style={styles.email} numberOfLines={1}>
+                      {row.email}
+                    </Text>
+                  </TouchableOpacity>
                 ))}
               </GlassCard>
             </View>
@@ -129,8 +127,18 @@ const styles = StyleSheet.create({
   groupHead: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingHorizontal: 4 },
   groupTitle: { fontFamily: "Inter", fontSize: 13, fontWeight: "700", color: colors.onSurface, textTransform: "uppercase", letterSpacing: 0.5 },
   groupCount: { fontSize: 12, color: colors.secondary },
-  row: { flexDirection: "row", alignItems: "center", gap: 12, padding: 12 },
-  rowDivider: { borderBottomWidth: 1, borderBottomColor: 'rgba(0,0,0,0.06)' },
+  grid: { flexDirection: "row", flexWrap: "wrap", gap: 10, padding: 12 },
+  personCard: {
+    width: "47%",
+    flexGrow: 1,
+    minWidth: 140,
+    backgroundColor: colors.surfaceContainerLowest,
+    borderRadius: 16,
+    padding: 14,
+    gap: 6,
+    borderWidth: 1,
+    borderColor: colors.glassBorder,
+  },
   name: { fontFamily: "Inter", fontSize: 15, fontWeight: "600", color: colors.onSurface },
   meta: { fontFamily: "Inter", fontSize: 12, color: colors.secondary, marginTop: 2 },
   email: { fontFamily: "Inter", fontSize: 12, color: colors.onSurfaceVariant, marginTop: 2 },

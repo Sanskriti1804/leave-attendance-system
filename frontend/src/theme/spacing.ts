@@ -9,10 +9,10 @@ export const spacing = {
 };
 
 export const radii = {
-  s: 4,
-  m: 8,
-  l: 12,
-  xl: 16,
+  s: 8,
+  m: 12,
+  l: 16,
+  xl: 20,
   round: 9999,
 };
 

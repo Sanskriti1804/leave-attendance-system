@@ -61,6 +61,14 @@ LV-OVR-03/04 which statuses block overlap. LV-APP-18 HR-absent path. MED-12 “e
 
 ## Change History
 
+2026-09-21 — Edit draft uses `GET/PATCH /leaves/{id}`. Leave status transitions write BR-12 audit logs. Leave JSON includes `statusHistory`.
+
+2026-09-20 — Manager list includes team applications awaiting in-app manager approval. Submit notifies manager or HR; medical-missing and manager/HR reject notify the employee. Leave JSON includes document metadata for HR download. Apply Leave saves a draft, attaches the file, then submits so medical proof can be stored. Leave type configuration UI uses existing leave-type APIs. Cancel is available on approved own leave.
+
+2026-09-18 — Apply Leave overlap warning only on `LEAVE_OVERLAP`; themed success after submit; holidays/weekends blocked with themed dialog; HR reject optional comment.
+
+2026-09-18 — Past dates and dates beyond org `maxAdvanceDays` (default 14, IST) are rejected (`PAST_DATE` / `TOO_FAR_AHEAD`). Weekly offs (`weeklyOffDow`) and Holiday rows cannot be selected on Apply Leave; seed lists 2026 Indian holidays.
+
 2026-09-16 — Apply Leave: Approver — S Raman with divider; operational notice tag (certify copy removed). Leave APIs unchanged.
 2026-09-16 — Apply Leave: tap select/deselect; long-press themed Full/Half session dialog with First/Second Half radios; calendar session indicators and legend. Leave APIs unchanged.
 2026-09-15 — My Leave List, Apply Leave, and Admin Leave Review Queue aligned to Stitch layouts (gradient, glass cards, queue chips, duration info, manager attestation). Live leave APIs unchanged.

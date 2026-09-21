@@ -37,6 +37,8 @@ Section 13 working hours/shifts empty; BRD §8 cited later without a filled refi
 
 ## Change History
 
+2026-09-18 — Leave apply (create/draft/submit) rejects weekly offs from `weeklyOffDow` and dates in `Holiday`. Advance window is IST today through `maxAdvanceDays`. Seed holidays for 2026 Indian calendar dates listed in product config.
+
 2026-09-09 — Leave day-count also reads per-type `LeavePolicy` weekend/holiday include flags from the database.
 2026-09-04 — Leave day-count uses org weekend/holiday flags and shared holidays; max advance default 14; Indian holiday list is owner-provided.
 2026-09-01 — Holiday and organisation-settings HTTP APIs.

@@ -1,7 +1,7 @@
 import type { Prisma } from "../../../generated/prisma/client.js";
 import { prisma } from "../../shared/db/index.js";
 
-export function createStatusHistory(
+export async function createStatusHistory(
   tx: Prisma.TransactionClient,
   data: {
     leaveId: number;
@@ -11,7 +11,7 @@ export function createStatusHistory(
     reason?: string | null;
   },
 ) {
-  return tx.leaveStatusHistory.create({
+  const history = await tx.leaveStatusHistory.create({
     data: {
       leaveId: data.leaveId,
       changedById: data.changedById,
@@ -20,6 +20,19 @@ export function createStatusHistory(
       reason: data.reason ?? null,
     },
   });
+  if (data.changedById != null) {
+    await tx.auditLog.create({
+      data: {
+        userId: data.changedById,
+        action: `LEAVE_${data.newStatus}`.slice(0, 50),
+        entityType: "LeaveApplication",
+        entityId: data.leaveId,
+        oldValue: data.oldStatus ? { status: data.oldStatus } : undefined,
+        newValue: { status: data.newStatus, reason: data.reason ?? null },
+      },
+    });
+  }
+  return history;
 }
 
 export function findHistoryByLeaveId(leaveId: number) {

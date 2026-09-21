@@ -6,20 +6,17 @@ import { ScreenGradient, ThemedDialog, ThemedToast } from "../../components/ui/A
 import { login as authLogin, passLogin } from "../../../services/auth";
 import { getMe, requestPasswordReset, apiErrorMessage } from "../../../services/resources";
 import { getPostLoginRoute } from "./SplashScreen";
+import { colors as themeColors } from "../../theme";
 
-// Stitch Design Colors & Token Map
 const colors = {
-  primary: "#242424",
-  onPrimary: "#ffffff",
-  secondary: "#374151", // text-secondary
-  error: "#ba1a1a",
-  cardBg: "rgb(222, 223, 227)",
-  cardBorder: "rgba(0, 0, 0, 0.15)",
-  inputBg: "#f6f3f2",
-  inputBorder: "#374151",
-  textMain: "rgb(36, 36, 36)",
-  textVariant: "rgb(28, 27, 27)",
-  indicatorPulse: "#242424",
+  ...themeColors,
+  cardBg: themeColors.surfaceContainerLowest,
+  cardBorder: themeColors.glassBorder,
+  inputBg: themeColors.surfaceContainerLow,
+  inputBorder: themeColors.border,
+  textMain: themeColors.onSurface,
+  textVariant: themeColors.onSurfaceVariant,
+  indicatorPulse: themeColors.primary,
 };
 
 export default function LoginScreen() {
@@ -291,7 +288,7 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
   },
   pulseContainer: {
-    backgroundColor: '#ebe7e7',
+    backgroundColor: themeColors.surfaceContainerHigh,
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 9999,
@@ -324,16 +321,16 @@ const styles = StyleSheet.create({
   },
   card: {
     backgroundColor: colors.cardBg,
-    borderRadius: 12,
+    borderRadius: 16,
     borderWidth: 1,
     borderColor: colors.cardBorder,
-    padding: 20,
+    padding: 22,
     width: '100%',
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.12,
-    shadowRadius: 25,
-    elevation: 5,
+    shadowColor: "#161616",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.06,
+    shadowRadius: 18,
+    elevation: 3,
     gap: 16,
   },
   inputGroup: {
@@ -382,7 +379,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.inputBg,
     borderWidth: 1.5,
     borderColor: colors.inputBorder,
-    borderRadius: 8,
+    borderRadius: 12,
     paddingLeft: 40,
     paddingRight: 40,
     fontFamily: 'Inter',
@@ -427,7 +424,7 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 48,
     backgroundColor: colors.primary,
-    borderRadius: 8,
+    borderRadius: 12,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -475,9 +472,9 @@ const styles = StyleSheet.create({
   passButton: {
     paddingVertical: 8,
     paddingHorizontal: 16,
-    borderRadius: 6,
+    borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#cfc4c5',
+    borderColor: colors.glassBorder,
   },
   passButtonText: {
     fontFamily: 'Inter',

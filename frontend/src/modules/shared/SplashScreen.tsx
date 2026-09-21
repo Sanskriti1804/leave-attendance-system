@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { getSession } from "../../../services/auth";
 import { designContent } from "../../maxstarter/design";
 import { getMe } from "../../../services/resources";
+import { colors } from "../../theme";
 
 /** Post-auth destination for EXPO_PUBLIC_START_SCREEN. `/login` keeps the default home tab. */
 export function getPostLoginRoute(): Href {
@@ -119,19 +120,19 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter',
     fontSize: 33,
     fontWeight: '800',
-    color: '#1c1b1b',
+    color: colors.onSurface,
     textTransform: 'uppercase',
     letterSpacing: -0.5,
     marginBottom: 4,
   },
   titleSecondary: {
-    color: '#585f6c',
+    color: colors.secondary,
   },
   subtitle: {
     fontFamily: 'Inter',
     fontSize: 15,
     fontWeight: '600',
-    color: '#4c4546',
+    color: colors.onSurfaceVariant,
   },
   footer: {
     alignItems: 'center',
@@ -140,13 +141,13 @@ const styles = StyleSheet.create({
   footerTextTop: {
     fontFamily: 'Inter',
     fontSize: 12,
-    color: '#7e7576',
+    color: colors.secondary,
     marginBottom: 4,
   },
   footerTextBottom: {
     fontFamily: 'Inter',
     fontSize: 12,
     fontWeight: '500',
-    color: '#4c4546',
+    color: colors.onSurfaceVariant,
   }
 });

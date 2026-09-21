@@ -1,6 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert } from "react-native";
-import { apiErrorMessage, getMe, getOrgSettings, patchOrgSettings, type OrganisationSettings } from "../../services/resources";
+import {
+  apiErrorMessage,
+  createHoliday,
+  getMe,
+  getOrgSettings,
+  listHolidays,
+  patchOrgSettings,
+  type Holiday,
+  type OrganisationSettings,
+} from "../../services/resources";
 import { colors } from "../theme";
 import { WebCard, WebShell } from "./WebShell";
 import { UIFallbackIndicator } from "../components/ui/UIFallback";
@@ -25,6 +34,9 @@ export default function WebOrganisationSettingsScreen() {
   const [weeklyOff, setWeeklyOff] = useState<number[]>([6, 7]);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [holidays, setHolidays] = useState<Holiday[]>([]);
+  const [holidayDate, setHolidayDate] = useState("");
+  const [holidayName, setHolidayName] = useState("");
   const canEdit = role === "admin";
   const isGuest = role === "guest_admin";
 
@@ -48,6 +60,12 @@ export default function WebOrganisationSettingsScreen() {
         setWeeklyOff(org.weeklyOffDow?.length ? org.weeklyOffDow : [6, 7]);
       } catch (err) {
         if (!cancelled) setError(apiErrorMessage(err));
+      }
+      try {
+        const rows = await listHolidays();
+        if (!cancelled) setHolidays(rows.items);
+      } catch {
+        /* keep empty */
       }
     })();
     return () => {
@@ -100,6 +118,36 @@ export default function WebOrganisationSettingsScreen() {
           {settings?.leaveCountExcludesHolidays ? "excluded" : "included"}
         </Text>
         {error ? <Text style={styles.err}>{error}</Text> : null}
+        {holidays.map((row) => (
+          <Text key={`${row.holidayDate}-${row.holidayName}`} style={styles.meta}>
+            {row.holidayDate} · {row.holidayName}
+          </Text>
+        ))}
+        {canEdit ? (
+          <>
+            <TextInput style={styles.input} value={holidayDate} onChangeText={setHolidayDate} placeholder="YYYY-MM-DD" placeholderTextColor={colors.secondary} />
+            <TextInput style={styles.input} value={holidayName} onChangeText={setHolidayName} placeholder="Holiday name" placeholderTextColor={colors.secondary} />
+            <TouchableOpacity
+              style={styles.save}
+              onPress={async () => {
+                if (!/^\d{4}-\d{2}-\d{2}$/.test(holidayDate) || !holidayName.trim()) {
+                  Alert.alert("Invalid holiday", "Use YYYY-MM-DD and a holiday name.");
+                  return;
+                }
+                try {
+                  const created = await createHoliday({ date: holidayDate, name: holidayName.trim() });
+                  setHolidays((prev) => [...prev, created].sort((a, b) => (a.holidayDate ?? "").localeCompare(b.holidayDate ?? "")));
+                  setHolidayDate("");
+                  setHolidayName("");
+                } catch (err) {
+                  Alert.alert("Could not add holiday", apiErrorMessage(err));
+                }
+              }}
+            >
+              <Text style={styles.saveText}>Add holiday</Text>
+            </TouchableOpacity>
+          </>
+        ) : null}
         {canEdit ? (
           <TouchableOpacity
             style={styles.save}

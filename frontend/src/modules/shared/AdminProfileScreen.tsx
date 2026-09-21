@@ -15,7 +15,6 @@ import { colors } from "../../theme";
 import { ScreenGradient } from "../../components/ui/AppChrome";
 import { BottomNavBar, TopNavBar, useTopNavContentInset } from "../../components/ui/AdminComponents";
 import { UserAvatar } from "../../components/ui/UserAvatar";
-import { UIFallbackIndicator } from "../../components/ui/UIFallback";
 import { pickAndSaveProfilePhoto } from "../../../services/profilePhoto";
 
 function formatJoining(value: string | null | undefined): string {
@@ -104,50 +103,38 @@ export default function AdminProfileScreen() {
             </View>
           ) : null}
 
-          <View style={styles.card}>
-            <View style={styles.hero}>
-              <UserAvatar
-                employee={me}
-                size={56}
-                fallback="PK"
-                onPress={
-                  me
-                    ? () => {
-                        void pickAndSaveProfilePhoto(me.employeeId);
-                      }
-                    : undefined
-                }
-              />
-              <View style={{ flex: 1 }}>
-                <View style={styles.nameRow}>
-                  <Text style={styles.name}>{name}</Text>
-                  {fallback ? <UIFallbackIndicator /> : null}
-                </View>
-                <Text style={styles.emp}>EMP-{me?.employeeId ?? 1024}</Text>
-                <View style={styles.statusRow}>
-                  <View style={styles.dot} />
-                  <Text style={styles.status}>{me?.status ?? "Active"}</Text>
-                </View>
-              </View>
-            </View>
-            <Text style={styles.headline}>
-              {isGuest ? "Guest Admin / Org-wide read" : "Head of HR & People Ops"}
-            </Text>
-            <View style={styles.chip}>
-              <Text style={styles.chipText}>{(me?.role ?? "ADMIN").toUpperCase()} /auth/me</Text>
-            </View>
+          <View style={styles.heroBlock}>
+            <UserAvatar
+              employee={me}
+              size={96}
+              fallback="PK"
+              onPress={me ? () => { void pickAndSaveProfilePhoto(me.employeeId); } : undefined}
+            />
+            <Text style={styles.name}>{name}</Text>
           </View>
 
           <View style={styles.card}>
             <View style={styles.cardHead}>
               <Text style={styles.cardTitle}>Work Information</Text>
-              <Text style={styles.lock}>Read-Only</Text>
+              <View style={styles.activeTag}><Text style={styles.activeTagText}>{me?.status ?? "Active"}</Text></View>
             </View>
-            <InfoRow label="Role" value={isGuest ? "Guest Admin" : "Head of HR / Org Admin"} />
             <InfoRow label="Department" value={departmentName === "—" ? "Human Resources & Ops" : departmentName} />
             <InfoRow label="Reporting Manager" value={managerName === "—" ? "—" : managerName} />
-            <InfoRow label="Official Email" value={me?.email ?? "—"} />
-            <InfoRow label="Joining Date" value={formatJoining(me?.joiningDate)} last />
+            <InfoRow label="Joining Date" value={me?.joiningDate ? `${formatJoining(me.joiningDate)} · Ongoing` : formatJoining(me?.joiningDate)} last />
+          </View>
+
+          <View style={styles.card}>
+            <View style={styles.contactRow}>
+              <View style={styles.contactCol}>
+                <Text style={styles.infoLabel}>Email</Text>
+                <Text style={styles.infoValue}>{me?.email ?? "—"}</Text>
+              </View>
+              <View style={styles.contactDivider} />
+              <View style={styles.contactCol}>
+                <Text style={styles.infoLabel}>Phone</Text>
+                <Text style={styles.infoValue}>{me?.phone ?? "—"}</Text>
+              </View>
+            </View>
           </View>
 
           <View style={styles.card}>
@@ -243,7 +230,7 @@ const styles = StyleSheet.create({
   pillOn: { backgroundColor: colors.primary },
   pillText: { fontFamily: "Inter", fontSize: 10, fontWeight: "700", color: colors.onSurface },
   pillTextOn: { color: colors.onPrimary },
-  scroll: { paddingHorizontal: 16, paddingBottom: 120, gap: 12 },
+  scroll: { paddingHorizontal: 16, paddingBottom: 120, gap: 16 },
   banner: {
     flexDirection: "row",
     gap: 10,
@@ -274,7 +261,13 @@ const styles = StyleSheet.create({
   },
   avatarText: { fontFamily: "Inter", fontSize: 22, fontWeight: "700", color: colors.onPrimary },
   nameRow: { flexDirection: "row", alignItems: "center" },
-  name: { fontFamily: "Inter", fontSize: 20, fontWeight: "700", color: colors.onSurface },
+  name: { fontFamily: "Inter", fontSize: 22, fontWeight: "700", color: colors.onSurface, textAlign: "center" },
+  heroBlock: { alignItems: "center", gap: 12, paddingVertical: 4 },
+  activeTag: { backgroundColor: colors.primary, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4 },
+  activeTagText: { color: colors.onPrimary, fontSize: 11, fontWeight: "700", textTransform: "uppercase" },
+  contactRow: { flexDirection: "row", alignItems: "stretch", minHeight: 52 },
+  contactCol: { flex: 1, gap: 4, justifyContent: "center" },
+  contactDivider: { width: 1, backgroundColor: "rgba(0,0,0,0.08)", marginHorizontal: 12 },
   emp: { fontFamily: "Inter", fontSize: 12, color: colors.secondary, marginTop: 2 },
   statusRow: { flexDirection: "row", alignItems: "center", gap: 6, marginTop: 4 },
   dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: "#16a34a" },

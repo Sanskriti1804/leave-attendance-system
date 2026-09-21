@@ -1,13 +1,13 @@
 # Reports, notifications, audit API (Proposed)
 
-Not implemented.
+Notifications list is implemented. Reports and audit GET remain unimplemented.
 
 ## Notifications
 
 | Method | Path | Purpose | Auth |
 | --- | --- | --- | --- |
-| GET | `/notifications` | In-app list | * |
-| POST | `/notifications/{id}/read` | Mark read | owner |
+| GET | `/api/v1/notifications` | In-app list (own rows) | authenticated |
+| POST | `/notifications/{id}/read` | Mark read | owner (Proposed, not implemented) |
 
 ## Reports
 

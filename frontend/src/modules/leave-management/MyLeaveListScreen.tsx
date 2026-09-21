@@ -11,8 +11,11 @@ import {
   apiErrorMessage,
   displayName,
   getMe,
+  cancelLeave,
   listLeaveTypes,
   listLeaves,
+  managerApproveLeave,
+  managerRejectLeave,
   submitLeaveDraft,
   withdrawLeave,
   type EmployeePublic,
@@ -20,22 +23,7 @@ import {
   type LeaveType,
 } from "../../../services/resources";
 import { UIFallbackIndicator } from "../../components/ui/UIFallback";
-
-const colors = {
-  surface: "#fcf9f8",
-  primary: "#242424",
-  onPrimary: "#ffffff",
-  surfaceContainerLowest: "#ffffff",
-  surfaceContainerLow: "#f6f3f2",
-  surfaceContainer: "#f0edec",
-  surfaceContainerHigh: "#ebe7e7",
-  surfaceContainerHighest: "#e5e2e1",
-  secondary: "#585f6c",
-  onSurface: "#1c1b1b",
-  onSurfaceVariant: "#4c4546",
-  glass: "rgb(222, 223, 227)",
-  glassBorder: "rgba(0, 0, 0, 0.15)",
-};
+import { colors } from "../../theme";
 
 function matchesFilter(status: string, filter: string): boolean {
   if (filter === "all") {
@@ -185,6 +173,36 @@ export default function MyLeaveListScreen() {
     }
   }
 
+  async function onCancel(leaveId: number) {
+    setBusyId(leaveId);
+    setError(null);
+    try {
+      await cancelLeave(leaveId);
+      await load();
+    } catch (err) {
+      setError(apiErrorMessage(err));
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  async function onManager(leaveId: number, kind: "approve" | "reject") {
+    setBusyId(leaveId);
+    setError(null);
+    try {
+      if (kind === "approve") {
+        await managerApproveLeave(leaveId);
+      } else {
+        await managerRejectLeave(leaveId);
+      }
+      await load();
+    } catch (err) {
+      setError(apiErrorMessage(err));
+    } finally {
+      setBusyId(null);
+    }
+  }
+
   const filters = [
     { key: "all", label: "All" },
     { key: "pending", label: "Pending" },
@@ -237,6 +255,12 @@ export default function MyLeaveListScreen() {
               const pending = leave.status === "SUBMITTED" || leave.status === "PENDING_HR_REVIEW";
               const draft = leave.status === "DRAFT";
               const history = leave.status === "REJECTED" || leave.status === "CANCELLED" || leave.status === "WITHDRAWN";
+              const isOwn = me == null || leave.employeeId === me.employeeId;
+              const managerPending =
+                !isOwn &&
+                leave.status === "SUBMITTED" &&
+                leave.managerApprovalStatus === "PENDING" &&
+                leave.reportingManagerEmployeeId === me?.employeeId;
               const meta = statusMeta(leave.status);
               const name = typeName(leave.leaveTypeId);
               const half = leave.durationType.includes("HALF") || leave.halfDayType;
@@ -245,7 +269,7 @@ export default function MyLeaveListScreen() {
                   <View style={styles.cardHeader}>
                     <View style={styles.cardInfo}>
                       <View style={styles.cardTitleRow}>
-                        <Text style={styles.cardTitle}>{name}</Text>
+                        <Text style={styles.cardTitle}>{name}{isOwn ? "" : " · Team"}</Text>
                         <View
                           style={
                             meta.kind === "approved"
@@ -297,10 +321,17 @@ export default function MyLeaveListScreen() {
                           <Text style={styles.fileText}>Medical file included</Text>
                         </View>
                       ) : null}
+                      {leave.statusHistory && leave.statusHistory.length > 0 ? (
+                        <Text style={styles.fileText}>
+                          {leave.statusHistory
+                            .map((row) => row.newStatus.replaceAll("_", " "))
+                            .join(" → ")}
+                        </Text>
+                      ) : null}
                     </View>
                   )}
 
-                  {pending ? (
+                  {pending && isOwn ? (
                     <View style={styles.cardFooter}>
                       <View style={styles.footerTime}>
                         <MaterialIcons name="schedule" size={16} color={colors.secondary} />
@@ -325,14 +356,38 @@ export default function MyLeaveListScreen() {
                     </View>
                   ) : null}
 
-                  {draft ? (
+                  {leave.status === "APPROVED" && isOwn ? (
+                    <View style={styles.cardFooter}>
+                      <View style={styles.footerTime}>
+                        <MaterialIcons name="event-available" size={16} color={colors.secondary} />
+                        <Text style={styles.footerTimeText}>Approved</Text>
+                      </View>
+                      <TouchableOpacity style={styles.actionBtn} onPress={() => void onCancel(leave.leaveId)} disabled={busyId === leave.leaveId}>
+                        <MaterialIcons name="close" size={16} color={colors.onSurface} />
+                        <Text style={styles.actionBtnText}>{busyId === leave.leaveId ? "..." : "Cancel leave"}</Text>
+                      </TouchableOpacity>
+                    </View>
+                  ) : null}
+
+                  {managerPending ? (
+                    <View style={styles.cardFooterRight}>
+                      <TouchableOpacity style={styles.actionBtn} onPress={() => void onManager(leave.leaveId, "reject")} disabled={busyId === leave.leaveId}>
+                        <Text style={styles.actionBtnText}>Reject</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity style={styles.actionBtnPrimary} onPress={() => void onManager(leave.leaveId, "approve")} disabled={busyId === leave.leaveId}>
+                        <Text style={styles.actionBtnPrimaryText}>{busyId === leave.leaveId ? "..." : "Approve"}</Text>
+                      </TouchableOpacity>
+                    </View>
+                  ) : null}
+
+                  {draft && isOwn ? (
                     <>
                       <View style={styles.cardDraftBox}>
                         <Text style={styles.draftText}>Draft saved • Pending Submission</Text>
                         <Text style={styles.draftBadge}>UNSENT</Text>
                       </View>
                       <View style={styles.cardFooterRight}>
-                        <TouchableOpacity style={styles.actionBtn} onPress={() => router.push(applyHref as never)}>
+                        <TouchableOpacity style={styles.actionBtn} onPress={() => router.push(`${applyHref}?draftId=${leave.leaveId}` as never)}>
                           <MaterialIcons name="edit" size={16} color={colors.onSurface} />
                           <Text style={styles.actionBtnText}>Edit Draft</Text>
                         </TouchableOpacity>
@@ -370,33 +425,33 @@ const styles = StyleSheet.create({
   topRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingHorizontal: 16, paddingTop: 8 },
   topLabel: { fontSize: 16, fontWeight: "700", color: colors.onSurface, marginTop: 4 },
   empName: { fontSize: 22, fontWeight: "800", color: colors.onSurface },
-  applyBtn: { flexDirection: "row", alignItems: "center", backgroundColor: colors.primary, paddingHorizontal: 16, height: 44, borderRadius: 8, gap: 8 },
+  applyBtn: { flexDirection: "row", alignItems: "center", backgroundColor: colors.primary, paddingHorizontal: 16, height: 44, borderRadius: 12, gap: 8 },
   applyBtnText: { fontSize: 14, fontWeight: "500", color: colors.onPrimary },
   filtersScroll: { flexGrow: 0, marginHorizontal: 16 },
   filtersContainer: {
     gap: 8,
     paddingVertical: 4,
   },
-  filterChipActive: { flexDirection: "row", alignItems: "center", backgroundColor: colors.primary, height: 36, paddingHorizontal: 12, borderRadius: 8, gap: 8 },
+  filterChipActive: { flexDirection: "row", alignItems: "center", backgroundColor: colors.primary, height: 36, paddingHorizontal: 12, borderRadius: 999, gap: 8 },
   filterChipTextActive: { fontSize: 12, fontWeight: "500", color: colors.onPrimary },
   filterBadgeActive: { backgroundColor: colors.surface, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 12 },
-  filterChip: { flexDirection: "row", alignItems: "center", backgroundColor: colors.glass, height: 36, paddingHorizontal: 12, borderRadius: 8, gap: 8, borderWidth: 1, borderColor: colors.glassBorder },
+  filterChip: { flexDirection: "row", alignItems: "center", backgroundColor: colors.surfaceContainerLowest, height: 36, paddingHorizontal: 12, borderRadius: 999, gap: 8, borderWidth: 1, borderColor: colors.glassBorder },
   filterChipText: { fontSize: 12, fontWeight: "500", color: colors.onSurface },
   filterBadge: { backgroundColor: colors.surfaceContainerHighest, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 12 },
   filterBadgeText: { fontSize: 11, fontWeight: "600", color: colors.onSurface },
   listContainer: { paddingHorizontal: 16, gap: 12 },
   card: {
-    backgroundColor: colors.glass,
+    backgroundColor: colors.surfaceContainerLowest,
     borderRadius: 16,
     padding: 16,
     gap: 12,
     borderWidth: 1,
     borderColor: colors.glassBorder,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 20 },
-    shadowOpacity: 0.1,
-    shadowRadius: 25,
-    elevation: 5,
+    shadowColor: "#161616",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.04,
+    shadowRadius: 16,
+    elevation: 2,
   },
   cardHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start" },
   cardInfo: { flex: 1, gap: 4 },
@@ -419,7 +474,7 @@ const styles = StyleSheet.create({
   cardFooter: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingTop: 4 },
   footerTime: { flexDirection: "row", alignItems: "center", gap: 4, flex: 1 },
   footerTimeText: { fontSize: 12, color: colors.secondary },
-  actionBtn: { flexDirection: "row", alignItems: "center", backgroundColor: colors.surfaceContainer, height: 44, paddingHorizontal: 12, borderRadius: 8, gap: 4 },
+  actionBtn: { flexDirection: "row", alignItems: "center", backgroundColor: colors.surfaceContainer, height: 44, paddingHorizontal: 12, borderRadius: 12, gap: 4 },
   actionBtnText: { fontSize: 12, fontWeight: "500", color: colors.onSurface },
   cardCommentBox: { backgroundColor: colors.surfaceContainer, padding: 12, borderRadius: 8, gap: 4 },
   commentHeader: { flexDirection: "row", alignItems: "center", gap: 8 },
@@ -429,6 +484,6 @@ const styles = StyleSheet.create({
   draftText: { fontSize: 12, color: colors.secondary, fontStyle: "italic", flex: 1 },
   draftBadge: { fontSize: 11, fontWeight: "600", color: colors.secondary, letterSpacing: 0.5 },
   cardFooterRight: { flexDirection: "row", justifyContent: "flex-end", alignItems: "center", paddingTop: 4, gap: 8 },
-  actionBtnPrimary: { flexDirection: "row", alignItems: "center", backgroundColor: colors.primary, height: 44, paddingHorizontal: 16, borderRadius: 8, gap: 4 },
+  actionBtnPrimary: { flexDirection: "row", alignItems: "center", backgroundColor: colors.primary, height: 44, paddingHorizontal: 16, borderRadius: 12, gap: 4 },
   actionBtnPrimaryText: { fontSize: 12, fontWeight: "500", color: colors.onPrimary },
 });

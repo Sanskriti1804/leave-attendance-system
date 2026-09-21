@@ -19,20 +19,18 @@ import { UserAvatar } from "../../components/ui/UserAvatar";
 import { ScreenGradient } from "../../components/ui/AppChrome";
 import { TopNavBar, useTopNavContentInset } from "../../components/ui/AdminComponents";
 import { EmployeeBottomNavBar } from "../../components/ui/EmployeeComponents";
+import { colors } from "../../theme";
 
-const colors = {
-  surface: "#fcf9f8",
-  surfaceContainerLowest: "#ffffff",
-  surfaceContainerLow: "#f6f3f2",
-  surfaceContainer: "#f0edec",
-  surfaceContainerHigh: "#ebe7e7",
-  surfaceContainerHighest: "#e5e2e1",
-  onSurface: "#1c1b1b",
-  onSurfaceVariant: "#4c4546",
-  primary: "#242424",
-  onPrimary: "#ffffff",
-  secondary: "#585f6c",
-};
+function formatJoining(value: string | null | undefined): string {
+  if (!value) {
+    return "—";
+  }
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+  return date.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
+}
 
 export default function ProfileSettingsScreen() {
   const router = useRouter();
@@ -98,7 +96,7 @@ export default function ProfileSettingsScreen() {
   const role = me?.role ?? "Senior Software Engineer";
   const empId = me?.employeeId ?? "8492";
   const email = me?.email ?? "dev@enterprisehrms.internal";
-  const joiningDate = me?.joiningDate ?? "March 15, 2022";
+  const joiningDate = me?.joiningDate ? formatJoining(me.joiningDate) : "March 15, 2022";
   const status = me?.status ?? "Active";
   const deptFallback = error || !me?.departmentId ? "Engineering & DevOps" : departmentName;
   const managerFallback = error || !me?.managerId ? "Marcus Vance (VP, Eng)" : managerName;
@@ -119,74 +117,49 @@ export default function ProfileSettingsScreen() {
       />
 
       <ScrollView style={styles.scrollContainer} contentContainerStyle={[styles.contentContainer, { paddingTop: topInset }]}>
-        {/* Profile Header Card */}
+        <View style={styles.heroBlock}>
+          <UserAvatar
+            employee={me}
+            size={96}
+            fallback="AC"
+            onPress={me ? () => { void pickAndSaveProfilePhoto(me.employeeId); } : undefined}
+          />
+          <Text style={styles.nameText}>{name}</Text>
+        </View>
+
         <View style={styles.card}>
-          <View style={styles.profileHeaderRow}>
-            <UserAvatar
-              employee={me}
-              size={72}
-              fallback="AC"
-              onPress={
-                me
-                  ? () => {
-                      void pickAndSaveProfilePhoto(me.employeeId);
-                    }
-                  : undefined
-              }
-            />
-            <View style={styles.profileInfo}>
-              <View style={styles.nameRow}>
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <Text style={styles.nameText}>{name}</Text>
-                  {isFallback && <UIFallbackIndicator />}
-                </View>
-                <View style={styles.tag}>
-                  <Text style={styles.tagText}>{role.toUpperCase()}</Text>
-                </View>
-              </View>
-              <Text style={styles.empText}>EMP-{empId}</Text>
-              <View style={styles.statusRow}>
-                <Text style={styles.statusText}>{status}</Text>
-              </View>
-            </View>
+          <View style={styles.cardHead}>
+            <Text style={styles.cardTitle}>Work Information</Text>
+            <View style={styles.activeTag}><Text style={styles.activeTagText}>{status}</Text></View>
+          </View>
+          <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>Department</Text>
+            <Text style={styles.infoValue}>{deptFallback}</Text>
+          </View>
+          <View style={styles.divider} />
+          <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>Reporting Manager</Text>
+            <Text style={styles.infoValue}>{managerFallback}</Text>
+          </View>
+          <View style={styles.divider} />
+          <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>Joining Date</Text>
+            <Text style={styles.infoValue}>
+              {me?.joiningDate ? `${joiningDate} · Ongoing` : joiningDate}
+            </Text>
           </View>
         </View>
 
-        {/* Work Information Card */}
         <View style={styles.card}>
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <Text style={styles.cardTitle}>Work Information</Text>
-            {isFallback && <UIFallbackIndicator />}
-          </View>
-          <View style={styles.cardInner}>
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Role</Text>
-              <Text style={styles.infoValue}>{role}</Text>
-            </View>
-            <View style={styles.divider} />
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Department</Text>
-              <Text style={styles.infoValue}>{deptFallback}</Text>
-            </View>
-            <View style={styles.divider} />
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Reporting Manager</Text>
-              <Text style={styles.infoValue}>{managerFallback}</Text>
-            </View>
-            <View style={styles.divider} />
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Work Location</Text>
-              <Text style={styles.infoValue}>{locationFallback}</Text>
-            </View>
-            <View style={styles.divider} />
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Official Email</Text>
+          <View style={styles.contactRow}>
+            <View style={styles.contactCol}>
+              <Text style={styles.infoLabel}>Email</Text>
               <Text style={styles.infoValue}>{email}</Text>
             </View>
-            <View style={styles.divider} />
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Joining Date</Text>
-              <Text style={styles.infoValue}>{joiningDate}</Text>
+            <View style={styles.contactDivider} />
+            <View style={styles.contactCol}>
+              <Text style={styles.infoLabel}>Phone</Text>
+              <Text style={styles.infoValue}>{me?.phone ?? "—"}</Text>
             </View>
           </View>
         </View>
@@ -326,10 +299,18 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   nameText: {
-    fontSize: 20,
-    fontWeight: '600',
+    fontSize: 22,
+    fontWeight: '700',
     color: colors.onSurface,
+    textAlign: 'center',
   },
+  heroBlock: { alignItems: 'center', gap: 12, paddingVertical: 8 },
+  cardHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  activeTag: { backgroundColor: colors.primary, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4 },
+  activeTagText: { color: colors.onPrimary, fontSize: 11, fontWeight: '700', textTransform: 'uppercase' },
+  contactRow: { flexDirection: 'row', alignItems: 'stretch', minHeight: 56 },
+  contactCol: { flex: 1, gap: 4, justifyContent: 'center' },
+  contactDivider: { width: 1, backgroundColor: colors.surfaceContainerHighest, marginHorizontal: 12 },
   tag: {
     backgroundColor: colors.surfaceContainer,
     paddingHorizontal: 8,

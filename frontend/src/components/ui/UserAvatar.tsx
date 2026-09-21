@@ -47,6 +47,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     overflow: "hidden",
+    borderWidth: 1,
+    borderColor: colors.glassBorder,
   },
   text: {
     fontWeight: "700",

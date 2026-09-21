@@ -11,9 +11,12 @@ import {
 import { MaterialIcons } from "@expo/vector-icons";
 import {
   apiErrorMessage,
+  createHoliday,
   getMe,
   getOrgSettings,
+  listHolidays,
   patchOrgSettings,
+  type Holiday,
   type OrganisationSettings,
 } from "../../../services/resources";
 import { colors } from "../../theme";
@@ -57,6 +60,9 @@ export default function OrganisationSettingsScreen() {
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [dialog, setDialog] = useState<{ title: string; message: string } | null>(null);
+  const [holidays, setHolidays] = useState<Holiday[]>([]);
+  const [holidayDate, setHolidayDate] = useState("");
+  const [holidayName, setHolidayName] = useState("");
 
   const isGuest = role === "guest_admin";
   const canEdit = role === "admin";
@@ -89,6 +95,14 @@ export default function OrganisationSettingsScreen() {
         if (!cancelled) {
           setError(apiErrorMessage(err));
         }
+      }
+      try {
+        const rows = await listHolidays();
+        if (!cancelled) {
+          setHolidays(rows.items);
+        }
+      } catch {
+        /* keep empty */
       }
     })();
     return () => {
@@ -140,6 +154,24 @@ export default function OrganisationSettingsScreen() {
   };
 
   const medicalDays = settings?.medicalDocExceedsDays ?? 2;
+
+  const addHoliday = async () => {
+    if (!canEdit) {
+      return;
+    }
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(holidayDate) || !holidayName.trim()) {
+      setDialog({ title: "Invalid holiday", message: "Use YYYY-MM-DD and a holiday name." });
+      return;
+    }
+    try {
+      const created = await createHoliday({ date: holidayDate, name: holidayName.trim() });
+      setHolidays((prev) => [...prev, created].sort((a, b) => (a.holidayDate ?? "").localeCompare(b.holidayDate ?? "")));
+      setHolidayDate("");
+      setHolidayName("");
+    } catch (err) {
+      setDialog({ title: "Could not add holiday", message: apiErrorMessage(err) });
+    }
+  };
 
   return (
     <ScreenGradient>
@@ -236,6 +268,37 @@ export default function OrganisationSettingsScreen() {
               Weekends {settings?.leaveCountExcludesWeekends ? "excluded" : "included"} · Holidays{" "}
               {settings?.leaveCountExcludesHolidays ? "excluded" : "included"}
             </Text>
+          </View>
+
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>Holiday calendar</Text>
+            <Text style={styles.meta}>Configured holidays cannot be selected on Apply Leave.</Text>
+            {holidays.map((row) => (
+              <Text key={`${row.holidayDate}-${row.holidayName}`} style={styles.infoValue}>
+                {row.holidayDate} · {row.holidayName}
+              </Text>
+            ))}
+            {canEdit ? (
+              <>
+                <TextInput
+                  style={styles.input}
+                  value={holidayDate}
+                  onChangeText={setHolidayDate}
+                  placeholder="YYYY-MM-DD"
+                  placeholderTextColor={colors.secondary}
+                />
+                <TextInput
+                  style={styles.input}
+                  value={holidayName}
+                  onChangeText={setHolidayName}
+                  placeholder="Holiday name"
+                  placeholderTextColor={colors.secondary}
+                />
+                <TouchableOpacity style={styles.save} onPress={() => void addHoliday()}>
+                  <Text style={styles.saveText}>Add holiday</Text>
+                </TouchableOpacity>
+              </>
+            ) : null}
           </View>
 
           {error ? <Text style={styles.error}>{error}</Text> : null}

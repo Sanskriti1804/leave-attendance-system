@@ -5,10 +5,13 @@ import { useRouter } from "expo-router";
 import { getSession } from "../../services/auth";
 import {
   apiErrorMessage,
+  cancelLeave,
   displayName,
   getMe,
   listLeaveTypes,
   listLeaves,
+  managerApproveLeave,
+  managerRejectLeave,
   submitLeaveDraft,
   withdrawLeave,
   type EmployeePublic,
@@ -121,8 +124,12 @@ export default function WebLeaveListScreen() {
             <Text style={[styles.td, { flex: 2 }]} numberOfLines={2}>
               {leave.reason}
             </Text>
-            <View style={{ flex: 1, flexDirection: "row", gap: 8 }}>
-              {leave.status === "DRAFT" ? (
+            <View style={{ flex: 1, flexDirection: "row", gap: 8, flexWrap: "wrap" }}>
+              {leave.status === "DRAFT" && leave.employeeId === me?.employeeId ? (
+                <>
+                  <TouchableOpacity onPress={() => router.push(`${applyHref}?draftId=${leave.leaveId}` as never)}>
+                    <Text style={styles.link}>Edit</Text>
+                  </TouchableOpacity>
                 <TouchableOpacity
                   disabled={busyId === leave.leaveId}
                   onPress={async () => {
@@ -139,8 +146,67 @@ export default function WebLeaveListScreen() {
                 >
                   <Text style={styles.link}>Submit</Text>
                 </TouchableOpacity>
+                </>
               ) : null}
-              {leave.status === "SUBMITTED" || leave.status === "PENDING_HR_REVIEW" || leave.status === "DRAFT" ? (
+              {leave.status === "SUBMITTED" &&
+              leave.managerApprovalStatus === "PENDING" &&
+              leave.reportingManagerEmployeeId === me?.employeeId &&
+              leave.employeeId !== me?.employeeId ? (
+                <>
+                  <TouchableOpacity
+                    disabled={busyId === leave.leaveId}
+                    onPress={async () => {
+                      setBusyId(leave.leaveId);
+                      try {
+                        await managerApproveLeave(leave.leaveId);
+                        await load();
+                      } catch (err) {
+                        setError(apiErrorMessage(err));
+                      } finally {
+                        setBusyId(null);
+                      }
+                    }}
+                  >
+                    <Text style={styles.link}>Approve</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    disabled={busyId === leave.leaveId}
+                    onPress={async () => {
+                      setBusyId(leave.leaveId);
+                      try {
+                        await managerRejectLeave(leave.leaveId);
+                        await load();
+                      } catch (err) {
+                        setError(apiErrorMessage(err));
+                      } finally {
+                        setBusyId(null);
+                      }
+                    }}
+                  >
+                    <Text style={styles.link}>Reject</Text>
+                  </TouchableOpacity>
+                </>
+              ) : null}
+              {leave.status === "APPROVED" && leave.employeeId === me?.employeeId ? (
+                <TouchableOpacity
+                  disabled={busyId === leave.leaveId}
+                  onPress={async () => {
+                    setBusyId(leave.leaveId);
+                    try {
+                      await cancelLeave(leave.leaveId);
+                      await load();
+                    } catch (err) {
+                      setError(apiErrorMessage(err));
+                    } finally {
+                      setBusyId(null);
+                    }
+                  }}
+                >
+                  <Text style={styles.link}>Cancel</Text>
+                </TouchableOpacity>
+              ) : null}
+              {(leave.status === "SUBMITTED" || leave.status === "PENDING_HR_REVIEW" || leave.status === "DRAFT") &&
+              leave.employeeId === me?.employeeId ? (
                 <TouchableOpacity
                   disabled={busyId === leave.leaveId}
                   onPress={async () => {

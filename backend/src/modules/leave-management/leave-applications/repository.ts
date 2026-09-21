@@ -4,6 +4,7 @@ import { prisma } from "../../shared/db/index.js";
 export const leaveInclude = {
   dateSelections: { orderBy: { leaveDate: "asc" as const } },
   documents: true,
+  statusHistory: { orderBy: { changedAt: "asc" as const } },
 } satisfies Prisma.LeaveApplicationInclude;
 
 export type LeaveWithSelections = Prisma.LeaveApplicationGetPayload<{ include: typeof leaveInclude }>;
@@ -17,12 +18,18 @@ export function findLeaveById(leaveId: number): Promise<LeaveWithSelections | nu
 
 export async function findManyLeaves(filter: {
   employeeId?: number;
+  reportingManagerEmployeeId?: number;
   status?: string;
   skip: number;
   take: number;
 }): Promise<{ rows: LeaveWithSelections[]; total: number }> {
   const where: Prisma.LeaveApplicationWhereInput = {};
-  if (filter.employeeId !== undefined) {
+  if (filter.employeeId !== undefined && filter.reportingManagerEmployeeId !== undefined) {
+    where.OR = [
+      { employeeId: filter.employeeId },
+      { reportingManagerEmployeeId: filter.reportingManagerEmployeeId },
+    ];
+  } else if (filter.employeeId !== undefined) {
     where.employeeId = filter.employeeId;
   }
   if (filter.status !== undefined) {

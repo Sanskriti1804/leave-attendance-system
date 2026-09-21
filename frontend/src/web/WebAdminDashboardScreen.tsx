@@ -5,7 +5,6 @@ import { getSession } from "../../services/auth";
 import { displayName, getMe, listEmployees, listLeaves, type EmployeePublic, type LeaveApplication } from "../../services/resources";
 import { colors } from "../theme";
 import { WebCard, WebShell } from "./WebShell";
-import { UIFallbackIndicator } from "../components/ui/UIFallback";
 
 export default function WebAdminDashboardScreen() {
   const router = useRouter();
@@ -75,8 +74,7 @@ export default function WebAdminDashboardScreen() {
       <View style={styles.stats}>
         <WebCard style={styles.stat}>
           <Text style={styles.kicker}>Active entities</Text>
-          <Text style={styles.num}>{employeeTotal ?? "67"}</Text>
-          {employeeTotal === null ? <UIFallbackIndicator /> : null}
+          <Text style={styles.num}>{employeeTotal ?? 0}</Text>
         </WebCard>
         <WebCard style={styles.stat}>
           <Text style={styles.kicker}>On leave today</Text>
@@ -90,6 +88,27 @@ export default function WebAdminDashboardScreen() {
           </TouchableOpacity>
         </WebCard>
       </View>
+      <WebCard>
+        <Text style={styles.h}>HR Quick Actions</Text>
+        <TouchableOpacity style={styles.cta} onPress={() => router.push(reviewHref as never)}>
+          <Text style={styles.ctaText}>Leave approval / review</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.cta} onPress={() => router.push("/leave/types" as never)}>
+          <Text style={styles.ctaText}>Leave types</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.cta} onPress={() => router.push("/org-settings" as never)}>
+          <Text style={styles.ctaText}>Holiday management</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.cta} onPress={() => router.push("/attendance-corrections" as never)}>
+          <Text style={styles.ctaText}>Attendance corrections</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.cta} onPress={() => router.push("/people" as never)}>
+          <Text style={styles.ctaText}>People directory</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.cta} onPress={() => router.push("/org-settings" as never)}>
+          <Text style={styles.ctaText}>Organisation settings</Text>
+        </TouchableOpacity>
+      </WebCard>
       <WebCard>
         <Text style={styles.h}>Directory snapshot</Text>
         {filteredEmployees.slice(0, 8).map((row) => (

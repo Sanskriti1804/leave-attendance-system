@@ -78,6 +78,16 @@ export default function MoreSettingsScreen() {
                 </View>
                 <MaterialIcons name="chevron-right" size={20} color={colors.secondary} />
               </TouchableOpacity>
+              <TouchableOpacity style={styles.row} onPress={() => router.push("/leave/types" as never)}>
+                <View style={styles.iconWrap}>
+                  <MaterialIcons name="category" size={18} color={colors.onSurface} />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.rowTitle}>Leave Types</Text>
+                  <Text style={styles.rowSub}>Create, deactivate, or delete leave categories</Text>
+                </View>
+                <MaterialIcons name="chevron-right" size={20} color={colors.secondary} />
+              </TouchableOpacity>
               <TouchableOpacity style={styles.row} onPress={() => router.push("/org-settings" as never)}>
                 <View style={styles.iconWrap}>
                   <MaterialIcons name="apartment" size={18} color={colors.onSurface} />
@@ -214,10 +224,10 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
     color: colors.secondary,
   },
-  title: { fontFamily: "Inter", fontSize: 22, fontWeight: "800", color: colors.onSurface },
+  title: { fontFamily: "Inter", fontSize: 22, fontWeight: "700", color: colors.onSurface },
   scroll: { paddingHorizontal: 16, paddingBottom: 120, gap: 12 },
   card: {
-    backgroundColor: colors.glass,
+    backgroundColor: colors.surfaceContainerLowest,
     borderRadius: 16,
     borderWidth: 1,
     borderColor: colors.glassBorder,
