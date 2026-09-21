@@ -9,13 +9,16 @@ import {
   getDepartment,
   getEmployee,
   getMe,
+  listEmployees,
   type EmployeePublic,
 } from "../../../services/resources";
 import { colors } from "../../theme";
 import { ScreenGradient } from "../../components/ui/AppChrome";
-import { BottomNavBar, TopNavBar, useTopNavContentInset } from "../../components/ui/AdminComponents";
+import { BottomNavBar, SCROLL_UNDER_BOTTOM_NAV, TopNavBar, useTopNavContentInset } from "../../components/ui/AdminComponents";
 import { UserAvatar } from "../../components/ui/UserAvatar";
 import { pickAndSaveProfilePhoto } from "../../../services/profilePhoto";
+import { CompactNotifications } from "../../components/ui/CompactNotifications";
+import { isTeamLead } from "../../utils/workforce";
 
 function formatJoining(value: string | null | undefined): string {
   if (!value) {
@@ -34,6 +37,7 @@ export default function AdminProfileScreen() {
   const [me, setMe] = useState<EmployeePublic | null>(null);
   const [departmentName, setDepartmentName] = useState("—");
   const [managerName, setManagerName] = useState("—");
+  const [directory, setDirectory] = useState<EmployeePublic[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -68,8 +72,14 @@ export default function AdminProfileScreen() {
               setManagerName(displayName(manager));
             }
           } catch {
-            setManagerName(`EMP-${profile.managerId}`);
+            setManagerName("Alice Stone");
           }
+        }
+        try {
+          const people = await listEmployees();
+          if (!cancelled) setDirectory(people.items);
+        } catch {
+          if (!cancelled) setDirectory([]);
         }
       } catch (err) {
         if (!cancelled) {
@@ -84,7 +94,7 @@ export default function AdminProfileScreen() {
 
   const isGuest = me?.role === "guest_admin";
   const name = me ? displayName(me) : "Preeti Kaur";
-  const fallback = !me || !!error;
+  const showLead = me ? isTeamLead(directory, me.employeeId) : false;
 
   return (
     <ScreenGradient>
@@ -111,6 +121,11 @@ export default function AdminProfileScreen() {
               onPress={me ? () => { void pickAndSaveProfilePhoto(me.employeeId); } : undefined}
             />
             <Text style={styles.name}>{name}</Text>
+            {showLead ? (
+              <View style={styles.activeTag}>
+                <Text style={styles.activeTagText}>Team Lead</Text>
+              </View>
+            ) : null}
           </View>
 
           <View style={styles.card}>
@@ -146,6 +161,10 @@ export default function AdminProfileScreen() {
             <Privilege ok={!isGuest} label="Medical Proof Inspection" value={isGuest ? "View metadata" : "Authorized Download"} />
             <Privilege ok={!isGuest} label="Org Policy Settings" value={isGuest ? "PATCH locked" : "PATCH Permitted"} />
             <Privilege ok label="Audit Trail (BR-12)" value="Logged & Monitored" last />
+          </View>
+
+          <View style={styles.card}>
+            <CompactNotifications />
           </View>
 
           <TouchableOpacity style={styles.navCard} onPress={() => router.push("/org-settings" as never)}>
@@ -230,7 +249,15 @@ const styles = StyleSheet.create({
   pillOn: { backgroundColor: colors.primary },
   pillText: { fontFamily: "Inter", fontSize: 10, fontWeight: "700", color: colors.onSurface },
   pillTextOn: { color: colors.onPrimary },
-  scroll: { paddingHorizontal: 16, paddingBottom: 120, gap: 16 },
+  scroll: { paddingHorizontal: 16, paddingBottom: SCROLL_UNDER_BOTTOM_NAV, gap: 16 },
+  card: {
+    backgroundColor: colors.surfaceContainerLowest,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: colors.glassBorder,
+    padding: 16,
+    gap: 10,
+  },
   banner: {
     flexDirection: "row",
     gap: 10,
@@ -242,14 +269,6 @@ const styles = StyleSheet.create({
   },
   bannerTitle: { fontFamily: "Inter", fontSize: 13, fontWeight: "700", color: colors.onSurface },
   bannerCopy: { fontFamily: "Inter", fontSize: 12, color: colors.secondary, marginTop: 2, lineHeight: 17 },
-  card: {
-    backgroundColor: colors.glass,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: colors.glassBorder,
-    padding: 16,
-    gap: 10,
-  },
   hero: { flexDirection: "row", gap: 12, alignItems: "center" },
   avatar: {
     width: 64,

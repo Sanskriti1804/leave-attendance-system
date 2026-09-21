@@ -1,5 +1,5 @@
 import React from "react";
-import { Modal, View, Text, TouchableOpacity, StyleSheet, ViewProps } from "react-native";
+import { Modal, View, Text, TouchableOpacity, StyleSheet, ViewProps, Pressable } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -116,8 +116,8 @@ export function ThemedDialog({
 }) {
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onRequestClose}>
-      <View style={styles.dialogBackdrop}>
-        <View style={styles.dialogCard}>
+      <Pressable style={styles.dialogBackdrop} onPress={onRequestClose}>
+        <Pressable style={styles.dialogCard} onPress={(event) => event.stopPropagation()}>
           <View style={styles.dialogHeader}>
             <Text style={styles.dialogTitle}>{title}</Text>
             <TouchableOpacity onPress={onRequestClose} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
@@ -141,8 +141,8 @@ export function ThemedDialog({
               ))}
             </View>
           ) : null}
-        </View>
-      </View>
+        </Pressable>
+      </Pressable>
     </Modal>
   );
 }
@@ -205,7 +205,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     left: 20,
     right: 20,
-    top: 76,
+    bottom: 108,
     backgroundColor: colors.accentDeep,
     borderRadius: 8,
     paddingVertical: 12,

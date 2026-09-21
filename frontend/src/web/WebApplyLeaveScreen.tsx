@@ -22,7 +22,7 @@ import {
 import { colors } from "../theme";
 import { WebCard, WebShell } from "./WebShell";
 import { UserAvatar } from "../components/ui/UserAvatar";
-import { ThemedDialog } from "../components/ui/AppChrome";
+import { ThemedDialog, ThemedToast } from "../components/ui/AppChrome";
 import { addCalendarDaysIST, getTodayIST, isoWeekdayCivil } from "../utils/date";
 
 function pad2(value: number): string {
@@ -70,7 +70,7 @@ export default function WebApplyLeaveScreen() {
   const [holidayDates, setHolidayDates] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
+  const [toast, setToast] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [pickedFile, setPickedFile] = useState<{ uri: string; name: string; type: string; blob?: Blob } | null>(null);
   const [dialog, setDialog] = useState<{ title: string; message: string } | null>(null);
@@ -88,7 +88,7 @@ export default function WebApplyLeaveScreen() {
               const manager = await getEmployee(profile.managerId);
               if (!cancelled) setManagerName(displayName(manager));
             } catch {
-              if (!cancelled) setManagerName(`EMP-${profile.managerId}`);
+              if (!cancelled) setManagerName("Alice Stone");
             }
           } else if (!cancelled) {
             setManagerName("HR review");
@@ -158,6 +158,12 @@ export default function WebApplyLeaveScreen() {
     };
   }, [editingLeaveId]);
 
+  useEffect(() => {
+    if (!toast) return;
+    const timer = setTimeout(() => setToast(null), 4000);
+    return () => clearTimeout(timer);
+  }, [toast]);
+
   const today = getTodayIST();
   const maxDate = addCalendarDaysIST(today, maxAdvanceDays);
 
@@ -197,7 +203,6 @@ export default function WebApplyLeaveScreen() {
     }
     setSubmitting(true);
     setError(null);
-    setMessage(null);
     try {
       const payload = {
         leaveTypeId,
@@ -216,15 +221,15 @@ export default function WebApplyLeaveScreen() {
         }
       }
       if (kind !== "draft") {
-        await submitLeaveDraft(draft.leaveId);
-      }
-      setDialog({
-        title: kind === "draft" ? "Draft saved" : "Leave submitted",
-        message:
-          kind === "draft"
-            ? "Draft saved successfully."
+        const submitted = await submitLeaveDraft(draft.leaveId);
+        setToast(
+          submitted.reportingManagerEmployeeId
+            ? "Leave request submitted successfully. Approver has been notified."
             : "Leave request submitted successfully.",
-      });
+        );
+      } else {
+        setToast("Draft saved successfully.");
+      }
     } catch (err) {
       const text = apiErrorMessage(err);
       if (/overlap/i.test(text) || /LEAVE_OVERLAP/.test(text)) {
@@ -240,7 +245,7 @@ export default function WebApplyLeaveScreen() {
   return (
     <WebShell title="Apply Leave Request" variant="employee" activeRoute="leave" showBack>
       {loading ? <ActivityIndicator color={colors.primary} /> : null}
-      <Text style={styles.banner}>Advance booking limit: Max {maxAdvanceDays} calendar days forward. Approver — S. Raman</Text>
+      <Text style={styles.banner}>Advance booking limit: Max {maxAdvanceDays} calendar days forward. Approver — {error ? "Alice Stone" : managerName}</Text>
       <View style={styles.cols}>
         <WebCard style={styles.col}>
           <View style={styles.applicant}>
@@ -284,9 +289,12 @@ export default function WebApplyLeaveScreen() {
             <Text style={styles.h}>Manager notification</Text>
             <Text style={styles.required}>Manager proof required</Text>
           </View>
-          <TouchableOpacity onPress={() => setAttested(!attested)}>
+          <TouchableOpacity style={styles.checkRow} onPress={() => setAttested(!attested)}>
+            <View style={[styles.checkbox, attested && styles.checkboxOn]}>
+              {attested ? <Text style={styles.checkMark}>✓</Text> : null}
+            </View>
             <Text style={styles.body}>
-              {attested ? "☑" : "☐"} I have notified my reporting manager and received approval for this leave.
+              I have notified my reporting manager and received approval for this leave.
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
@@ -315,7 +323,6 @@ export default function WebApplyLeaveScreen() {
             <Text style={styles.body}>{pickedFile ? pickedFile.name : "Attach medical document (PDF, JPG, PNG)"}</Text>
           </TouchableOpacity>
           {error ? <Text style={styles.err}>{error}</Text> : null}
-          {message ? <Text style={styles.ok}>{message}</Text> : null}
           <View style={styles.actions}>
             <TouchableOpacity style={styles.secondary} disabled={submitting} onPress={() => void submit("draft")}>
               <Text style={styles.secondaryText}>Save draft</Text>
@@ -333,6 +340,7 @@ export default function WebApplyLeaveScreen() {
         onRequestClose={() => setDialog(null)}
         actions={[{ label: "OK", onPress: () => setDialog(null), primary: true }]}
       />
+      <ThemedToast message={toast} />
     </WebShell>
   );
 }
@@ -343,6 +351,20 @@ const styles = StyleSheet.create({
   col: { flexGrow: 1, flexBasis: 360, gap: 10 },
   applicant: { flexDirection: "row", alignItems: "center", gap: 12 },
   attestHead: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
+  checkRow: { flexDirection: "row", alignItems: "flex-start", gap: 12 },
+  checkbox: {
+    width: 20,
+    height: 20,
+    borderRadius: 4,
+    backgroundColor: colors.surfaceContainerLowest,
+    borderWidth: 1,
+    borderColor: colors.border,
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 2,
+  },
+  checkboxOn: { backgroundColor: colors.accent, borderColor: colors.accent },
+  checkMark: { color: colors.onPrimary, fontSize: 12, fontWeight: "700" },
   required: { fontSize: 11, fontWeight: "700", color: colors.error },
   h: { fontSize: 14, fontWeight: "700", color: colors.onSurface, marginTop: 8 },
   body: { fontSize: 15, color: colors.onSurface },

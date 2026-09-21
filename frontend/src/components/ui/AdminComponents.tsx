@@ -11,10 +11,12 @@ import { getMe, type EmployeePublic } from "../../../services/resources";
 
 export const TOP_NAV_EXTRA_PAD = 10;
 export const TOP_NAV_INNER_HEIGHT = 72;
+export const CONTENT_GAP_BELOW_TOP = 14;
+export const SCROLL_UNDER_BOTTOM_NAV = 132;
 
 export function useTopNavContentInset(): number {
   const insets = useSafeAreaInsets();
-  return insets.top + TOP_NAV_EXTRA_PAD + TOP_NAV_INNER_HEIGHT;
+  return insets.top + TOP_NAV_EXTRA_PAD + TOP_NAV_INNER_HEIGHT + CONTENT_GAP_BELOW_TOP;
 }
 
 export function ProfileIcon() {

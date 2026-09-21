@@ -31,6 +31,20 @@ export function matchesPeopleQuery(
   return haystack.includes(term);
 }
 
+export function isTeamLead(employees: EmployeePublic[], employeeId: number): boolean {
+  return employees.some((row) => row.managerId === employeeId);
+}
+
+export function teamMembersForLead(employees: EmployeePublic[], leadId: number, departmentId: number): EmployeePublic[] {
+  return employees.filter(
+    (row) =>
+      row.employeeId !== leadId &&
+      row.departmentId === departmentId &&
+      row.role === "employee" &&
+      !row.obsolete,
+  );
+}
+
 export function computeWorkforce(employees: EmployeePublic[], approvedLeaves: LeaveApplication[], today: string) {
   const active = employees.filter((row) => row.status === "ACTIVE" && !row.obsolete);
   const onLeaveIds = new Set(

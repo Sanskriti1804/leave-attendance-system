@@ -54,6 +54,8 @@ LV-APP-18 HR absence. Who may cancel/withdraw already approved leave.
 
 ## Change History
 
+2026-09-21 — Apply Leave range highlights all dates from From through To. Approver name uses the employee’s manager (seed fallback Alice Stone). Submit shows a bottom toast; in-app notification copy is concise.
+
 2026-09-21 — Leave status transitions write BR-12 `AuditLog` rows with `LeaveStatusHistory`.
 
 2026-09-20 — `GET /leaves` for employees includes applications where they are the reporting manager. Submit, manager-reject, and HR decisions write in-app notifications. HR approve/reject UI is limited to `PENDING_HR_REVIEW`.

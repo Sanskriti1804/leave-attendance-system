@@ -34,6 +34,8 @@ NOTIF-12 clock times for reminders. NOTIF-08/09/11 rows unrecoverable — do not
 
 ## Change History
 
+2026-09-21 — Notification copy is concise (submitted / requires review / approved / rejected) without leave numbers in the message. Submit also notifies the employee. Type includes leave id for dedupe.
+
 2026-09-21 — Implemented mark-read and unreadCount. Leave notification writes are isolated from leave mutation success.
 
 2026-09-20 — Implemented: `GET /api/v1/notifications` lists the caller’s in-app rows. Leave submit notifies manager or HR; missing medical, manager reject, and HR approve/reject notify the employee (duplicate title+message skipped).

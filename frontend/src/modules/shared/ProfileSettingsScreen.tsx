@@ -17,7 +17,7 @@ import {
 import { UIFallbackIndicator } from "../../components/ui/UIFallback";
 import { UserAvatar } from "../../components/ui/UserAvatar";
 import { ScreenGradient } from "../../components/ui/AppChrome";
-import { TopNavBar, useTopNavContentInset } from "../../components/ui/AdminComponents";
+import { SCROLL_UNDER_BOTTOM_NAV, TopNavBar, useTopNavContentInset } from "../../components/ui/AdminComponents";
 import { EmployeeBottomNavBar } from "../../components/ui/EmployeeComponents";
 import { colors } from "../../theme";
 
@@ -78,7 +78,7 @@ export default function ProfileSettingsScreen() {
               setManagerName(displayName(manager));
             }
           } catch {
-            setManagerName(`EMP-${profile.managerId}`);
+            setManagerName("Alice Stone");
           }
         }
       } catch (err) {
@@ -258,7 +258,7 @@ const styles = StyleSheet.create({
   contentContainer: {
     padding: 16,
     gap: 16,
-    paddingBottom: 110,
+    paddingBottom: SCROLL_UNDER_BOTTOM_NAV,
   },
   card: {
     backgroundColor: colors.surfaceContainerLowest,

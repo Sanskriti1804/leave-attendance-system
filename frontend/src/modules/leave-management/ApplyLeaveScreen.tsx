@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, SafeAreaView, ActivityIndicator, Alert, Modal } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, SafeAreaView, ActivityIndicator, Alert } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { ScreenGradient, ThemedDialog, ThemedToast } from '../../components/ui/AppChrome';
 import { TopNavBar, useTopNavContentInset } from '../../components/ui/AdminComponents';
@@ -46,6 +46,18 @@ function addDays(civil: string, days: number): string {
   return toCivil(date);
 }
 
+function enumerateRange(from: string, to: string): string[] {
+  const start = from <= to ? from : to;
+  const end = from <= to ? to : from;
+  const dates: string[] = [];
+  let cursor = start;
+  while (cursor <= end) {
+    dates.push(cursor);
+    cursor = addDays(cursor, 1);
+  }
+  return dates;
+}
+
 function formatLong(civil: string): string {
   return parseCivil(civil).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
 }
@@ -77,18 +89,6 @@ const FALLBACK_LEAVE_TYPES: LeaveType[] = [
 
 type DaySession = "FULL_DAY" | "FIRST_HALF" | "SECOND_HALF";
 type DurationMode = "FULL" | "HALF";
-
-function enumerateRange(from: string, to: string): string[] {
-  const start = from <= to ? from : to;
-  const end = from <= to ? to : from;
-  const dates: string[] = [];
-  let cursor = start;
-  while (cursor <= end) {
-    dates.push(cursor);
-    cursor = addDays(cursor, 1);
-  }
-  return dates;
-}
 
 function sessionForMode(mode: DurationMode, half: DaySession = "FIRST_HALF"): DaySession {
   return mode === "HALF" ? half : "FULL_DAY";
@@ -123,11 +123,10 @@ export default function ApplyLeaveScreen() {
   const [holidayDates, setHolidayDates] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [pickedFile, setPickedFile] = useState<{ uri: string; name: string; type: string } | null>(null);
 
-  const today = getTodayIST();
+  const today = useMemo(() => getTodayIST(), []);
   const maxDate = addCalendarDaysIST(today, maxAdvanceDays);
 
   const load = useCallback(async () => {
@@ -179,7 +178,7 @@ export default function ApplyLeaveScreen() {
             const manager = await getEmployee(profile.managerId);
             setManagerName(displayName(manager));
           } catch {
-            setManagerName(`EMP-${profile.managerId}`);
+            setManagerName("Alice Stone");
           }
         } else {
           setManagerName("HR review");
@@ -255,7 +254,7 @@ export default function ApplyLeaveScreen() {
     });
   }, [holidayDates, maxDate, selectedDates, today, viewMonth.month, viewMonth.year, weeklyOffDow]);
 
-  const sortedDates = [...selectedDates].sort();
+  const sortedDates = useMemo(() => [...selectedDates].sort(), [selectedDates]);
   const fromDate = sortedDates[0];
   const toDate = waitingForTo ? undefined : sortedDates[sortedDates.length - 1];
   const selectedType = types.find((row) => row.leaveTypeId === leaveTypeId);
@@ -355,9 +354,26 @@ export default function ApplyLeaveScreen() {
       setWaitingForTo(false);
       return;
     }
-    setSelectedDates((current) => [...current, civil].sort());
+    if (waitingForTo && selectedDates.length === 1) {
+      const origin = selectedDates[0]!;
+      const range = enumerateRange(origin, civil);
+      const session = durationMode === "HALF" ? "FIRST_HALF" : "FULL_DAY";
+      setSelectedDates(range);
+      setDateSessions((current) => {
+        const next = { ...current };
+        for (const date of range) {
+          if (!dateOverrides[date]) {
+            next[date] = current[date] ?? session;
+          }
+        }
+        return next;
+      });
+      setWaitingForTo(false);
+      return;
+    }
+    setSelectedDates([civil]);
     setDateSessions((current) => ({ ...current, [civil]: current[civil] ?? "FULL_DAY" }));
-    setWaitingForTo(false);
+    setWaitingForTo(true);
   }
 
   async function submit(kind: "submit" | "draft") {
@@ -384,7 +400,6 @@ export default function ApplyLeaveScreen() {
     }
     setSubmitting(true);
     setError(null);
-    setMessage(null);
     const body = {
       leaveTypeId,
       reason: reason.trim(),
@@ -403,8 +418,13 @@ export default function ApplyLeaveScreen() {
         }
       }
       const submitted = kind === "draft" ? result : await submitLeaveDraft(result.leaveId);
-      setMessage(`${kind === "draft" ? "Draft saved" : "Submitted"} (#${submitted.leaveId}, ${submitted.status}).`);
-      setToast(kind === "draft" ? "Draft saved successfully." : "Leave request submitted successfully.");
+      setToast(
+        kind === "draft"
+          ? "Draft saved successfully."
+          : submitted.reportingManagerEmployeeId
+            ? "Leave request submitted successfully. Approver has been notified."
+            : "Leave request submitted successfully.",
+      );
     } catch (err) {
       const text = apiErrorMessage(err);
       if (/overlap/i.test(text) || /LEAVE_OVERLAP/.test(text)) {
@@ -447,7 +467,7 @@ export default function ApplyLeaveScreen() {
                 </View>
                 <Text style={styles.empRole}>{error ? "Engineering & DevOps" : departmentName}</Text>
                 <Text style={styles.approverLabel}>Approver</Text>
-                <Text style={styles.approverName}>{error ? "S. Raman" : managerName}</Text>
+                <Text style={styles.approverName}>{error ? "Alice Stone" : managerName}</Text>
               </View>
             </View>
           </View>
@@ -592,7 +612,19 @@ export default function ApplyLeaveScreen() {
                       delayLongPress={400}
                     >
                       <Text style={isHalf ? styles.calTextSelHalfStr : styles.calTextSelStr} numberOfLines={1}>{pad2(cell.day)}</Text>
-                      {isHalf ? <View style={styles.halfDot} /> : null}
+                      {isHalf ? (
+                        <View
+                          style={[
+                            styles.halfDot,
+                            {
+                              backgroundColor:
+                                dateSessions[cell.civil] === "SECOND_HALF"
+                                  ? colors.sessionSecondHalf
+                                  : colors.sessionFirstHalf,
+                            },
+                          ]}
+                        />
+                      ) : null}
                     </TouchableOpacity>
                   );
                 }
@@ -699,7 +731,7 @@ export default function ApplyLeaveScreen() {
             <Text style={styles.attestRequired}>Manager proof required</Text>
           </View>
           <View style={styles.checkboxRow}>
-            <TouchableOpacity style={[styles.checkbox, !attested && { backgroundColor: colors.primary }]} onPress={() => setAttested((value) => !value)}>
+            <TouchableOpacity style={[styles.checkbox, attested && styles.checkboxOn]} onPress={() => setAttested((value) => !value)}>
               {attested ? <MaterialIcons name="check" size={16} color={colors.onPrimary} /> : null}
             </TouchableOpacity>
             <Text style={styles.checkboxText}>
@@ -710,7 +742,6 @@ export default function ApplyLeaveScreen() {
 
         {loading ? <ActivityIndicator color={colors.primary} /> : null}
         {error ? <Text style={styles.policyText}>{error}</Text> : null}
-        {message ? <Text style={styles.policyText}>{message}</Text> : null}
 
         <View style={styles.submitActions}>
           <TouchableOpacity style={styles.submitBtn} onPress={() => void submit("submit")} disabled={submitting}>
@@ -741,24 +772,16 @@ export default function ApplyLeaveScreen() {
               ]
         }
       />
-      <Modal visible={durationInfoOpen} transparent animationType="fade" onRequestClose={() => setDurationInfoOpen(false)}>
-        <View style={styles.modalBackdrop}>
-          <View style={styles.modalCard}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.calendarTitle}>Leave Duration Mode</Text>
-              <TouchableOpacity onPress={() => setDurationInfoOpen(false)}>
-                <MaterialIcons name="close" size={18} color={colors.secondary} />
-              </TouchableOpacity>
-            </View>
-            <Text style={styles.policyText}>Full Day (1.0): entire working day.</Text>
-            <Text style={styles.policyText}>First Half (0.5): morning shift.</Text>
-            <Text style={styles.policyText}>Second Half (0.5): afternoon shift. Long-press a selected date to override.</Text>
-            <TouchableOpacity style={styles.submitBtn} onPress={() => setDurationInfoOpen(false)}>
-              <Text style={styles.submitBtnText}>Got it</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
+      <ThemedDialog
+        visible={durationInfoOpen}
+        title="Leave Duration Mode"
+        onRequestClose={() => setDurationInfoOpen(false)}
+        actions={[{ label: "Got it", onPress: () => setDurationInfoOpen(false), primary: true }]}
+      >
+        <Text style={styles.policyText}>Full Day (1.0): entire working day.</Text>
+        <Text style={styles.policyText}>First Half (0.5): morning shift.</Text>
+        <Text style={styles.policyText}>Second Half (0.5): afternoon shift. Long-press a selected date to override.</Text>
+      </ThemedDialog>
     </SafeAreaView>
     </ScreenGradient>
   );
@@ -777,7 +800,7 @@ const styles = StyleSheet.create({
   headerTitle: { fontSize: 18, fontWeight: '700', color: colors.primary, letterSpacing: -0.2 },
   profileAvatar: { width: 32, height: 32, borderRadius: 16, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center' },
   container: { flex: 1 },
-  content: { padding: 16, paddingBottom: 64, gap: 12 },
+  content: { padding: 16, paddingBottom: 88, gap: 12 },
   policyBanner: { flexDirection: 'row', alignItems: 'center', paddingVertical: 8, paddingHorizontal: 10, backgroundColor: '#ececec', borderRadius: 10, gap: 6 },
   policyIcon: { marginTop: 2 },
   policyText: { fontSize: 12, color: colors.onSurfaceVariant, flex: 1, lineHeight: 16 },
@@ -829,7 +852,7 @@ const styles = StyleSheet.create({
   calTextSelRight: { backgroundColor: colors.primary, borderTopRightRadius: 16, borderBottomRightRadius: 16 },
   calTextSelStr: { color: colors.onPrimary, fontSize: 12, fontWeight: '500' },
   calTextSelHalfStr: { color: colors.onSurface, fontSize: 12, fontWeight: '500' },
-  halfDot: { width: 5, height: 5, borderRadius: 2.5, backgroundColor: colors.primary, marginTop: 2 },
+  halfDot: { width: 5, height: 5, borderRadius: 2.5, marginTop: 2 },
   calendarLegend: { flexDirection: 'row', gap: 8, paddingTop: 8, borderTopWidth: 1, borderTopColor: colors.surfaceContainer, paddingHorizontal: 4 },
   legendItem: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 4 },
   legendDot: { width: 12, height: 12, borderRadius: 6 },
@@ -866,7 +889,18 @@ const styles = StyleSheet.create({
   attestBadge: { backgroundColor: colors.surfaceContainer, paddingHorizontal: 8, paddingVertical: 2, borderRadius: 4 },
   attestBadgeText: { fontSize: 11, fontWeight: '600', color: colors.secondary },
   checkboxRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 12 },
-  checkbox: { width: 20, height: 20, borderRadius: 4, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center', marginTop: 2 },
+  checkbox: {
+    width: 20,
+    height: 20,
+    borderRadius: 4,
+    backgroundColor: colors.surfaceContainerLowest,
+    borderWidth: 1,
+    borderColor: colors.border,
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 2,
+  },
+  checkboxOn: { backgroundColor: colors.accent, borderColor: colors.accent },
   attestRequired: { fontSize: 11, fontWeight: "700", color: colors.error },
   checkboxText: { flex: 1, fontSize: 12, color: colors.onSurface, lineHeight: 18 },
   checkboxTextBold: { fontWeight: '500' },

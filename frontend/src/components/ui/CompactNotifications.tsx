@@ -1,0 +1,84 @@
+import React, { useEffect, useState } from "react";
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from "react-native";
+import { MaterialIcons } from "@expo/vector-icons";
+import { colors } from "../../theme";
+import {
+  apiErrorMessage,
+  listMyNotifications,
+  markNotificationRead,
+  type AppNotification,
+} from "../../../services/resources";
+import { formatDateTimeIST } from "../../utils/date";
+
+export function CompactNotifications({ limit = 6 }: { limit?: number }) {
+  const [items, setItems] = useState<AppNotification[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const result = await listMyNotifications();
+        if (!cancelled) setItems(result.items.slice(0, limit));
+      } catch (err) {
+        if (!cancelled) setError(apiErrorMessage(err));
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [limit]);
+
+  return (
+    <View style={styles.wrap}>
+      <Text style={styles.heading}>Notifications</Text>
+      {loading ? <ActivityIndicator color={colors.primary} /> : null}
+      {error ? <Text style={styles.meta}>{error}</Text> : null}
+      {!loading && !error && items.length === 0 ? (
+        <Text style={styles.meta}>No notifications yet.</Text>
+      ) : null}
+      {items.map((item) => (
+        <TouchableOpacity
+          key={item.notificationId}
+          style={styles.row}
+          onPress={() => {
+            if (item.isRead) return;
+            setItems((current) =>
+              current.map((row) => (row.notificationId === item.notificationId ? { ...row, isRead: true } : row)),
+            );
+            void markNotificationRead(item.notificationId).catch(() => {
+              setItems((current) =>
+                current.map((row) => (row.notificationId === item.notificationId ? { ...row, isRead: false } : row)),
+              );
+            });
+          }}
+        >
+          <View style={[styles.dot, { backgroundColor: item.isRead ? colors.sand : colors.accent }]} />
+          <View style={styles.body}>
+            <Text style={styles.title} numberOfLines={1}>
+              {item.title}
+            </Text>
+            <Text style={styles.copy} numberOfLines={2}>
+              {item.message}
+            </Text>
+            <Text style={styles.meta}>{item.createdAt ? formatDateTimeIST(item.createdAt) : ""}</Text>
+          </View>
+        </TouchableOpacity>
+      ))}
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  wrap: { gap: 8 },
+  heading: { fontFamily: "Inter", fontSize: 15, fontWeight: "700", color: colors.onSurface },
+  row: { flexDirection: "row", alignItems: "flex-start", gap: 10, paddingVertical: 6 },
+  dot: { width: 8, height: 8, borderRadius: 4, marginTop: 6 },
+  body: { flex: 1, gap: 2 },
+  title: { fontFamily: "Inter", fontSize: 13, fontWeight: "600", color: colors.onSurface },
+  copy: { fontFamily: "Inter", fontSize: 12, color: colors.onSurfaceVariant, lineHeight: 16 },
+  meta: { fontFamily: "Inter", fontSize: 11, color: colors.secondary },
+});

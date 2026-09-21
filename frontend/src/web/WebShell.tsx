@@ -155,7 +155,7 @@ const styles = StyleSheet.create({
   },
   title: { fontSize: 28, fontWeight: "700", color: colors.onSurface, letterSpacing: -0.8 },
   scroll: { flex: 1 },
-  scrollInner: { paddingHorizontal: 32, paddingBottom: 56 },
+  scrollInner: { paddingHorizontal: 32, paddingTop: 12, paddingBottom: 64 },
   canvas: { width: "100%", maxWidth: 1180, alignSelf: "center", gap: 22 },
   card: {
     backgroundColor: colors.surfaceContainerLowest,

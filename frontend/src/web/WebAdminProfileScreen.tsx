@@ -2,7 +2,9 @@ import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
 import { getSession } from "../../services/auth";
-import { apiErrorMessage, displayName, getDepartment, getEmployee, getMe, type EmployeePublic } from "../../services/resources";
+import { CompactNotifications } from "../components/ui/CompactNotifications";
+import { isTeamLead } from "../utils/workforce";
+import { apiErrorMessage, displayName, getDepartment, getEmployee, getMe, listEmployees, type EmployeePublic } from "../../services/resources";
 import { colors } from "../theme";
 import { WebCard, WebShell } from "./WebShell";
 import { UserAvatar } from "../components/ui/UserAvatar";
@@ -21,6 +23,7 @@ export default function WebAdminProfileScreen() {
   const [me, setMe] = useState<EmployeePublic | null>(null);
   const [departmentName, setDepartmentName] = useState("—");
   const [managerName, setManagerName] = useState("—");
+  const [directory, setDirectory] = useState<EmployeePublic[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -49,8 +52,14 @@ export default function WebAdminProfileScreen() {
             const manager = await getEmployee(profile.managerId);
             if (!cancelled) setManagerName(displayName(manager));
           } catch {
-            setManagerName(`EMP-${profile.managerId}`);
+            setManagerName("Alice Stone");
           }
+        }
+        try {
+          const people = await listEmployees();
+          if (!cancelled) setDirectory(people.items);
+        } catch {
+          if (!cancelled) setDirectory([]);
         }
       } catch (err) {
         if (!cancelled) setError(apiErrorMessage(err));
@@ -63,6 +72,7 @@ export default function WebAdminProfileScreen() {
 
   const isGuest = me?.role === "guest_admin";
   const fallback = !me || !!error;
+  const showLead = me ? isTeamLead(directory, me.employeeId) : false;
 
   return (
     <WebShell title="Profile" variant="admin" activeRoute="more" showBack>
@@ -80,6 +90,7 @@ export default function WebAdminProfileScreen() {
           onPress={me ? () => { void pickAndSaveProfilePhoto(me.employeeId); } : undefined}
         />
         <Text style={styles.name}>{me ? displayName(me) : "Preeti Kaur"}</Text>
+        {showLead ? <Text style={styles.activeTag}>Team Lead</Text> : null}
         {fallback ? <UIFallbackIndicator /> : null}
       </View>
       <View style={styles.cols}>
@@ -104,6 +115,9 @@ export default function WebAdminProfileScreen() {
               <Text style={styles.body}>{me?.phone ?? "—"}</Text>
             </View>
           </View>
+        </WebCard>
+        <WebCard style={styles.col}>
+          <CompactNotifications />
         </WebCard>
         <WebCard style={styles.col}>
           <Text style={styles.h}>Privileges & Scope</Text>

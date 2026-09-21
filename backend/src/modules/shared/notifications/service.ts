@@ -86,26 +86,20 @@ export async function notifyLeaveDecision(params: {
 }): Promise<void> {
   const type = params.kind === "APPROVED" ? "LEAVE_APPROVED" : "LEAVE_REJECTED";
   const title = params.kind === "APPROVED" ? "Leave approved" : "Leave rejected";
-  const message =
-    params.kind === "APPROVED"
-      ? `Leave #${params.leaveId} approved.`
-      : `Leave #${params.leaveId} rejected.`;
   await notifyOnce({
     userId: params.employeeId,
-    type,
+    type: `${type}_${params.leaveId}`,
     title,
-    message,
+    message: params.kind === "APPROVED" ? "Leave request approved." : "Leave request rejected.",
   });
 }
 
 export async function notifyMedicalDocumentRequired(employeeId: number, leaveId?: number): Promise<void> {
   await notifyOnce({
     userId: employeeId,
-    type: "MEDICAL_REQUIRED",
+    type: leaveId ? `MEDICAL_REQUIRED_${leaveId}` : "MEDICAL_REQUIRED",
     title: "Medical proof required",
-    message: leaveId
-      ? `Attach medical file before submitting #${leaveId}.`
-      : "Attach medical file before submitting leave.",
+    message: "Attach medical file before submitting leave.",
   });
 }
 
@@ -123,12 +117,18 @@ export async function notifyLeaveSubmitted(params: {
     });
     return;
   }
+  await notifyOnce({
+    userId: params.employeeId,
+    type: `LEAVE_SUBMITTED_SELF_${params.leaveId}`,
+    title: "Leave submitted",
+    message: "Leave request submitted for approval.",
+  });
   if (params.status === "SUBMITTED" && params.reportingManagerEmployeeId) {
     await notifyOnce({
       userId: params.reportingManagerEmployeeId,
-      type: "LEAVE_SUBMITTED",
+      type: `LEAVE_SUBMITTED_${params.leaveId}`,
       title: "Leave needs approval",
-      message: `Leave #${params.leaveId} awaits manager review.`,
+      message: "Leave request requires your review.",
     });
     return;
   }
@@ -143,9 +143,9 @@ export async function notifyLeaveSubmitted(params: {
       }
       await notifyOnce({
         userId: admin.employeeId,
-        type: "LEAVE_SUBMITTED",
+        type: `LEAVE_SUBMITTED_${params.leaveId}`,
         title: "Leave pending HR",
-        message: `Leave #${params.leaveId} is pending HR review.`,
+        message: "Leave request requires your review.",
       });
     }
   }

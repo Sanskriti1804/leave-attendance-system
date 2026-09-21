@@ -155,6 +155,13 @@ export function getEmployee(employeeId: number): Promise<EmployeePublic> {
   return authorizedRequest<EmployeePublic>(`/api/v1/employees/${employeeId}`);
 }
 
+export function patchEmployee(
+  employeeId: number,
+  body: Partial<Pick<EmployeePublic, "managerId" | "status" | "role" | "departmentId">>,
+): Promise<EmployeePublic> {
+  return authorizedRequest<EmployeePublic>(`/api/v1/employees/${employeeId}`, { method: "PATCH", body });
+}
+
 export function listEmployees(): Promise<ItemList<EmployeePublic>> {
   return authorizedRequest<ItemList<EmployeePublic>>("/api/v1/employees?page=1&pageSize=100");
 }
