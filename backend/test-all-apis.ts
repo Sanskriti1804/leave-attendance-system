@@ -667,7 +667,7 @@ async function run(): Promise<void> {
       body: {
         leaveTypeId: casual.leaveTypeId,
         reason: "draft",
-        selectedDates: [{ date: d6, session: "FIRST_HALF" }],
+        selectedDates: [{ date: d4, session: "FIRST_HALF" }],
       },
       token: empSess.access,
     });
@@ -748,9 +748,9 @@ async function run(): Promise<void> {
         leaveTypeId: sick.leaveTypeId,
         reason: "flu",
         selectedDates: [
+          { date: addCalendarDays(today, 8), session: "FULL_DAY" },
           { date: addCalendarDays(today, 9), session: "FULL_DAY" },
-          { date: addCalendarDays(today, 11), session: "FULL_DAY" },
-          { date: addCalendarDays(today, 12), session: "FULL_DAY" },
+          { date: addCalendarDays(today, 10), session: "FULL_DAY" },
         ],
       },
       token: empSess.access,
@@ -802,8 +802,54 @@ async function run(): Promise<void> {
       token: empSess.access,
     });
     expect("document JSON body 422", jsonNotMultipart.status, 422);
+
+    const empNotes = await request(base, "GET", "/api/v1/notifications", { token: empSess.access });
+    expect("employee notifications 200", empNotes.status, 200);
+    const empNoteItems = Array.isArray((empNotes.json as { items?: unknown }).items)
+      ? ((empNotes.json as { items: { notificationId: number; isRead: boolean }[] }).items)
+      : [];
+    expect("employee received leave notifications", empNoteItems.length > 0, true);
+
+    if (empNoteItems[0]) {
+      const markRead = await request(
+        base,
+        "POST",
+        `/api/v1/notifications/${empNoteItems[0].notificationId}/read`,
+        { token: empSess.access },
+      );
+      expect("mark notification read 200", markRead.status, 200);
+      const otherRead = await request(
+        base,
+        "POST",
+        `/api/v1/notifications/${empNoteItems[0].notificationId}/read`,
+        { token: hireToken },
+      );
+      expect("other employee mark-read 404", otherRead.status, 404);
+    }
+
+    const guestNotes = await request(base, "GET", "/api/v1/notifications", { token: guestSess.access });
+    expect("guest notifications 200", guestNotes.status, 200);
+
+    const auditGuest = await request(base, "GET", "/api/v1/audit", { token: guestSess.access });
+    expect("guest_admin GET audit 403", auditGuest.status, 403);
+    const auditEmp = await request(base, "GET", "/api/v1/audit", { token: empSess.access });
+    expect("employee GET audit 403", auditEmp.status, 403);
+    const auditAdmin = await request(base, "GET", "/api/v1/audit?page=1&pageSize=20", {
+      token: adminSess.access,
+    });
+    expect("admin GET audit 200", auditAdmin.status, 200);
+    const auditItems = Array.isArray((auditAdmin.json as { items?: unknown }).items)
+      ? (auditAdmin.json as { items: { entityType: string }[] }).items
+      : [];
+    expect("audit contains leave rows", auditItems.some((row) => row.entityType === "LeaveApplication"), true);
   } finally {
     server.close();
+    await prisma.notification.deleteMany({
+      where: { user: { email: { contains: suffix } } },
+    });
+    await prisma.auditLog.deleteMany({
+      where: { user: { email: { contains: suffix } } },
+    });
     await prisma.leaveDocument.deleteMany({
       where: { leave: { employee: { email: { contains: suffix } } } },
     });

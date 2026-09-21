@@ -15,10 +15,12 @@ import { prisma } from "../../shared/db/index.js";
 import { createStatusHistory } from "../leave-status-history/repository.js";
 import { assertMedicalDocumentsForSubmit } from "../leave-documents/service.js";
 import { getLeaveAdvanceConfig, getOrganisationLeaveConfig } from "../leave-policies/service.js";
+import { createAuditLog } from "../../shared/audit-logs/repository.js";
 import {
   notifyLeaveDecision,
   notifyLeaveSubmitted,
   notifyMedicalDocumentRequired,
+  safeNotify,
 } from "../../shared/notifications/service.js";
 import { assertEmployeeEligibleForLeaveType } from "../leave-types/service.js";
 import * as leaveRepository from "./repository.js";
@@ -278,6 +280,27 @@ async function loadActorEmployee(actor: AuthTokenPayload) {
   return employee;
 }
 
+async function auditLeave(
+  tx: Prisma.TransactionClient,
+  actor: AuthTokenPayload,
+  action: string,
+  leaveId: number,
+  oldStatus: string | null,
+  newStatus: string,
+): Promise<void> {
+  await createAuditLog(
+    {
+      userId: actor.employeeId,
+      action,
+      entityType: "LeaveApplication",
+      entityId: leaveId,
+      oldValue: oldStatus ? { status: oldStatus } : undefined,
+      newValue: { status: newStatus },
+    },
+    tx,
+  );
+}
+
 async function persistLeave(
   tx: Prisma.TransactionClient,
   data: {
@@ -419,7 +442,7 @@ async function validatePayload(
       });
     } catch (err) {
       if (err instanceof HttpError && err.code === "MEDICAL_DOCUMENT_REQUIRED") {
-        await notifyMedicalDocumentRequired(employee.employeeId, excludeLeaveId);
+        await safeNotify(() => notifyMedicalDocumentRequired(employee.employeeId, excludeLeaveId));
       }
       throw err;
     }
@@ -433,8 +456,8 @@ export async function createDraft(actor: AuthTokenPayload, body: LeaveApplicatio
   }
   const employee = await loadActorEmployee(actor);
   const { prepared, warnings } = await validatePayload(body, employee);
-  const leave = await prisma.$transaction((tx) =>
-    persistLeave(tx, {
+  const leave = await prisma.$transaction(async (tx) => {
+    const created = await persistLeave(tx, {
       employeeId: employee.employeeId,
       leaveTypeId: body.leaveTypeId,
       reason: body.reason,
@@ -442,8 +465,10 @@ export async function createDraft(actor: AuthTokenPayload, body: LeaveApplicatio
       reportingManagerEmployeeId: employee.managerId,
       status: "DRAFT",
       managerApprovalStatus: null,
-    }),
-  );
+    });
+    await auditLeave(tx, actor, "LEAVE_DRAFT_CREATE", created.leaveId, null, "DRAFT");
+    return created;
+  });
   return toLeaveResponse(leave, warnings);
 }
 
@@ -465,14 +490,18 @@ export async function submitNew(actor: AuthTokenPayload, body: LeaveApplicationB
       status: "DRAFT",
       managerApprovalStatus: null,
     });
-    return applySubmitTransitions(tx, draft, actor);
+    const submitted = await applySubmitTransitions(tx, draft, actor);
+    await auditLeave(tx, actor, "LEAVE_SUBMIT", submitted.leaveId, "DRAFT", submitted.status);
+    return submitted;
   });
-  await notifyLeaveSubmitted({
-    employeeId: leave.employeeId,
-    leaveId: leave.leaveId,
-    status: leave.status,
-    reportingManagerEmployeeId: leave.reportingManagerEmployeeId,
-  });
+  await safeNotify(() =>
+    notifyLeaveSubmitted({
+      employeeId: leave.employeeId,
+      leaveId: leave.leaveId,
+      status: leave.status,
+      reportingManagerEmployeeId: leave.reportingManagerEmployeeId,
+    }),
+  );
   return toLeaveResponse(leave, warnings);
 }
 
@@ -496,8 +525,8 @@ export async function updateDraft(actor: AuthTokenPayload, leaveId: number, body
       })),
   };
   const { prepared, warnings } = await validatePayload(merged, employee, leaveId);
-  const updated = await prisma.$transaction((tx) =>
-    persistLeave(tx, {
+  const updated = await prisma.$transaction(async (tx) => {
+    const next = await persistLeave(tx, {
       leaveId,
       employeeId: employee.employeeId,
       leaveTypeId: merged.leaveTypeId,
@@ -506,8 +535,10 @@ export async function updateDraft(actor: AuthTokenPayload, leaveId: number, body
       reportingManagerEmployeeId: employee.managerId,
       status: "DRAFT",
       managerApprovalStatus: null,
-    }),
-  );
+    });
+    await auditLeave(tx, actor, "LEAVE_DRAFT_UPDATE", leaveId, "DRAFT", "DRAFT");
+    return next;
+  });
   return toLeaveResponse(updated, warnings);
 }
 
@@ -542,14 +573,18 @@ export async function submitDraft(actor: AuthTokenPayload, leaveId: number) {
       status: "DRAFT",
       managerApprovalStatus: null,
     });
-    return applySubmitTransitions(tx, updated, actor);
+    const next = await applySubmitTransitions(tx, updated, actor);
+    await auditLeave(tx, actor, "LEAVE_SUBMIT", leaveId, "DRAFT", next.status);
+    return next;
   });
-  await notifyLeaveSubmitted({
-    employeeId: submitted.employeeId,
-    leaveId: submitted.leaveId,
-    status: submitted.status,
-    reportingManagerEmployeeId: submitted.reportingManagerEmployeeId,
-  });
+  await safeNotify(() =>
+    notifyLeaveSubmitted({
+      employeeId: submitted.employeeId,
+      leaveId: submitted.leaveId,
+      status: submitted.status,
+      reportingManagerEmployeeId: submitted.reportingManagerEmployeeId,
+    }),
+  );
   return toLeaveResponse(submitted, warnings);
 }
 
@@ -609,14 +644,17 @@ export async function managerApprove(actor: AuthTokenPayload, leaveId: number, b
       newStatus: "PENDING_HR_REVIEW",
       reason: body.comment ?? "MANAGER_APPROVED",
     });
+    await auditLeave(tx, actor, "LEAVE_MANAGER_APPROVE", leaveId, "SUBMITTED", "PENDING_HR_REVIEW");
     return next;
   });
-  await notifyLeaveSubmitted({
-    employeeId: updated.employeeId,
-    leaveId: updated.leaveId,
-    status: updated.status,
-    reportingManagerEmployeeId: updated.reportingManagerEmployeeId,
-  });
+  await safeNotify(() =>
+    notifyLeaveSubmitted({
+      employeeId: updated.employeeId,
+      leaveId: updated.leaveId,
+      status: updated.status,
+      reportingManagerEmployeeId: updated.reportingManagerEmployeeId,
+    }),
+  );
   return toLeaveResponse(updated);
 }
 
@@ -650,13 +688,16 @@ export async function managerReject(actor: AuthTokenPayload, leaveId: number, bo
       newStatus: "REJECTED",
       reason: body.comment ?? "MANAGER_REJECTED",
     });
+    await auditLeave(tx, actor, "LEAVE_MANAGER_REJECT", leaveId, "SUBMITTED", "REJECTED");
     return next;
   });
-  await notifyLeaveDecision({
-    employeeId: leave.employeeId,
-    leaveId,
-    kind: "REJECTED",
-  });
+  await safeNotify(() =>
+    notifyLeaveDecision({
+      employeeId: leave.employeeId,
+      leaveId,
+      kind: "REJECTED",
+    }),
+  );
   return toLeaveResponse(updated);
 }
 
@@ -693,13 +734,16 @@ export async function hrApprove(actor: AuthTokenPayload, leaveId: number, body: 
       newStatus: "APPROVED",
       reason: body.comment ?? null,
     });
+    await auditLeave(tx, actor, "LEAVE_HR_APPROVE", leaveId, "PENDING_HR_REVIEW", "APPROVED");
     return next;
   });
-  await notifyLeaveDecision({
-    employeeId: leave.employeeId,
-    leaveId,
-    kind: "APPROVED",
-  });
+  await safeNotify(() =>
+    notifyLeaveDecision({
+      employeeId: leave.employeeId,
+      leaveId,
+      kind: "APPROVED",
+    }),
+  );
   return toLeaveResponse(updated);
 }
 
@@ -736,13 +780,16 @@ export async function hrReject(actor: AuthTokenPayload, leaveId: number, body: R
       newStatus: "REJECTED",
       reason: body.comment ?? null,
     });
+    await auditLeave(tx, actor, "LEAVE_HR_REJECT", leaveId, "PENDING_HR_REVIEW", "REJECTED");
     return next;
   });
-  await notifyLeaveDecision({
-    employeeId: leave.employeeId,
-    leaveId,
-    kind: "REJECTED",
-  });
+  await safeNotify(() =>
+    notifyLeaveDecision({
+      employeeId: leave.employeeId,
+      leaveId,
+      kind: "REJECTED",
+    }),
+  );
   return toLeaveResponse(updated);
 }
 
@@ -767,6 +814,7 @@ export async function withdraw(actor: AuthTokenPayload, leaveId: number) {
       oldStatus: leave.status,
       newStatus: "WITHDRAWN",
     });
+    await auditLeave(tx, actor, "LEAVE_WITHDRAW", leaveId, leave.status, "WITHDRAWN");
     return next;
   });
   return toLeaveResponse(updated);
@@ -797,6 +845,7 @@ export async function cancel(actor: AuthTokenPayload, leaveId: number) {
       oldStatus: leave.status,
       newStatus: "CANCELLED",
     });
+    await auditLeave(tx, actor, "LEAVE_CANCEL", leaveId, leave.status, "CANCELLED");
     return next;
   });
   return toLeaveResponse(updated);

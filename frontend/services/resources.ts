@@ -199,8 +199,12 @@ export type AppNotification = {
   createdAt: string | null;
 };
 
-export function listMyNotifications(): Promise<{ items: AppNotification[] }> {
-  return authorizedRequest<{ items: AppNotification[] }>("/api/v1/notifications");
+export function listMyNotifications(): Promise<{ items: AppNotification[]; unreadCount?: number }> {
+  return authorizedRequest<{ items: AppNotification[]; unreadCount?: number }>("/api/v1/notifications");
+}
+
+export function markNotificationRead(notificationId: number): Promise<AppNotification> {
+  return authorizedRequest<AppNotification>(`/api/v1/notifications/${notificationId}/read`, { method: "POST" });
 }
 
 export function patchOrgSettings(body: Partial<OrganisationSettings>): Promise<OrganisationSettings> {

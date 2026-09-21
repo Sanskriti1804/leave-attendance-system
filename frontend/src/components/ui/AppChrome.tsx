@@ -7,15 +7,15 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { colors, pageGradient } from "../../theme";
 
 export const glassCardStyle = {
-  backgroundColor: colors.glass,
-  borderRadius: 16,
+  backgroundColor: colors.surfaceContainerLowest,
+  borderRadius: 12,
   borderWidth: 1,
   borderColor: colors.glassBorder,
-  padding: 18,
-  shadowColor: "#161616",
-  shadowOffset: { width: 0, height: 8 },
-  shadowOpacity: 0.04,
-  shadowRadius: 16,
+  padding: 20,
+  shadowColor: "#1A1410",
+  shadowOffset: { width: 0, height: 12 },
+  shadowOpacity: 0.05,
+  shadowRadius: 24,
   elevation: 2,
 } as const;
 
@@ -88,7 +88,7 @@ export function RoleBottomNav({
               activeOpacity={0.7}
             >
               <View style={[styles.bottomNavIconContainer, isActive && styles.bottomNavIconContainerActive]}>
-                <MaterialIcons name={item.icon} size={20} color={isActive ? colors.onPrimary : colors.navInactive} />
+                <MaterialIcons name={item.icon} size={18} color={isActive ? colors.onPrimary : colors.navInactive} />
               </View>
               <Text style={[styles.bottomNavLabel, isActive && styles.bottomNavLabelActive]}>{item.label}</Text>
             </TouchableOpacity>
@@ -168,15 +168,17 @@ const styles = StyleSheet.create({
   },
   dialogCard: {
     backgroundColor: colors.surfaceContainerLowest,
-    borderRadius: 20,
-    padding: 20,
+    borderRadius: 10,
+    padding: 22,
     gap: 14,
     borderWidth: 1,
     borderColor: colors.glassBorder,
-    shadowColor: "#161616",
-    shadowOffset: { width: 0, height: 16 },
-    shadowOpacity: 0.12,
-    shadowRadius: 32,
+    borderLeftWidth: 4,
+    borderLeftColor: colors.accent,
+    shadowColor: "#1A1410",
+    shadowOffset: { width: 0, height: 18 },
+    shadowOpacity: 0.14,
+    shadowRadius: 36,
     elevation: 8,
   },
   dialogHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
@@ -185,8 +187,8 @@ const styles = StyleSheet.create({
   dialogActions: { gap: 8, marginTop: 4 },
   dialogPrimaryBtn: {
     minHeight: 46,
-    backgroundColor: colors.primary,
-    borderRadius: 12,
+    backgroundColor: colors.accent,
+    borderRadius: 8,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -194,7 +196,7 @@ const styles = StyleSheet.create({
   dialogGhostBtn: {
     minHeight: 46,
     backgroundColor: colors.surfaceContainerLow,
-    borderRadius: 12,
+    borderRadius: 8,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -204,8 +206,8 @@ const styles = StyleSheet.create({
     left: 20,
     right: 20,
     top: 76,
-    backgroundColor: colors.onSurface,
-    borderRadius: 12,
+    backgroundColor: colors.accentDeep,
+    borderRadius: 8,
     paddingVertical: 12,
     paddingHorizontal: 16,
     zIndex: 80,
@@ -213,19 +215,19 @@ const styles = StyleSheet.create({
   toastText: { fontFamily: "Inter", fontSize: 13, color: colors.onPrimary, lineHeight: 18, fontWeight: "500" },
   bottomNavContainer: {
     position: "absolute",
-    left: 20,
-    right: 20,
+    left: 16,
+    right: 16,
     zIndex: 50,
     backgroundColor: colors.navBg,
-    borderRadius: 28,
-    paddingHorizontal: 10,
+    borderRadius: 18,
+    paddingHorizontal: 8,
     paddingVertical: 8,
     borderWidth: 1,
     borderColor: colors.navBorder,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.22,
-    shadowRadius: 24,
+    shadowColor: "#0F766E",
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.18,
+    shadowRadius: 28,
     elevation: 10,
   },
   bottomNavContent: {
@@ -240,9 +242,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   bottomNavIconContainer: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
+    width: 36,
+    height: 28,
+    borderRadius: 8,
     alignItems: "center",
     justifyContent: "center",
   },

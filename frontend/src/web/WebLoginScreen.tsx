@@ -81,7 +81,7 @@ export default function WebLoginScreen() {
         </View>
         <View style={styles.formPane}>
           <WebCard>
-            <Text style={styles.heading}>Enterprise Sign In</Text>
+            <Text style={styles.heading}>Welcome back</Text>
             <Text style={styles.label}>Corporate Email / Employee ID *</Text>
             <View style={styles.inputRow}>
               <MaterialIcons name="badge" size={18} color={colors.secondary} />
@@ -139,12 +139,12 @@ export default function WebLoginScreen() {
 const styles = StyleSheet.create({
   page: { flex: 1, minHeight: 640 },
   split: { flex: 1, flexDirection: "row", flexWrap: "wrap", maxWidth: 1100, width: "100%", alignSelf: "center", padding: 32, gap: 32, alignItems: "center" },
-  brandPane: { flex: 1, minWidth: 280, gap: 8 },
+  brandPane: { flex: 1, minWidth: 280, gap: 8, backgroundColor: colors.primary, padding: 36, borderRadius: 10 },
   formPane: { flex: 1, minWidth: 320, maxWidth: 480 },
-  logo: { width: 72, height: 72, borderRadius: 36, marginBottom: 8 },
-  brand: { fontSize: 28, fontWeight: "800", color: colors.onSurface, letterSpacing: 1 },
-  tagline: { fontSize: 16, fontWeight: "600", color: colors.onSurfaceVariant },
-  copy: { fontSize: 14, color: colors.secondary, lineHeight: 20, maxWidth: 420 },
+  logo: { width: 72, height: 72, borderRadius: 8, marginBottom: 8 },
+  brand: { fontSize: 28, fontWeight: "800", color: colors.onPrimary, letterSpacing: 2 },
+  tagline: { fontSize: 16, fontWeight: "600", color: "rgba(255,255,255,0.72)" },
+  copy: { fontSize: 14, color: "rgba(255,255,255,0.55)", lineHeight: 20, maxWidth: 420 },
   heading: { fontSize: 22, fontWeight: "700", color: colors.onSurface, marginBottom: 16 },
   label: { fontSize: 12, fontWeight: "600", color: colors.onSurface, marginBottom: 6, marginTop: 10 },
   inputRow: {
@@ -163,12 +163,12 @@ const styles = StyleSheet.create({
   link: { fontSize: 12, fontWeight: "600", color: colors.secondary },
   remember: { flexDirection: "row", alignItems: "center", gap: 10, marginTop: 14 },
   track: { width: 36, height: 20, borderRadius: 10, backgroundColor: colors.surfaceContainerHigh, justifyContent: "center" },
-  trackOn: { backgroundColor: colors.primary },
+  trackOn: { backgroundColor: colors.accent },
   thumb: { width: 16, height: 16, borderRadius: 8, backgroundColor: "#fff", marginLeft: 2 },
   thumbOn: { marginLeft: 18 },
   rememberText: { fontSize: 13, color: colors.onSurface },
   error: { color: colors.error, marginTop: 10, fontSize: 13 },
-  cta: { marginTop: 18, backgroundColor: colors.primary, minHeight: 46, borderRadius: 10, alignItems: "center", justifyContent: "center" },
+  cta: { marginTop: 18, backgroundColor: colors.accent, minHeight: 48, borderRadius: 8, alignItems: "center", justifyContent: "center" },
   ctaText: { color: colors.onPrimary, fontWeight: "700" },
   footer: { flexDirection: "row", justifyContent: "space-between", marginTop: 16 },
   version: { fontSize: 12, color: colors.secondary },

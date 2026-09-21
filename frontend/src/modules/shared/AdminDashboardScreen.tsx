@@ -146,7 +146,7 @@ export default function AdminDashboardScreen() {
                  </View>
                  <View style={{ flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
                     <Text style={{ backgroundColor: colors.surfaceContainerHigh, borderWidth: 1, borderColor: colors.glassBorder, borderRadius: 9999, fontSize: 10, fontWeight: 'bold', paddingHorizontal: 8, paddingVertical: 2, color: colors.onSurface, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4, overflow: 'hidden' }}>{pending.length} REQ</Text>
-                    <TouchableOpacity style={{ backgroundColor: colors.primary, paddingHorizontal: 14, paddingVertical: 6, borderRadius: 10, minHeight: 34, alignItems: 'center', justifyContent: 'center' }} onPress={() => router.push(reviewHref as never)}>
+                    <TouchableOpacity style={{ backgroundColor: colors.accent, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 8, minHeight: 34, alignItems: 'center', justifyContent: 'center' }} onPress={() => router.push(reviewHref as never)}>
                        <Text style={{ fontFamily: 'Inter', fontSize: 12, fontWeight: '600', color: colors.onPrimary }}>Review Queue</Text>
                     </TouchableOpacity>
                  </View>

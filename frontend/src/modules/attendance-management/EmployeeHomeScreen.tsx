@@ -141,6 +141,7 @@ export default function EmployeeHomeScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.clockCard}>
+          <Text style={styles.clockKicker}>India Standard Time</Text>
           <View style={styles.istPill}>
             <View style={styles.istPulseDot} />
           </View>
@@ -319,7 +320,7 @@ export default function EmployeeHomeScreen() {
 
         <View style={styles.actionsSection}>
           <TouchableOpacity
-            style={styles.actionCard}
+            style={[styles.actionCard, styles.actionCardTeal]}
             onPress={() => router.push(attendanceHref as never)}
             activeOpacity={0.7}
           >
@@ -478,18 +479,20 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   clockCard: {
-    backgroundColor: colors.surfaceContainerLowest,
-    padding: 18,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: colors.glassBorder,
-    alignItems: "center",
+    backgroundColor: colors.primary,
+    paddingVertical: 28,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+    alignItems: "flex-start",
     justifyContent: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 1,
+  },
+  clockKicker: {
+    fontSize: 11,
+    fontWeight: "700",
+    letterSpacing: 2.2,
+    textTransform: "uppercase",
+    color: "rgba(255,255,255,0.55)",
+    marginBottom: 10,
   },
   istPill: {
     flexDirection: "row",
@@ -497,15 +500,15 @@ const styles = StyleSheet.create({
     gap: 6,
     paddingHorizontal: 10,
     paddingVertical: 3,
-    backgroundColor: colors.surfaceContainer,
-    borderRadius: 16,
-    marginBottom: 8,
+    backgroundColor: colors.accent,
+    borderRadius: 4,
+    marginBottom: 12,
   },
   istPulseDot: {
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: colors.primary,
+    backgroundColor: colors.onPrimary,
   },
   istPillText: {
     fontSize: 11,
@@ -516,14 +519,14 @@ const styles = StyleSheet.create({
   },
   istDateText: {
     fontSize: 14,
-    color: colors.secondary,
+    color: "rgba(255,255,255,0.7)",
     lineHeight: 20,
   },
   istTimeDisplay: {
-    fontSize: 30,
-    fontWeight: "600",
-    color: colors.primary,
-    letterSpacing: -0.6,
+    fontSize: 42,
+    fontWeight: "700",
+    color: colors.onPrimary,
+    letterSpacing: -1.4,
     marginVertical: 4,
     fontVariant: ["tabular-nums"],
   },
@@ -535,7 +538,7 @@ const styles = StyleSheet.create({
   },
   syncText: {
     fontSize: 12,
-    color: colors.onSurfaceVariant,
+    color: "rgba(255,255,255,0.55)",
   },
   simulationContainer: {
     gap: 6,
@@ -576,10 +579,12 @@ const styles = StyleSheet.create({
   statusBanner: {
     flexDirection: "row",
     alignItems: "flex-start",
-    backgroundColor: colors.surfaceContainer,
-    padding: 12,
-    borderRadius: 12,
-    marginTop: 2,
+    backgroundColor: colors.accentWash,
+    padding: 16,
+    borderRadius: 8,
+    gap: 10,
+    borderLeftWidth: 3,
+    borderLeftColor: colors.accent,
   },
   statusTexts: {
     flex: 1,
@@ -608,15 +613,15 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 8,
     paddingHorizontal: 12,
-    borderRadius: 12,
+    borderRadius: 8,
   },
   punchButtonPrimary: {
-    backgroundColor: colors.primary,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 2,
+    backgroundColor: colors.accent,
+    shadowColor: colors.accentDeep,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.25,
+    shadowRadius: 12,
+    elevation: 3,
   },
   punchButtonDisabled: {
     backgroundColor: colors.surfaceContainer,
@@ -795,18 +800,19 @@ const styles = StyleSheet.create({
     paddingTop: 4,
   },
   actionCard: {
-    height: 48,
+    height: 52,
     backgroundColor: colors.surfaceContainerLowest,
     borderRadius: 8,
     paddingHorizontal: 16,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 1,
+    borderWidth: 1,
+    borderColor: colors.glassBorder,
+  },
+  actionCardTeal: {
+    backgroundColor: colors.accentWash,
+    borderColor: "transparent",
   },
   actionCardLeft: {
     flexDirection: "row",

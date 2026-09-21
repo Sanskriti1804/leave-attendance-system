@@ -9,6 +9,21 @@ export function findByUser(userId: number): Promise<Notification[]> {
   });
 }
 
+export function countUnread(userId: number): Promise<number> {
+  return prisma.notification.count({ where: { userId, isRead: false } });
+}
+
+export function findById(notificationId: number): Promise<Notification | null> {
+  return prisma.notification.findUnique({ where: { notificationId } });
+}
+
+export function markRead(notificationId: number): Promise<Notification> {
+  return prisma.notification.update({
+    where: { notificationId },
+    data: { isRead: true },
+  });
+}
+
 export function findDuplicate(params: {
   userId: number;
   type: string;

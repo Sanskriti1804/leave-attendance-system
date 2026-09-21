@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
 import { env } from "../../../env.js";
 import { asyncHandler } from "../../shared/middlewares/async-handler.js";
+import { createAuditLog } from "../../shared/audit-logs/repository.js";
 import { HttpError } from "../../shared/utils/http-error.js";
 import { parseMultipart, readRequestBuffer } from "./multipart.js";
 import * as leaveDocumentService from "./service.js";
@@ -20,11 +21,25 @@ export const upload = asyncHandler(async (req: Request, res: Response): Promise<
   //extract leave id and file from the multipart request
   const parsed = parseMultipart(body, contentType);
   const document = await leaveDocumentService.uploadLeaveDocument(req.user!, parsed.leaveIdRaw, parsed.file);
+  await createAuditLog({
+    userId: req.user!.employeeId,
+    action: "DOCUMENT_UPLOAD",
+    entityType: "LeaveDocument",
+    entityId: document.documentId,
+    newValue: { leaveId: document.leaveId, fileType: document.fileType, fileSize: document.fileSize },
+  });
   res.status(201).json(document);
 });
 
 export const download = asyncHandler(async (req: Request, res: Response): Promise<void> => {
   const file = await leaveDocumentService.downloadLeaveDocument(req.user!, Number(res.locals.params.id));
+  await createAuditLog({
+    userId: req.user!.employeeId,
+    action: "DOCUMENT_DOWNLOAD",
+    entityType: "LeaveDocument",
+    entityId: Number(res.locals.params.id),
+    newValue: { contentType: file.contentType },
+  });
   res.setHeader("Content-Type", file.contentType);  //type of file
   res.setHeader("Content-Disposition", "attachment");  //tells the browser to download the file
   res.status(200).send(file.bytes);

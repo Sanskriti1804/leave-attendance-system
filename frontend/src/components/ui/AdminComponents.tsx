@@ -190,7 +190,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '700',
     color: colors.onSurface,
-    letterSpacing: -0.2,
+    letterSpacing: -0.6,
     flex: 1,
     flexShrink: 1,
   },
@@ -200,15 +200,9 @@ const styles = StyleSheet.create({
     gap: 8
   },
   hrCard: {
-    padding: 18,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: colors.glassBorder,
-    shadowColor: '#161616',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.04,
-    shadowRadius: 16,
-    elevation: 2,
+    padding: 20,
+    borderRadius: 10,
+    borderWidth: 0,
     gap: 12
   },
   hrCardHeader: {

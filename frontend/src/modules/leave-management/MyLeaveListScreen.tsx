@@ -86,19 +86,6 @@ function iconForType(name: string): keyof typeof MaterialIcons.glyphMap {
   return "event-available";
 }
 
-const FALLBACK_TYPES: LeaveType[] = [
-  { leaveTypeId: 1, name: "Medical Leave", description: null, requiresMedicalDocument: true, allowedSex: null, obsolete: false },
-  { leaveTypeId: 2, name: "Casual Leave", description: null, requiresMedicalDocument: false, allowedSex: null, obsolete: false },
-  { leaveTypeId: 3, name: "Annual Leave", description: null, requiresMedicalDocument: false, allowedSex: null, obsolete: false },
-];
-
-const FALLBACK_LEAVES: LeaveApplication[] = [
-  { leaveId: 1, employeeId: 1, leaveTypeId: 1, startDate: "2026-10-26", endDate: "2026-10-29", numberOfDays: 3, durationType: "FULL_DAY", halfDayType: null, status: "PENDING_HR_REVIEW", reason: "Post-operative recovery • Medical Cert Attached", hrComments: null, createdAt: new Date(Date.now() - 4 * 36e5).toISOString(), selectedDates: [] },
-  { leaveId: 2, employeeId: 1, leaveTypeId: 2, startDate: "2026-09-14", endDate: "2026-09-14", numberOfDays: 0.5, durationType: "HALF_DAY", halfDayType: "SECOND_HALF", status: "APPROVED", reason: "Family matter commitment", hrComments: "Approved by HR and TL", createdAt: "2026-09-10T10:00:00Z", selectedDates: [] },
-  { leaveId: 3, employeeId: 1, leaveTypeId: 3, startDate: "2026-08-18", endDate: "2026-08-20", numberOfDays: 3, durationType: "FULL_DAY", halfDayType: null, status: "REJECTED", reason: "Vacation", hrComments: "HR Note: High sprint freeze period during release cycle. Please reschedule with manager.", createdAt: "2026-08-02T10:00:00Z", selectedDates: [] },
-  { leaveId: 4, employeeId: 1, leaveTypeId: 2, startDate: "2026-11-12", endDate: "2026-11-12", numberOfDays: 1, durationType: "FULL_DAY", halfDayType: null, status: "DRAFT", reason: "Family event", hrComments: null, createdAt: "2026-11-01T10:00:00Z", selectedDates: [] },
-];
-
 export default function MyLeaveListScreen() {
   const router = useRouter();
   const topInset = useTopNavContentInset();
@@ -126,8 +113,8 @@ export default function MyLeaveListScreen() {
       setItems(leaves.items);
     } catch (err) {
       setError(apiErrorMessage(err));
-      setTypes(FALLBACK_TYPES);
-      setItems(FALLBACK_LEAVES);
+      setTypes([]);
+      setItems([]);
     } finally {
       setLoading(false);
     }
@@ -425,33 +412,30 @@ const styles = StyleSheet.create({
   topRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingHorizontal: 16, paddingTop: 8 },
   topLabel: { fontSize: 16, fontWeight: "700", color: colors.onSurface, marginTop: 4 },
   empName: { fontSize: 22, fontWeight: "800", color: colors.onSurface },
-  applyBtn: { flexDirection: "row", alignItems: "center", backgroundColor: colors.primary, paddingHorizontal: 16, height: 44, borderRadius: 12, gap: 8 },
+  applyBtn: { flexDirection: "row", alignItems: "center", backgroundColor: colors.accent, paddingHorizontal: 16, height: 44, borderRadius: 8, gap: 8 },
   applyBtnText: { fontSize: 14, fontWeight: "500", color: colors.onPrimary },
   filtersScroll: { flexGrow: 0, marginHorizontal: 16 },
   filtersContainer: {
     gap: 8,
     paddingVertical: 4,
   },
-  filterChipActive: { flexDirection: "row", alignItems: "center", backgroundColor: colors.primary, height: 36, paddingHorizontal: 12, borderRadius: 999, gap: 8 },
+  filterChipActive: { flexDirection: "row", alignItems: "center", backgroundColor: colors.accent, height: 36, paddingHorizontal: 12, borderRadius: 6, gap: 8 },
   filterChipTextActive: { fontSize: 12, fontWeight: "500", color: colors.onPrimary },
   filterBadgeActive: { backgroundColor: colors.surface, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 12 },
-  filterChip: { flexDirection: "row", alignItems: "center", backgroundColor: colors.surfaceContainerLowest, height: 36, paddingHorizontal: 12, borderRadius: 999, gap: 8, borderWidth: 1, borderColor: colors.glassBorder },
+  filterChip: { flexDirection: "row", alignItems: "center", backgroundColor: colors.surfaceContainerLowest, height: 36, paddingHorizontal: 12, borderRadius: 6, gap: 8, borderWidth: 1, borderColor: colors.glassBorder },
   filterChipText: { fontSize: 12, fontWeight: "500", color: colors.onSurface },
   filterBadge: { backgroundColor: colors.surfaceContainerHighest, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 12 },
   filterBadgeText: { fontSize: 11, fontWeight: "600", color: colors.onSurface },
   listContainer: { paddingHorizontal: 16, gap: 12 },
   card: {
     backgroundColor: colors.surfaceContainerLowest,
-    borderRadius: 16,
-    padding: 16,
+    borderRadius: 10,
+    padding: 18,
     gap: 12,
     borderWidth: 1,
     borderColor: colors.glassBorder,
-    shadowColor: "#161616",
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.04,
-    shadowRadius: 16,
-    elevation: 2,
+    borderLeftWidth: 4,
+    borderLeftColor: colors.accent,
   },
   cardHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start" },
   cardInfo: { flex: 1, gap: 4 },
@@ -459,8 +443,8 @@ const styles = StyleSheet.create({
   cardTitle: { fontSize: 18, fontWeight: "600", color: colors.onSurface },
   statusBadgePending: { flexDirection: "row", alignItems: "center", backgroundColor: colors.surfaceContainerHigh, paddingHorizontal: 8, paddingVertical: 2, borderRadius: 12, gap: 4 },
   statusBadgeTextPending: { fontSize: 11, fontWeight: "600", color: colors.onSurface, textTransform: "capitalize" },
-  statusBadgeApproved: { flexDirection: "row", alignItems: "center", backgroundColor: colors.primary, paddingHorizontal: 8, paddingVertical: 2, borderRadius: 12, gap: 4 },
-  statusBadgeTextApproved: { fontSize: 11, fontWeight: "600", color: colors.onPrimary },
+  statusBadgeApproved: { flexDirection: "row", alignItems: "center", backgroundColor: colors.successWash, paddingHorizontal: 8, paddingVertical: 2, borderRadius: 4, gap: 4 },
+  statusBadgeTextApproved: { fontSize: 11, fontWeight: "700", color: colors.success },
   statusBadgeRejected: { flexDirection: "row", alignItems: "center", backgroundColor: colors.surfaceContainerHighest, paddingHorizontal: 8, paddingVertical: 2, borderRadius: 12, gap: 4 },
   statusBadgeDraft: { flexDirection: "row", alignItems: "center", backgroundColor: colors.surfaceContainer, paddingHorizontal: 8, paddingVertical: 2, borderRadius: 12, gap: 4 },
   cardDate: { fontSize: 14, fontWeight: "500", color: colors.onSurface, marginTop: 4 },
@@ -484,6 +468,6 @@ const styles = StyleSheet.create({
   draftText: { fontSize: 12, color: colors.secondary, fontStyle: "italic", flex: 1 },
   draftBadge: { fontSize: 11, fontWeight: "600", color: colors.secondary, letterSpacing: 0.5 },
   cardFooterRight: { flexDirection: "row", justifyContent: "flex-end", alignItems: "center", paddingTop: 4, gap: 8 },
-  actionBtnPrimary: { flexDirection: "row", alignItems: "center", backgroundColor: colors.primary, height: 44, paddingHorizontal: 16, borderRadius: 12, gap: 4 },
+  actionBtnPrimary: { flexDirection: "row", alignItems: "center", backgroundColor: colors.accent, height: 44, paddingHorizontal: 16, borderRadius: 8, gap: 4 },
   actionBtnPrimaryText: { fontSize: 12, fontWeight: "500", color: colors.onPrimary },
 });

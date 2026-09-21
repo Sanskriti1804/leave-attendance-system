@@ -1,6 +1,12 @@
 import { prisma } from "../db/index.js";
+import { logger } from "../../../logger.js";
+import { HttpError } from "../utils/http-error.js";
 import { toIsoWithIstOffset } from "../utils/dates.js";
 import * as notificationRepository from "./repository.js";
+
+function clip(value: string, max: number): string {
+  return value.length <= max ? value : value.slice(0, max);
+}
 
 async function notifyOnce(params: {
   userId: number;
@@ -8,15 +14,29 @@ async function notifyOnce(params: {
   title: string;
   message: string;
 }): Promise<void> {
-  const existing = await notificationRepository.findDuplicate({
+  const payload = {
     userId: params.userId,
-    type: params.type,
-    message: params.message,
+    type: clip(params.type, 50),
+    title: clip(params.title, 50),
+    message: clip(params.message, 100),
+  };
+  const existing = await notificationRepository.findDuplicate({
+    userId: payload.userId,
+    type: payload.type,
+    message: payload.message,
   });
   if (existing) {
     return;
   }
-  await notificationRepository.createNotification(params);
+  await notificationRepository.createNotification(payload);
+}
+
+export async function safeNotify(task: () => Promise<void>): Promise<void> {
+  try {
+    await task();
+  } catch (err) {
+    logger.error({ err }, "Notification write failed");
+  }
 }
 
 function toResponse(row: {
@@ -40,8 +60,23 @@ function toResponse(row: {
 }
 
 export async function listMyNotifications(userId: number) {
-  const items = await notificationRepository.findByUser(userId);
-  return { items: items.map(toResponse) };
+  const [items, unreadCount] = await Promise.all([
+    notificationRepository.findByUser(userId),
+    notificationRepository.countUnread(userId),
+  ]);
+  return { items: items.map(toResponse), unreadCount };
+}
+
+export async function markNotificationRead(userId: number, notificationId: number) {
+  const row = await notificationRepository.findById(notificationId);
+  if (!row || row.userId !== userId) {
+    throw new HttpError(404, "NOT_FOUND", "Notification not found");
+  }
+  if (row.isRead) {
+    return toResponse(row);
+  }
+  const updated = await notificationRepository.markRead(notificationId);
+  return toResponse(updated);
 }
 
 export async function notifyLeaveDecision(params: {

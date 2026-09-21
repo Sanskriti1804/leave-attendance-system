@@ -23,24 +23,6 @@ import { colors } from "../../theme";
 
 type QueueFilter = "pending" | "medical" | "approved" | "clarify";
 
-const FALLBACK_EMPLOYEES: EmployeePublic[] = [
-  { employeeId: 1, firstName: "Milind", lastName: "Rawat", email: "milind@enterprisehrms.internal", departmentId: 1, role: "employee", managerId: null, joiningDate: null, createdAt: "", status: "ACTIVE", obsolete: false },
-  { employeeId: 2, firstName: "Elena", lastName: "D'Souza", email: "elena@enterprisehrms.internal", departmentId: 1, role: "employee", managerId: null, joiningDate: null, createdAt: "", status: "ACTIVE", obsolete: false },
-  { employeeId: 3, firstName: "Rajesh", lastName: "Patel", email: "rajesh@enterprisehrms.internal", departmentId: 1, role: "employee", managerId: null, joiningDate: null, createdAt: "", status: "ACTIVE", obsolete: false },
-];
-
-const FALLBACK_TYPES: LeaveType[] = [
-  { leaveTypeId: 1, name: "Medical / Sick Leave", description: null, requiresMedicalDocument: true, allowedSex: null, obsolete: false },
-  { leaveTypeId: 2, name: "Casual Leave", description: null, requiresMedicalDocument: false, allowedSex: null, obsolete: false },
-  { leaveTypeId: 3, name: "Clarification Thread", description: null, requiresMedicalDocument: false, allowedSex: null, obsolete: false },
-];
-
-const FALLBACK_LEAVES: LeaveApplication[] = [
-  { leaveId: 1, employeeId: 1, leaveTypeId: 1, startDate: "2026-10-26", endDate: "2026-10-29", numberOfDays: 3, durationType: "FULL_DAY", halfDayType: null, status: "PENDING_HR_REVIEW", reason: "Post-operative surgical recovery following outpatient procedure. Doctor advised strict rest.", hrComments: null, createdAt: "2026-10-25T10:00:00Z", selectedDates: [] },
-  { leaveId: 2, employeeId: 2, leaveTypeId: 2, startDate: "2026-11-02", endDate: "2026-11-02", numberOfDays: 0.5, durationType: "HALF_DAY", halfDayType: "SECOND_HALF", status: "PENDING_HR_REVIEW", reason: "Family administrative matter and appointment.", hrComments: null, createdAt: "2026-11-01T10:00:00Z", selectedDates: [] },
-  { leaveId: 3, employeeId: 3, leaveTypeId: 3, startDate: "2026-11-05", endDate: "2026-11-05", numberOfDays: 1, durationType: "FULL_DAY", halfDayType: null, status: "REJECTED", reason: "Clarification required on previous leave", hrComments: "Please verify if shift coverage has been arranged with lead.", createdAt: "2026-11-04T10:00:00Z", selectedDates: [] },
-];
-
 function matchesQueue(leave: LeaveApplication, type: LeaveType | undefined, filter: QueueFilter): boolean {
   if (filter === "pending") {
     return leave.status === "SUBMITTED" || leave.status === "PENDING_HR_REVIEW";
@@ -91,9 +73,9 @@ export default function AdminLeaveReviewQueueScreen() {
       setEmployees(people.items);
     } catch (err) {
       setError(apiErrorMessage(err));
-      setItems(FALLBACK_LEAVES);
-      setTypes(FALLBACK_TYPES);
-      setEmployees(FALLBACK_EMPLOYEES);
+      setItems([]);
+      setTypes([]);
+      setEmployees([]);
     } finally {
       setLoading(false);
     }
@@ -414,7 +396,7 @@ const styles = StyleSheet.create({
   chipActive: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: colors.primary,
+    backgroundColor: colors.accent,
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 4,
@@ -485,7 +467,7 @@ const styles = StyleSheet.create({
   threadBody: { fontSize: 12, fontStyle: "italic", color: colors.onSurface },
   actionsBox: { gap: 8, marginTop: 8 },
   actionRow: { flexDirection: "row", gap: 8 },
-  approveBtn: { flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", backgroundColor: colors.primary, height: 44, borderRadius: 4, gap: 4 },
+  approveBtn: { flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", backgroundColor: colors.accent, height: 44, borderRadius: 4, gap: 4 },
   approveBtnText: { fontSize: 14, fontWeight: "500", color: colors.onPrimary },
   rejectBtn: { flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", backgroundColor: colors.surfaceContainerHighest, height: 44, borderRadius: 4, gap: 4 },
   rejectBtnText: { fontSize: 14, fontWeight: "500", color: colors.onSurface },

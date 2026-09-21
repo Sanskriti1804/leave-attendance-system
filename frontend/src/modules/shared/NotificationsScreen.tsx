@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, ScrollView, SafeAreaView, ActivityIndicator } from "react-native";
+import { View, Text, StyleSheet, ScrollView, SafeAreaView, ActivityIndicator, TouchableOpacity } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { colors } from "../../theme";
 import { ScreenGradient } from "../../components/ui/AppChrome";
 import { EmployeeBottomNavBar } from "../../components/ui/EmployeeComponents";
 import { TopNavBar, useTopNavContentInset } from "../../components/ui/AdminComponents";
-import { apiErrorMessage, listMyNotifications, type AppNotification } from "../../../services/resources";
+import { apiErrorMessage, listMyNotifications, markNotificationRead, type AppNotification } from "../../../services/resources";
 import { formatDateTimeIST } from "../../utils/date";
 
 export default function NotificationsScreen() {
@@ -46,11 +46,31 @@ export default function NotificationsScreen() {
             </View>
           ) : null}
           {items.map((item) => (
-            <View key={item.notificationId} style={styles.card}>
+            <TouchableOpacity
+              key={item.notificationId}
+              style={[styles.card, !item.isRead && styles.unread]}
+              onPress={() => {
+                if (item.isRead) {
+                  return;
+                }
+                setItems((current) =>
+                  current.map((row) =>
+                    row.notificationId === item.notificationId ? { ...row, isRead: true } : row,
+                  ),
+                );
+                void markNotificationRead(item.notificationId).catch(() => {
+                  setItems((current) =>
+                    current.map((row) =>
+                      row.notificationId === item.notificationId ? { ...row, isRead: false } : row,
+                    ),
+                  );
+                });
+              }}
+            >
               <Text style={styles.title}>{item.title}</Text>
               <Text style={styles.time}>{item.createdAt ? formatDateTimeIST(item.createdAt) : ""}</Text>
               <Text style={styles.copy}>{item.message}</Text>
-            </View>
+            </TouchableOpacity>
           ))}
         </ScrollView>
         <EmployeeBottomNavBar activeRoute="notifications" />
@@ -62,8 +82,9 @@ export default function NotificationsScreen() {
 const styles = StyleSheet.create({
   safe: { flex: 1 },
   scroll: { paddingHorizontal: 16, paddingBottom: 120, gap: 12 },
-  empty: { marginTop: 24, backgroundColor: colors.surfaceContainerLowest, borderRadius: 16, padding: 22, gap: 8, borderWidth: 1, borderColor: colors.glassBorder },
-  card: { backgroundColor: colors.surfaceContainerLowest, borderRadius: 16, padding: 16, gap: 6, borderWidth: 1, borderColor: colors.glassBorder },
+  empty: { marginTop: 24, backgroundColor: colors.accentWash, borderRadius: 10, padding: 24, gap: 8 },
+  card: { backgroundColor: colors.surfaceContainerLowest, borderRadius: 10, padding: 16, gap: 6, borderWidth: 1, borderColor: colors.glassBorder, borderLeftWidth: 3, borderLeftColor: colors.sand },
+  unread: { borderLeftColor: colors.accent, backgroundColor: colors.accentWash },
   title: { fontSize: 16, fontWeight: "700", color: colors.onSurface },
   time: { fontSize: 12, color: colors.secondary },
   copy: { fontSize: 14, color: colors.secondary, lineHeight: 20 },

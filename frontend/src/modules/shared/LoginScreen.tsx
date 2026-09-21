@@ -136,8 +136,8 @@ export default function LoginScreen() {
 
           <View style={styles.mainBlock}>
           <View style={styles.titleContainer}>
-            <Text style={styles.title}>Enterprise Sign In</Text>
-            <Text style={styles.subtitle}>Authenticate with your corporate credentials to access workforce ledgers and attendance punches.</Text>
+            <Text style={styles.title}>Welcome back</Text>
+            <Text style={styles.subtitle}>Sign in with your work email to continue to leave, attendance, and workforce tools.</Text>
           </View>
 
           {/* Main Login Card */}
@@ -422,19 +422,19 @@ const styles = StyleSheet.create({
   },
   signInButton: {
     width: '100%',
-    height: 48,
-    backgroundColor: colors.primary,
-    borderRadius: 12,
+    height: 52,
+    backgroundColor: colors.accent,
+    borderRadius: 8,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
     marginTop: 24,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowColor: colors.accentDeep,
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.28,
+    shadowRadius: 16,
+    elevation: 4,
   },
   signInButtonText: {
     fontFamily: 'Inter',

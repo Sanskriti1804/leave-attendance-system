@@ -53,6 +53,6 @@ On **web** (`expo start --web`), the same routes render a separate desktop UI un
 
 Leave list and apply keep live `/api/v1` leave calls. Admin review approve/reject is admin-only; guest_admin is read-only. Medical document bytes are not fetched for employees (MED-09). Apply Leave uploads via `POST /api/v1/documents` after the file picker. Home punch buttons use live check-in/check-out and dashboard APIs; reports APIs are not implemented.
 
-## Theme tokens (from design.md)
+## Theme tokens (live `frontend/src/theme`)
 
-primary `#000000`, background/secondary `#FFFFFF`, text `#111111`, muted `#6B7280`, error `#DC2626`, border `#E5E7EB`. System fonts.
+Ink primary `#1A1A1A`, cream canvas `#F3EEE6`, teal accent `#0F766E`, session blue `#2563EB`. Page gradient blends sand, cream, teal wash, and mist. Shared chrome: ink/teal bottom nav, dark web sidebar, editorial kickers, restrained radii (8–10px), left-accent surfaces. Attendance punch logic is unchanged; Home clock/punch chrome is visual only.

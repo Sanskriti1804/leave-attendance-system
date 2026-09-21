@@ -1,5 +1,5 @@
-import { colors, pageGradient } from "./colors";
-import { spacing, radii } from "./spacing";
+import { colors, pageGradient, inkGradient } from "./colors";
+import { spacing, radii, motion, elevation } from "./spacing";
 import { typography } from "./typography";
 
 export const theme = {
@@ -8,10 +8,13 @@ export const theme = {
   radii,
   typography,
   pageGradient,
+  inkGradient,
+  motion,
+  elevation,
 };
 
-export { colors, pageGradient } from "./colors";
-export { spacing, radii } from "./spacing";
+export { colors, pageGradient, inkGradient } from "./colors";
+export { spacing, radii, motion, elevation } from "./spacing";
 export { typography } from "./typography";
 
 export type Theme = typeof theme;

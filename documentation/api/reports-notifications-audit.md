@@ -1,13 +1,13 @@
 # Reports, notifications, audit API (Proposed)
 
-Notifications list is implemented. Reports and audit GET remain unimplemented.
+Notifications list and mark-read are implemented. Audit GET is implemented for admin. Reports remain unimplemented.
 
 ## Notifications
 
 | Method | Path | Purpose | Auth |
 | --- | --- | --- | --- |
-| GET | `/api/v1/notifications` | In-app list (own rows) | authenticated |
-| POST | `/notifications/{id}/read` | Mark read | owner (Proposed, not implemented) |
+| GET | `/api/v1/notifications` | In-app list (own rows) plus `unreadCount` | authenticated |
+| POST | `/api/v1/notifications/{id}/read` | Mark read | owner |
 
 ## Reports
 
@@ -19,4 +19,4 @@ Slugs: `leave-employee`, `leave-department`, `leave-monthly`, `leave-type`, `lea
 
 | Method | Path | Purpose | Auth |
 | --- | --- | --- | --- |
-| GET | `/audit` | Audit viewer | A; AUD-08 Open |
+| GET | `/api/v1/audit` | Audit viewer | A (guest_admin 403; AUD-08 still Open) |
