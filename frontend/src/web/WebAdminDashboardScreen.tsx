@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, TextInput, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
 import { getSession } from "../../services/auth";
@@ -10,7 +10,6 @@ export default function WebAdminDashboardScreen() {
   const router = useRouter();
   const reviewHref = (process.env.EXPO_PUBLIC_ADMIN_LEAVE_REVIEW as string | undefined) || "/leave/admin-review";
   const [me, setMe] = useState<EmployeePublic | null>(null);
-  const [employees, setEmployees] = useState<EmployeePublic[]>([]);
   const [pending, setPending] = useState<LeaveApplication[]>([]);
   const [approved, setApproved] = useState<LeaveApplication[]>([]);
   const [query, setQuery] = useState("");
@@ -29,7 +28,6 @@ export default function WebAdminDashboardScreen() {
       try {
         const people = await listEmployees();
         if (!cancelled) {
-          setEmployees(people.items);
           setEmployeeTotal(people.total ?? people.items.length);
         }
       } catch {
@@ -54,12 +52,6 @@ export default function WebAdminDashboardScreen() {
     };
   }, []);
 
-  const filteredEmployees = useMemo(() => {
-    const term = query.trim().toLowerCase();
-    if (!term) return employees;
-    return employees.filter((row) => `${row.firstName} ${row.lastName ?? ""} ${row.email}`.toLowerCase().includes(term));
-  }, [employees, query]);
-
   const today = new Date().toISOString().slice(0, 10);
   const onLeaveToday = approved.filter((row) => row.startDate <= today && row.endDate >= today).length;
 
@@ -67,8 +59,8 @@ export default function WebAdminDashboardScreen() {
     <WebShell title="Admin Dashboard" variant="admin" activeRoute="home">
       <WebCard>
         <Text style={styles.kicker}>HR Operations</Text>
-        <Text style={styles.h}>{me ? displayName(me).toUpperCase() : "PREETI KAUR"}</Text>
-        <Text style={styles.meta}>{me?.role ?? "Human Resource"}</Text>
+        <Text style={styles.h}>{me ? displayName(me).toUpperCase() : "—"}</Text>
+        <Text style={styles.meta}>{me?.role ?? "—"}</Text>
       </WebCard>
       <TextInput style={styles.search} placeholder="Search employees, records, or departments..." value={query} onChangeText={setQuery} placeholderTextColor={colors.secondary} />
       <View style={styles.stats}>
@@ -108,17 +100,6 @@ export default function WebAdminDashboardScreen() {
         <TouchableOpacity style={styles.cta} onPress={() => router.push("/org-settings" as never)}>
           <Text style={styles.ctaText}>Organisation settings</Text>
         </TouchableOpacity>
-      </WebCard>
-      <WebCard>
-        <Text style={styles.h}>Directory snapshot</Text>
-        {filteredEmployees.slice(0, 8).map((row) => (
-          <View key={row.employeeId} style={styles.row}>
-            <Text style={styles.body}>{displayName(row)}</Text>
-            <Text style={styles.meta}>
-              {row.email} · {row.role}
-            </Text>
-          </View>
-        ))}
       </WebCard>
     </WebShell>
   );

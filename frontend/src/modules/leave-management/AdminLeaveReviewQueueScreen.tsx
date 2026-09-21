@@ -14,6 +14,8 @@ import {
   listEmployees,
   listLeaveTypes,
   listLeaves,
+  managerApproveLeave,
+  managerRejectLeave,
   rejectLeave,
   type EmployeePublic,
   type LeaveApplication,
@@ -112,6 +114,32 @@ export default function AdminLeaveReviewQueueScreen() {
     }
   }
 
+  async function onManagerApprove(leaveId: number) {
+    setBusyId(leaveId);
+    setError(null);
+    try {
+      await managerApproveLeave(leaveId, notes[leaveId]);
+      await load();
+    } catch (err) {
+      setError(apiErrorMessage(err));
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  async function onManagerReject(leaveId: number) {
+    setBusyId(leaveId);
+    setError(null);
+    try {
+      await managerRejectLeave(leaveId, notes[leaveId]);
+      await load();
+    } catch (err) {
+      setError(apiErrorMessage(err));
+    } finally {
+      setBusyId(null);
+    }
+  }
+
   async function onReject(leaveId: number) {
     setBusyId(leaveId);
     setError(null);
@@ -170,6 +198,11 @@ export default function AdminLeaveReviewQueueScreen() {
             const type = typeOf(leave.leaveTypeId);
             const medical = Boolean(type?.requiresMedicalDocument);
             const clarify = leave.status === "REJECTED" || Boolean(leave.hrComments);
+            const canHrAct = canAct && leave.status === "PENDING_HR_REVIEW";
+            const canManagerAct =
+              canAct &&
+              leave.status === "SUBMITTED" &&
+              leave.reportingManagerEmployeeId === me?.employeeId;
             return (
               <View key={leave.leaveId} style={styles.card}>
                 <View style={styles.cardHeader}>
@@ -278,14 +311,24 @@ export default function AdminLeaveReviewQueueScreen() {
                   </View>
                 ) : null}
 
-                {canAct && leave.status === "PENDING_HR_REVIEW" ? (
+                {canHrAct || canManagerAct ? (
                   <View style={styles.actionsBox}>
                     <View style={styles.actionRow}>
-                      <TouchableOpacity style={styles.approveBtn} onPress={() => void onApprove(leave.leaveId)} disabled={busyId === leave.leaveId}>
+                      <TouchableOpacity
+                        style={styles.approveBtn}
+                        onPress={() => void (canHrAct ? onApprove(leave.leaveId) : onManagerApprove(leave.leaveId))}
+                        disabled={busyId === leave.leaveId}
+                      >
                         <MaterialIcons name="done-all" size={18} color={colors.onPrimary} />
-                        <Text style={styles.approveBtnText}>{busyId === leave.leaveId ? "..." : "Approve Leave"}</Text>
+                        <Text style={styles.approveBtnText}>
+                          {busyId === leave.leaveId ? "..." : canHrAct ? "Approve Leave" : "Manager approve"}
+                        </Text>
                       </TouchableOpacity>
-                      <TouchableOpacity style={styles.rejectBtn} onPress={() => void onReject(leave.leaveId)} disabled={busyId === leave.leaveId}>
+                      <TouchableOpacity
+                        style={styles.rejectBtn}
+                        onPress={() => void (canHrAct ? onReject(leave.leaveId) : onManagerReject(leave.leaveId))}
+                        disabled={busyId === leave.leaveId}
+                      >
                         <MaterialIcons name="close" size={18} color={colors.onSurface} />
                         <Text style={styles.rejectBtnText}>Reject</Text>
                       </TouchableOpacity>
@@ -294,6 +337,16 @@ export default function AdminLeaveReviewQueueScreen() {
                       <MaterialIcons name="note-add" size={16} color={colors.secondary} />
                       <Text style={styles.noteBtnText}>Add HR Note</Text>
                     </TouchableOpacity>
+                  </View>
+                ) : leave.status === "SUBMITTED" && canAct ? (
+                  <View style={styles.guestNotice}>
+                    <View style={styles.guestNoticeLeft}>
+                      <MaterialIcons name="hourglass-empty" size={18} color={colors.secondary} />
+                      <View>
+                        <Text style={styles.guestNoticeTitle}>AWAITING MANAGER</Text>
+                        <Text style={styles.guestNoticeSub}>Submitted — waiting for reporting manager review</Text>
+                      </View>
+                    </View>
                   </View>
                 ) : (
                   <View style={styles.guestNotice}>
@@ -306,9 +359,11 @@ export default function AdminLeaveReviewQueueScreen() {
                         </Text>
                       </View>
                     </View>
-                    <View style={styles.readOnlyBadge}>
-                      <Text style={styles.readOnlyText}>READ ONLY</Text>
-                    </View>
+                    {isGuest || leave.status === "APPROVED" || leave.status === "REJECTED" ? (
+                      <View style={styles.readOnlyBadge}>
+                        <Text style={styles.readOnlyText}>READ ONLY</Text>
+                      </View>
+                    ) : null}
                   </View>
                 )}
               </View>

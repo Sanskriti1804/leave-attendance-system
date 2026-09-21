@@ -45,6 +45,15 @@ export function teamMembersForLead(employees: EmployeePublic[], leadId: number, 
   );
 }
 
+export function reportsOfLead(employees: EmployeePublic[], leadId: number): EmployeePublic[] {
+  return employees.filter((row) => row.managerId === leadId);
+}
+
+export function mergeEmployees(current: EmployeePublic[], updated: EmployeePublic[]): EmployeePublic[] {
+  const byId = new Map(updated.map((row) => [row.employeeId, row]));
+  return current.map((row) => byId.get(row.employeeId) ?? row);
+}
+
 export function computeWorkforce(employees: EmployeePublic[], approvedLeaves: LeaveApplication[], today: string) {
   const active = employees.filter((row) => row.status === "ACTIVE" && !row.obsolete);
   const onLeaveIds = new Set(

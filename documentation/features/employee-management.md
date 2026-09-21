@@ -50,6 +50,10 @@ Provisioning method (invite vs temp password).
 
 ## Change History
 
+2026-09-21 — HR More opens Admin Profile directly; Leave Types, Organisation Settings, password, and logout remain below the profile. Remove Team Lead closes the person dialog after PATCH so the tag clears immediately.
+
+2026-09-21 — Admin People: Designate Team Lead sets department employees’ `managerId`; Remove Team Lead clears `managerId` for that lead’s reports. No new role.
+
 2026-09-21 — Admin People directory can designate a Team Lead by PATCHing department employees’ `managerId` to that person (existing reporting-manager field; no new role). Team Lead tag appears when anyone reports to them.
 
 2026-09-18 — People directory groups `listEmployees` by department. Seed includes additional HR, Operations, and Product employees (re-run `npm run seed`). Profile photos are local device storage, not an employee photo API.

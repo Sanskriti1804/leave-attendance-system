@@ -15,7 +15,7 @@ import { colors } from "../theme";
 import { WebCard, WebShell } from "./WebShell";
 import { UserAvatar } from "../components/ui/UserAvatar";
 import { ThemedDialog, ThemedToast } from "../components/ui/AppChrome";
-import { isTeamLead, matchesPeopleQuery, teamMembersForLead } from "../utils/workforce";
+import { isTeamLead, matchesPeopleQuery, mergeEmployees, reportsOfLead, teamMembersForLead } from "../utils/workforce";
 
 export default function WebPeopleDirectoryScreen() {
   const [items, setItems] = useState<EmployeePublic[]>([]);
@@ -72,11 +72,27 @@ export default function WebPeopleDirectoryScreen() {
     try {
       const targets = teamMembersForLead(items, lead.employeeId, lead.departmentId);
       const updated = await Promise.all(targets.map((row) => patchEmployee(row.employeeId, { managerId: lead.employeeId })));
-      setItems((current) => {
-        const byId = new Map(updated.map((row) => [row.employeeId, row]));
-        return current.map((row) => byId.get(row.employeeId) ?? row);
-      });
+      setItems((current) => mergeEmployees(current, updated));
       setToast(`${displayName(lead)} is now Team Lead for ${deptName(lead.departmentId)}.`);
+    } catch (err) {
+      setToast(apiErrorMessage(err));
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function removeTeamLead(lead: EmployeePublic) {
+    if (!canAssign) {
+      setToast("Guest Admin cannot change reporting relationships.");
+      return;
+    }
+    setSaving(true);
+    try {
+      const reports = reportsOfLead(items, lead.employeeId);
+      const updated = await Promise.all(reports.map((row) => patchEmployee(row.employeeId, { managerId: null })));
+      setItems((current) => mergeEmployees(current, updated));
+      setSelected(null);
+      setToast(`${displayName(lead)} is no longer Team Lead.`);
     } catch (err) {
       setToast(apiErrorMessage(err));
     } finally {
@@ -135,7 +151,11 @@ export default function WebPeopleDirectoryScreen() {
             ? [
                 { label: "Close", onPress: () => setSelected(null) },
                 ...(canAssign
-                  ? [{ label: saving ? "Saving…" : "Designate Team Lead", onPress: () => void designateTeamLead(selected), primary: true }]
+                  ? [
+                      isTeamLead(items, selected.employeeId)
+                        ? { label: saving ? "Saving…" : "Remove Team Lead", onPress: () => void removeTeamLead(selected), primary: true }
+                        : { label: saving ? "Saving…" : "Designate Team Lead", onPress: () => void designateTeamLead(selected), primary: true },
+                    ]
                   : []),
               ]
             : []

@@ -18,7 +18,7 @@ const ADMIN_ITEMS: { id: AdminNavId; label: string; icon: keyof typeof MaterialI
   { id: "leave", label: "Leave review", icon: "event-available", route: "/leave/admin-review" },
   { id: "people", label: "People", icon: "group", route: "/people" },
   { id: "reports", label: "Reports", icon: "query-stats", route: "/reports" },
-  { id: "more", label: "More", icon: "more-horiz", route: "/settings" },
+  { id: "more", label: "More", icon: "more-horiz", route: "/admin-profile" },
 ];
 
 const EMPLOYEE_ITEMS: { id: EmployeeNavId; label: string; icon: keyof typeof MaterialIcons.glyphMap; route: string }[] = [

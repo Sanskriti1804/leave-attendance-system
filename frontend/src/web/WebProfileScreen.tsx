@@ -55,7 +55,7 @@ export default function WebProfileScreen() {
             const manager = await getEmployee(profile.managerId);
             if (!cancelled) setManagerName(displayName(manager));
           } catch {
-            setManagerName(`EMP-${profile.managerId}`);
+            setManagerName("—");
           }
         }
       } catch (err) {
@@ -67,7 +67,7 @@ export default function WebProfileScreen() {
     };
   }, []);
 
-  const name = me ? displayName(me) : "Alex Chen";
+  const name = me ? displayName(me) : "—";
   const fallback = !me || !!error;
 
   return (
@@ -76,7 +76,7 @@ export default function WebProfileScreen() {
         <UserAvatar
           employee={me}
           size={96}
-          fallback="AC"
+          fallback="—"
           onPress={me ? () => { void pickAndSaveProfilePhoto(me.employeeId); } : undefined}
         />
         <Text style={styles.name}>{name}</Text>
@@ -89,7 +89,7 @@ export default function WebProfileScreen() {
             <Text style={styles.activeTag}>{me?.status ?? "Active"}</Text>
           </View>
           <Row label="Department" value={departmentName} />
-          <Row label="Reporting Manager" value={managerName} />
+          <Row label="Approver" value={me?.managerId ? managerName : "Not assigned"} />
           <Row label="Joining Date" value={me?.joiningDate ? `${formatJoining(me.joiningDate)} · Ongoing` : formatJoining(me?.joiningDate)} />
         </WebCard>
         <WebCard style={styles.col}>
@@ -107,8 +107,8 @@ export default function WebProfileScreen() {
         </WebCard>
         <WebCard style={styles.col}>
           <Text style={styles.h}>Attendance & Work Schedule</Text>
-          <Row label="Timezone" value={settings?.timezone ?? "America/New_York"} />
-          <Row label="Shift" value={`${settings?.workStart ?? "09:00"} - ${settings?.workEnd ?? "18:00"}`} />
+          <Row label="Timezone" value={settings?.timezone ?? "—"} />
+          <Row label="Shift" value={`${settings?.workStart ?? "—"} - ${settings?.workEnd ?? "—"}`} />
           <TouchableOpacity onPress={() => router.push("/(tabs)/settings" as never)}>
             <Text style={styles.link}>App & Account Settings</Text>
           </TouchableOpacity>

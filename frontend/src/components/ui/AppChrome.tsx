@@ -49,7 +49,7 @@ const ADMIN_ITEMS: { id: AdminNavId; label: string; icon: keyof typeof MaterialI
   { id: "leave", label: "Leave", icon: "event-available", route: "/leave/admin-review" },
   { id: "people", label: "People", icon: "group", route: "/people" },
   { id: "reports", label: "Reports", icon: "query-stats", route: "/reports" },
-  { id: "more", label: "More", icon: "more-horiz", route: "/settings" },
+  { id: "more", label: "More", icon: "more-horiz", route: "/admin-profile" },
 ];
 
 const EMPLOYEE_ITEMS: { id: EmployeeNavId; label: string; icon: keyof typeof MaterialIcons.glyphMap; route: string }[] = [
@@ -147,14 +147,26 @@ export function ThemedDialog({
   );
 }
 
-export function ThemedToast({ message }: { message: string | null }) {
+export function ThemedToast({
+  message,
+  onDismiss,
+}: {
+  message: string | null;
+  onDismiss?: () => void;
+}) {
   if (!message) {
     return null;
   }
   return (
-    <View pointerEvents="none" style={styles.toastBox}>
-      <Text style={styles.toastText}>{message}</Text>
-    </View>
+    <Pressable
+      pointerEvents={onDismiss ? "auto" : "none"}
+      style={onDismiss ? styles.toastDismissLayer : styles.toastBox}
+      onPress={onDismiss}
+    >
+      <View style={onDismiss ? styles.toastBox : undefined} pointerEvents="none">
+        <Text style={styles.toastText}>{message}</Text>
+      </View>
+    </Pressable>
   );
 }
 
@@ -201,6 +213,11 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   dialogGhostBtnText: { fontFamily: "Inter", fontSize: 15, fontWeight: "500", color: colors.onSurface },
+  toastDismissLayer: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 80,
+    justifyContent: "flex-end",
+  },
   toastBox: {
     position: "absolute",
     left: 20,

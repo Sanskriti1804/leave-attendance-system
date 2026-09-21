@@ -21,9 +21,8 @@ import {
   type EmployeePublic,
   type LeaveType,
 } from '../../../services/resources';
-import { UIFallbackIndicator } from '../../components/ui/UIFallback';
 import { UserAvatar } from '../../components/ui/UserAvatar';
-import { addCalendarDaysIST, getTodayIST, isoWeekdayCivil } from '../../utils/date';
+import { addCalendarDaysIST, enumerateCivilRange, getTodayIST, isoWeekdayCivil } from '../../utils/date';
 import { useLocalSearchParams } from 'expo-router';
 import { colors } from '../../theme';
 
@@ -38,24 +37,6 @@ function toCivil(date: Date): string {
 function parseCivil(civil: string): Date {
   const [y, m, d] = civil.split("-").map(Number);
   return new Date(y, (m ?? 1) - 1, d ?? 1);
-}
-
-function addDays(civil: string, days: number): string {
-  const date = parseCivil(civil);
-  date.setDate(date.getDate() + days);
-  return toCivil(date);
-}
-
-function enumerateRange(from: string, to: string): string[] {
-  const start = from <= to ? from : to;
-  const end = from <= to ? to : from;
-  const dates: string[] = [];
-  let cursor = start;
-  while (cursor <= end) {
-    dates.push(cursor);
-    cursor = addDays(cursor, 1);
-  }
-  return dates;
 }
 
 function formatLong(civil: string): string {
@@ -80,13 +61,6 @@ function iconForLeaveType(name: string): "medical-services" | "beach-access" | "
   return "event-available";
 }
 
-const FALLBACK_LEAVE_TYPES: LeaveType[] = [
-  { leaveTypeId: 1, name: "Casual", description: "Casual leave", requiresMedicalDocument: false, allowedSex: null, obsolete: false },
-  { leaveTypeId: 2, name: "Sick", description: "Medical leave", requiresMedicalDocument: true, allowedSex: null, obsolete: false },
-  { leaveTypeId: 3, name: "Emergency", description: "Emergency leave", requiresMedicalDocument: false, allowedSex: null, obsolete: false },
-  { leaveTypeId: 4, name: "Planned", description: "Planned leave", requiresMedicalDocument: false, allowedSex: null, obsolete: false },
-];
-
 type DaySession = "FULL_DAY" | "FIRST_HALF" | "SECOND_HALF";
 type DurationMode = "FULL" | "HALF";
 
@@ -110,9 +84,11 @@ export default function ApplyLeaveScreen() {
   const [dateOverrides, setDateOverrides] = useState<Record<string, true>>({});
   const [durationMode, setDurationMode] = useState<DurationMode>("FULL");
   const [waitingForTo, setWaitingForTo] = useState(false);
+  const [rangeAnchor, setRangeAnchor] = useState<string | null>(null);
   const [sessionDialog, setSessionDialog] = useState<{ civil: string; step: "mode" | "half" } | null>(null);
   const [durationInfoOpen, setDurationInfoOpen] = useState(false);
   const [attested, setAttested] = useState(false);
+  const [dateBlock, setDateBlock] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const [viewMonth, setViewMonth] = useState(() => {
     const now = new Date();
@@ -121,6 +97,7 @@ export default function ApplyLeaveScreen() {
   const [maxAdvanceDays, setMaxAdvanceDays] = useState(14);
   const [weeklyOffDow, setWeeklyOffDow] = useState<number[]>([6, 7]);
   const [holidayDates, setHolidayDates] = useState<Set<string>>(new Set());
+  const [holidayNames, setHolidayNames] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -129,7 +106,7 @@ export default function ApplyLeaveScreen() {
   const today = useMemo(() => getTodayIST(), []);
   const maxDate = addCalendarDaysIST(today, maxAdvanceDays);
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (signal?: { cancelled: boolean }) => {
     setLoading(true);
     setError(null);
     try {
@@ -138,47 +115,54 @@ export default function ApplyLeaveScreen() {
         listLeaveTypes(),
         getOrgSettings(),
       ]);
+      if (signal?.cancelled) return;
       setMaxAdvanceDays(settings.maxAdvanceDays);
       setWeeklyOffDow(settings.weeklyOffDow?.length ? settings.weeklyOffDow : [6, 7]);
       try {
         const holidays = await listHolidays(today, addCalendarDaysIST(today, Math.max(settings.maxAdvanceDays, 366)));
-        setHolidayDates(new Set(holidays.items.map((row) => row.holidayDate).filter((value): value is string => Boolean(value))));
+        if (!signal?.cancelled) {
+          const names: Record<string, string> = {};
+          const dates = new Set<string>();
+          for (const row of holidays.items) {
+            if (!row.holidayDate) continue;
+            dates.add(row.holidayDate);
+            names[row.holidayDate] = row.holidayName;
+          }
+          setHolidayDates(dates);
+          setHolidayNames(names);
+        }
       } catch {
-        setHolidayDates(new Set());
+        if (!signal?.cancelled) setHolidayDates(new Set());
       }
-      const resolvedTypes = leaveTypes.items.length > 0 ? leaveTypes.items : FALLBACK_LEAVE_TYPES;
+      if (signal?.cancelled) return;
+      const resolvedTypes = leaveTypes.items;
       setTypes(resolvedTypes);
-      const sick = resolvedTypes.find((row) => /sick|medical/i.test(row.name));
       const casual = resolvedTypes.find((row) => /casual/i.test(row.name));
-      setLeaveTypeId((casual ?? resolvedTypes[0] ?? sick)?.leaveTypeId ?? null);
-      setSelectedDates([]);
-      setDateSessions({});
-      setDateOverrides({});
-      setDurationMode("FULL");
-      setWaitingForTo(false);
+      setLeaveTypeId((casual ?? resolvedTypes[0])?.leaveTypeId ?? null);
 
       let profile = session?.user as EmployeePublic | undefined;
       try {
         profile = await getMe();
       } catch {
-        // Pass/dev session has no API user.
+        // keep session user if present
       }
+      if (signal?.cancelled) return;
       if (profile) {
         setMe(profile);
         if (profile.departmentId) {
           try {
             const department = await getDepartment(profile.departmentId);
-            setDepartmentName(department.departmentName);
+            if (!signal?.cancelled) setDepartmentName(department.departmentName);
           } catch {
-            setDepartmentName(`Dept ${profile.departmentId}`);
+            if (!signal?.cancelled) setDepartmentName("—");
           }
         }
         if (profile.managerId) {
           try {
             const manager = await getEmployee(profile.managerId);
-            setManagerName(displayName(manager));
+            if (!signal?.cancelled) setManagerName(displayName(manager));
           } catch {
-            setManagerName("Alice Stone");
+            if (!signal?.cancelled) setManagerName("—");
           }
         } else {
           setManagerName("HR review");
@@ -187,6 +171,7 @@ export default function ApplyLeaveScreen() {
       if (editingLeaveId) {
         try {
           const draft = await getLeave(editingLeaveId);
+          if (signal?.cancelled) return;
           if (draft.status === "DRAFT") {
             setLeaveTypeId(draft.leaveTypeId);
             setReason(draft.reason);
@@ -197,20 +182,26 @@ export default function ApplyLeaveScreen() {
             );
             const first = draft.selectedDates[0];
             setDurationMode(first && first.session !== "FULL_DAY" ? "HALF" : "FULL");
+            setRangeAnchor(dates[0] ?? null);
+            setWaitingForTo(dates.length <= 1);
           }
         } catch {
-          setToast("Unable to load this draft.");
+          if (!signal?.cancelled) setToast("Unable to load this draft.");
         }
       }
     } catch (err) {
-      setError(apiErrorMessage(err));
+      if (!signal?.cancelled) setError(apiErrorMessage(err));
     } finally {
-      setLoading(false);
+      if (!signal?.cancelled) setLoading(false);
     }
   }, [today, editingLeaveId]);
 
   useEffect(() => {
-    void load();
+    const signal = { cancelled: false };
+    void load(signal);
+    return () => {
+      signal.cancelled = true;
+    };
   }, [load]);
 
   useEffect(() => {
@@ -221,14 +212,27 @@ export default function ApplyLeaveScreen() {
     return () => clearTimeout(timer);
   }, [toast]);
 
-  function isDateUnavailable(civil: string): boolean {
-    if (civil < today || civil > maxDate) {
-      return true;
+  function dateUnavailableReason(civil: string): string | null {
+    if (holidayDates.has(civil)) {
+      const name = holidayNames[civil];
+      return name
+        ? `This date is an organization holiday (${name}).`
+        : "This date is an organization holiday.";
     }
     if (weeklyOffDow.includes(isoWeekdayCivil(civil))) {
-      return true;
+      const dow = isoWeekdayCivil(civil);
+      if (dow === 6 || dow === 7) {
+        return "This date cannot be selected because it is a weekend.";
+      }
+      return "This date cannot be selected because it is a weekly off.";
     }
-    return holidayDates.has(civil);
+    if (civil < today) return "This date cannot be selected because it is in the past.";
+    if (civil > maxDate) return `Leave can only be applied up to ${maxAdvanceDays} days in advance.`;
+    return null;
+  }
+
+  function isDateUnavailable(civil: string): boolean {
+    return dateUnavailableReason(civil) != null;
   }
 
   const cells = useMemo(() => {
@@ -249,7 +253,7 @@ export default function ApplyLeaveScreen() {
         isWeekend: dow === 0 || dow === 6,
         isToday: civil === today,
         selected: selectedDates.includes(civil),
-        unavailable: civil < today || civil > maxDate || weeklyOffDow.includes(isoWeekdayCivil(civil)) || holidayDates.has(civil),
+        unavailable: isDateUnavailable(civil),
       };
     });
   }, [holidayDates, maxDate, selectedDates, today, viewMonth.month, viewMonth.year, weeklyOffDow]);
@@ -322,9 +326,27 @@ export default function ApplyLeaveScreen() {
     setDateOverrides((current) => ({ ...current, [civil]: true }));
   }
 
+  function applyRange(from: string, to: string) {
+    const session = durationMode === "HALF" ? "FIRST_HALF" : "FULL_DAY";
+    const range = enumerateCivilRange(from, to).filter((date) => date === from || date === to || !isDateUnavailable(date));
+    const selectable = range.filter((date) => !isDateUnavailable(date));
+    setSelectedDates(selectable);
+    setDateSessions((current) => {
+      const next = { ...current };
+      for (const date of selectable) {
+        if (!dateOverrides[date]) {
+          next[date] = current[date] ?? session;
+        }
+      }
+      return next;
+    });
+    setWaitingForTo(false);
+  }
+
   function openDateSessionMenu(civil: string) {
-    if (isDateUnavailable(civil)) {
-      setToast(`Past dates, dates more than ${maxAdvanceDays} days ahead, weekly offs, and holidays cannot be selected.`);
+    const blocked = dateUnavailableReason(civil);
+    if (blocked) {
+      setDateBlock(blocked);
       return;
     }
     if (!selectedDates.includes(civil)) {
@@ -335,10 +357,12 @@ export default function ApplyLeaveScreen() {
   }
 
   function toggleDate(civil: string) {
-    if (isDateUnavailable(civil)) {
-      setToast(`Past dates, dates more than ${maxAdvanceDays} days ahead, weekly offs, and holidays cannot be selected.`);
+    const blocked = dateUnavailableReason(civil);
+    if (blocked) {
+      setDateBlock(blocked);
       return;
     }
+    setDateBlock(null);
     if (selectedDates.includes(civil)) {
       setSelectedDates((current) => current.filter((date) => date !== civil));
       setDateSessions((current) => {
@@ -351,28 +375,19 @@ export default function ApplyLeaveScreen() {
         delete next[civil];
         return next;
       });
-      setWaitingForTo(false);
+      if (rangeAnchor === civil) {
+        setRangeAnchor(null);
+        setWaitingForTo(false);
+      }
       return;
     }
-    if (waitingForTo && selectedDates.length === 1) {
-      const origin = selectedDates[0]!;
-      const range = enumerateRange(origin, civil);
-      const session = durationMode === "HALF" ? "FIRST_HALF" : "FULL_DAY";
-      setSelectedDates(range);
-      setDateSessions((current) => {
-        const next = { ...current };
-        for (const date of range) {
-          if (!dateOverrides[date]) {
-            next[date] = current[date] ?? session;
-          }
-        }
-        return next;
-      });
-      setWaitingForTo(false);
+    if (rangeAnchor) {
+      applyRange(rangeAnchor, civil);
       return;
     }
     setSelectedDates([civil]);
     setDateSessions((current) => ({ ...current, [civil]: current[civil] ?? "FULL_DAY" }));
+    setRangeAnchor(civil);
     setWaitingForTo(true);
   }
 
@@ -459,15 +474,14 @@ export default function ApplyLeaveScreen() {
         <View style={styles.empCard}>
           <View style={styles.empCardRow}>
             <View style={styles.empInfoLeft}>
-              <UserAvatar employee={error ? null : me} size={40} fallback={error ? "AC" : "—"} />
+              <UserAvatar employee={me} size={40} fallback="—" />
               <View style={{ flex: 1 }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <Text style={styles.empName}>{error ? "Anand Chadda" : displayName(me)}</Text>
-                  {error && <UIFallbackIndicator style={{ marginTop: 2 }} />}
+                  <Text style={styles.empName}>{loading ? "—" : displayName(me)}</Text>
                 </View>
-                <Text style={styles.empRole}>{error ? "Engineering & DevOps" : departmentName}</Text>
+                <Text style={styles.empRole}>{departmentName}</Text>
                 <Text style={styles.approverLabel}>Approver</Text>
-                <Text style={styles.approverName}>{error ? "Alice Stone" : managerName}</Text>
+                <Text style={styles.approverName}>{managerName}</Text>
               </View>
             </View>
           </View>
@@ -480,33 +494,7 @@ export default function ApplyLeaveScreen() {
 
           <View style={styles.leaveTypeGrid}>
             {types.length === 0 && !loading ? (
-              FALLBACK_LEAVE_TYPES.map((type) => {
-                const active = type.leaveTypeId === leaveTypeId;
-                return (
-                  <TouchableOpacity
-                    key={type.leaveTypeId}
-                    style={active ? styles.leaveTypeItemActive : styles.leaveTypeItem}
-                    onPress={() => {
-                      setTypes(FALLBACK_LEAVE_TYPES);
-                      setLeaveTypeId(type.leaveTypeId);
-                    }}
-                  >
-                    <View style={styles.leaveTypeIconRow}>
-                      <MaterialIcons
-                        name={iconForLeaveType(type.name)}
-                        size={18}
-                        color={active ? colors.onPrimary : colors.secondary}
-                      />
-                      {active ? (
-                        <MaterialIcons name="check-circle" size={16} color={colors.onPrimary} />
-                      ) : (
-                        <View style={styles.radioDot} />
-                      )}
-                    </View>
-                    <Text style={active ? styles.leaveTypeTextActive : styles.leaveTypeText}>{type.name}</Text>
-                  </TouchableOpacity>
-                );
-              })
+              <Text style={styles.policyText}>No leave types available.</Text>
             ) : null}
             {types.map((type) => {
               const active = type.leaveTypeId === leaveTypeId;
@@ -755,6 +743,13 @@ export default function ApplyLeaveScreen() {
 
       </ScrollView>
       <ThemedToast message={toast} />
+      <ThemedDialog
+        visible={dateBlock != null}
+        title="Date not available"
+        message={dateBlock ?? ""}
+        onRequestClose={() => setDateBlock(null)}
+        actions={[{ label: "OK", onPress: () => setDateBlock(null), primary: true }]}
+      />
       <ThemedDialog
         visible={sessionDialog != null}
         title={sessionDialog ? formatLong(sessionDialog.civil) : "Session"}

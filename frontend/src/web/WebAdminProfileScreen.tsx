@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, TextInput } from "react-native";
 import { useRouter } from "expo-router";
-import { getSession } from "../../services/auth";
+import { getSession, logout } from "../../services/auth";
 import { CompactNotifications } from "../components/ui/CompactNotifications";
 import { isTeamLead } from "../utils/workforce";
-import { apiErrorMessage, displayName, getDepartment, getEmployee, getMe, listEmployees, type EmployeePublic } from "../../services/resources";
+import { apiErrorMessage, changePassword, displayName, getDepartment, getEmployee, getMe, getOrgSettings, listEmployees, type EmployeePublic, type OrganisationSettings } from "../../services/resources";
 import { colors } from "../theme";
 import { WebCard, WebShell } from "./WebShell";
 import { UserAvatar } from "../components/ui/UserAvatar";
@@ -24,6 +24,11 @@ export default function WebAdminProfileScreen() {
   const [departmentName, setDepartmentName] = useState("—");
   const [managerName, setManagerName] = useState("—");
   const [directory, setDirectory] = useState<EmployeePublic[]>([]);
+  const [settings, setSettings] = useState<OrganisationSettings | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [savingPassword, setSavingPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -52,7 +57,7 @@ export default function WebAdminProfileScreen() {
             const manager = await getEmployee(profile.managerId);
             if (!cancelled) setManagerName(displayName(manager));
           } catch {
-            setManagerName("Alice Stone");
+            setManagerName("—");
           }
         }
         try {
@@ -60,6 +65,12 @@ export default function WebAdminProfileScreen() {
           if (!cancelled) setDirectory(people.items);
         } catch {
           if (!cancelled) setDirectory([]);
+        }
+        try {
+          const org = await getOrgSettings();
+          if (!cancelled) setSettings(org);
+        } catch {
+          if (!cancelled) setSettings(null);
         }
       } catch (err) {
         if (!cancelled) setError(apiErrorMessage(err));
@@ -75,7 +86,7 @@ export default function WebAdminProfileScreen() {
   const showLead = me ? isTeamLead(directory, me.employeeId) : false;
 
   return (
-    <WebShell title="Profile" variant="admin" activeRoute="more" showBack>
+    <WebShell title="Profile" variant="admin" activeRoute="more">
       {isGuest ? (
         <WebCard>
           <Text style={styles.h}>Guest Admin Mode (AUTH-09)</Text>
@@ -86,10 +97,10 @@ export default function WebAdminProfileScreen() {
         <UserAvatar
           employee={me}
           size={96}
-          fallback="PK"
+          fallback="—"
           onPress={me ? () => { void pickAndSaveProfilePhoto(me.employeeId); } : undefined}
         />
-        <Text style={styles.name}>{me ? displayName(me) : "Preeti Kaur"}</Text>
+        <Text style={styles.name}>{me ? displayName(me) : "—"}</Text>
         {showLead ? <Text style={styles.activeTag}>Team Lead</Text> : null}
         {fallback ? <UIFallbackIndicator /> : null}
       </View>
@@ -97,10 +108,10 @@ export default function WebAdminProfileScreen() {
         <WebCard style={styles.col}>
           <View style={styles.cardHead}>
             <Text style={styles.h}>Work Information</Text>
-            <Text style={styles.activeTag}>{me?.status ?? "Active"}</Text>
+            <Text style={styles.activeTag}>{me?.status ?? "—"}</Text>
           </View>
           <Text style={styles.meta}>Department: {departmentName}</Text>
-          <Text style={styles.meta}>Reporting Manager: {managerName}</Text>
+          <Text style={styles.meta}>Team Lead: {me?.managerId ? managerName : "Not assigned"}</Text>
           <Text style={styles.meta}>Joining Date: {me?.joiningDate ? `${formatJoining(me.joiningDate)} · Ongoing` : formatJoining(me?.joiningDate)}</Text>
         </WebCard>
         <WebCard style={styles.col}>
@@ -122,8 +133,55 @@ export default function WebAdminProfileScreen() {
         <WebCard style={styles.col}>
           <Text style={styles.h}>Privileges & Scope</Text>
           <Text style={styles.meta}>{isGuest ? "Read-Only (AUTH-09)" : "Full HR Authority"}</Text>
+          <TouchableOpacity onPress={() => router.push("/leave/types" as never)}>
+            <Text style={styles.link}>Leave Types</Text>
+          </TouchableOpacity>
           <TouchableOpacity onPress={() => router.push("/org-settings" as never)}>
             <Text style={styles.link}>Organisation Settings</Text>
+          </TouchableOpacity>
+        </WebCard>
+        <WebCard style={styles.col}>
+          <Text style={styles.h}>Attendance Preferences</Text>
+          <Text style={styles.meta}>Timezone: {settings?.timezone ?? "—"}</Text>
+          <Text style={styles.meta}>Shift: {settings?.workStart ?? "—"} - {settings?.workEnd ?? "—"}</Text>
+        </WebCard>
+        <WebCard style={styles.col}>
+          <Text style={styles.h}>Security</Text>
+          <TouchableOpacity onPress={() => setShowPassword((value) => !value)}>
+            <Text style={styles.link}>Change Password</Text>
+          </TouchableOpacity>
+          {showPassword ? (
+            <View style={{ gap: 8, marginTop: 8 }}>
+              <TextInput style={styles.input} placeholder="Current password" secureTextEntry value={currentPassword} onChangeText={setCurrentPassword} placeholderTextColor={colors.secondary} />
+              <TextInput style={styles.input} placeholder="New password" secureTextEntry value={newPassword} onChangeText={setNewPassword} placeholderTextColor={colors.secondary} />
+              <TouchableOpacity
+                disabled={savingPassword}
+                onPress={async () => {
+                  setSavingPassword(true);
+                  try {
+                    await changePassword({ currentPassword, newPassword });
+                    setCurrentPassword("");
+                    setNewPassword("");
+                    setShowPassword(false);
+                    setError("Password updated.");
+                  } catch (err) {
+                    setError(apiErrorMessage(err));
+                  } finally {
+                    setSavingPassword(false);
+                  }
+                }}
+              >
+                <Text style={styles.link}>{savingPassword ? "Updating…" : "Update password"}</Text>
+              </TouchableOpacity>
+            </View>
+          ) : null}
+          <TouchableOpacity
+            onPress={async () => {
+              await logout();
+              router.replace("/login" as never);
+            }}
+          >
+            <Text style={styles.link}>Log out</Text>
           </TouchableOpacity>
         </WebCard>
       </View>
@@ -146,4 +204,5 @@ const styles = StyleSheet.create({
   h: { fontSize: 16, fontWeight: "700", color: colors.onSurface, marginBottom: 8 },
   meta: { fontSize: 13, color: colors.secondary, marginTop: 4 },
   link: { marginTop: 12, fontWeight: "700", color: colors.primary },
+  input: { minHeight: 44, borderWidth: 1, borderColor: colors.border, borderRadius: 8, paddingHorizontal: 10, marginTop: 8, color: colors.onSurface },
 });

@@ -16,7 +16,7 @@ import { colors } from "../../theme";
 import { GlassCard, RoleBottomNav, ScreenGradient, ThemedDialog, ThemedToast } from "../../components/ui/AppChrome";
 import { SCROLL_UNDER_BOTTOM_NAV, TopNavBar, useTopNavContentInset } from "../../components/ui/AdminComponents";
 import { UserAvatar } from "../../components/ui/UserAvatar";
-import { isTeamLead, matchesPeopleQuery, teamMembersForLead } from "../../utils/workforce";
+import { isTeamLead, matchesPeopleQuery, mergeEmployees, reportsOfLead, teamMembersForLead } from "../../utils/workforce";
 
 export default function PeopleDirectoryScreen() {
   const topInset = useTopNavContentInset();
@@ -72,12 +72,27 @@ export default function PeopleDirectoryScreen() {
     try {
       const targets = teamMembersForLead(items, lead.employeeId, lead.departmentId);
       const updated = await Promise.all(targets.map((row) => patchEmployee(row.employeeId, { managerId: lead.employeeId })));
-      setItems((current) => {
-        const byId = new Map(updated.map((row) => [row.employeeId, row]));
-        return current.map((row) => byId.get(row.employeeId) ?? row);
-      });
-      setSelected((current) => (current ? { ...current } : current));
+      setItems((current) => mergeEmployees(current, updated));
       setToast(`${displayName(lead)} is now Team Lead for ${deptName(lead.departmentId)}.`);
+    } catch (err) {
+      setToast(apiErrorMessage(err));
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function removeTeamLead(lead: EmployeePublic) {
+    if (!canAssign) {
+      setToast("Guest Admin cannot change reporting relationships.");
+      return;
+    }
+    setSaving(true);
+    try {
+      const reports = reportsOfLead(items, lead.employeeId);
+      const updated = await Promise.all(reports.map((row) => patchEmployee(row.employeeId, { managerId: null })));
+      setItems((current) => mergeEmployees(current, updated));
+      setSelected(null);
+      setToast(`${displayName(lead)} is no longer Team Lead.`);
     } catch (err) {
       setToast(apiErrorMessage(err));
     } finally {
@@ -158,7 +173,11 @@ export default function PeopleDirectoryScreen() {
               ? [
                   { label: "Close", onPress: () => setSelected(null) },
                   ...(canAssign
-                    ? [{ label: saving ? "Saving…" : "Designate Team Lead", onPress: () => void designateTeamLead(selected), primary: true }]
+                    ? [
+                        isTeamLead(items, selected.employeeId)
+                          ? { label: saving ? "Saving…" : "Remove Team Lead", onPress: () => void removeTeamLead(selected), primary: true }
+                          : { label: saving ? "Saving…" : "Designate Team Lead", onPress: () => void designateTeamLead(selected), primary: true },
+                      ]
                     : []),
                 ]
               : []

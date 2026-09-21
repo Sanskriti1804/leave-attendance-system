@@ -40,6 +40,7 @@ export default function ProfileSettingsScreen() {
   const [managerName, setManagerName] = useState("—");
   const [settings, setSettings] = useState<OrganisationSettings | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
@@ -78,13 +79,15 @@ export default function ProfileSettingsScreen() {
               setManagerName(displayName(manager));
             }
           } catch {
-            setManagerName("Alice Stone");
+            setManagerName("—");
           }
         }
       } catch (err) {
         if (!cancelled) {
           setError(apiErrorMessage(err));
         }
+      } finally {
+        if (!cancelled) setLoading(false);
       }
     })();
     return () => {
@@ -92,17 +95,12 @@ export default function ProfileSettingsScreen() {
     };
   }, []);
 
-  const name = me ? displayName(me) : "Alex Chen";
-  const role = me?.role ?? "Senior Software Engineer";
-  const empId = me?.employeeId ?? "8492";
-  const email = me?.email ?? "dev@enterprisehrms.internal";
-  const joiningDate = me?.joiningDate ? formatJoining(me.joiningDate) : "March 15, 2022";
-  const status = me?.status ?? "Active";
-  const deptFallback = error || !me?.departmentId ? "Engineering & DevOps" : departmentName;
-  const managerFallback = error || !me?.managerId ? "Marcus Vance (VP, Eng)" : managerName;
-  const locationFallback = "NY HQ (Floor 4) / Hybrid";
-
-  const isFallback = !me || !!error;
+  const name = me ? displayName(me) : "—";
+  const email = me?.email ?? "—";
+  const joiningDate = me?.joiningDate ? formatJoining(me.joiningDate) : "—";
+  const status = me?.status ?? (loading ? "—" : "—");
+  const deptValue = me?.departmentId ? departmentName : "—";
+  const teamLeadName = me?.managerId ? managerName : "Not assigned";
 
   return (
     <ScreenGradient>
@@ -121,7 +119,7 @@ export default function ProfileSettingsScreen() {
           <UserAvatar
             employee={me}
             size={96}
-            fallback="AC"
+            fallback="—"
             onPress={me ? () => { void pickAndSaveProfilePhoto(me.employeeId); } : undefined}
           />
           <Text style={styles.nameText}>{name}</Text>
@@ -134,12 +132,12 @@ export default function ProfileSettingsScreen() {
           </View>
           <View style={styles.infoRow}>
             <Text style={styles.infoLabel}>Department</Text>
-            <Text style={styles.infoValue}>{deptFallback}</Text>
+            <Text style={styles.infoValue}>{deptValue}</Text>
           </View>
           <View style={styles.divider} />
           <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>Reporting Manager</Text>
-            <Text style={styles.infoValue}>{managerFallback}</Text>
+            <Text style={styles.infoLabel}>Approver</Text>
+            <Text style={styles.infoValue}>{teamLeadName}</Text>
           </View>
           <View style={styles.divider} />
           <View style={styles.infoRow}>
@@ -179,13 +177,13 @@ export default function ProfileSettingsScreen() {
           <View style={styles.cardInner}>
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Organization Timezone</Text>
-              <Text style={styles.infoValue}>{settings?.timezone ?? "America/New_York (EST / UTC-5)"}</Text>
+              <Text style={styles.infoValue}>{settings?.timezone ?? "—"}</Text>
             </View>
             <View style={styles.divider} />
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Shift Timing</Text>
               <Text style={styles.infoValue}>
-                {settings?.workStart ?? "09:00"} - {settings?.workEnd ?? "18:00 EST"}
+                {settings?.workStart ?? "—"} - {settings?.workEnd ?? "—"}
               </Text>
             </View>
             <View style={styles.divider} />
@@ -194,7 +192,7 @@ export default function ProfileSettingsScreen() {
               <Text style={styles.infoValue}>
                 {settings?.weeklyOffDow?.length
                   ? `Weekly off DOW: ${settings.weeklyOffDow.join(",")}`
-                  : "Monday – Friday (40 hrs/week)"}
+                  : "—"}
               </Text>
             </View>
           </View>

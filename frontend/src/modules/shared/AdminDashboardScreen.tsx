@@ -68,14 +68,6 @@ export default function AdminDashboardScreen() {
     return () => { cancelled = true; };
   }, []);
 
-  const filteredEmployees = useMemo(() => {
-    const term = query.trim().toLowerCase();
-    if (!term) return employees;
-    return employees.filter((row) =>
-      `${row.firstName} ${row.lastName ?? ""} ${row.email}`.toLowerCase().includes(term),
-    );
-  }, [employees, query]);
-
   const todayCivil = civilToday();
   const workforce = useMemo(() => computeWorkforce(employees, approved, todayCivil), [employees, approved, todayCivil]);
 
@@ -86,8 +78,8 @@ export default function AdminDashboardScreen() {
         
         <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingTop: topInset, paddingHorizontal: 16, paddingBottom: 112, gap: 18 }}>
           <HROperationsCard 
-            name={me ? displayName(me).toUpperCase() : "PREETI KAUR"}
-            role={me?.role ?? "Human Resource"}
+            name={me ? displayName(me).toUpperCase() : "—"}
+            role={me?.role ?? "—"}
             day={new Date().toLocaleDateString('en-US', { weekday: 'long' })}
             date={new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
           />
@@ -180,34 +172,6 @@ export default function AdminDashboardScreen() {
                   </View>
                 </ContentCard>
               </TouchableOpacity>
-            ))}
-            {pending.slice(0, 5).map(leave => {
-              const employee = employees.find((row) => row.employeeId === leave.employeeId);
-              return (
-                <ContentCard key={leave.leaveId}>
-                  <View style={{ flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between' }}>
-                    <View style={{ flexDirection: 'column' }}>
-                      <Text style={{ fontFamily: 'Inter', fontSize: 16, fontWeight: '500', color: colors.onSurface }}>{employee ? displayName(employee) : `EMP-${leave.employeeId}`}</Text>
-                      <Text style={{ fontFamily: 'Inter', fontSize: 12, color: colors.secondary, marginTop: 2 }}>{leave.status} • {leave.numberOfDays} Days ({leave.startDate} - {leave.endDate})</Text>
-                    </View>
-                  </View>
-                  <View style={{ backgroundColor: colors.surfaceContainerLow, padding: 10, borderRadius: 10, marginTop: 12, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <Text style={{ fontFamily: 'Inter', fontSize: 12, color: colors.secondary }}>Awaiting Review</Text>
-                    <TouchableOpacity onPress={() => router.push(reviewHref as never)}>
-                      <MaterialIcons name="arrow-forward" size={16} color={colors.secondary} />
-                    </TouchableOpacity>
-                  </View>
-                </ContentCard>
-              );
-            })}
-            
-            {filteredEmployees.slice(0, 3).map((row) => (
-              <ContentCard key={`emp-${row.employeeId}`}>
-                <View style={{ flexDirection: 'column' }}>
-                  <Text style={{ fontFamily: 'Inter', fontSize: 16, fontWeight: '500', color: colors.onSurface }}>{displayName(row)}</Text>
-                  <Text style={{ fontFamily: 'Inter', fontSize: 12, color: colors.secondary, marginTop: 2 }}>{row.email} · {row.role}</Text>
-                </View>
-              </ContentCard>
             ))}
           </View>
         </ScrollView>

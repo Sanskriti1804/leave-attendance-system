@@ -23,31 +23,7 @@ import { colors } from "../theme";
 import { WebCard, WebShell } from "./WebShell";
 import { UserAvatar } from "../components/ui/UserAvatar";
 import { ThemedDialog, ThemedToast } from "../components/ui/AppChrome";
-import { addCalendarDaysIST, getTodayIST, isoWeekdayCivil } from "../utils/date";
-
-function pad2(value: number): string {
-  return String(value).padStart(2, "0");
-}
-function toCivil(date: Date): string {
-  return `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(date.getDate())}`;
-}
-function addDays(civil: string, days: number): string {
-  const [y, m, d] = civil.split("-").map(Number);
-  const date = new Date(y, (m ?? 1) - 1, d ?? 1);
-  date.setDate(date.getDate() + days);
-  return toCivil(date);
-}
-function enumerateRange(from: string, to: string): string[] {
-  const start = from <= to ? from : to;
-  const end = from <= to ? to : from;
-  const dates: string[] = [];
-  let cursor = start;
-  while (cursor <= end) {
-    dates.push(cursor);
-    cursor = addDays(cursor, 1);
-  }
-  return dates;
-}
+import { addCalendarDaysIST, enumerateCivilRange, getTodayIST, isoWeekdayCivil } from "../utils/date";
 
 type DaySession = "FULL_DAY" | "FIRST_HALF" | "SECOND_HALF";
 
@@ -88,7 +64,7 @@ export default function WebApplyLeaveScreen() {
               const manager = await getEmployee(profile.managerId);
               if (!cancelled) setManagerName(displayName(manager));
             } catch {
-              if (!cancelled) setManagerName("Alice Stone");
+              if (!cancelled) setManagerName("—");
             }
           } else if (!cancelled) {
             setManagerName("HR review");
@@ -174,7 +150,10 @@ export default function WebApplyLeaveScreen() {
     return holidayDates.has(civil);
   }
 
-  const selectedDates = useMemo(() => enumerateRange(fromDate, toDate), [fromDate, toDate]);
+  const selectedDates = useMemo(
+    () => enumerateCivilRange(fromDate, toDate).filter((date) => !isDateUnavailable(date)),
+    [fromDate, toDate, today, maxDate, weeklyOffDow, holidayDates],
+  );
 
   async function submit(kind: "submit" | "draft") {
     if (!leaveTypeId) {
@@ -245,7 +224,7 @@ export default function WebApplyLeaveScreen() {
   return (
     <WebShell title="Apply Leave Request" variant="employee" activeRoute="leave" showBack>
       {loading ? <ActivityIndicator color={colors.primary} /> : null}
-      <Text style={styles.banner}>Advance booking limit: Max {maxAdvanceDays} calendar days forward. Approver — {error ? "Alice Stone" : managerName}</Text>
+      <Text style={styles.banner}>Advance booking limit: Max {maxAdvanceDays} calendar days forward. Approver — {managerName}</Text>
       <View style={styles.cols}>
         <WebCard style={styles.col}>
           <View style={styles.applicant}>

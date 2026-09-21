@@ -10,6 +10,8 @@ import {
   listEmployees,
   listLeaveTypes,
   listLeaves,
+  managerApproveLeave,
+  managerRejectLeave,
   rejectLeave,
   type EmployeePublic,
   type LeaveApplication,
@@ -153,6 +155,42 @@ export default function WebAdminReviewScreen() {
                   </TouchableOpacity>
                 ) : null}
               </View>
+            ) : canAct && leave.status === "SUBMITTED" && leave.reportingManagerEmployeeId === me?.employeeId ? (
+              <View style={styles.actions}>
+                <TouchableOpacity
+                  disabled={busyId === leave.leaveId}
+                  onPress={async () => {
+                    setBusyId(leave.leaveId);
+                    try {
+                      await managerApproveLeave(leave.leaveId, notes[leave.leaveId]);
+                      await load();
+                    } catch (err) {
+                      setError(apiErrorMessage(err));
+                    } finally {
+                      setBusyId(null);
+                    }
+                  }}
+                >
+                  <Text style={styles.link}>Manager approve</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={async () => {
+                    setBusyId(leave.leaveId);
+                    try {
+                      await managerRejectLeave(leave.leaveId, notes[leave.leaveId]);
+                      await load();
+                    } catch (err) {
+                      Alert.alert("Could not reject", apiErrorMessage(err));
+                    } finally {
+                      setBusyId(null);
+                    }
+                  }}
+                >
+                  <Text style={styles.link}>Reject</Text>
+                </TouchableOpacity>
+              </View>
+            ) : canAct && leave.status === "SUBMITTED" ? (
+              <Text style={styles.meta}>Awaiting manager</Text>
             ) : null}
           </View>
         ))}

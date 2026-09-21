@@ -1,19 +1,22 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView } from "react-native";
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, TextInput } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { getSession } from "../../../services/auth";
+import { getSession, logout } from "../../../services/auth";
 import {
   apiErrorMessage,
+  changePassword,
   displayName,
   getDepartment,
   getEmployee,
   getMe,
+  getOrgSettings,
   listEmployees,
   type EmployeePublic,
+  type OrganisationSettings,
 } from "../../../services/resources";
 import { colors } from "../../theme";
-import { ScreenGradient } from "../../components/ui/AppChrome";
+import { ScreenGradient, ThemedDialog } from "../../components/ui/AppChrome";
 import { BottomNavBar, SCROLL_UNDER_BOTTOM_NAV, TopNavBar, useTopNavContentInset } from "../../components/ui/AdminComponents";
 import { UserAvatar } from "../../components/ui/UserAvatar";
 import { pickAndSaveProfilePhoto } from "../../../services/profilePhoto";
@@ -38,6 +41,12 @@ export default function AdminProfileScreen() {
   const [departmentName, setDepartmentName] = useState("—");
   const [managerName, setManagerName] = useState("—");
   const [directory, setDirectory] = useState<EmployeePublic[]>([]);
+  const [settings, setSettings] = useState<OrganisationSettings | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [savingPassword, setSavingPassword] = useState(false);
+  const [dialog, setDialog] = useState<{ title: string; message: string } | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -72,7 +81,7 @@ export default function AdminProfileScreen() {
               setManagerName(displayName(manager));
             }
           } catch {
-            setManagerName("Alice Stone");
+            setManagerName("—");
           }
         }
         try {
@@ -80,6 +89,12 @@ export default function AdminProfileScreen() {
           if (!cancelled) setDirectory(people.items);
         } catch {
           if (!cancelled) setDirectory([]);
+        }
+        try {
+          const org = await getOrgSettings();
+          if (!cancelled) setSettings(org);
+        } catch {
+          if (!cancelled) setSettings(null);
         }
       } catch (err) {
         if (!cancelled) {
@@ -93,13 +108,13 @@ export default function AdminProfileScreen() {
   }, []);
 
   const isGuest = me?.role === "guest_admin";
-  const name = me ? displayName(me) : "Preeti Kaur";
+  const name = me ? displayName(me) : "—";
   const showLead = me ? isTeamLead(directory, me.employeeId) : false;
 
   return (
     <ScreenGradient>
       <SafeAreaView style={styles.safe}>
-        <TopNavBar title="Profile" showBack />
+        <TopNavBar title="Profile" />
         <ScrollView contentContainerStyle={[styles.scroll, { paddingTop: topInset }]} showsVerticalScrollIndicator={false}>
           {isGuest ? (
             <View style={styles.banner}>
@@ -117,7 +132,7 @@ export default function AdminProfileScreen() {
             <UserAvatar
               employee={me}
               size={96}
-              fallback="PK"
+              fallback="—"
               onPress={me ? () => { void pickAndSaveProfilePhoto(me.employeeId); } : undefined}
             />
             <Text style={styles.name}>{name}</Text>
@@ -131,10 +146,10 @@ export default function AdminProfileScreen() {
           <View style={styles.card}>
             <View style={styles.cardHead}>
               <Text style={styles.cardTitle}>Work Information</Text>
-              <View style={styles.activeTag}><Text style={styles.activeTagText}>{me?.status ?? "Active"}</Text></View>
+              <View style={styles.activeTag}><Text style={styles.activeTagText}>{me?.status ?? "—"}</Text></View>
             </View>
-            <InfoRow label="Department" value={departmentName === "—" ? "Human Resources & Ops" : departmentName} />
-            <InfoRow label="Reporting Manager" value={managerName === "—" ? "—" : managerName} />
+            <InfoRow label="Department" value={departmentName} />
+            <InfoRow label="Team Lead" value={me?.managerId ? managerName : "Not assigned"} />
             <InfoRow label="Joining Date" value={me?.joiningDate ? `${formatJoining(me.joiningDate)} · Ongoing` : formatJoining(me?.joiningDate)} last />
           </View>
 
@@ -167,6 +182,14 @@ export default function AdminProfileScreen() {
             <CompactNotifications />
           </View>
 
+          <TouchableOpacity style={styles.navCard} onPress={() => router.push("/leave/types" as never)}>
+            <View>
+              <Text style={styles.navTitle}>Leave Types</Text>
+              <Text style={styles.navSub}>Create, deactivate, or delete leave categories</Text>
+            </View>
+            <MaterialIcons name="chevron-right" size={22} color={colors.secondary} />
+          </TouchableOpacity>
+
           <TouchableOpacity style={styles.navCard} onPress={() => router.push("/org-settings" as never)}>
             <View>
               <Text style={styles.navTitle}>Organisation Settings</Text>
@@ -174,8 +197,91 @@ export default function AdminProfileScreen() {
             </View>
             <MaterialIcons name="chevron-right" size={22} color={colors.secondary} />
           </TouchableOpacity>
+
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>Attendance Preferences</Text>
+            <InfoRow label="Organization Timezone" value={settings?.timezone ?? "—"} />
+            <InfoRow
+              label="Standard Shift"
+              value={`${settings?.workStart ?? "—"} - ${settings?.workEnd ?? "—"}`}
+            />
+            <InfoRow
+              label="Work Week"
+              value={settings?.weeklyOffDow?.length ? `Weekly off ISO DOW: ${settings.weeklyOffDow.join(", ")}` : "—"}
+              last
+            />
+          </View>
+
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>Security</Text>
+            <TouchableOpacity style={styles.navCard} onPress={() => setShowPassword((value) => !value)}>
+              <View>
+                <Text style={styles.navTitle}>Change Password</Text>
+                <Text style={styles.navSub}>Update the password used to sign in.</Text>
+              </View>
+              <MaterialIcons name={showPassword ? "expand-less" : "expand-more"} size={22} color={colors.secondary} />
+            </TouchableOpacity>
+            {showPassword ? (
+              <View style={{ gap: 8 }}>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Current password"
+                  placeholderTextColor={colors.secondary}
+                  secureTextEntry
+                  value={currentPassword}
+                  onChangeText={setCurrentPassword}
+                />
+                <TextInput
+                  style={styles.input}
+                  placeholder="New password"
+                  placeholderTextColor={colors.secondary}
+                  secureTextEntry
+                  value={newPassword}
+                  onChangeText={setNewPassword}
+                />
+                <TouchableOpacity
+                  style={styles.navCard}
+                  disabled={savingPassword}
+                  onPress={async () => {
+                    setSavingPassword(true);
+                    try {
+                      await changePassword({ currentPassword, newPassword });
+                      setCurrentPassword("");
+                      setNewPassword("");
+                      setShowPassword(false);
+                      setDialog({ title: "Password updated", message: "Use the new password the next time you sign in." });
+                    } catch (err) {
+                      setDialog({ title: "Could not change password", message: apiErrorMessage(err) });
+                    } finally {
+                      setSavingPassword(false);
+                    }
+                  }}
+                >
+                  <Text style={styles.navTitle}>{savingPassword ? "Updating…" : "Update password"}</Text>
+                </TouchableOpacity>
+              </View>
+            ) : null}
+          </View>
+
+          <TouchableOpacity
+            style={styles.navCard}
+            onPress={async () => {
+              await logout();
+              router.replace("/login");
+            }}
+          >
+            <Text style={styles.navTitle}>Log out</Text>
+            <MaterialIcons name="logout" size={22} color={colors.secondary} />
+          </TouchableOpacity>
         </ScrollView>
         <BottomNavBar activeRoute="more" />
+        <ThemedDialog
+          visible={dialog != null}
+          title={dialog?.title ?? ""}
+          message={dialog?.message}
+          onRequestClose={() => setDialog(null)}
+          actions={[{ label: "OK", onPress: () => setDialog(null), primary: true }]}
+        />
       </SafeAreaView>
     </ScreenGradient>
   );
@@ -319,4 +425,13 @@ const styles = StyleSheet.create({
   },
   navTitle: { fontFamily: "Inter", fontSize: 15, fontWeight: "700", color: colors.onSurface },
   navSub: { fontFamily: "Inter", fontSize: 12, color: colors.secondary, marginTop: 2 },
+  input: {
+    minHeight: 44,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    color: colors.onSurface,
+    backgroundColor: colors.surfaceContainerLowest,
+  },
 });

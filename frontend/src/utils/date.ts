@@ -141,3 +141,15 @@ export function workingMinutes(
   if (Number.isNaN(end)) return 0;
   return Math.max(0, Math.floor((end - start) / 60000));
 }
+
+export function enumerateCivilRange(from: string, to: string): string[] {
+  const start = from <= to ? from : to;
+  const end = from <= to ? to : from;
+  const dates: string[] = [];
+  let cursor = start;
+  while (cursor <= end) {
+    dates.push(cursor);
+    cursor = addCalendarDaysIST(cursor, 1);
+  }
+  return dates;
+}

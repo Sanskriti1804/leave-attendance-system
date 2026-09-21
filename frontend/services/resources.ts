@@ -157,7 +157,7 @@ export function getEmployee(employeeId: number): Promise<EmployeePublic> {
 
 export function patchEmployee(
   employeeId: number,
-  body: Partial<Pick<EmployeePublic, "managerId" | "status" | "role" | "departmentId">>,
+  body: Partial<{ managerId: number | null; status: string; role: string; departmentId: number }>,
 ): Promise<EmployeePublic> {
   return authorizedRequest<EmployeePublic>(`/api/v1/employees/${employeeId}`, { method: "PATCH", body });
 }
