@@ -45,13 +45,8 @@ export default function SplashScreen() {
         } else {
           router.replace("/(tabs)");
         }
-      } catch (err) {
-        // Fallback for mocked backend
-        if (session.email?.includes('admin')) {
-          router.replace("/admin");
-        } else {
-          router.replace(getPostLoginRoute());
-        }
+      } catch {
+        router.replace("/login");
       }
     }, splashDuration);
 

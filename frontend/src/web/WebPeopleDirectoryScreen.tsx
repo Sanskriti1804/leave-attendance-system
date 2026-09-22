@@ -176,7 +176,7 @@ export default function WebPeopleDirectoryScreen() {
 }
 
 const styles = StyleSheet.create({
-  search: { backgroundColor: "#fff", borderRadius: 10, borderWidth: 1, borderColor: colors.border, paddingHorizontal: 12, minHeight: 44, color: colors.onSurface },
+  search: { backgroundColor: colors.surfaceContainerLowest, borderRadius: 8, borderWidth: 1, borderColor: colors.border, paddingHorizontal: 12, minHeight: 44, color: colors.onSurface },
   meta: { fontSize: 12, color: colors.secondary },
   group: { fontSize: 12, fontWeight: "700", color: colors.secondary, textTransform: "uppercase", marginBottom: 8 },
   grid: { flexDirection: "row", flexWrap: "wrap", gap: 12 },
@@ -184,15 +184,17 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     flexBasis: 180,
     maxWidth: 280,
-    backgroundColor: colors.surfaceContainerLow,
-    borderRadius: 12,
+    backgroundColor: colors.surfaceContainerLowest,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: colors.glassBorder,
     padding: 12,
     gap: 6,
   },
   name: { fontSize: 14, fontWeight: "700", color: colors.onSurface },
   lead: {
     alignSelf: "flex-start",
-    backgroundColor: colors.primary,
+    backgroundColor: colors.accent,
     color: colors.onPrimary,
     fontSize: 10,
     fontWeight: "700",

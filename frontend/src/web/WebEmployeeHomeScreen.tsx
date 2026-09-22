@@ -161,6 +161,6 @@ const styles = StyleSheet.create({
   metric: { flexGrow: 1, flexBasis: 180 },
   metricVal: { fontSize: 22, fontWeight: "700", color: colors.onSurface, marginTop: 6 },
   actions: { flexDirection: "row", flexWrap: "wrap", gap: 12 },
-  action: { flexGrow: 1, flexBasis: 220, backgroundColor: colors.surfaceContainerLowest, borderRadius: 12, padding: 16, borderWidth: 1, borderColor: "rgba(0,0,0,0.08)" },
+  action: { flexGrow: 1, flexBasis: 220, backgroundColor: colors.surfaceContainerLowest, borderRadius: 10, padding: 16, borderWidth: 1, borderColor: colors.glassBorder, borderLeftWidth: 3, borderLeftColor: colors.accent },
   actionTitle: { fontSize: 15, fontWeight: "600", color: colors.onSurface },
 });

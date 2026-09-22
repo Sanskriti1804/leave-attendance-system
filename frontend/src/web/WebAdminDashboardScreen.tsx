@@ -106,15 +106,15 @@ export default function WebAdminDashboardScreen() {
 }
 
 const styles = StyleSheet.create({
-  kicker: { fontSize: 11, fontWeight: "700", color: colors.secondary, textTransform: "uppercase", letterSpacing: 0.5 },
+  kicker: { fontSize: 11, fontWeight: "700", color: colors.accentDeep, textTransform: "uppercase", letterSpacing: 1.2 },
   h: { fontSize: 20, fontWeight: "700", color: colors.onSurface, marginTop: 4 },
   meta: { fontSize: 12, color: colors.secondary, marginTop: 2 },
   body: { fontSize: 14, fontWeight: "600", color: colors.onSurface },
-  search: { backgroundColor: "#fff", borderRadius: 10, borderWidth: 1, borderColor: colors.border, paddingHorizontal: 12, minHeight: 44, color: colors.onSurface },
+  search: { backgroundColor: colors.surfaceContainerLowest, borderRadius: 8, borderWidth: 1, borderColor: colors.border, paddingHorizontal: 12, minHeight: 44, color: colors.onSurface },
   stats: { flexDirection: "row", flexWrap: "wrap", gap: 12 },
   stat: { flexGrow: 1, flexBasis: 200 },
   num: { fontSize: 32, fontWeight: "700", color: colors.onSurface, marginTop: 8 },
-  cta: { marginTop: 12, alignSelf: "flex-start", backgroundColor: colors.primary, borderRadius: 6, paddingHorizontal: 12, paddingVertical: 8 },
+  cta: { marginTop: 12, alignSelf: "flex-start", backgroundColor: colors.accent, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 8 },
   ctaText: { color: colors.onPrimary, fontWeight: "700", fontSize: 12 },
   row: { paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: colors.surfaceContainerHighest },
 });

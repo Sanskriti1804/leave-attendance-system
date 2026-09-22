@@ -20,6 +20,7 @@ import { BottomNavBar, SCROLL_UNDER_BOTTOM_NAV, TopNavBar, useTopNavContentInset
 import { UserAvatar } from "../../components/ui/UserAvatar";
 import { pickAndSaveProfilePhoto } from "../../../services/profilePhoto";
 import { CompactNotifications } from "../../components/ui/CompactNotifications";
+import { CompactAudit } from "../../components/ui/CompactAudit";
 import { isTeamLead } from "../../utils/workforce";
 
 function formatJoining(value: string | null | undefined): string {
@@ -168,6 +169,12 @@ export default function AdminProfileScreen() {
           <View style={styles.card}>
             <CompactNotifications />
           </View>
+
+          {!isGuest ? (
+            <View style={styles.card}>
+              <CompactAudit />
+            </View>
+          ) : null}
 
           <TouchableOpacity style={styles.navCard} onPress={() => router.push("/leave/types" as never)}>
             <View>

@@ -139,10 +139,10 @@ Confirmed intent (AT-01–05, dashboards in IST):
 
 ---
 
-## 9. Reports, notifications, audit (**not implemented**)
+## 9. Reports, notifications, audit
 
-- **Reports (AUTH-07):** leave (employee, department, monthly, type, decisions) and attendance (daily, monthly, employee, late, missing-logout). Excel / CSV / PDF. Pack: admin **and** guest_admin (REP-15 Open).
-- **Notifications:** in-app (and Proposed email) for leave decisions, missing medical before submit, unmarked attendance, missing logout. Own list only. Teams/Slack is Future.
+- **Reports (AUTH-07):** leave (employee, department, monthly, type, decisions) and attendance (daily, monthly, employee, late, missing-logout). JSON table plus Excel / CSV / PDF. Pack: admin **and** guest_admin (REP-15 Open).
+- **Notifications:** in-app for leave decisions, missing medical before submit, unmarked attendance, missing logout. Own list only. Teams/Slack is Future.
 - **Audit (BR-12 Confirmed):** every change recorded. Viewer **Proposed** admin-only. Must not log passwords or medical bytes.
 
 ---

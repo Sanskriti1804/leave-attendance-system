@@ -5,7 +5,6 @@ import { LinearGradient } from "expo-linear-gradient";
 import { getSession } from "../../services/auth";
 import { getMe } from "../../services/resources";
 import { designContent } from "../maxstarter/design";
-import { getPostLoginRoute } from "../modules/shared/SplashScreen";
 import { colors, pageGradient } from "../theme";
 
 export default function WebSplashScreen() {
@@ -27,11 +26,7 @@ export default function WebSplashScreen() {
           router.replace("/(tabs)");
         }
       } catch {
-        if (session.email?.includes("admin")) {
-          router.replace("/admin");
-        } else {
-          router.replace(getPostLoginRoute());
-        }
+        router.replace("/login");
       }
     }, splashDuration);
     return () => clearTimeout(timer);
@@ -61,7 +56,7 @@ const styles = StyleSheet.create({
   center: { alignItems: "center", gap: 8 },
   logo: { width: 96, height: 96, borderRadius: 48, marginBottom: 12 },
   title: { fontSize: 32, fontWeight: "800", color: colors.onSurface, letterSpacing: -0.5 },
-  muted: { color: colors.secondary },
+  muted: { color: colors.accentDeep },
   sub: { fontSize: 15, fontWeight: "600", color: colors.onSurfaceVariant },
   footer: { position: "absolute", bottom: 32, fontSize: 12, color: colors.secondary },
 });

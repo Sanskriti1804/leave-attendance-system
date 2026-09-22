@@ -842,6 +842,24 @@ async function run(): Promise<void> {
       ? (auditAdmin.json as { items: { entityType: string }[] }).items
       : [];
     expect("audit contains leave rows", auditItems.some((row) => row.entityType === "LeaveApplication"), true);
+
+    const empReport = await request(base, "GET", `/api/v1/reports/leave-employee?from=${today}&to=${d2}&format=json`, {
+      token: empSess.access,
+    });
+    expect("employee GET report 403", empReport.status, 403);
+    const guestReport = await request(base, "GET", `/api/v1/reports/leave-employee?from=${today}&to=${d2}&format=json`, {
+      token: guestSess.access,
+    });
+    expect("guest GET report 200", guestReport.status, 200);
+    const adminReport = await request(base, "GET", `/api/v1/reports/leave-employee?from=${today}&to=${d2}&format=json`, {
+      token: adminSess.access,
+    });
+    expect("admin GET report 200", adminReport.status, 200);
+    expect("admin report has columns", Array.isArray((adminReport.json as { columns?: unknown }).columns), true);
+    const csvReport = await request(base, "GET", `/api/v1/reports/attendance-daily?from=${today}&to=${d2}&format=csv`, {
+      token: adminSess.access,
+    });
+    expect("admin GET report csv 200", csvReport.status, 200);
   } finally {
     server.close();
     await prisma.notification.deleteMany({

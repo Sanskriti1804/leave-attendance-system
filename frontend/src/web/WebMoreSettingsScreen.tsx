@@ -117,12 +117,12 @@ function Pref({ label, value, onChange }: { label: string; value: boolean; onCha
 
 const styles = StyleSheet.create({
   section: { fontSize: 14, fontWeight: "700", color: colors.onSurface, marginBottom: 8 },
-  link: { fontSize: 14, fontWeight: "600", color: colors.primary, marginTop: 8 },
+  link: { fontSize: 14, fontWeight: "600", color: colors.accentDeep, marginTop: 8 },
   meta: { fontSize: 12, color: colors.secondary, marginTop: 6 },
   body: { fontSize: 14, color: colors.onSurface, flex: 1 },
   pref: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingVertical: 8, gap: 12 },
   input: { minHeight: 44, borderWidth: 1, borderColor: colors.border, borderRadius: 8, paddingHorizontal: 10, color: colors.onSurface },
-  primary: { backgroundColor: colors.primary, borderRadius: 8, padding: 12, alignItems: "center" },
+  primary: { backgroundColor: colors.accent, borderRadius: 8, padding: 12, alignItems: "center" },
   primaryText: { color: colors.onPrimary, fontWeight: "700" },
   logout: { marginTop: 16, padding: 12, borderRadius: 8, borderWidth: 1, borderColor: colors.border, alignItems: "center" },
   logoutText: { fontWeight: "700", color: colors.onSurface },

@@ -2,7 +2,7 @@
 
 ## Status
 
-REP-01–13 Confirmed (leave and attendance report kinds; Excel/CSV/PDF). Filters and cancelled/withdrawn treatment Open. **Not implemented.**
+REP-01–13 Confirmed (leave and attendance report kinds; Excel/CSV/PDF). Filters and cancelled/withdrawn treatment Open. **Implemented:** `GET /api/v1/reports/{slug}` for admin and guest_admin (AUTH-07 / pack TD-18). `from`/`to` required (TD until REP-14). JSON table for the in-app Reports screen; `csv`, `xlsx` (Excel XML), and `pdf` attachments.
 
 ## Purpose
 
@@ -22,7 +22,7 @@ Payroll extracts. Invented report types.
 
 ## API Endpoints
 
-Proposed `GET /reports/{slug}` with slugs: `leave-employee`, `leave-department`, `leave-monthly`, `leave-type`, `leave-decisions`, `attendance-daily`, `attendance-monthly`, `attendance-employee`, `attendance-late`, `attendance-missing-logout`. Format `xlsx|csv|pdf`.
+Implemented `GET /api/v1/reports/{slug}` with slugs: `leave-employee`, `leave-department`, `leave-monthly`, `leave-type`, `leave-decisions`, `attendance-daily`, `attendance-monthly`, `attendance-employee`, `attendance-late`, `attendance-missing-logout`. Query: `from`, `to` (required), optional `employeeId`, `departmentId`, `format=json|csv|xlsx|pdf`. Employee callers receive 403.
 
 ## Edge Cases
 
@@ -33,5 +33,7 @@ Null department grouped as Unassigned (EDGE-02). Export max 366 days is TD, not 
 REP-14 filters. REP-16 cancelled/withdrawn/corrected treatment. Report access list.
 
 ## Change History
+
+2026-09-21 — Implemented org report GET + Admin/guest Reports UI (live data, date range, CSV/Excel/PDF). Attendance punch logic unchanged; reports only read attendance rows.
 
 2026-08-27 — Extracted from source documentation.

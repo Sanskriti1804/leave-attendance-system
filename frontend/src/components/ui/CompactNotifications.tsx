@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from "react-native";
-import { MaterialIcons } from "@expo/vector-icons";
 import { colors } from "../../theme";
 import {
   apiErrorMessage,
@@ -13,6 +12,7 @@ import { displayNotification } from "../../utils/notifications";
 
 export function CompactNotifications({ limit = 6 }: { limit?: number }) {
   const [items, setItems] = useState<AppNotification[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -21,7 +21,10 @@ export function CompactNotifications({ limit = 6 }: { limit?: number }) {
     (async () => {
       try {
         const result = await listMyNotifications();
-        if (!cancelled) setItems(result.items.slice(0, limit));
+        if (!cancelled) {
+          setItems(result.items.slice(0, limit));
+          setUnreadCount(result.unreadCount ?? result.items.filter((row) => !row.isRead).length);
+        }
       } catch (err) {
         if (!cancelled) setError(apiErrorMessage(err));
       } finally {
@@ -35,7 +38,7 @@ export function CompactNotifications({ limit = 6 }: { limit?: number }) {
 
   return (
     <View style={styles.wrap}>
-      <Text style={styles.heading}>Notifications</Text>
+      <Text style={styles.heading}>{unreadCount ? `Notifications · ${unreadCount} unread` : "Notifications"}</Text>
       {loading ? <ActivityIndicator color={colors.primary} /> : null}
       {error ? <Text style={styles.meta}>{error}</Text> : null}
       {!loading && !error && items.length === 0 ? (
@@ -52,10 +55,12 @@ export function CompactNotifications({ limit = 6 }: { limit?: number }) {
             setItems((current) =>
               current.map((row) => (row.notificationId === item.notificationId ? { ...row, isRead: true } : row)),
             );
+            setUnreadCount((count) => Math.max(0, count - 1));
             void markNotificationRead(item.notificationId).catch(() => {
               setItems((current) =>
                 current.map((row) => (row.notificationId === item.notificationId ? { ...row, isRead: false } : row)),
               );
+              setUnreadCount((count) => count + 1);
             });
           }}
         >

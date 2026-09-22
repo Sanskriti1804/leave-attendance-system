@@ -103,9 +103,9 @@ const styles = StyleSheet.create({
   name: { fontSize: 16, fontWeight: "700", color: colors.onSurface },
   meta: { fontSize: 12, color: colors.secondary, marginTop: 4 },
   row: { flexDirection: "row", gap: 16, marginTop: 8 },
-  link: { fontWeight: "700", color: colors.primary },
-  input: { minHeight: 44, borderWidth: 1, borderColor: colors.border, borderRadius: 8, paddingHorizontal: 10, marginTop: 8, color: colors.onSurface, backgroundColor: "#fff" },
-  save: { marginTop: 12, backgroundColor: colors.primary, borderRadius: 8, padding: 12, alignItems: "center" },
+  link: { fontWeight: "700", color: colors.accentDeep },
+  input: { minHeight: 44, borderWidth: 1, borderColor: colors.border, borderRadius: 8, paddingHorizontal: 10, marginTop: 8, color: colors.onSurface, backgroundColor: colors.surfaceContainerLow },
+  save: { marginTop: 12, backgroundColor: colors.accent, borderRadius: 8, padding: 12, alignItems: "center" },
   saveText: { color: colors.onPrimary, fontWeight: "700" },
   err: { color: colors.error },
 });

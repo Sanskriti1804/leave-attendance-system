@@ -135,7 +135,7 @@ const styles = StyleSheet.create({
   avatarText: { fontSize: 22, fontWeight: "700", color: colors.onSurface },
   name: { fontSize: 22, fontWeight: "700", color: colors.onSurface, textAlign: "center" },
   tag: { marginTop: 8, alignSelf: "flex-start", backgroundColor: colors.surfaceContainer, paddingHorizontal: 8, paddingVertical: 4, borderRadius: 12, fontSize: 11, fontWeight: "700" },
-  activeTag: { backgroundColor: colors.primary, color: colors.onPrimary, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4, fontSize: 11, fontWeight: "700", overflow: "hidden", textTransform: "uppercase" },
+  activeTag: { backgroundColor: colors.accent, color: colors.onPrimary, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4, fontSize: 11, fontWeight: "700", overflow: "hidden", textTransform: "uppercase" },
   cardHead: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 8 },
   contactRow: { flexDirection: "row", alignItems: "stretch", minHeight: 56 },
   contactCol: { flex: 1, gap: 4, justifyContent: "center" },
@@ -145,5 +145,5 @@ const styles = StyleSheet.create({
   row: { flexDirection: "row", justifyContent: "space-between", paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: colors.surfaceContainerHighest, gap: 12 },
   label: { fontSize: 12, color: colors.secondary },
   value: { fontSize: 12, fontWeight: "600", color: colors.onSurface, textAlign: "right", flex: 1 },
-  link: { marginTop: 12, fontWeight: "700", color: colors.primary },
+  link: { marginTop: 12, fontWeight: "700", color: colors.accentDeep },
 });

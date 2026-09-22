@@ -4,7 +4,7 @@ How to run automated coverage of the **implemented** Express routes, and how to 
 
 This is **not** a signed test specification. Test framework choice remains a **Pending Decision**; the suite uses Node `assert` + `tsx` (`backend/test-all-apis.ts`).
 
-Attendance HTTP APIs exist but were not changed in this integration pass. Notifications and audit list/mark-read are covered by `test-all-apis.ts`. Report exports remain unimplemented.
+Attendance HTTP APIs exist but were not changed in this integration pass. Notifications, report GET, and audit list/mark-read are covered by `test-all-apis.ts`.
 
 ---
 

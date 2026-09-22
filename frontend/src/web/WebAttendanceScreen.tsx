@@ -133,7 +133,7 @@ export default function WebAttendanceScreen() {
 const styles = StyleSheet.create({
   top: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
   title: { fontSize: 18, fontWeight: "700", color: colors.onSurface },
-  link: { fontSize: 13, fontWeight: "700", color: colors.primary },
+  link: { fontSize: 13, fontWeight: "700", color: colors.accentDeep },
   disabled: { opacity: 0.4 },
   stats: { flexDirection: "row", flexWrap: "wrap", gap: 12 },
   stat: { minWidth: 120, flexGrow: 1 },
@@ -141,7 +141,7 @@ const styles = StyleSheet.create({
   num: { fontSize: 22, fontWeight: "700", color: colors.onSurface, marginTop: 4 },
   filters: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   chip: { paddingHorizontal: 12, paddingVertical: 8, borderRadius: 999, backgroundColor: colors.surfaceContainer },
-  chipOn: { paddingHorizontal: 12, paddingVertical: 8, borderRadius: 999, backgroundColor: colors.primary },
+  chipOn: { paddingHorizontal: 12, paddingVertical: 8, borderRadius: 999, backgroundColor: colors.accent },
   chipText: { fontSize: 12, fontWeight: "600", color: colors.onSurface },
   chipOnText: { fontSize: 12, fontWeight: "600", color: colors.onPrimary },
   row: { flexDirection: "row", paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: colors.surfaceContainerHighest },

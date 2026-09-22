@@ -51,4 +51,6 @@ Session TTL; invite vs temporary password; self-approval of own leave by admin (
 
 ## Change History
 
+2026-09-22 — Client uses existing `POST /auth/refresh` when access tokens expire; Remember me controls persistence; failed splash `/me` goes to login.
+
 2026-08-27 — Extracted from source documentation.

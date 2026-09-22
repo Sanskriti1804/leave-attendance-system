@@ -1,6 +1,6 @@
 # Reports, notifications, audit API (Proposed)
 
-Notifications list and mark-read are implemented. Audit GET is implemented for admin. Reports remain unimplemented.
+Notifications list and mark-read are implemented. Audit GET is implemented for admin. Reports `GET /api/v1/reports/{slug}` is implemented for admin and guest_admin.
 
 ## Notifications
 
@@ -11,7 +11,7 @@ Notifications list and mark-read are implemented. Audit GET is implemented for a
 
 ## Reports
 
-`GET /reports/{slug}` — A G (TD until REP-15 signed). Format `xlsx|csv|pdf`.
+`GET /api/v1/reports/{slug}` — A G (TD until REP-15 signed). Format `json|xlsx|csv|pdf`. `from` and `to` required.
 
 Slugs: `leave-employee`, `leave-department`, `leave-monthly`, `leave-type`, `leave-decisions`, `attendance-daily`, `attendance-monthly`, `attendance-employee`, `attendance-late`, `attendance-missing-logout`.
 

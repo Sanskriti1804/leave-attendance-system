@@ -214,6 +214,87 @@ export function markNotificationRead(notificationId: number): Promise<AppNotific
   return authorizedRequest<AppNotification>(`/api/v1/notifications/${notificationId}/read`, { method: "POST" });
 }
 
+export type AuditLogItem = {
+  auditId: number;
+  userId: number;
+  actorName?: string;
+  action: string;
+  entityType: string;
+  entityId: number | null;
+  createdAt: string | null;
+};
+
+export function listAuditLogs(page = 1, pageSize = 20): Promise<{ items: AuditLogItem[]; total: number }> {
+  return authorizedRequest<{ items: AuditLogItem[]; total: number }>(
+    `/api/v1/audit?page=${page}&pageSize=${pageSize}`,
+  );
+}
+
+export const REPORT_SLUGS = [
+  "leave-employee",
+  "leave-department",
+  "leave-monthly",
+  "leave-type",
+  "leave-decisions",
+  "attendance-daily",
+  "attendance-monthly",
+  "attendance-employee",
+  "attendance-late",
+  "attendance-missing-logout",
+] as const;
+
+export type ReportSlug = (typeof REPORT_SLUGS)[number];
+
+export type ReportTable = {
+  slug: string;
+  from: string;
+  to: string;
+  columns: string[];
+  rows: string[][];
+};
+
+export function getReport(params: {
+  slug: ReportSlug;
+  from: string;
+  to: string;
+  employeeId?: number;
+  departmentId?: number;
+}): Promise<ReportTable> {
+  const query = new URLSearchParams({ from: params.from, to: params.to, format: "json" });
+  if (params.employeeId) query.set("employeeId", String(params.employeeId));
+  if (params.departmentId) query.set("departmentId", String(params.departmentId));
+  return authorizedRequest<ReportTable>(`/api/v1/reports/${params.slug}?${query.toString()}`);
+}
+
+export async function downloadReport(params: {
+  slug: ReportSlug;
+  from: string;
+  to: string;
+  format: "csv" | "xlsx" | "pdf";
+  employeeId?: number;
+  departmentId?: number;
+}): Promise<void> {
+  const { authorizedFetch } = await import("./auth");
+  const query = new URLSearchParams({ from: params.from, to: params.to, format: params.format });
+  if (params.employeeId) query.set("employeeId", String(params.employeeId));
+  if (params.departmentId) query.set("departmentId", String(params.departmentId));
+  const response = await authorizedFetch(`/api/v1/reports/${params.slug}?${query.toString()}`);
+  if (!response.ok) {
+    throw new Error("Unable to download report.");
+  }
+  const blob = await response.blob();
+  const ext = params.format === "xlsx" ? "xls" : params.format;
+  const fileName = `${params.slug}.${ext}`;
+  if (typeof document !== "undefined" && typeof URL !== "undefined") {
+    const href = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = href;
+    anchor.download = fileName;
+    anchor.click();
+    URL.revokeObjectURL(href);
+  }
+}
+
 export function patchOrgSettings(body: Partial<OrganisationSettings>): Promise<OrganisationSettings> {
   return authorizedRequest<OrganisationSettings>("/api/v1/org-settings", { method: "PATCH", body });
 }
@@ -397,12 +478,8 @@ export async function downloadLeaveDocument(
   documentId: number,
   fileName: string,
 ): Promise<void> {
-  const { getApiBaseUrl } = await import("./api");
-  const { getSession } = await import("./auth");
-  const session = await getSession();
-  const response = await fetch(`${getApiBaseUrl()}/api/v1/documents/${documentId}`, {
-    headers: session?.token ? { Authorization: `Bearer ${session.token}` } : undefined,
-  });
+  const { authorizedFetch } = await import("./auth");
+  const response = await authorizedFetch(`/api/v1/documents/${documentId}`);
   if (!response.ok) {
     throw new Error("Unable to download document.");
   }

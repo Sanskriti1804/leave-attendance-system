@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, TextInput } from "react-nativ
 import { useRouter } from "expo-router";
 import { getSession, logout } from "../../services/auth";
 import { CompactNotifications } from "../components/ui/CompactNotifications";
+import { CompactAudit } from "../components/ui/CompactAudit";
 import { isTeamLead } from "../utils/workforce";
 import { apiErrorMessage, changePassword, displayName, getDepartment, getMe, getOrgSettings, listEmployees, type EmployeePublic, type OrganisationSettings } from "../../services/resources";
 import { colors } from "../theme";
@@ -120,6 +121,11 @@ export default function WebAdminProfileScreen() {
         <WebCard style={styles.col}>
           <CompactNotifications />
         </WebCard>
+        {!isGuest ? (
+          <WebCard style={styles.col}>
+            <CompactAudit />
+          </WebCard>
+        ) : null}
         <WebCard style={styles.col}>
           <Text style={styles.h}>Privileges & Scope</Text>
           <Text style={styles.meta}>{isGuest ? "Read-Only (AUTH-09)" : "Full HR Authority"}</Text>
@@ -185,7 +191,7 @@ const styles = StyleSheet.create({
   heroBlock: { alignItems: "center", gap: 12, paddingVertical: 16 },
   name: { fontSize: 22, fontWeight: "700", color: colors.onSurface, textAlign: "center" },
   tag: { marginTop: 8, alignSelf: "flex-start", backgroundColor: colors.surfaceContainer, paddingHorizontal: 8, paddingVertical: 4, borderRadius: 12, fontSize: 11, fontWeight: "700" },
-  activeTag: { backgroundColor: colors.primary, color: colors.onPrimary, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4, fontSize: 11, fontWeight: "700", overflow: "hidden", textTransform: "uppercase" },
+  activeTag: { backgroundColor: colors.accent, color: colors.onPrimary, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4, fontSize: 11, fontWeight: "700", overflow: "hidden", textTransform: "uppercase" },
   cardHead: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 8 },
   contactRow: { flexDirection: "row", alignItems: "stretch", minHeight: 56 },
   contactCol: { flex: 1, gap: 4, justifyContent: "center" },
@@ -193,6 +199,6 @@ const styles = StyleSheet.create({
   body: { fontSize: 14, fontWeight: "600", color: colors.onSurface },
   h: { fontSize: 16, fontWeight: "700", color: colors.onSurface, marginBottom: 8 },
   meta: { fontSize: 13, color: colors.secondary, marginTop: 4 },
-  link: { marginTop: 12, fontWeight: "700", color: colors.primary },
-  input: { minHeight: 44, borderWidth: 1, borderColor: colors.border, borderRadius: 8, paddingHorizontal: 10, marginTop: 8, color: colors.onSurface },
+  link: { marginTop: 12, fontWeight: "700", color: colors.accentDeep },
+  input: { minHeight: 44, borderWidth: 1, borderColor: colors.border, borderRadius: 8, paddingHorizontal: 10, marginTop: 8, color: colors.onSurface, backgroundColor: colors.surfaceContainerLow },
 });

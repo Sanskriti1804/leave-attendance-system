@@ -46,7 +46,7 @@ export default function LoginScreen() {
 
     setLoading(true);
     try {
-      const session = await authLogin({ email: email.trim(), password });
+      const session = await authLogin({ email: email.trim(), password }, { persist: rememberMe });
       try {
         const me = await getMe();
         if (me.role === 'admin' || me.role === 'guest_admin') {

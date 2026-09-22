@@ -47,6 +47,9 @@ export async function findManyAuditLogs(filter: {
       orderBy: { createdAt: "desc" },
       skip: filter.skip,
       take: filter.take,
+      include: {
+        user: { select: { firstName: true, lastName: true } },
+      },
     }),
     prisma.auditLog.count({ where }),
   ]);

@@ -1,7 +1,8 @@
 import { prisma } from "../db/index.js";
 import { logger } from "../../../logger.js";
 import { HttpError } from "../utils/http-error.js";
-import { toIsoWithIstOffset } from "../utils/dates.js";
+import { addCalendarDays, fromCivilDate, isoWeekday, todayInIst, toIsoWithIstOffset } from "../utils/dates.js";
+import { getOrganisationSettings } from "../organisation-settings/service.js";
 import * as notificationRepository from "./repository.js";
 
 function clip(value: string, max: number): string {
@@ -59,7 +60,62 @@ function toResponse(row: {
   };
 }
 
+async function ensureAttendanceReminders(employeeId: number): Promise<void> {
+  const settings = await getOrganisationSettings();
+  const today = todayInIst();
+  const weeklyOff = new Set(settings.weeklyOffDow);
+  let cursor = addCalendarDays(today, -1);
+  let workDay: string | null = null;
+  for (let i = 0; i < 14; i += 1) {
+    const holiday = await prisma.holiday.findUnique({ where: { holidayDate: fromCivilDate(cursor) } });
+    if (!weeklyOff.has(isoWeekday(cursor)) && !holiday) {
+      workDay = cursor;
+      break;
+    }
+    cursor = addCalendarDays(cursor, -1);
+  }
+  if (!workDay) {
+    return;
+  }
+  const dateObj = fromCivilDate(workDay);
+  const [attendance, approvedLeave] = await Promise.all([
+    prisma.attendance.findUnique({
+      where: { employeeId_attendanceDate: { employeeId, attendanceDate: dateObj } },
+    }),
+    prisma.leaveDateSelection.findFirst({
+      where: {
+        leaveDate: dateObj,
+        leave: { employeeId, status: "APPROVED" },
+      },
+    }),
+  ]);
+  const onLeave = Boolean(approvedLeave) || attendance?.status === "On Leave";
+  if (!onLeave && (!attendance || !attendance.checkIn)) {
+    await notifyOnce({
+      userId: employeeId,
+      type: `UNMARKED_ATTENDANCE_${workDay}`,
+      title: "Unmarked attendance",
+      message: "Please mark attendance for your last work day.",
+    });
+  }
+  if (attendance?.checkIn && !attendance.checkOut) {
+    await notifyOnce({
+      userId: employeeId,
+      type: `MISSING_LOGOUT_${workDay}`,
+      title: "Missing logout",
+      message: "Please complete checkout for your last work day.",
+    });
+  }
+}
+
 export async function listMyNotifications(userId: number) {
+  const user = await prisma.employee.findUnique({
+    where: { employeeId: userId },
+    select: { role: true },
+  });
+  if (user?.role === "employee") {
+    await safeNotify(() => ensureAttendanceReminders(userId));
+  }
   const [items, unreadCount] = await Promise.all([
     notificationRepository.findByUser(userId),
     notificationRepository.countUnread(userId),

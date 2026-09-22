@@ -12,6 +12,7 @@ import { displayNotification } from "../../utils/notifications";
 export default function NotificationsScreen() {
   const topInset = useTopNavContentInset();
   const [items, setItems] = useState<AppNotification[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -20,7 +21,10 @@ export default function NotificationsScreen() {
     (async () => {
       try {
         const result = await listMyNotifications();
-        if (!cancelled) setItems(result.items);
+        if (!cancelled) {
+          setItems(result.items);
+          setUnreadCount(result.unreadCount ?? result.items.filter((row) => !row.isRead).length);
+        }
       } catch (err) {
         if (!cancelled) setError(apiErrorMessage(err));
       } finally {
@@ -35,7 +39,7 @@ export default function NotificationsScreen() {
   return (
     <ScreenGradient>
       <SafeAreaView style={styles.safe}>
-        <TopNavBar title="Notifications" />
+        <TopNavBar title={unreadCount ? `Notifications · ${unreadCount} unread` : "Notifications"} />
         <ScrollView contentContainerStyle={[styles.scroll, { paddingTop: topInset }]} showsVerticalScrollIndicator={false}>
           {loading ? <ActivityIndicator color={colors.primary} /> : null}
           {error ? <Text style={styles.copy}>{error}</Text> : null}
@@ -43,7 +47,7 @@ export default function NotificationsScreen() {
             <View style={styles.empty}>
               <MaterialIcons name="notifications-none" size={28} color={colors.secondary} />
               <Text style={styles.title}>No notifications yet</Text>
-              <Text style={styles.copy}>Leave submit, approval, and rejection updates will appear here.</Text>
+              <Text style={styles.copy}>Leave decisions, medical reminders, and attendance alerts appear here.</Text>
             </View>
           ) : null}
           {items.map((item) => {
@@ -61,12 +65,14 @@ export default function NotificationsScreen() {
                     row.notificationId === item.notificationId ? { ...row, isRead: true } : row,
                   ),
                 );
+                setUnreadCount((count) => Math.max(0, count - 1));
                 void markNotificationRead(item.notificationId).catch(() => {
                   setItems((current) =>
                     current.map((row) =>
                       row.notificationId === item.notificationId ? { ...row, isRead: false } : row,
                     ),
                   );
+                  setUnreadCount((count) => count + 1);
                 });
               }}
             >

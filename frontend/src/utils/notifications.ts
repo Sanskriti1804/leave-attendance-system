@@ -18,6 +18,12 @@ export function displayNotification(item: AppNotification): { title: string; mes
   if (type.startsWith("LEAVE_SUBMITTED")) {
     return { title: item.title, message: "Leave request requires your review." };
   }
+  if (type.startsWith("UNMARKED_ATTENDANCE")) {
+    return { title: "Unmarked attendance", message: "Please mark attendance for your last work day." };
+  }
+  if (type.startsWith("MISSING_LOGOUT")) {
+    return { title: "Missing logout", message: "Please complete checkout for your last work day." };
+  }
   return {
     title: item.title,
     message: item.message.replace(/leave\s*#\d+\s*/gi, "").replace(/\s+/g, " ").trim() || item.message,

@@ -2,7 +2,7 @@
 
 ## Status
 
-NOTIF-01–07 Confirmed. Teams/Slack Future. Reminder schedule Open. **In-app list, mark-read, and leave submit / medical-required / approve / reject notifications implemented.** Unmarked attendance / missing logout reminders are not.
+NOTIF-01–07 Confirmed. Teams/Slack Future. Reminder schedule Open. **In-app list, mark-read, unreadCount, leave submit / medical-required / approve / reject, and unmarked-attendance / missing-logout reminders (last work day, generated when the employee lists notifications; NOTIF-12 clock times remain Open).**
 
 ## Purpose
 
@@ -22,7 +22,7 @@ Microsoft Teams / Slack (NOTIF-10 Future).
 
 ## API Endpoints
 
-Implemented: `GET /api/v1/notifications` (own rows; JWT; `unreadCount`). `POST /api/v1/notifications/:id/read` marks the caller’s row. Leave submit / medical-required / approve / reject with dedupe. Notification write failures do not fail the leave mutation.
+Implemented: `GET /api/v1/notifications` (own rows; JWT; `unreadCount`). `POST /api/v1/notifications/:id/read` marks the caller’s row. Leave submit / medical-required / approve / reject with dedupe. Employee list also writes unmarked-attendance / missing-logout reminders for the last work day (weekly off and holidays skipped; approved leave skipped). Notification write failures do not fail the leave mutation.
 
 ## Database Impact
 
@@ -33,6 +33,8 @@ Proposed `notifications` with channels IN_APP | EMAIL. Payload jsonb must not in
 NOTIF-12 clock times for reminders. NOTIF-08/09/11 rows unrecoverable — do not invent. Email vs in-app only until channels are signed (pack TD: both).
 
 ## Change History
+
+2026-09-21 — Employee GET notifications also persists unmarked-attendance and missing-logout reminders for the last work day. Unread counts shown on existing notification UIs.
 
 2026-09-21 — Employee-facing leave notification copy: submitted successfully / approved / rejected, without leave IDs. Existing event types unchanged.
 

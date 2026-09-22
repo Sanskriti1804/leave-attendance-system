@@ -1,4 +1,3 @@
-
 import { Platform } from "react-native";
 
 export function getApiBaseUrl(): string {
@@ -15,6 +14,17 @@ export function getApiBaseUrl(): string {
 export function authPath(path: string): string {
   const suffix = path.startsWith("/") ? path : `/${path}`;
   return `/api/v1/auth${suffix}`;
+}
+
+export class ApiError extends Error {
+  constructor(
+    message: string,
+    readonly status: number,
+    readonly code?: string,
+  ) {
+    super(message);
+    this.name = "ApiError";
+  }
 }
 
 export type ApiRequestInit = Omit<RequestInit, "body"> & {
@@ -62,25 +72,23 @@ export async function apiRequest<T>(path: string, init: ApiRequestInit = {}): Pr
   }
 
   if (!response.ok) {
-    const nested =
+    const errObj =
       typeof parsed === "object" &&
       parsed !== null &&
       "error" in parsed &&
       typeof (parsed as { error: unknown }).error === "object" &&
-      (parsed as { error: { message?: unknown } }).error !== null
-        ? (parsed as { error: { message?: unknown } }).error.message
-        : undefined;
+      (parsed as { error: unknown }).error !== null
+        ? (parsed as { error: { message?: unknown; code?: unknown } }).error
+        : null;
+    const nested = errObj?.message;
     const top =
       typeof parsed === "object" && parsed !== null && "message" in parsed
         ? (parsed as { message: unknown }).message
         : undefined;
     const message =
-      nested != null
-        ? String(nested)
-        : top != null
-          ? String(top)
-          : `Request failed (${response.status})`;
-    throw new Error(message);
+      nested != null ? String(nested) : top != null ? String(top) : `Request failed (${response.status})`;
+    const code = typeof errObj?.code === "string" ? errObj.code : undefined;
+    throw new ApiError(message, response.status, code);
   }
 
   return parsed as T;

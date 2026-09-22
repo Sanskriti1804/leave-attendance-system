@@ -2,7 +2,7 @@
 
 ## Status
 
-AUD-01 / BR-12 Confirmed (every change recorded). Actor/time/before-after/scope Proposed. Who can view Open. **Write path implemented** for leave, employee, department, holiday, org-settings, leave-type, and document mutations. Attendance punch/correction audit writes already existed and were not changed. `GET /api/v1/audit` is admin-only while AUD-08 remains Open.
+AUD-01 / BR-12 Confirmed (every change recorded). Actor/time/before-after/scope Proposed. Who can view Open. **Write path implemented** for leave, employee, department, holiday, org-settings, leave-type, and document mutations. Attendance punch/correction audit writes already existed and were not changed. `GET /api/v1/audit` is admin-only while AUD-08 remains Open. List responses include actor name and omit password/token fields. Admin Profile shows a compact live audit list.
 
 ## Purpose
 
@@ -34,6 +34,6 @@ AUD-08 who can view. AUD-02–07 detailed field list Proposed.
 
 ## Change History
 
-2026-09-21 — Audit writes on leave status changes and org configuration mutations. Admin GET list. Attendance punch/correction audit writes were already present and were not changed.
+2026-09-21 — Admin GET audit includes actorName; secrets stripped from before/after JSON. Admin Profile compact audit list. Attendance punch/correction audit writes were not changed.
 
 2026-08-27 — Extracted from source documentation.

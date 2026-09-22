@@ -9,6 +9,7 @@ import { displayNotification } from "../utils/notifications";
 
 export default function WebNotificationsScreen() {
   const [items, setItems] = useState<AppNotification[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -17,7 +18,10 @@ export default function WebNotificationsScreen() {
     (async () => {
       try {
         const result = await listMyNotifications();
-        if (!cancelled) setItems(result.items);
+        if (!cancelled) {
+          setItems(result.items);
+          setUnreadCount(result.unreadCount ?? result.items.filter((row) => !row.isRead).length);
+        }
       } catch (err) {
         if (!cancelled) setError(apiErrorMessage(err));
       } finally {
@@ -30,14 +34,14 @@ export default function WebNotificationsScreen() {
   }, []);
 
   return (
-    <WebShell title="Notifications" variant="employee" activeRoute="notifications">
+    <WebShell title={unreadCount ? `Notifications · ${unreadCount} unread` : "Notifications"} variant="employee" activeRoute="notifications">
       {loading ? <ActivityIndicator color={colors.primary} /> : null}
       {error ? <Text style={styles.copy}>{error}</Text> : null}
       {!loading && !error && items.length === 0 ? (
         <WebCard>
           <MaterialIcons name="notifications-none" size={22} color={colors.secondary} />
           <Text style={styles.title}>No notifications yet</Text>
-          <Text style={styles.copy}>Leave approvals and rejections will appear here.</Text>
+          <Text style={styles.copy}>Leave decisions, medical reminders, and attendance alerts will appear here.</Text>
         </WebCard>
       ) : null}
       {items.map((item) => {
@@ -54,12 +58,14 @@ export default function WebNotificationsScreen() {
                 row.notificationId === item.notificationId ? { ...row, isRead: true } : row,
               ),
             );
+            setUnreadCount((count) => Math.max(0, count - 1));
             void markNotificationRead(item.notificationId).catch(() => {
               setItems((current) =>
                 current.map((row) =>
                   row.notificationId === item.notificationId ? { ...row, isRead: false } : row,
                 ),
               );
+              setUnreadCount((count) => count + 1);
             });
           }}
         >
