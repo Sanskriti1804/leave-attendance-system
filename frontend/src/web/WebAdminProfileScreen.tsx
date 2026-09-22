@@ -19,6 +19,18 @@ function formatJoining(value: string | null | undefined): string {
   return date.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
 }
 
+function avatarInitials(employee: EmployeePublic | null): string {
+  if (!employee) return "?";
+  const first = (employee.firstName?.[0] ?? "").toUpperCase();
+  const last = (employee.lastName?.[0] ?? "").toUpperCase();
+  if (first && last) return `${first}${last}`;
+  if (first) return first;
+  const parts = displayName(employee).split(/\s+/).filter(Boolean);
+  if (parts.length >= 2) return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+  if (parts[0]) return parts[0].slice(0, 2).toUpperCase();
+  return "?";
+}
+
 export default function WebAdminProfileScreen() {
   const router = useRouter();
   const [me, setMe] = useState<EmployeePublic | null>(null);
@@ -76,13 +88,14 @@ export default function WebAdminProfileScreen() {
 
   const isGuest = me?.role === "guest_admin";
   const showLead = me ? isTeamLead(directory, me.employeeId) : false;
+  const name = me ? displayName(me) : "—";
 
   if (panel === "notifications") {
     return (
       <WebShell title="Notifications" variant="admin" activeRoute="more">
         <TouchableOpacity style={styles.backLink} onPress={() => setPanel("profile")}>
           <MaterialIcons name="arrow-back" size={16} color={colors.accentDeep} />
-          <Text style={styles.link}>Back to profile</Text>
+          <Text style={styles.linkInline}>Back to profile</Text>
         </TouchableOpacity>
         <WebCard style={styles.fullCard}>
           <CompactNotifications limit={20} />
@@ -96,7 +109,7 @@ export default function WebAdminProfileScreen() {
       <WebShell title="Audits" variant="admin" activeRoute="more">
         <TouchableOpacity style={styles.backLink} onPress={() => setPanel("profile")}>
           <MaterialIcons name="arrow-back" size={16} color={colors.accentDeep} />
-          <Text style={styles.link}>Back to profile</Text>
+          <Text style={styles.linkInline}>Back to profile</Text>
         </TouchableOpacity>
         <WebCard style={styles.fullCard}>
           <CompactAudit limit={20} />
@@ -108,152 +121,174 @@ export default function WebAdminProfileScreen() {
   return (
     <WebShell title="Profile" variant="admin" activeRoute="more">
       {isGuest ? (
-        <WebCard>
+        <WebCard style={styles.fullCard}>
           <Text style={styles.h}>Guest Admin Mode (AUTH-09)</Text>
-          <Text style={styles.meta}>Org-wide read-only visibility. System configuration & triage updates are locked.</Text>
+          <Text style={styles.label}>Org-wide read-only visibility. System configuration & triage updates are locked.</Text>
         </WebCard>
       ) : null}
-      <WebCard style={styles.heroCard}>
-        <View style={styles.heroRow}>
-          <UserAvatar
-            employee={me}
-            size={96}
-            fallback="—"
-            onPress={me ? () => { void pickAndSaveProfilePhoto(me.employeeId); } : undefined}
-          />
-          <View style={styles.heroCopy}>
-            <Text style={styles.kicker}>HR profile</Text>
-            <Text style={styles.name}>{me ? displayName(me) : "—"}</Text>
-            <View style={styles.tagRow}>
-              <Text style={styles.activeTag}>{me?.status ?? "—"}</Text>
-              {showLead ? <Text style={styles.activeTag}>Team Lead</Text> : null}
-            </View>
-            {error ? <Text style={styles.meta}>{error}</Text> : null}
-          </View>
-        </View>
-        <View style={styles.divider} />
-        <View style={styles.infoGrid}>
-          <View style={styles.infoBlock}>
+      <View style={styles.heroBlock}>
+        <UserAvatar
+          employee={me}
+          size={104}
+          fallback={avatarInitials(me)}
+          onPress={me ? () => { void pickAndSaveProfilePhoto(me.employeeId); } : undefined}
+        />
+        <Text style={styles.name}>{name}</Text>
+        {showLead ? <Text style={styles.activeTag}>Team Lead</Text> : null}
+        {error ? <Text style={styles.label}>{error}</Text> : null}
+      </View>
+      <View style={styles.stack}>
+        <WebCard style={styles.fullCard}>
+          <View style={styles.cardHead}>
             <Text style={styles.h}>Work Information</Text>
-            <Text style={styles.meta}>Department: {departmentName}</Text>
-            <Text style={styles.meta}>Joining Date: {me?.joiningDate ? `${formatJoining(me.joiningDate)} · Ongoing` : formatJoining(me?.joiningDate)}</Text>
+            <Text style={styles.activeTag}>{me?.status ?? "—"}</Text>
           </View>
-          <View style={styles.infoBlock}>
-            <Text style={styles.h}>Contact</Text>
-            <Text style={styles.meta}>Email</Text>
-            <Text style={styles.body}>{me?.email ?? "—"}</Text>
-            <Text style={styles.meta}>Phone</Text>
-            <Text style={styles.body}>{me?.phone ?? "—"}</Text>
-          </View>
-          <View style={styles.infoBlock}>
-            <Text style={styles.h}>Privileges & Scope</Text>
-            <Text style={styles.meta}>{isGuest ? "Read-Only (AUTH-09)" : "Full HR Authority"}</Text>
-            <TouchableOpacity onPress={() => router.push("/leave/types" as never)}>
-              <Text style={styles.link}>Leave Types</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => router.push("/org-settings" as never)}>
-              <Text style={styles.link}>Organisation Settings</Text>
-            </TouchableOpacity>
-          </View>
-          <View style={styles.infoBlock}>
-            <Text style={styles.h}>Attendance Preferences</Text>
-            <Text style={styles.meta}>Timezone: {settings?.timezone ?? "—"}</Text>
-            <Text style={styles.meta}>Shift: {settings?.workStart ?? "—"} - {settings?.workEnd ?? "—"}</Text>
-          </View>
-        </View>
-        <View style={styles.divider} />
-        <Text style={styles.h}>Security</Text>
-        <TouchableOpacity onPress={() => setShowPassword((value) => !value)}>
-          <Text style={styles.link}>Change Password</Text>
-        </TouchableOpacity>
-        {showPassword ? (
-          <View style={{ gap: 8, marginTop: 8 }}>
-            <TextInput style={styles.input} placeholder="Current password" secureTextEntry value={currentPassword} onChangeText={setCurrentPassword} placeholderTextColor={colors.secondary} />
-            <TextInput style={styles.input} placeholder="New password" secureTextEntry value={newPassword} onChangeText={setNewPassword} placeholderTextColor={colors.secondary} />
-            <TouchableOpacity
-              disabled={savingPassword}
-              onPress={async () => {
-                setSavingPassword(true);
-                try {
-                  await changePassword({ currentPassword, newPassword });
-                  setCurrentPassword("");
-                  setNewPassword("");
-                  setShowPassword(false);
-                  setError("Password updated.");
-                } catch (err) {
-                  setError(apiErrorMessage(err));
-                } finally {
-                  setSavingPassword(false);
-                }
-              }}
-            >
-              <Text style={styles.link}>{savingPassword ? "Updating…" : "Update password"}</Text>
-            </TouchableOpacity>
-          </View>
-        ) : null}
-        <TouchableOpacity
-          onPress={async () => {
-            await logout();
-            router.replace("/login" as never);
-          }}
-        >
-          <Text style={styles.link}>Log out</Text>
-        </TouchableOpacity>
-      </WebCard>
-      <View style={styles.navGrid}>
-        <TouchableOpacity style={styles.navCard} onPress={() => setPanel("notifications")}>
-          <View style={styles.navIcon}>
-            <MaterialIcons name="notifications" size={22} color={colors.onPrimary} />
-          </View>
-          <Text style={styles.actionTitle}>Notifications</Text>
-          <Text style={styles.meta}>Open your updates</Text>
-        </TouchableOpacity>
-        {!isGuest ? (
-          <TouchableOpacity style={styles.navCard} onPress={() => setPanel("audits")}>
-            <View style={styles.navIcon}>
-              <MaterialIcons name="history" size={22} color={colors.onPrimary} />
+          <Row label="Department" value={departmentName} />
+          <Row label="Joining Date" value={me?.joiningDate ? `${formatJoining(me.joiningDate)} · Ongoing` : formatJoining(me?.joiningDate)} />
+        </WebCard>
+        <WebCard style={styles.fullCard}>
+          <View style={styles.contactRow}>
+            <View style={styles.contactCol}>
+              <Text style={styles.label}>Email</Text>
+              <Text style={styles.valueLeft}>{me?.email ?? "—"}</Text>
             </View>
-            <Text style={styles.actionTitle}>Audits</Text>
-            <Text style={styles.meta}>Open the audit trail</Text>
+            <View style={styles.contactDivider} />
+            <View style={styles.contactCol}>
+              <Text style={styles.label}>Phone</Text>
+              <Text style={styles.valueLeft}>{me?.phone ?? "—"}</Text>
+            </View>
+          </View>
+        </WebCard>
+        <WebCard style={styles.fullCard}>
+          <Text style={styles.h}>Privileges & Scope</Text>
+          <Row label="Access" value={isGuest ? "Read-Only (AUTH-09)" : "Full HR Authority"} />
+          <TouchableOpacity onPress={() => router.push("/leave/types" as never)}>
+            <Text style={styles.link}>Leave Types</Text>
           </TouchableOpacity>
-        ) : null}
+          <TouchableOpacity onPress={() => router.push("/org-settings" as never)}>
+            <Text style={styles.link}>Organisation Settings</Text>
+          </TouchableOpacity>
+        </WebCard>
+        <WebCard style={styles.fullCard}>
+          <Text style={styles.h}>Attendance Preferences</Text>
+          <Row label="Timezone" value={settings?.timezone ?? "—"} />
+          <Row label="Shift" value={`${settings?.workStart ?? "—"} - ${settings?.workEnd ?? "—"}`} />
+        </WebCard>
+        <WebCard style={styles.fullCard}>
+          <Text style={styles.h}>Security</Text>
+          <TouchableOpacity onPress={() => setShowPassword((value) => !value)}>
+            <Text style={styles.link}>Change Password</Text>
+          </TouchableOpacity>
+          {showPassword ? (
+            <View style={{ gap: 8, marginTop: 8 }}>
+              <TextInput style={styles.input} placeholder="Current password" secureTextEntry value={currentPassword} onChangeText={setCurrentPassword} placeholderTextColor={colors.secondary} />
+              <TextInput style={styles.input} placeholder="New password" secureTextEntry value={newPassword} onChangeText={setNewPassword} placeholderTextColor={colors.secondary} />
+              <TouchableOpacity
+                disabled={savingPassword}
+                onPress={async () => {
+                  setSavingPassword(true);
+                  try {
+                    await changePassword({ currentPassword, newPassword });
+                    setCurrentPassword("");
+                    setNewPassword("");
+                    setShowPassword(false);
+                    setError("Password updated.");
+                  } catch (err) {
+                    setError(apiErrorMessage(err));
+                  } finally {
+                    setSavingPassword(false);
+                  }
+                }}
+              >
+                <Text style={styles.link}>{savingPassword ? "Updating…" : "Update password"}</Text>
+              </TouchableOpacity>
+            </View>
+          ) : null}
+          <TouchableOpacity
+            onPress={async () => {
+              await logout();
+              router.replace("/login" as never);
+            }}
+          >
+            <Text style={styles.link}>Log out</Text>
+          </TouchableOpacity>
+        </WebCard>
+        <View style={styles.navRow}>
+          <TouchableOpacity style={styles.navCard} onPress={() => setPanel("notifications")}>
+            <View style={styles.navIcon}>
+              <MaterialIcons name="notifications" size={18} color={colors.onPrimary} />
+            </View>
+            <View style={styles.navCopy}>
+              <Text style={styles.navTitle}>Notifications</Text>
+              <Text style={styles.navMeta}>Open updates</Text>
+            </View>
+            <MaterialIcons name="chevron-right" size={18} color={colors.secondary} />
+          </TouchableOpacity>
+          {!isGuest ? (
+            <TouchableOpacity style={styles.navCard} onPress={() => setPanel("audits")}>
+              <View style={styles.navIcon}>
+                <MaterialIcons name="history" size={18} color={colors.onPrimary} />
+              </View>
+              <View style={styles.navCopy}>
+                <Text style={styles.navTitle}>Audits</Text>
+                <Text style={styles.navMeta}>Open audit trail</Text>
+              </View>
+              <MaterialIcons name="chevron-right" size={18} color={colors.secondary} />
+            </TouchableOpacity>
+          ) : null}
+        </View>
       </View>
     </WebShell>
   );
 }
 
+function Row({ label, value }: { label: string; value: string }) {
+  return (
+    <View style={styles.row}>
+      <Text style={styles.label}>{label}</Text>
+      <Text style={styles.value}>{value}</Text>
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
-  heroCard: { width: "100%", alignSelf: "stretch", gap: 12, padding: 24 },
-  fullCard: { width: "100%" },
-  heroRow: { flexDirection: "row", alignItems: "center", gap: 20, flexWrap: "wrap" },
-  heroCopy: { flex: 1, minWidth: 220, gap: 6 },
-  kicker: { fontSize: 11, fontWeight: "700", color: colors.accentDeep, textTransform: "uppercase", letterSpacing: 1.2 },
-  name: { fontSize: 26, fontWeight: "700", color: colors.onSurface },
-  tagRow: { flexDirection: "row", gap: 8, flexWrap: "wrap" },
+  stack: { flexDirection: "column", gap: 20, width: "100%", paddingBottom: 8 },
+  fullCard: { width: "100%", alignSelf: "stretch", paddingVertical: 8 },
+  heroBlock: { alignItems: "center", gap: 14, paddingVertical: 24, width: "100%" },
+  name: { fontSize: 22, fontWeight: "700", color: colors.onSurface, textAlign: "center" },
   activeTag: { backgroundColor: colors.accent, color: colors.onPrimary, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4, fontSize: 11, fontWeight: "700", overflow: "hidden", textTransform: "uppercase" },
-  divider: { height: 1, backgroundColor: colors.surfaceContainerHighest, marginVertical: 4 },
-  infoGrid: { flexDirection: "row", flexWrap: "wrap", gap: 20 },
-  infoBlock: { flexGrow: 1, flexBasis: 240, gap: 4 },
-  body: { fontSize: 14, fontWeight: "600", color: colors.onSurface },
-  h: { fontSize: 16, fontWeight: "700", color: colors.onSurface, marginBottom: 4 },
-  meta: { fontSize: 13, color: colors.secondary, marginTop: 2 },
-  link: { marginTop: 8, fontWeight: "700", color: colors.accentDeep },
+  cardHead: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 8 },
+  contactRow: { flexDirection: "row", alignItems: "stretch", minHeight: 56 },
+  contactCol: { flex: 1, gap: 4, justifyContent: "center" },
+  contactDivider: { width: 1, backgroundColor: colors.surfaceContainerHighest, marginHorizontal: 16 },
+  h: { fontSize: 16, fontWeight: "700", color: colors.onSurface, marginBottom: 8 },
+  row: { flexDirection: "row", justifyContent: "space-between", paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: colors.surfaceContainerHighest, gap: 12 },
+  label: { fontSize: 12, color: colors.secondary },
+  value: { fontSize: 12, fontWeight: "600", color: colors.onSurface, textAlign: "right", flex: 1 },
+  valueLeft: { fontSize: 13, fontWeight: "600", color: colors.onSurface },
+  link: { marginTop: 12, fontWeight: "700", color: colors.accentDeep },
+  linkInline: { fontWeight: "700", color: colors.accentDeep },
   input: { minHeight: 44, borderWidth: 1, borderColor: colors.border, borderRadius: 8, paddingHorizontal: 10, marginTop: 8, color: colors.onSurface, backgroundColor: colors.surfaceContainerLow },
-  navGrid: { flexDirection: "row", flexWrap: "wrap", gap: 12 },
+  backLink: { flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 8 },
+  navRow: { flexDirection: "row", flexWrap: "wrap", gap: 12, width: "100%" },
   navCard: {
-    flexGrow: 1,
+    flex: 1,
     flexBasis: 280,
-    minHeight: 120,
+    minHeight: 72,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
     backgroundColor: colors.surfaceContainerLowest,
     borderRadius: 10,
     borderWidth: 1,
     borderColor: colors.glassBorder,
     borderLeftWidth: 3,
     borderLeftColor: colors.accent,
-    padding: 16,
-    gap: 8,
   },
-  navIcon: { width: 40, height: 40, borderRadius: 10, backgroundColor: colors.accent, alignItems: "center", justifyContent: "center" },
-  actionTitle: { fontSize: 15, fontWeight: "700", color: colors.onSurface },
-  backLink: { flexDirection: "row", alignItems: "center", gap: 6 },
+  navIcon: { width: 32, height: 32, borderRadius: 8, backgroundColor: colors.accent, alignItems: "center", justifyContent: "center" },
+  navCopy: { flex: 1, gap: 2 },
+  navTitle: { fontSize: 14, fontWeight: "700", color: colors.onSurface },
+  navMeta: { fontSize: 12, color: colors.secondary },
 });

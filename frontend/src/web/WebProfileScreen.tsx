@@ -8,6 +8,18 @@ import { WebCard, WebShell } from "./WebShell";
 import { UserAvatar } from "../components/ui/UserAvatar";
 import { pickAndSaveProfilePhoto } from "../../services/profilePhoto";
 
+function avatarInitials(employee: EmployeePublic | null): string {
+  if (!employee) return "?";
+  const first = (employee.firstName?.[0] ?? "").toUpperCase();
+  const last = (employee.lastName?.[0] ?? "").toUpperCase();
+  if (first && last) return `${first}${last}`;
+  if (first) return first;
+  const parts = displayName(employee).split(/\s+/).filter(Boolean);
+  if (parts.length >= 2) return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+  if (parts[0]) return parts[0].slice(0, 2).toUpperCase();
+  return "?";
+}
+
 function formatJoining(value: string | null | undefined): string {
   if (!value) return "—";
   const date = new Date(value);
@@ -73,8 +85,8 @@ export default function WebProfileScreen() {
       <View style={styles.heroBlock}>
         <UserAvatar
           employee={me}
-          size={96}
-          fallback="—"
+          size={104}
+          fallback={avatarInitials(me)}
           onPress={me ? () => { void pickAndSaveProfilePhoto(me.employeeId); } : undefined}
         />
         <Text style={styles.name}>{name}</Text>
@@ -126,9 +138,9 @@ function Row({ label, value }: { label: string; value: string }) {
 }
 
 const styles = StyleSheet.create({
-  stack: { flexDirection: "column", gap: 16, width: "100%" },
-  fullCard: { width: "100%", alignSelf: "stretch" },
-  heroBlock: { alignItems: "center", gap: 12, paddingVertical: 16 },
+  stack: { flexDirection: "column", gap: 20, width: "100%", paddingBottom: 8 },
+  fullCard: { width: "100%", alignSelf: "stretch", paddingVertical: 8 },
+  heroBlock: { alignItems: "center", gap: 14, paddingVertical: 24, width: "100%" },
   name: { fontSize: 22, fontWeight: "700", color: colors.onSurface, textAlign: "center" },
   activeTag: { backgroundColor: colors.accent, color: colors.onPrimary, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4, fontSize: 11, fontWeight: "700", overflow: "hidden", textTransform: "uppercase" },
   cardHead: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 8 },

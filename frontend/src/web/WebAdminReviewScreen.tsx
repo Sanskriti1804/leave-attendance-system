@@ -132,46 +132,51 @@ export default function WebAdminReviewScreen() {
             </View>
             <View style={styles.colActions}>
               {canAct && leave.status === "PENDING_HR_REVIEW" ? (
-                <View style={styles.actions}>
-                  <TouchableOpacity
-                    style={styles.btnApprove}
-                    disabled={busyId === leave.leaveId}
-                    onPress={async () => {
-                      setBusyId(leave.leaveId);
-                      try {
-                        await approveLeave(leave.leaveId, notes[leave.leaveId]);
-                        await load();
-                      } catch (err) {
-                        setError(apiErrorMessage(err));
-                      } finally {
-                        setBusyId(null);
-                      }
-                    }}
-                  >
-                    <Text style={styles.btnApproveText}>Approve</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={styles.btnReject}
-                    onPress={async () => {
-                      setBusyId(leave.leaveId);
-                      try {
-                        await rejectLeave(leave.leaveId, notes[leave.leaveId]);
-                        await load();
-                      } catch (err) {
-                        Alert.alert("Could not reject", apiErrorMessage(err));
-                      } finally {
-                        setBusyId(null);
-                      }
-                    }}
-                  >
-                    <Text style={styles.btnRejectText}>Reject</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity style={styles.btnGhost} onPress={() => setNoteTarget(leave.leaveId)}>
-                    <Text style={styles.btnGhostText}>Add HR Note</Text>
+                <View style={styles.actionsBox}>
+                  <View style={styles.actionRow}>
+                    <TouchableOpacity
+                      style={styles.approveBtn}
+                      disabled={busyId === leave.leaveId}
+                      onPress={async () => {
+                        setBusyId(leave.leaveId);
+                        try {
+                          await approveLeave(leave.leaveId, notes[leave.leaveId]);
+                          await load();
+                        } catch (err) {
+                          setError(apiErrorMessage(err));
+                        } finally {
+                          setBusyId(null);
+                        }
+                      }}
+                    >
+                      <MaterialIcons name="done-all" size={18} color={colors.onPrimary} />
+                      <Text style={styles.approveBtnText}>{busyId === leave.leaveId ? "..." : "Approve Leave"}</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={styles.rejectBtn}
+                      onPress={async () => {
+                        setBusyId(leave.leaveId);
+                        try {
+                          await rejectLeave(leave.leaveId, notes[leave.leaveId]);
+                          await load();
+                        } catch (err) {
+                          Alert.alert("Could not reject", apiErrorMessage(err));
+                        } finally {
+                          setBusyId(null);
+                        }
+                      }}
+                    >
+                      <MaterialIcons name="close" size={18} color={colors.onSurface} />
+                      <Text style={styles.rejectBtnText}>Reject</Text>
+                    </TouchableOpacity>
+                  </View>
+                  <TouchableOpacity style={styles.noteBtn} onPress={() => setNoteTarget(leave.leaveId)}>
+                    <MaterialIcons name="note-add" size={16} color={colors.secondary} />
+                    <Text style={styles.noteBtnText}>Add HR Note</Text>
                   </TouchableOpacity>
                   {leave.documents?.[0] ? (
                     <TouchableOpacity
-                      style={styles.btnGhost}
+                      style={styles.downloadBtn}
                       onPress={() => {
                         const doc = leave.documents![0]!;
                         void downloadLeaveDocument(doc.documentId, doc.fileName).catch((err) => {
@@ -179,45 +184,50 @@ export default function WebAdminReviewScreen() {
                         });
                       }}
                     >
-                      <Text style={styles.btnGhostText}>Medical file</Text>
+                      <MaterialIcons name="download" size={16} color={colors.onPrimary} />
+                      <Text style={styles.downloadBtnText}>Medical file</Text>
                     </TouchableOpacity>
                   ) : null}
                 </View>
               ) : canAct && leave.status === "SUBMITTED" && leave.reportingManagerEmployeeId === me?.employeeId ? (
-                <View style={styles.actions}>
-                  <TouchableOpacity
-                    style={styles.btnApprove}
-                    disabled={busyId === leave.leaveId}
-                    onPress={async () => {
-                      setBusyId(leave.leaveId);
-                      try {
-                        await managerApproveLeave(leave.leaveId, notes[leave.leaveId]);
-                        await load();
-                      } catch (err) {
-                        setError(apiErrorMessage(err));
-                      } finally {
-                        setBusyId(null);
-                      }
-                    }}
-                  >
-                    <Text style={styles.btnApproveText}>Manager approve</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={styles.btnReject}
-                    onPress={async () => {
-                      setBusyId(leave.leaveId);
-                      try {
-                        await managerRejectLeave(leave.leaveId, notes[leave.leaveId]);
-                        await load();
-                      } catch (err) {
-                        Alert.alert("Could not reject", apiErrorMessage(err));
-                      } finally {
-                        setBusyId(null);
-                      }
-                    }}
-                  >
-                    <Text style={styles.btnRejectText}>Reject</Text>
-                  </TouchableOpacity>
+                <View style={styles.actionsBox}>
+                  <View style={styles.actionRow}>
+                    <TouchableOpacity
+                      style={styles.approveBtn}
+                      disabled={busyId === leave.leaveId}
+                      onPress={async () => {
+                        setBusyId(leave.leaveId);
+                        try {
+                          await managerApproveLeave(leave.leaveId, notes[leave.leaveId]);
+                          await load();
+                        } catch (err) {
+                          setError(apiErrorMessage(err));
+                        } finally {
+                          setBusyId(null);
+                        }
+                      }}
+                    >
+                      <MaterialIcons name="done-all" size={18} color={colors.onPrimary} />
+                      <Text style={styles.approveBtnText}>{busyId === leave.leaveId ? "..." : "Manager approve"}</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={styles.rejectBtn}
+                      onPress={async () => {
+                        setBusyId(leave.leaveId);
+                        try {
+                          await managerRejectLeave(leave.leaveId, notes[leave.leaveId]);
+                          await load();
+                        } catch (err) {
+                          Alert.alert("Could not reject", apiErrorMessage(err));
+                        } finally {
+                          setBusyId(null);
+                        }
+                      }}
+                    >
+                      <MaterialIcons name="close" size={18} color={colors.onSurface} />
+                      <Text style={styles.rejectBtnText}>Reject</Text>
+                    </TouchableOpacity>
+                  </View>
                 </View>
               ) : canAct && leave.status === "SUBMITTED" ? (
                 <Text style={styles.meta}>Awaiting manager</Text>
@@ -239,11 +249,11 @@ export default function WebAdminReviewScreen() {
             </View>
             <TextInput style={styles.input} value={hrNote} onChangeText={setHrNote} placeholder="Saved only if you choose Add HR Note" placeholderTextColor={colors.secondary} />
             <View style={styles.dialogActions}>
-              <TouchableOpacity style={styles.btnGhost} onPress={() => setNoteTarget(null)}>
-                <Text style={styles.btnGhostText}>Cancel</Text>
+              <TouchableOpacity style={styles.rejectBtn} onPress={() => setNoteTarget(null)}>
+                <Text style={styles.rejectBtnText}>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={styles.btnApprove}
+                style={styles.approveBtn}
                 onPress={() => {
                   if (noteTarget == null) return;
                   setNotes((current) => ({ ...current, [noteTarget]: hrNote.trim() }));
@@ -251,7 +261,7 @@ export default function WebAdminReviewScreen() {
                   setHrNote("");
                 }}
               >
-                <Text style={styles.btnApproveText}>Save note</Text>
+                <Text style={styles.approveBtnText}>Save note</Text>
               </TouchableOpacity>
             </View>
           </Pressable>
@@ -282,27 +292,30 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 8,
-    paddingVertical: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 14,
     borderBottomWidth: 1,
     borderBottomColor: colors.surfaceContainerHighest,
     gap: 12,
   },
-  colPerson: { flex: 1.3, minWidth: 140 },
-  colDates: { flex: 1.2, minWidth: 130 },
-  colStatus: { flex: 0.9, minWidth: 110 },
-  colReason: { flex: 1.6, minWidth: 160, gap: 4 },
-  colActions: { flex: 1.6, minWidth: 220 },
+  colPerson: { flex: 1.3, minWidth: 140, justifyContent: "center" },
+  colDates: { flex: 1.2, minWidth: 130, justifyContent: "center" },
+  colStatus: { flex: 0.9, minWidth: 110, justifyContent: "center" },
+  colReason: { flex: 1.6, minWidth: 160, gap: 4, justifyContent: "center" },
+  colActions: { flex: 1.8, minWidth: 280, justifyContent: "center" },
   name: { fontSize: 14, fontWeight: "700", color: colors.onSurface },
   meta: { fontSize: 12, color: colors.secondary },
   note: { fontSize: 11, color: colors.accentDeep },
-  actions: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
-  btnApprove: { backgroundColor: colors.accent, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 8 },
-  btnApproveText: { color: colors.onPrimary, fontSize: 12, fontWeight: "700" },
-  btnReject: { backgroundColor: colors.surfaceContainer, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 8, borderWidth: 1, borderColor: colors.error },
-  btnRejectText: { color: colors.error, fontSize: 12, fontWeight: "700" },
-  btnGhost: { borderRadius: 8, paddingHorizontal: 12, paddingVertical: 8, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surfaceContainerLowest },
-  btnGhostText: { color: colors.onSurface, fontSize: 12, fontWeight: "700" },
+  actionsBox: { gap: 8, width: "100%" },
+  actionRow: { flexDirection: "row", gap: 8, width: "100%" },
+  approveBtn: { flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", backgroundColor: colors.accent, height: 44, borderRadius: 4, gap: 4, paddingHorizontal: 8 },
+  approveBtnText: { fontSize: 14, fontWeight: "500", color: colors.onPrimary },
+  rejectBtn: { flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", backgroundColor: colors.surfaceContainerHighest, height: 44, borderRadius: 4, gap: 4, paddingHorizontal: 8 },
+  rejectBtnText: { fontSize: 14, fontWeight: "500", color: colors.onSurface },
+  noteBtn: { flexDirection: "row", alignItems: "center", justifyContent: "center", height: 44, gap: 4, borderWidth: 1, borderColor: colors.border, borderRadius: 4, backgroundColor: colors.surfaceContainerLowest },
+  noteBtnText: { fontSize: 12, fontWeight: "500", color: colors.secondary },
+  downloadBtn: { flexDirection: "row", alignItems: "center", justifyContent: "center", backgroundColor: colors.primary, paddingHorizontal: 12, height: 44, borderRadius: 4, gap: 4 },
+  downloadBtnText: { fontSize: 11, fontWeight: "600", color: colors.onPrimary },
   err: { color: colors.error, fontSize: 13 },
   backdrop: { flex: 1, backgroundColor: "rgba(16,16,16,0.45)", justifyContent: "center", alignItems: "center", padding: 24 },
   dialog: {
@@ -318,6 +331,6 @@ const styles = StyleSheet.create({
     borderLeftColor: colors.accent,
   },
   dialogHead: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", gap: 12 },
-  dialogActions: { flexDirection: "row", justifyContent: "flex-end", gap: 8 },
+  dialogActions: { flexDirection: "row", gap: 8, width: "100%" },
   input: { minHeight: 44, borderWidth: 1, borderColor: colors.border, borderRadius: 8, paddingHorizontal: 10, color: colors.onSurface, backgroundColor: colors.surfaceContainerLow },
 });
