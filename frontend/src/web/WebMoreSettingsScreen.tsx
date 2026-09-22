@@ -49,7 +49,7 @@ export default function WebMoreSettingsScreen() {
         <Pref label="Leave status updates" value={leaveAlerts} onChange={setLeaveAlerts} />
         <Pref label="Attendance & Missed Punch Reminders" value={attendanceReminders} onChange={setAttendanceReminders} />
         <Pref label="HR Announcements" value={hrAnnouncements} onChange={setHrAnnouncements} />
-        <Text style={styles.meta}>Preference switches are local until a notification API exists.</Text>
+        <Text style={styles.meta}>Preference switches apply on this device.</Text>
       </WebCard>
       <WebCard>
         <Text style={styles.section}>Attendance Preferences</Text>

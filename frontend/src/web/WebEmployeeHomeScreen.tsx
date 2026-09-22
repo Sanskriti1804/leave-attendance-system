@@ -42,8 +42,7 @@ export default function WebEmployeeHomeScreen() {
 
   return (
     <WebShell title="Home" variant="employee" activeRoute="home">
-      <View style={styles.grid}>
-        <WebCard style={styles.span2}>
+      <WebCard style={styles.clockCard}>
           <View style={styles.rowBetween}>
             <View>
               <Text style={styles.kicker}>{settings?.timezone ?? "Asia/Kolkata"}</Text>
@@ -62,7 +61,9 @@ export default function WebEmployeeHomeScreen() {
           {error ? <Text style={styles.error}>{error}</Text> : null}
           {punchError ? <Text style={styles.error}>{punchError}</Text> : null}
         </WebCard>
-        <WebCard>
+      <View style={styles.slim}>
+        <View style={styles.grid}>
+        <WebCard style={styles.punch}>
           <Text style={styles.cardTitle}>Check-In</Text>
           {loading ? <ActivityIndicator color={colors.primary} /> : canCheckIn ? (
             <TouchableOpacity style={styles.primaryBtn} onPress={() => void punchIn()} disabled={punching}>
@@ -78,7 +79,7 @@ export default function WebEmployeeHomeScreen() {
             {attendance?.checkIn ? formatTimeIST(attendance.checkIn, false) : "Not checked in"}
           </Text>
         </WebCard>
-        <WebCard>
+        <WebCard style={styles.punch}>
           <Text style={styles.cardTitle}>Check-Out</Text>
           {canCheckOut ? (
             <TouchableOpacity style={styles.primaryBtn} onPress={() => void punchOut()} disabled={punching}>
@@ -94,10 +95,7 @@ export default function WebEmployeeHomeScreen() {
             {attendance?.checkOut ? formatTimeIST(attendance.checkOut, false) : "Not checked out"}
           </Text>
         </WebCard>
-      </View>
-      <Text style={styles.note}>
-        Check-in and check-out call `/api/v1/attendance`. Duplicate punches are blocked by the server and disabled in this UI.
-      </Text>
+        </View>
       <View style={styles.metrics}>
         <WebCard style={styles.metric}>
           <Text style={styles.kicker}>Work Log</Text>
@@ -135,13 +133,16 @@ export default function WebEmployeeHomeScreen() {
           <Text style={styles.meta}>Monthly history</Text>
         </TouchableOpacity>
       </View>
+      </View>
     </WebShell>
   );
 }
 
 const styles = StyleSheet.create({
+  clockCard: { width: "100%", alignSelf: "stretch" },
+  slim: { width: "100%", maxWidth: 860, alignSelf: "center", gap: 16 },
   grid: { flexDirection: "row", flexWrap: "wrap", gap: 16 },
-  span2: { flexGrow: 1, flexBasis: 420 },
+  punch: { flexGrow: 1, flexBasis: 240, maxWidth: 400 },
   rowBetween: { flexDirection: "row", justifyContent: "space-between" },
   kicker: { fontSize: 11, fontWeight: "700", letterSpacing: 2, color: colors.accentDeep, textTransform: "uppercase" },
   date: { fontSize: 16, fontWeight: "600", color: colors.onSurface, marginTop: 4 },
@@ -156,11 +157,10 @@ const styles = StyleSheet.create({
   disabledBtnText: { fontWeight: "600", color: colors.secondary },
   primaryBtn: { backgroundColor: colors.accent, borderRadius: 8, padding: 12, flexDirection: "row", gap: 8, justifyContent: "center", alignItems: "center" },
   primaryBtnText: { color: colors.onPrimary, fontWeight: "700" },
-  note: { fontSize: 12, color: colors.secondary, lineHeight: 18 },
   metrics: { flexDirection: "row", flexWrap: "wrap", gap: 16 },
-  metric: { flexGrow: 1, flexBasis: 180 },
+  metric: { flexGrow: 1, flexBasis: 160, maxWidth: 260 },
   metricVal: { fontSize: 22, fontWeight: "700", color: colors.onSurface, marginTop: 6 },
   actions: { flexDirection: "row", flexWrap: "wrap", gap: 12 },
-  action: { flexGrow: 1, flexBasis: 220, backgroundColor: colors.surfaceContainerLowest, borderRadius: 10, padding: 16, borderWidth: 1, borderColor: colors.glassBorder, borderLeftWidth: 3, borderLeftColor: colors.accent },
+  action: { flexGrow: 1, flexBasis: 200, maxWidth: 400, backgroundColor: colors.surfaceContainerLowest, borderRadius: 10, padding: 16, borderWidth: 1, borderColor: colors.glassBorder, borderLeftWidth: 3, borderLeftColor: colors.accent },
   actionTitle: { fontSize: 15, fontWeight: "600", color: colors.onSurface },
 });

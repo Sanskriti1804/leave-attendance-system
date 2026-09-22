@@ -6,7 +6,6 @@ import { apiErrorMessage, displayName, getDepartment, getEmployee, getMe, getOrg
 import { colors } from "../theme";
 import { WebCard, WebShell } from "./WebShell";
 import { UserAvatar } from "../components/ui/UserAvatar";
-import { UIFallbackIndicator } from "../components/ui/UIFallback";
 import { pickAndSaveProfilePhoto } from "../../services/profilePhoto";
 
 function formatJoining(value: string | null | undefined): string {
@@ -68,7 +67,6 @@ export default function WebProfileScreen() {
   }, []);
 
   const name = me ? displayName(me) : "—";
-  const fallback = !me || !!error;
 
   return (
     <WebShell title="Profile" variant="employee" activeRoute="profile">
@@ -80,10 +78,10 @@ export default function WebProfileScreen() {
           onPress={me ? () => { void pickAndSaveProfilePhoto(me.employeeId); } : undefined}
         />
         <Text style={styles.name}>{name}</Text>
-        {fallback ? <UIFallbackIndicator /> : null}
+        {error ? <Text style={styles.label}>{error}</Text> : null}
       </View>
-      <View style={styles.cols}>
-        <WebCard style={styles.col}>
+      <View style={styles.stack}>
+        <WebCard style={styles.fullCard}>
           <View style={styles.cardHead}>
             <Text style={styles.h}>Work Information</Text>
             <Text style={styles.activeTag}>{me?.status ?? "Active"}</Text>
@@ -92,20 +90,20 @@ export default function WebProfileScreen() {
           <Row label="Approver" value={me?.managerId ? managerName : "Not assigned"} />
           <Row label="Joining Date" value={me?.joiningDate ? `${formatJoining(me.joiningDate)} · Ongoing` : formatJoining(me?.joiningDate)} />
         </WebCard>
-        <WebCard style={styles.col}>
+        <WebCard style={styles.fullCard}>
           <View style={styles.contactRow}>
             <View style={styles.contactCol}>
               <Text style={styles.label}>Email</Text>
-              <Text style={styles.value}>{me?.email ?? "—"}</Text>
+              <Text style={styles.valueLeft}>{me?.email ?? "—"}</Text>
             </View>
             <View style={styles.contactDivider} />
             <View style={styles.contactCol}>
               <Text style={styles.label}>Phone</Text>
-              <Text style={styles.value}>{me?.phone ?? "—"}</Text>
+              <Text style={styles.valueLeft}>{me?.phone ?? "—"}</Text>
             </View>
           </View>
         </WebCard>
-        <WebCard style={styles.col}>
+        <WebCard style={styles.fullCard}>
           <Text style={styles.h}>Attendance & Work Schedule</Text>
           <Row label="Timezone" value={settings?.timezone ?? "—"} />
           <Row label="Shift" value={`${settings?.workStart ?? "—"} - ${settings?.workEnd ?? "—"}`} />
@@ -128,22 +126,19 @@ function Row({ label, value }: { label: string; value: string }) {
 }
 
 const styles = StyleSheet.create({
-  cols: { flexDirection: "row", flexWrap: "wrap", gap: 16 },
-  col: { flexGrow: 1, flexBasis: 280, padding: 16 },
+  stack: { flexDirection: "column", gap: 16, width: "100%" },
+  fullCard: { width: "100%", alignSelf: "stretch" },
   heroBlock: { alignItems: "center", gap: 12, paddingVertical: 16 },
-  avatar: { width: 72, height: 72, borderRadius: 36, backgroundColor: colors.surfaceContainerHigh, alignItems: "center", justifyContent: "center", marginBottom: 12 },
-  avatarText: { fontSize: 22, fontWeight: "700", color: colors.onSurface },
   name: { fontSize: 22, fontWeight: "700", color: colors.onSurface, textAlign: "center" },
-  tag: { marginTop: 8, alignSelf: "flex-start", backgroundColor: colors.surfaceContainer, paddingHorizontal: 8, paddingVertical: 4, borderRadius: 12, fontSize: 11, fontWeight: "700" },
   activeTag: { backgroundColor: colors.accent, color: colors.onPrimary, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4, fontSize: 11, fontWeight: "700", overflow: "hidden", textTransform: "uppercase" },
   cardHead: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 8 },
   contactRow: { flexDirection: "row", alignItems: "stretch", minHeight: 56 },
   contactCol: { flex: 1, gap: 4, justifyContent: "center" },
   contactDivider: { width: 1, backgroundColor: colors.surfaceContainerHighest, marginHorizontal: 16 },
-  meta: { fontSize: 12, color: colors.secondary, marginTop: 6 },
   h: { fontSize: 16, fontWeight: "700", color: colors.onSurface, marginBottom: 8 },
   row: { flexDirection: "row", justifyContent: "space-between", paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: colors.surfaceContainerHighest, gap: 12 },
   label: { fontSize: 12, color: colors.secondary },
   value: { fontSize: 12, fontWeight: "600", color: colors.onSurface, textAlign: "right", flex: 1 },
+  valueLeft: { fontSize: 13, fontWeight: "600", color: colors.onSurface },
   link: { marginTop: 12, fontWeight: "700", color: colors.accentDeep },
 });

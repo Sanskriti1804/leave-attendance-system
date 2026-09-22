@@ -12,7 +12,6 @@ import {
 } from "../../services/resources";
 import { colors } from "../theme";
 import { WebCard, WebShell } from "./WebShell";
-import { UIFallbackIndicator } from "../components/ui/UIFallback";
 
 const DOW = [
   { id: 1, label: "Mon" },
@@ -79,7 +78,6 @@ export default function WebOrganisationSettingsScreen() {
         <WebCard style={styles.col}>
           <Text style={styles.h}>Standard Timezone</Text>
           <Text style={styles.hero}>{settings?.timezone ?? "America/New_York"}</Text>
-          {!settings ? <UIFallbackIndicator /> : null}
         </WebCard>
         <WebCard style={styles.col}>
           <Text style={styles.h}>Work Shift & Grace</Text>

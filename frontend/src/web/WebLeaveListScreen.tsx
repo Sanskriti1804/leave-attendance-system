@@ -20,7 +20,6 @@ import {
 } from "../../services/resources";
 import { colors } from "../theme";
 import { WebCard, WebShell } from "./WebShell";
-import { UIFallbackIndicator } from "../components/ui/UIFallback";
 
 function matchesFilter(status: string, filter: string): boolean {
   if (filter === "all") return true;
@@ -82,7 +81,6 @@ export default function WebLeaveListScreen() {
           <Text style={styles.kicker}>LEAVE RECORDS</Text>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
             <Text style={styles.name}>{displayName(me)}</Text>
-            {error ? <UIFallbackIndicator /> : null}
           </View>
         </View>
         <TouchableOpacity style={styles.apply} onPress={() => router.push(applyHref as never)}>

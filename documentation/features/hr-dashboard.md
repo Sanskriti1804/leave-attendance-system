@@ -22,6 +22,8 @@ Exact “unmarked” vs Absent vs Missing Check-In (depends on attendance status
 
 ## Change History
 
+2026-09-22 — Web HR Dashboard quick actions use an equal-size icon grid. Same routes and live leave/employee counts. Android dashboard unchanged.
+
 2026-09-21 — Dashboard chrome restyled (tokens, cards, stats, pending-review panel). No API or workforce logic changes.
 
 2026-09-18 — Admin dashboard pending-review count uses live `PENDING_HR_REVIEW` + `SUBMITTED` leave lists. HR Quick Actions navigate to existing leave review, org settings (holidays), attendance corrections, people, and organisation settings.

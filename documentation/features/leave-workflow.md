@@ -54,6 +54,8 @@ LV-APP-18 HR absence. Who may cancel/withdraw already approved leave.
 
 ## Change History
 
+2026-09-22 — Web Leave Review uses aligned columns and distinct action buttons; HR note opens a centered, max-width dialog. Approve/reject/download/manager actions and APIs are unchanged. Android review UI unchanged.
+
 2026-09-21 — Leave Review cards show a truncated HR Note preview when `hrComments` exists.
 
 2026-09-21 — Employee Profile shows Approver from `managerId`. Admin More tab opens Admin Profile with existing More options below. Blocked Apply Leave dates use a themed dialog. Remove Team Lead clears reports and dialog state.

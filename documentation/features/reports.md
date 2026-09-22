@@ -34,6 +34,8 @@ REP-14 filters. REP-16 cancelled/withdrawn/corrected treatment. Report access li
 
 ## Change History
 
+2026-09-22 — Web Reports layout groups leave vs attendance chips and drops the AUTH-07 / zero KPI strip. Live `GET /api/v1/reports/{slug}` and exports are unchanged. Android Reports unchanged.
+
 2026-09-21 — Implemented org report GET + Admin/guest Reports UI (live data, date range, CSV/Excel/PDF). Attendance punch logic unchanged; reports only read attendance rows.
 
 2026-08-27 — Extracted from source documentation.

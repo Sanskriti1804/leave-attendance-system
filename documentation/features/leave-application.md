@@ -61,6 +61,8 @@ LV-OVR-03/04 which statuses block overlap. LV-APP-18 HR-absent path. MED-12 “e
 
 ## Change History
 
+2026-09-22 — Web Apply Leave is a single scrollable card with Android-style calendar chrome and medical upload UI. From–to range, session chips, validations, and `/api/v1` leave calls are unchanged.
+
 2026-09-21 — Edit draft uses `GET/PATCH /leaves/{id}`. Leave status transitions write BR-12 audit logs. Leave JSON includes `statusHistory`.
 
 2026-09-20 — Manager list includes team applications awaiting in-app manager approval. Submit notifies manager or HR; medical-missing and manager/HR reject notify the employee. Leave JSON includes document metadata for HR download. Apply Leave saves a draft, attaches the file, then submits so medical proof can be stored. Leave type configuration UI uses existing leave-type APIs. Cancel is available on approved own leave.
