@@ -11,7 +11,20 @@ import { createApp } from "./src/app.js";
 import { env } from "./src/env.js";
 import { prisma } from "./src/modules/shared/db/index.js";
 import { hashPassword } from "./src/modules/shared/utils/security.js";
-import { addCalendarDays, todayInTimeZone } from "./src/modules/shared/utils/dates.js";
+import { addCalendarDays, isoWeekday, todayInTimeZone } from "./src/modules/shared/utils/dates.js";
+
+function addWorkingDays(civil: string, count: number, holidays: Set<string> = new Set()): string {
+  let date = civil;
+  let added = 0;
+  while (added < count) {
+    date = addCalendarDays(date, 1);
+    const dow = isoWeekday(date);
+    if (dow !== 6 && dow !== 7 && !holidays.has(date)) {
+      added += 1;
+    }
+  }
+  return date;
+}
 
 type Json = Record<string, unknown>;
 
@@ -76,13 +89,22 @@ async function run(): Promise<void> {
   const password = "ApiSuitePass123!";
   const passwordHash = await hashPassword(password);
   const today = todayInTimeZone(env.appTimezone);
-  const d1 = addCalendarDays(today, 1);
-  const d2 = addCalendarDays(today, 2);
-  const d3 = addCalendarDays(today, 3);
-  const d4 = addCalendarDays(today, 4);
-  const d6 = addCalendarDays(today, 6);
-  const d7 = addCalendarDays(today, 7);
-  const d10 = addCalendarDays(today, 10);
+  const holidayRows = await prisma.holiday.findMany({ select: { holidayDate: true } });
+  const holidays = new Set(
+    holidayRows
+      .map((row) => row.holidayDate.toISOString().slice(0, 10))
+      .filter(Boolean),
+  );
+  const d1 = addWorkingDays(today, 1, holidays);
+  const d2 = addWorkingDays(today, 2, holidays);
+  const d3 = addWorkingDays(today, 3, holidays);
+  const d4 = addWorkingDays(today, 4, holidays);
+  const d5 = addWorkingDays(today, 5, holidays);
+  const d6 = addWorkingDays(today, 6, holidays);
+  const d7 = addWorkingDays(today, 7, holidays);
+  const d8 = addWorkingDays(today, 8, holidays);
+  const d9 = addWorkingDays(today, 9, holidays);
+  const d10 = addWorkingDays(today, 10, holidays);
   const tooFar = addCalendarDays(today, env.leaveMaxAdvanceDays + 2);
 
   const department = await prisma.department.create({
@@ -706,7 +728,7 @@ async function run(): Promise<void> {
       body: {
         leaveTypeId: casual.leaveTypeId,
         reason: "cancel",
-        selectedDates: [{ date: addCalendarDays(today, 8), session: "FULL_DAY" }],
+        selectedDates: [{ date: d8, session: "FULL_DAY" }],
       },
       token: empSess.access,
     });
@@ -748,9 +770,9 @@ async function run(): Promise<void> {
         leaveTypeId: sick.leaveTypeId,
         reason: "flu",
         selectedDates: [
-          { date: addCalendarDays(today, 8), session: "FULL_DAY" },
-          { date: addCalendarDays(today, 9), session: "FULL_DAY" },
-          { date: addCalendarDays(today, 10), session: "FULL_DAY" },
+          { date: d5, session: "FULL_DAY" },
+          { date: d6, session: "FULL_DAY" },
+          { date: d9, session: "FULL_DAY" },
         ],
       },
       token: empSess.access,

@@ -96,6 +96,7 @@ Login is rate-limited (10 / 15 min). Collection Runner on the login folder can h
 
 | Date | Change |
 | --- | --- |
+| 2026-09-22 | API suite leave dates skip weekly offs and Holiday rows so coverage does not fail on weekends/Gandhi Jayanti. Application leave rules unchanged. |
 | 2026-09-15 | Seed: extra employees Dana/Eve, more leave rows, attendance punches and correction requests. |
 | 2026-09-15 | Seed: org settings, holidays, leave policies, manager link, sample leave applications. |
 | 2026-09-09 | Added `npm run test:apis`, Postman collection + local environment, this page. |
