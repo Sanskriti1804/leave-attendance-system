@@ -4,6 +4,8 @@
 
 There is **no applied migration**. Prisma models live at `backend/prisma/schema.prisma` (not signed BRD). CLI connection and migration path are in `backend/prisma.config.ts` (`DATABASE_URL` from `backend/.env`). The lists below remain the pack blueprint and may not match that file.
 
+**Implementation (Prisma, 2026-09-23):** every model has `createdAt` and `updatedAt` (`Timestamptz(3)`). `createdAt` defaults to `now()`. `updatedAt` uses Prisma `@updatedAt`. Domain instants that are not that pair (`changedAt`, `uploadedAt`, `reviewedAt`) are unchanged. Attendance, LeaveType, LeaveApplication, and RefreshToken already had both columns and were left as they were.
+
 ## Conventions (Proposed)
 
 - UUID PK `gen_random_uuid()`; `users.id` = `auth.users.id`

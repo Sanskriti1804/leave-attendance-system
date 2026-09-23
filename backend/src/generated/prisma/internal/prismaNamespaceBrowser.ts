@@ -88,7 +88,9 @@ export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof
 export const DepartmentScalarFieldEnum = {
   departmentId: 'departmentId',
   departmentName: 'departmentName',
-  obsolete: 'obsolete'
+  obsolete: 'obsolete',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 } as const
 
 export type DepartmentScalarFieldEnum = (typeof DepartmentScalarFieldEnum)[keyof typeof DepartmentScalarFieldEnum]
@@ -105,6 +107,7 @@ export const EmployeeScalarFieldEnum = {
   managerId: 'managerId',
   joiningDate: 'joiningDate',
   createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
   status: 'status',
   obsolete: 'obsolete',
   sex: 'sex'
@@ -142,6 +145,7 @@ export const AttendanceCorrectionScalarFieldEnum = {
   reviewedBy: 'reviewedBy',
   hrComments: 'hrComments',
   createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
   reviewedAt: 'reviewedAt'
 } as const
 
@@ -169,7 +173,9 @@ export const LeavePolicyScalarFieldEnum = {
   includeWeekends: 'includeWeekends',
   includeHolidays: 'includeHolidays',
   maxDays: 'maxDays',
-  obsolete: 'obsolete'
+  obsolete: 'obsolete',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 } as const
 
 export type LeavePolicyScalarFieldEnum = (typeof LeavePolicyScalarFieldEnum)[keyof typeof LeavePolicyScalarFieldEnum]
@@ -205,7 +211,9 @@ export const LeaveDateSelectionScalarFieldEnum = {
   leaveId: 'leaveId',
   leaveDate: 'leaveDate',
   session: 'session',
-  unit: 'unit'
+  unit: 'unit',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 } as const
 
 export type LeaveDateSelectionScalarFieldEnum = (typeof LeaveDateSelectionScalarFieldEnum)[keyof typeof LeaveDateSelectionScalarFieldEnum]
@@ -218,7 +226,9 @@ export const LeaveStatusHistoryScalarFieldEnum = {
   oldStatus: 'oldStatus',
   newStatus: 'newStatus',
   reason: 'reason',
-  changedAt: 'changedAt'
+  changedAt: 'changedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 } as const
 
 export type LeaveStatusHistoryScalarFieldEnum = (typeof LeaveStatusHistoryScalarFieldEnum)[keyof typeof LeaveStatusHistoryScalarFieldEnum]
@@ -233,7 +243,9 @@ export const LeaveDocumentScalarFieldEnum = {
   contentType: 'contentType',
   fileSize: 'fileSize',
   uploadedBy: 'uploadedBy',
-  uploadedAt: 'uploadedAt'
+  uploadedAt: 'uploadedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 } as const
 
 export type LeaveDocumentScalarFieldEnum = (typeof LeaveDocumentScalarFieldEnum)[keyof typeof LeaveDocumentScalarFieldEnum]
@@ -246,7 +258,8 @@ export const NotificationScalarFieldEnum = {
   title: 'title',
   message: 'message',
   isRead: 'isRead',
-  createdAt: 'createdAt'
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 } as const
 
 export type NotificationScalarFieldEnum = (typeof NotificationScalarFieldEnum)[keyof typeof NotificationScalarFieldEnum]
@@ -260,7 +273,8 @@ export const AuditLogScalarFieldEnum = {
   entityId: 'entityId',
   oldValue: 'oldValue',
   newValue: 'newValue',
-  createdAt: 'createdAt'
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 } as const
 
 export type AuditLogScalarFieldEnum = (typeof AuditLogScalarFieldEnum)[keyof typeof AuditLogScalarFieldEnum]
@@ -269,7 +283,9 @@ export type AuditLogScalarFieldEnum = (typeof AuditLogScalarFieldEnum)[keyof typ
 export const HolidayScalarFieldEnum = {
   holidayId: 'holidayId',
   holidayName: 'holidayName',
-  holidayDate: 'holidayDate'
+  holidayDate: 'holidayDate',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 } as const
 
 export type HolidayScalarFieldEnum = (typeof HolidayScalarFieldEnum)[keyof typeof HolidayScalarFieldEnum]
@@ -280,7 +296,9 @@ export const ConfigurationSettingScalarFieldEnum = {
   settingCategory: 'settingCategory',
   settingKey: 'settingKey',
   settingValue: 'settingValue',
-  settingType: 'settingType'
+  settingType: 'settingType',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 } as const
 
 export type ConfigurationSettingScalarFieldEnum = (typeof ConfigurationSettingScalarFieldEnum)[keyof typeof ConfigurationSettingScalarFieldEnum]
@@ -306,7 +324,8 @@ export const PasswordResetTokenScalarFieldEnum = {
   tokenHash: 'tokenHash',
   isUsed: 'isUsed',
   expiresAt: 'expiresAt',
-  createdAt: 'createdAt'
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 } as const
 
 export type PasswordResetTokenScalarFieldEnum = (typeof PasswordResetTokenScalarFieldEnum)[keyof typeof PasswordResetTokenScalarFieldEnum]

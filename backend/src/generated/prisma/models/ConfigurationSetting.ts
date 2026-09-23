@@ -40,6 +40,8 @@ export type ConfigurationSettingMinAggregateOutputType = {
   settingKey: string | null
   settingValue: string | null
   settingType: string | null
+  createdAt: Date | null
+  updatedAt: Date | null
 }
 
 export type ConfigurationSettingMaxAggregateOutputType = {
@@ -48,6 +50,8 @@ export type ConfigurationSettingMaxAggregateOutputType = {
   settingKey: string | null
   settingValue: string | null
   settingType: string | null
+  createdAt: Date | null
+  updatedAt: Date | null
 }
 
 export type ConfigurationSettingCountAggregateOutputType = {
@@ -56,6 +60,8 @@ export type ConfigurationSettingCountAggregateOutputType = {
   settingKey: number
   settingValue: number
   settingType: number
+  createdAt: number
+  updatedAt: number
   _all: number
 }
 
@@ -74,6 +80,8 @@ export type ConfigurationSettingMinAggregateInputType = {
   settingKey?: true
   settingValue?: true
   settingType?: true
+  createdAt?: true
+  updatedAt?: true
 }
 
 export type ConfigurationSettingMaxAggregateInputType = {
@@ -82,6 +90,8 @@ export type ConfigurationSettingMaxAggregateInputType = {
   settingKey?: true
   settingValue?: true
   settingType?: true
+  createdAt?: true
+  updatedAt?: true
 }
 
 export type ConfigurationSettingCountAggregateInputType = {
@@ -90,6 +100,8 @@ export type ConfigurationSettingCountAggregateInputType = {
   settingKey?: true
   settingValue?: true
   settingType?: true
+  createdAt?: true
+  updatedAt?: true
   _all?: true
 }
 
@@ -185,6 +197,8 @@ export type ConfigurationSettingGroupByOutputType = {
   settingKey: string
   settingValue: string
   settingType: string
+  createdAt: Date
+  updatedAt: Date
   _count: ConfigurationSettingCountAggregateOutputType | null
   _avg: ConfigurationSettingAvgAggregateOutputType | null
   _sum: ConfigurationSettingSumAggregateOutputType | null
@@ -216,6 +230,8 @@ export type ConfigurationSettingWhereInput = {
   settingKey?: Prisma.StringFilter<"ConfigurationSetting"> | string
   settingValue?: Prisma.StringFilter<"ConfigurationSetting"> | string
   settingType?: Prisma.StringFilter<"ConfigurationSetting"> | string
+  createdAt?: Prisma.DateTimeFilter<"ConfigurationSetting"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"ConfigurationSetting"> | Date | string
 }
 
 export type ConfigurationSettingOrderByWithRelationInput = {
@@ -224,6 +240,8 @@ export type ConfigurationSettingOrderByWithRelationInput = {
   settingKey?: Prisma.SortOrder
   settingValue?: Prisma.SortOrder
   settingType?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type ConfigurationSettingWhereUniqueInput = Prisma.AtLeast<{
@@ -236,6 +254,8 @@ export type ConfigurationSettingWhereUniqueInput = Prisma.AtLeast<{
   settingKey?: Prisma.StringFilter<"ConfigurationSetting"> | string
   settingValue?: Prisma.StringFilter<"ConfigurationSetting"> | string
   settingType?: Prisma.StringFilter<"ConfigurationSetting"> | string
+  createdAt?: Prisma.DateTimeFilter<"ConfigurationSetting"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"ConfigurationSetting"> | Date | string
 }, "settingId" | "settingCategory_settingKey">
 
 export type ConfigurationSettingOrderByWithAggregationInput = {
@@ -244,6 +264,8 @@ export type ConfigurationSettingOrderByWithAggregationInput = {
   settingKey?: Prisma.SortOrder
   settingValue?: Prisma.SortOrder
   settingType?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
   _count?: Prisma.ConfigurationSettingCountOrderByAggregateInput
   _avg?: Prisma.ConfigurationSettingAvgOrderByAggregateInput
   _max?: Prisma.ConfigurationSettingMaxOrderByAggregateInput
@@ -260,6 +282,8 @@ export type ConfigurationSettingScalarWhereWithAggregatesInput = {
   settingKey?: Prisma.StringWithAggregatesFilter<"ConfigurationSetting"> | string
   settingValue?: Prisma.StringWithAggregatesFilter<"ConfigurationSetting"> | string
   settingType?: Prisma.StringWithAggregatesFilter<"ConfigurationSetting"> | string
+  createdAt?: Prisma.DateTimeWithAggregatesFilter<"ConfigurationSetting"> | Date | string
+  updatedAt?: Prisma.DateTimeWithAggregatesFilter<"ConfigurationSetting"> | Date | string
 }
 
 export type ConfigurationSettingCreateInput = {
@@ -267,6 +291,8 @@ export type ConfigurationSettingCreateInput = {
   settingKey: string
   settingValue: string
   settingType: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type ConfigurationSettingUncheckedCreateInput = {
@@ -275,6 +301,8 @@ export type ConfigurationSettingUncheckedCreateInput = {
   settingKey: string
   settingValue: string
   settingType: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type ConfigurationSettingUpdateInput = {
@@ -282,6 +310,8 @@ export type ConfigurationSettingUpdateInput = {
   settingKey?: Prisma.StringFieldUpdateOperationsInput | string
   settingValue?: Prisma.StringFieldUpdateOperationsInput | string
   settingType?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type ConfigurationSettingUncheckedUpdateInput = {
@@ -290,6 +320,8 @@ export type ConfigurationSettingUncheckedUpdateInput = {
   settingKey?: Prisma.StringFieldUpdateOperationsInput | string
   settingValue?: Prisma.StringFieldUpdateOperationsInput | string
   settingType?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type ConfigurationSettingCreateManyInput = {
@@ -298,6 +330,8 @@ export type ConfigurationSettingCreateManyInput = {
   settingKey: string
   settingValue: string
   settingType: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type ConfigurationSettingUpdateManyMutationInput = {
@@ -305,6 +339,8 @@ export type ConfigurationSettingUpdateManyMutationInput = {
   settingKey?: Prisma.StringFieldUpdateOperationsInput | string
   settingValue?: Prisma.StringFieldUpdateOperationsInput | string
   settingType?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type ConfigurationSettingUncheckedUpdateManyInput = {
@@ -313,6 +349,8 @@ export type ConfigurationSettingUncheckedUpdateManyInput = {
   settingKey?: Prisma.StringFieldUpdateOperationsInput | string
   settingValue?: Prisma.StringFieldUpdateOperationsInput | string
   settingType?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type ConfigurationSettingSettingCategorySettingKeyCompoundUniqueInput = {
@@ -326,6 +364,8 @@ export type ConfigurationSettingCountOrderByAggregateInput = {
   settingKey?: Prisma.SortOrder
   settingValue?: Prisma.SortOrder
   settingType?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type ConfigurationSettingAvgOrderByAggregateInput = {
@@ -338,6 +378,8 @@ export type ConfigurationSettingMaxOrderByAggregateInput = {
   settingKey?: Prisma.SortOrder
   settingValue?: Prisma.SortOrder
   settingType?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type ConfigurationSettingMinOrderByAggregateInput = {
@@ -346,6 +388,8 @@ export type ConfigurationSettingMinOrderByAggregateInput = {
   settingKey?: Prisma.SortOrder
   settingValue?: Prisma.SortOrder
   settingType?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type ConfigurationSettingSumOrderByAggregateInput = {
@@ -360,6 +404,8 @@ export type ConfigurationSettingSelect<ExtArgs extends runtime.Types.Extensions.
   settingKey?: boolean
   settingValue?: boolean
   settingType?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
 }, ExtArgs["result"]["configurationSetting"]>
 
 export type ConfigurationSettingSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -368,6 +414,8 @@ export type ConfigurationSettingSelectCreateManyAndReturn<ExtArgs extends runtim
   settingKey?: boolean
   settingValue?: boolean
   settingType?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
 }, ExtArgs["result"]["configurationSetting"]>
 
 export type ConfigurationSettingSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -376,6 +424,8 @@ export type ConfigurationSettingSelectUpdateManyAndReturn<ExtArgs extends runtim
   settingKey?: boolean
   settingValue?: boolean
   settingType?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
 }, ExtArgs["result"]["configurationSetting"]>
 
 export type ConfigurationSettingSelectScalar = {
@@ -384,9 +434,11 @@ export type ConfigurationSettingSelectScalar = {
   settingKey?: boolean
   settingValue?: boolean
   settingType?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
 }
 
-export type ConfigurationSettingOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"settingId" | "settingCategory" | "settingKey" | "settingValue" | "settingType", ExtArgs["result"]["configurationSetting"]>
+export type ConfigurationSettingOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"settingId" | "settingCategory" | "settingKey" | "settingValue" | "settingType" | "createdAt" | "updatedAt", ExtArgs["result"]["configurationSetting"]>
 
 export type $ConfigurationSettingPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "ConfigurationSetting"
@@ -397,6 +449,8 @@ export type $ConfigurationSettingPayload<ExtArgs extends runtime.Types.Extension
     settingKey: string
     settingValue: string
     settingType: string
+    createdAt: Date
+    updatedAt: Date
   }, ExtArgs["result"]["configurationSetting"]>
   composites: {}
 }
@@ -825,6 +879,8 @@ export interface ConfigurationSettingFieldRefs {
   readonly settingKey: Prisma.FieldRef<"ConfigurationSetting", 'String'>
   readonly settingValue: Prisma.FieldRef<"ConfigurationSetting", 'String'>
   readonly settingType: Prisma.FieldRef<"ConfigurationSetting", 'String'>
+  readonly createdAt: Prisma.FieldRef<"ConfigurationSetting", 'DateTime'>
+  readonly updatedAt: Prisma.FieldRef<"ConfigurationSetting", 'DateTime'>
 }
     
 

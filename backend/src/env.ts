@@ -4,6 +4,7 @@ export const env = {
   nodeEnv: process.env.NODE_ENV ?? "development",
   port: Number.parseInt(process.env.PORT ?? "3000", 10),
   appUrl: process.env.APP_URL ?? "http://localhost:3000",
+  resetAppUrl: process.env.RESET_APP_URL ?? "http://localhost:8081",
   jwtSecret:
     process.env.JWT_SECRET ||
     (process.env.NODE_ENV === "production"
@@ -27,9 +28,16 @@ export const env = {
   leaveDocumentsDir: process.env.LEAVE_DOCUMENTS_DIR ?? "uploads/leave-documents",
   leaveDocumentMaxBytes: Number.parseInt(process.env.LEAVE_DOCUMENT_MAX_BYTES ?? "10485760", 10),
 
-  // Email / SMTP settings
-  emailFrom: process.env.EMAIL_FROM ?? "noreply@leave-attendance.local",
-  smtpHost: process.env.SMTP_HOST,
+  // Email. Resend is preferred. SMTP is used only when RESEND_API_KEY is absent and SMTP_HOST is set.
+  resendApiKey: process.env.RESEND_API_KEY?.trim() || undefined,
+  resendDevInbox: process.env.RESEND_DEV_INBOX?.trim() || undefined,
+  emailFrom:
+    process.env.EMAIL_FROM && process.env.EMAIL_FROM !== "noreply@leave-attendance.local"
+      ? process.env.EMAIL_FROM
+      : process.env.RESEND_API_KEY?.trim()
+        ? "LAMS SCG <onboarding@resend.dev>"
+        : "noreply@leave-attendance.local",
+  smtpHost: process.env.SMTP_HOST?.trim() || undefined,
   smtpPort: process.env.SMTP_PORT ? Number.parseInt(process.env.SMTP_PORT, 10) : undefined,
   smtpUser: process.env.SMTP_USER,
   smtpPass: process.env.SMTP_PASS,

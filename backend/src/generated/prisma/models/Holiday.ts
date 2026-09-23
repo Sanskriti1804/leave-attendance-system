@@ -38,18 +38,24 @@ export type HolidayMinAggregateOutputType = {
   holidayId: number | null
   holidayName: string | null
   holidayDate: Date | null
+  createdAt: Date | null
+  updatedAt: Date | null
 }
 
 export type HolidayMaxAggregateOutputType = {
   holidayId: number | null
   holidayName: string | null
   holidayDate: Date | null
+  createdAt: Date | null
+  updatedAt: Date | null
 }
 
 export type HolidayCountAggregateOutputType = {
   holidayId: number
   holidayName: number
   holidayDate: number
+  createdAt: number
+  updatedAt: number
   _all: number
 }
 
@@ -66,18 +72,24 @@ export type HolidayMinAggregateInputType = {
   holidayId?: true
   holidayName?: true
   holidayDate?: true
+  createdAt?: true
+  updatedAt?: true
 }
 
 export type HolidayMaxAggregateInputType = {
   holidayId?: true
   holidayName?: true
   holidayDate?: true
+  createdAt?: true
+  updatedAt?: true
 }
 
 export type HolidayCountAggregateInputType = {
   holidayId?: true
   holidayName?: true
   holidayDate?: true
+  createdAt?: true
+  updatedAt?: true
   _all?: true
 }
 
@@ -171,6 +183,8 @@ export type HolidayGroupByOutputType = {
   holidayId: number
   holidayName: string
   holidayDate: Date
+  createdAt: Date
+  updatedAt: Date
   _count: HolidayCountAggregateOutputType | null
   _avg: HolidayAvgAggregateOutputType | null
   _sum: HolidaySumAggregateOutputType | null
@@ -200,12 +214,16 @@ export type HolidayWhereInput = {
   holidayId?: Prisma.IntFilter<"Holiday"> | number
   holidayName?: Prisma.StringFilter<"Holiday"> | string
   holidayDate?: Prisma.DateTimeFilter<"Holiday"> | Date | string
+  createdAt?: Prisma.DateTimeFilter<"Holiday"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"Holiday"> | Date | string
 }
 
 export type HolidayOrderByWithRelationInput = {
   holidayId?: Prisma.SortOrder
   holidayName?: Prisma.SortOrder
   holidayDate?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type HolidayWhereUniqueInput = Prisma.AtLeast<{
@@ -215,12 +233,16 @@ export type HolidayWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.HolidayWhereInput[]
   NOT?: Prisma.HolidayWhereInput | Prisma.HolidayWhereInput[]
   holidayName?: Prisma.StringFilter<"Holiday"> | string
+  createdAt?: Prisma.DateTimeFilter<"Holiday"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"Holiday"> | Date | string
 }, "holidayId" | "holidayDate">
 
 export type HolidayOrderByWithAggregationInput = {
   holidayId?: Prisma.SortOrder
   holidayName?: Prisma.SortOrder
   holidayDate?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
   _count?: Prisma.HolidayCountOrderByAggregateInput
   _avg?: Prisma.HolidayAvgOrderByAggregateInput
   _max?: Prisma.HolidayMaxOrderByAggregateInput
@@ -235,51 +257,69 @@ export type HolidayScalarWhereWithAggregatesInput = {
   holidayId?: Prisma.IntWithAggregatesFilter<"Holiday"> | number
   holidayName?: Prisma.StringWithAggregatesFilter<"Holiday"> | string
   holidayDate?: Prisma.DateTimeWithAggregatesFilter<"Holiday"> | Date | string
+  createdAt?: Prisma.DateTimeWithAggregatesFilter<"Holiday"> | Date | string
+  updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Holiday"> | Date | string
 }
 
 export type HolidayCreateInput = {
   holidayName: string
   holidayDate: Date | string
+  createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type HolidayUncheckedCreateInput = {
   holidayId?: number
   holidayName: string
   holidayDate: Date | string
+  createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type HolidayUpdateInput = {
   holidayName?: Prisma.StringFieldUpdateOperationsInput | string
   holidayDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type HolidayUncheckedUpdateInput = {
   holidayId?: Prisma.IntFieldUpdateOperationsInput | number
   holidayName?: Prisma.StringFieldUpdateOperationsInput | string
   holidayDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type HolidayCreateManyInput = {
   holidayId?: number
   holidayName: string
   holidayDate: Date | string
+  createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type HolidayUpdateManyMutationInput = {
   holidayName?: Prisma.StringFieldUpdateOperationsInput | string
   holidayDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type HolidayUncheckedUpdateManyInput = {
   holidayId?: Prisma.IntFieldUpdateOperationsInput | number
   holidayName?: Prisma.StringFieldUpdateOperationsInput | string
   holidayDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type HolidayCountOrderByAggregateInput = {
   holidayId?: Prisma.SortOrder
   holidayName?: Prisma.SortOrder
   holidayDate?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type HolidayAvgOrderByAggregateInput = {
@@ -290,12 +330,16 @@ export type HolidayMaxOrderByAggregateInput = {
   holidayId?: Prisma.SortOrder
   holidayName?: Prisma.SortOrder
   holidayDate?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type HolidayMinOrderByAggregateInput = {
   holidayId?: Prisma.SortOrder
   holidayName?: Prisma.SortOrder
   holidayDate?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type HolidaySumOrderByAggregateInput = {
@@ -308,27 +352,35 @@ export type HolidaySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   holidayId?: boolean
   holidayName?: boolean
   holidayDate?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
 }, ExtArgs["result"]["holiday"]>
 
 export type HolidaySelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   holidayId?: boolean
   holidayName?: boolean
   holidayDate?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
 }, ExtArgs["result"]["holiday"]>
 
 export type HolidaySelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   holidayId?: boolean
   holidayName?: boolean
   holidayDate?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
 }, ExtArgs["result"]["holiday"]>
 
 export type HolidaySelectScalar = {
   holidayId?: boolean
   holidayName?: boolean
   holidayDate?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
 }
 
-export type HolidayOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"holidayId" | "holidayName" | "holidayDate", ExtArgs["result"]["holiday"]>
+export type HolidayOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"holidayId" | "holidayName" | "holidayDate" | "createdAt" | "updatedAt", ExtArgs["result"]["holiday"]>
 
 export type $HolidayPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Holiday"
@@ -337,6 +389,8 @@ export type $HolidayPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     holidayId: number
     holidayName: string
     holidayDate: Date
+    createdAt: Date
+    updatedAt: Date
   }, ExtArgs["result"]["holiday"]>
   composites: {}
 }
@@ -763,6 +817,8 @@ export interface HolidayFieldRefs {
   readonly holidayId: Prisma.FieldRef<"Holiday", 'Int'>
   readonly holidayName: Prisma.FieldRef<"Holiday", 'String'>
   readonly holidayDate: Prisma.FieldRef<"Holiday", 'DateTime'>
+  readonly createdAt: Prisma.FieldRef<"Holiday", 'DateTime'>
+  readonly updatedAt: Prisma.FieldRef<"Holiday", 'DateTime'>
 }
     
 

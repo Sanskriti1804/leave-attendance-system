@@ -310,6 +310,13 @@ export function requestPasswordReset(email: string): Promise<{ message: string }
   });
 }
 
+export function submitPasswordReset(body: { token: string; newPassword: string }): Promise<{ message: string }> {
+  return apiRequest<{ message: string }>(authPath("/reset-password"), {
+    method: "POST",
+    body,
+  });
+}
+
 export function uploadLeaveDocument(
   leaveId: number,
   file: {

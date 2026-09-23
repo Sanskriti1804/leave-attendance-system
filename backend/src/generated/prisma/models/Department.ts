@@ -38,18 +38,24 @@ export type DepartmentMinAggregateOutputType = {
   departmentId: number | null
   departmentName: string | null
   obsolete: boolean | null
+  createdAt: Date | null
+  updatedAt: Date | null
 }
 
 export type DepartmentMaxAggregateOutputType = {
   departmentId: number | null
   departmentName: string | null
   obsolete: boolean | null
+  createdAt: Date | null
+  updatedAt: Date | null
 }
 
 export type DepartmentCountAggregateOutputType = {
   departmentId: number
   departmentName: number
   obsolete: number
+  createdAt: number
+  updatedAt: number
   _all: number
 }
 
@@ -66,18 +72,24 @@ export type DepartmentMinAggregateInputType = {
   departmentId?: true
   departmentName?: true
   obsolete?: true
+  createdAt?: true
+  updatedAt?: true
 }
 
 export type DepartmentMaxAggregateInputType = {
   departmentId?: true
   departmentName?: true
   obsolete?: true
+  createdAt?: true
+  updatedAt?: true
 }
 
 export type DepartmentCountAggregateInputType = {
   departmentId?: true
   departmentName?: true
   obsolete?: true
+  createdAt?: true
+  updatedAt?: true
   _all?: true
 }
 
@@ -171,6 +183,8 @@ export type DepartmentGroupByOutputType = {
   departmentId: number
   departmentName: string
   obsolete: boolean
+  createdAt: Date
+  updatedAt: Date
   _count: DepartmentCountAggregateOutputType | null
   _avg: DepartmentAvgAggregateOutputType | null
   _sum: DepartmentSumAggregateOutputType | null
@@ -200,6 +214,8 @@ export type DepartmentWhereInput = {
   departmentId?: Prisma.IntFilter<"Department"> | number
   departmentName?: Prisma.StringFilter<"Department"> | string
   obsolete?: Prisma.BoolFilter<"Department"> | boolean
+  createdAt?: Prisma.DateTimeFilter<"Department"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"Department"> | Date | string
   employees?: Prisma.EmployeeListRelationFilter
 }
 
@@ -207,6 +223,8 @@ export type DepartmentOrderByWithRelationInput = {
   departmentId?: Prisma.SortOrder
   departmentName?: Prisma.SortOrder
   obsolete?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
   employees?: Prisma.EmployeeOrderByRelationAggregateInput
 }
 
@@ -217,6 +235,8 @@ export type DepartmentWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.DepartmentWhereInput | Prisma.DepartmentWhereInput[]
   departmentName?: Prisma.StringFilter<"Department"> | string
   obsolete?: Prisma.BoolFilter<"Department"> | boolean
+  createdAt?: Prisma.DateTimeFilter<"Department"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"Department"> | Date | string
   employees?: Prisma.EmployeeListRelationFilter
 }, "departmentId">
 
@@ -224,6 +244,8 @@ export type DepartmentOrderByWithAggregationInput = {
   departmentId?: Prisma.SortOrder
   departmentName?: Prisma.SortOrder
   obsolete?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
   _count?: Prisma.DepartmentCountOrderByAggregateInput
   _avg?: Prisma.DepartmentAvgOrderByAggregateInput
   _max?: Prisma.DepartmentMaxOrderByAggregateInput
@@ -238,11 +260,15 @@ export type DepartmentScalarWhereWithAggregatesInput = {
   departmentId?: Prisma.IntWithAggregatesFilter<"Department"> | number
   departmentName?: Prisma.StringWithAggregatesFilter<"Department"> | string
   obsolete?: Prisma.BoolWithAggregatesFilter<"Department"> | boolean
+  createdAt?: Prisma.DateTimeWithAggregatesFilter<"Department"> | Date | string
+  updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Department"> | Date | string
 }
 
 export type DepartmentCreateInput = {
   departmentName: string
   obsolete?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
   employees?: Prisma.EmployeeCreateNestedManyWithoutDepartmentInput
 }
 
@@ -250,12 +276,16 @@ export type DepartmentUncheckedCreateInput = {
   departmentId?: number
   departmentName: string
   obsolete?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
   employees?: Prisma.EmployeeUncheckedCreateNestedManyWithoutDepartmentInput
 }
 
 export type DepartmentUpdateInput = {
   departmentName?: Prisma.StringFieldUpdateOperationsInput | string
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   employees?: Prisma.EmployeeUpdateManyWithoutDepartmentNestedInput
 }
 
@@ -263,6 +293,8 @@ export type DepartmentUncheckedUpdateInput = {
   departmentId?: Prisma.IntFieldUpdateOperationsInput | number
   departmentName?: Prisma.StringFieldUpdateOperationsInput | string
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   employees?: Prisma.EmployeeUncheckedUpdateManyWithoutDepartmentNestedInput
 }
 
@@ -270,23 +302,31 @@ export type DepartmentCreateManyInput = {
   departmentId?: number
   departmentName: string
   obsolete?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type DepartmentUpdateManyMutationInput = {
   departmentName?: Prisma.StringFieldUpdateOperationsInput | string
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type DepartmentUncheckedUpdateManyInput = {
   departmentId?: Prisma.IntFieldUpdateOperationsInput | number
   departmentName?: Prisma.StringFieldUpdateOperationsInput | string
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type DepartmentCountOrderByAggregateInput = {
   departmentId?: Prisma.SortOrder
   departmentName?: Prisma.SortOrder
   obsolete?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type DepartmentAvgOrderByAggregateInput = {
@@ -297,12 +337,16 @@ export type DepartmentMaxOrderByAggregateInput = {
   departmentId?: Prisma.SortOrder
   departmentName?: Prisma.SortOrder
   obsolete?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type DepartmentMinOrderByAggregateInput = {
   departmentId?: Prisma.SortOrder
   departmentName?: Prisma.SortOrder
   obsolete?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type DepartmentSumOrderByAggregateInput = {
@@ -320,6 +364,10 @@ export type StringFieldUpdateOperationsInput = {
 
 export type BoolFieldUpdateOperationsInput = {
   set?: boolean
+}
+
+export type DateTimeFieldUpdateOperationsInput = {
+  set?: Date | string
 }
 
 export type IntFieldUpdateOperationsInput = {
@@ -347,12 +395,16 @@ export type DepartmentUpdateOneRequiredWithoutEmployeesNestedInput = {
 export type DepartmentCreateWithoutEmployeesInput = {
   departmentName: string
   obsolete?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type DepartmentUncheckedCreateWithoutEmployeesInput = {
   departmentId?: number
   departmentName: string
   obsolete?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type DepartmentCreateOrConnectWithoutEmployeesInput = {
@@ -374,12 +426,16 @@ export type DepartmentUpdateToOneWithWhereWithoutEmployeesInput = {
 export type DepartmentUpdateWithoutEmployeesInput = {
   departmentName?: Prisma.StringFieldUpdateOperationsInput | string
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type DepartmentUncheckedUpdateWithoutEmployeesInput = {
   departmentId?: Prisma.IntFieldUpdateOperationsInput | number
   departmentName?: Prisma.StringFieldUpdateOperationsInput | string
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 
@@ -417,6 +473,8 @@ export type DepartmentSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   departmentId?: boolean
   departmentName?: boolean
   obsolete?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
   employees?: boolean | Prisma.Department$employeesArgs<ExtArgs>
   _count?: boolean | Prisma.DepartmentCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["department"]>
@@ -425,21 +483,27 @@ export type DepartmentSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   departmentId?: boolean
   departmentName?: boolean
   obsolete?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
 }, ExtArgs["result"]["department"]>
 
 export type DepartmentSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   departmentId?: boolean
   departmentName?: boolean
   obsolete?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
 }, ExtArgs["result"]["department"]>
 
 export type DepartmentSelectScalar = {
   departmentId?: boolean
   departmentName?: boolean
   obsolete?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
 }
 
-export type DepartmentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"departmentId" | "departmentName" | "obsolete", ExtArgs["result"]["department"]>
+export type DepartmentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"departmentId" | "departmentName" | "obsolete" | "createdAt" | "updatedAt", ExtArgs["result"]["department"]>
 export type DepartmentInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   employees?: boolean | Prisma.Department$employeesArgs<ExtArgs>
   _count?: boolean | Prisma.DepartmentCountOutputTypeDefaultArgs<ExtArgs>
@@ -456,6 +520,8 @@ export type $DepartmentPayload<ExtArgs extends runtime.Types.Extensions.Internal
     departmentId: number
     departmentName: string
     obsolete: boolean
+    createdAt: Date
+    updatedAt: Date
   }, ExtArgs["result"]["department"]>
   composites: {}
 }
@@ -883,6 +949,8 @@ export interface DepartmentFieldRefs {
   readonly departmentId: Prisma.FieldRef<"Department", 'Int'>
   readonly departmentName: Prisma.FieldRef<"Department", 'String'>
   readonly obsolete: Prisma.FieldRef<"Department", 'Boolean'>
+  readonly createdAt: Prisma.FieldRef<"Department", 'DateTime'>
+  readonly updatedAt: Prisma.FieldRef<"Department", 'DateTime'>
 }
     
 

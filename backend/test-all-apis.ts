@@ -8,6 +8,7 @@
  */
 import assert from "node:assert/strict";
 import { createApp } from "./src/app.js";
+import { setEmailTransport } from "./src/modules/shared/services/email.service.js";
 import { env } from "./src/env.js";
 import { prisma } from "./src/modules/shared/db/index.js";
 import { hashPassword } from "./src/modules/shared/utils/security.js";
@@ -257,15 +258,61 @@ async function run(): Promise<void> {
     });
     expect("forgot unknown email 200", forgotUnknown.status, 200);
 
+    let capturedResetLink = "";
+    setEmailTransport({
+      async sendMail(options) {
+        const match = options.text.match(/https?:\/\/\S+/);
+        capturedResetLink = match?.[0] ?? "";
+      },
+    });
+
     const forgotOk = await request(base, "POST", "/api/v1/auth/forgot-password", {
       body: { email: changer.email },
     });
     expect("forgot known email 200", forgotOk.status, 200);
+    expect("reset email contains link", capturedResetLink.includes("token="), true);
+    const resetToken = new URL(capturedResetLink).searchParams.get("token") ?? "";
+
+    const resetWeak = await request(base, "POST", "/api/v1/auth/reset-password", {
+      body: { token: resetToken, newPassword: "short" },
+    });
+    expect("reset weak password 422", resetWeak.status, 422);
 
     const resetBad = await request(base, "POST", "/api/v1/auth/reset-password", {
       body: { token: "deadbeef", newPassword: "ResetPass123!" },
     });
     expect("reset invalid token 400", resetBad.status, 400);
+
+    const resetOk = await request(base, "POST", "/api/v1/auth/reset-password", {
+      body: { token: resetToken, newPassword: "ResetPass123!" },
+    });
+    expect("reset password 200", resetOk.status, 200);
+
+    const resetReuse = await request(base, "POST", "/api/v1/auth/reset-password", {
+      body: { token: resetToken, newPassword: "ResetPass123!" },
+    });
+    expect("reset token single use 400", resetReuse.status, 400);
+
+    const loginReset = await request(base, "POST", "/api/v1/auth/login", {
+      body: { email: changer.email, password: "ResetPass123!" },
+    });
+    expect("login after reset 200", loginReset.status, 200);
+
+    capturedResetLink = "";
+    const forgotAgain = await request(base, "POST", "/api/v1/auth/forgot-password", {
+      body: { email: changer.email },
+    });
+    expect("forgot again 200", forgotAgain.status, 200);
+    const expiredToken = new URL(capturedResetLink).searchParams.get("token") ?? "";
+    const { hashToken } = await import("./src/modules/shared/utils/security.js");
+    await prisma.passwordResetToken.updateMany({
+      where: { tokenHash: hashToken(expiredToken) },
+      data: { expiresAt: new Date(Date.now() - 1000) },
+    });
+    const resetExpired = await request(base, "POST", "/api/v1/auth/reset-password", {
+      body: { token: expiredToken, newPassword: "ResetPass123!" },
+    });
+    expect("reset expired token 400", resetExpired.status, 400);
 
     const changeBad = await request(base, "POST", "/api/v1/auth/change-password", {
       body: { currentPassword: "nope", newPassword: "NewComplex9!" },
@@ -274,7 +321,7 @@ async function run(): Promise<void> {
     expect("change-password wrong current 400", changeBad.status, 400);
 
     const changeOk = await request(base, "POST", "/api/v1/auth/change-password", {
-      body: { currentPassword: password, newPassword: "NewComplex9!" },
+      body: { currentPassword: "ResetPass123!", newPassword: "NewComplex9!" },
       token: changerSess.access,
     });
     expect("change-password 200", changeOk.status, 200);

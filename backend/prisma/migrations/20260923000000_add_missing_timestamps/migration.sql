@@ -1,0 +1,52 @@
+-- Add createdAt/updatedAt only where the pair is missing.
+-- Existing rows keep their data. New timestamp columns are backfilled from the closest existing instant when one exists.
+
+ALTER TABLE "Department"
+  ADD COLUMN "createdAt" TIMESTAMPTZ(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  ADD COLUMN "updatedAt" TIMESTAMPTZ(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;
+
+ALTER TABLE "Employee"
+  ADD COLUMN "updatedAt" TIMESTAMPTZ(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;
+UPDATE "Employee" SET "updatedAt" = "createdAt";
+
+ALTER TABLE "AttendanceCorrection"
+  ADD COLUMN "updatedAt" TIMESTAMPTZ(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;
+UPDATE "AttendanceCorrection" SET "updatedAt" = COALESCE("reviewedAt", "createdAt");
+
+ALTER TABLE "LeavePolicy"
+  ADD COLUMN "createdAt" TIMESTAMPTZ(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  ADD COLUMN "updatedAt" TIMESTAMPTZ(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;
+
+ALTER TABLE "LeaveDateSelection"
+  ADD COLUMN "createdAt" TIMESTAMPTZ(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  ADD COLUMN "updatedAt" TIMESTAMPTZ(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;
+
+ALTER TABLE "LeaveStatusHistory"
+  ADD COLUMN "createdAt" TIMESTAMPTZ(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  ADD COLUMN "updatedAt" TIMESTAMPTZ(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;
+UPDATE "LeaveStatusHistory" SET "createdAt" = "changedAt", "updatedAt" = "changedAt";
+
+ALTER TABLE "LeaveDocument"
+  ADD COLUMN "createdAt" TIMESTAMPTZ(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  ADD COLUMN "updatedAt" TIMESTAMPTZ(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;
+UPDATE "LeaveDocument" SET "createdAt" = "uploadedAt", "updatedAt" = "uploadedAt";
+
+ALTER TABLE "Notification"
+  ADD COLUMN "updatedAt" TIMESTAMPTZ(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;
+UPDATE "Notification" SET "updatedAt" = "createdAt";
+
+ALTER TABLE "AuditLog"
+  ADD COLUMN "updatedAt" TIMESTAMPTZ(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;
+UPDATE "AuditLog" SET "updatedAt" = "createdAt";
+
+ALTER TABLE "Holiday"
+  ADD COLUMN "createdAt" TIMESTAMPTZ(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  ADD COLUMN "updatedAt" TIMESTAMPTZ(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;
+
+ALTER TABLE "ConfigurationSetting"
+  ADD COLUMN "createdAt" TIMESTAMPTZ(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  ADD COLUMN "updatedAt" TIMESTAMPTZ(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;
+
+ALTER TABLE "PasswordResetToken"
+  ADD COLUMN "updatedAt" TIMESTAMPTZ(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;
+UPDATE "PasswordResetToken" SET "updatedAt" = "createdAt";

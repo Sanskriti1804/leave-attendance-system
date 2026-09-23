@@ -49,6 +49,7 @@ export type EmployeeMinAggregateOutputType = {
   managerId: number | null
   joiningDate: Date | null
   createdAt: Date | null
+  updatedAt: Date | null
   status: string | null
   obsolete: boolean | null
   sex: string | null
@@ -65,6 +66,7 @@ export type EmployeeMaxAggregateOutputType = {
   managerId: number | null
   joiningDate: Date | null
   createdAt: Date | null
+  updatedAt: Date | null
   status: string | null
   obsolete: boolean | null
   sex: string | null
@@ -81,6 +83,7 @@ export type EmployeeCountAggregateOutputType = {
   managerId: number
   joiningDate: number
   createdAt: number
+  updatedAt: number
   status: number
   obsolete: number
   sex: number
@@ -111,6 +114,7 @@ export type EmployeeMinAggregateInputType = {
   managerId?: true
   joiningDate?: true
   createdAt?: true
+  updatedAt?: true
   status?: true
   obsolete?: true
   sex?: true
@@ -127,6 +131,7 @@ export type EmployeeMaxAggregateInputType = {
   managerId?: true
   joiningDate?: true
   createdAt?: true
+  updatedAt?: true
   status?: true
   obsolete?: true
   sex?: true
@@ -143,6 +148,7 @@ export type EmployeeCountAggregateInputType = {
   managerId?: true
   joiningDate?: true
   createdAt?: true
+  updatedAt?: true
   status?: true
   obsolete?: true
   sex?: true
@@ -246,6 +252,7 @@ export type EmployeeGroupByOutputType = {
   managerId: number | null
   joiningDate: Date | null
   createdAt: Date
+  updatedAt: Date
   status: string
   obsolete: boolean
   sex: string | null
@@ -285,6 +292,7 @@ export type EmployeeWhereInput = {
   managerId?: Prisma.IntNullableFilter<"Employee"> | number | null
   joiningDate?: Prisma.DateTimeNullableFilter<"Employee"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Employee"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"Employee"> | Date | string
   status?: Prisma.StringFilter<"Employee"> | string
   obsolete?: Prisma.BoolFilter<"Employee"> | boolean
   sex?: Prisma.StringNullableFilter<"Employee"> | string | null
@@ -316,6 +324,7 @@ export type EmployeeOrderByWithRelationInput = {
   managerId?: Prisma.SortOrderInput | Prisma.SortOrder
   joiningDate?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
   status?: Prisma.SortOrder
   obsolete?: Prisma.SortOrder
   sex?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -350,6 +359,7 @@ export type EmployeeWhereUniqueInput = Prisma.AtLeast<{
   managerId?: Prisma.IntNullableFilter<"Employee"> | number | null
   joiningDate?: Prisma.DateTimeNullableFilter<"Employee"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Employee"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"Employee"> | Date | string
   status?: Prisma.StringFilter<"Employee"> | string
   obsolete?: Prisma.BoolFilter<"Employee"> | boolean
   sex?: Prisma.StringNullableFilter<"Employee"> | string | null
@@ -381,6 +391,7 @@ export type EmployeeOrderByWithAggregationInput = {
   managerId?: Prisma.SortOrderInput | Prisma.SortOrder
   joiningDate?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
   status?: Prisma.SortOrder
   obsolete?: Prisma.SortOrder
   sex?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -405,6 +416,7 @@ export type EmployeeScalarWhereWithAggregatesInput = {
   managerId?: Prisma.IntNullableWithAggregatesFilter<"Employee"> | number | null
   joiningDate?: Prisma.DateTimeNullableWithAggregatesFilter<"Employee"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Employee"> | Date | string
+  updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Employee"> | Date | string
   status?: Prisma.StringWithAggregatesFilter<"Employee"> | string
   obsolete?: Prisma.BoolWithAggregatesFilter<"Employee"> | boolean
   sex?: Prisma.StringNullableWithAggregatesFilter<"Employee"> | string | null
@@ -418,6 +430,7 @@ export type EmployeeCreateInput = {
   role: string
   joiningDate?: Date | string | null
   createdAt?: Date | string
+  updatedAt?: Date | string
   status: string
   obsolete?: boolean
   sex?: string | null
@@ -449,6 +462,7 @@ export type EmployeeUncheckedCreateInput = {
   managerId?: number | null
   joiningDate?: Date | string | null
   createdAt?: Date | string
+  updatedAt?: Date | string
   status: string
   obsolete?: boolean
   sex?: string | null
@@ -475,6 +489,7 @@ export type EmployeeUpdateInput = {
   role?: Prisma.StringFieldUpdateOperationsInput | string
   joiningDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -506,6 +521,7 @@ export type EmployeeUncheckedUpdateInput = {
   managerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   joiningDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -535,6 +551,7 @@ export type EmployeeCreateManyInput = {
   managerId?: number | null
   joiningDate?: Date | string | null
   createdAt?: Date | string
+  updatedAt?: Date | string
   status: string
   obsolete?: boolean
   sex?: string | null
@@ -548,6 +565,7 @@ export type EmployeeUpdateManyMutationInput = {
   role?: Prisma.StringFieldUpdateOperationsInput | string
   joiningDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -564,6 +582,7 @@ export type EmployeeUncheckedUpdateManyInput = {
   managerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   joiningDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -595,6 +614,7 @@ export type EmployeeCountOrderByAggregateInput = {
   managerId?: Prisma.SortOrder
   joiningDate?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
   status?: Prisma.SortOrder
   obsolete?: Prisma.SortOrder
   sex?: Prisma.SortOrder
@@ -617,6 +637,7 @@ export type EmployeeMaxOrderByAggregateInput = {
   managerId?: Prisma.SortOrder
   joiningDate?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
   status?: Prisma.SortOrder
   obsolete?: Prisma.SortOrder
   sex?: Prisma.SortOrder
@@ -633,6 +654,7 @@ export type EmployeeMinOrderByAggregateInput = {
   managerId?: Prisma.SortOrder
   joiningDate?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
   status?: Prisma.SortOrder
   obsolete?: Prisma.SortOrder
   sex?: Prisma.SortOrder
@@ -717,10 +739,6 @@ export type NullableStringFieldUpdateOperationsInput = {
 
 export type NullableDateTimeFieldUpdateOperationsInput = {
   set?: Date | string | null
-}
-
-export type DateTimeFieldUpdateOperationsInput = {
-  set?: Date | string
 }
 
 export type EmployeeUpdateOneWithoutSubordinatesNestedInput = {
@@ -953,6 +971,7 @@ export type EmployeeCreateWithoutDepartmentInput = {
   role: string
   joiningDate?: Date | string | null
   createdAt?: Date | string
+  updatedAt?: Date | string
   status: string
   obsolete?: boolean
   sex?: string | null
@@ -982,6 +1001,7 @@ export type EmployeeUncheckedCreateWithoutDepartmentInput = {
   managerId?: number | null
   joiningDate?: Date | string | null
   createdAt?: Date | string
+  updatedAt?: Date | string
   status: string
   obsolete?: boolean
   sex?: string | null
@@ -1040,6 +1060,7 @@ export type EmployeeScalarWhereInput = {
   managerId?: Prisma.IntNullableFilter<"Employee"> | number | null
   joiningDate?: Prisma.DateTimeNullableFilter<"Employee"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Employee"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"Employee"> | Date | string
   status?: Prisma.StringFilter<"Employee"> | string
   obsolete?: Prisma.BoolFilter<"Employee"> | boolean
   sex?: Prisma.StringNullableFilter<"Employee"> | string | null
@@ -1053,6 +1074,7 @@ export type EmployeeCreateWithoutSubordinatesInput = {
   role: string
   joiningDate?: Date | string | null
   createdAt?: Date | string
+  updatedAt?: Date | string
   status: string
   obsolete?: boolean
   sex?: string | null
@@ -1083,6 +1105,7 @@ export type EmployeeUncheckedCreateWithoutSubordinatesInput = {
   managerId?: number | null
   joiningDate?: Date | string | null
   createdAt?: Date | string
+  updatedAt?: Date | string
   status: string
   obsolete?: boolean
   sex?: string | null
@@ -1113,6 +1136,7 @@ export type EmployeeCreateWithoutManagerInput = {
   role: string
   joiningDate?: Date | string | null
   createdAt?: Date | string
+  updatedAt?: Date | string
   status: string
   obsolete?: boolean
   sex?: string | null
@@ -1142,6 +1166,7 @@ export type EmployeeUncheckedCreateWithoutManagerInput = {
   role: string
   joiningDate?: Date | string | null
   createdAt?: Date | string
+  updatedAt?: Date | string
   status: string
   obsolete?: boolean
   sex?: string | null
@@ -1189,6 +1214,7 @@ export type EmployeeUpdateWithoutSubordinatesInput = {
   role?: Prisma.StringFieldUpdateOperationsInput | string
   joiningDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1219,6 +1245,7 @@ export type EmployeeUncheckedUpdateWithoutSubordinatesInput = {
   managerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   joiningDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1260,6 +1287,7 @@ export type EmployeeCreateWithoutAttendanceInput = {
   role: string
   joiningDate?: Date | string | null
   createdAt?: Date | string
+  updatedAt?: Date | string
   status: string
   obsolete?: boolean
   sex?: string | null
@@ -1290,6 +1318,7 @@ export type EmployeeUncheckedCreateWithoutAttendanceInput = {
   managerId?: number | null
   joiningDate?: Date | string | null
   createdAt?: Date | string
+  updatedAt?: Date | string
   status: string
   obsolete?: boolean
   sex?: string | null
@@ -1331,6 +1360,7 @@ export type EmployeeUpdateWithoutAttendanceInput = {
   role?: Prisma.StringFieldUpdateOperationsInput | string
   joiningDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1361,6 +1391,7 @@ export type EmployeeUncheckedUpdateWithoutAttendanceInput = {
   managerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   joiningDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1386,6 +1417,7 @@ export type EmployeeCreateWithoutAttendanceCorrectionsInput = {
   role: string
   joiningDate?: Date | string | null
   createdAt?: Date | string
+  updatedAt?: Date | string
   status: string
   obsolete?: boolean
   sex?: string | null
@@ -1416,6 +1448,7 @@ export type EmployeeUncheckedCreateWithoutAttendanceCorrectionsInput = {
   managerId?: number | null
   joiningDate?: Date | string | null
   createdAt?: Date | string
+  updatedAt?: Date | string
   status: string
   obsolete?: boolean
   sex?: string | null
@@ -1446,6 +1479,7 @@ export type EmployeeCreateWithoutReviewedCorrectionsInput = {
   role: string
   joiningDate?: Date | string | null
   createdAt?: Date | string
+  updatedAt?: Date | string
   status: string
   obsolete?: boolean
   sex?: string | null
@@ -1476,6 +1510,7 @@ export type EmployeeUncheckedCreateWithoutReviewedCorrectionsInput = {
   managerId?: number | null
   joiningDate?: Date | string | null
   createdAt?: Date | string
+  updatedAt?: Date | string
   status: string
   obsolete?: boolean
   sex?: string | null
@@ -1517,6 +1552,7 @@ export type EmployeeUpdateWithoutAttendanceCorrectionsInput = {
   role?: Prisma.StringFieldUpdateOperationsInput | string
   joiningDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1547,6 +1583,7 @@ export type EmployeeUncheckedUpdateWithoutAttendanceCorrectionsInput = {
   managerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   joiningDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1583,6 +1620,7 @@ export type EmployeeUpdateWithoutReviewedCorrectionsInput = {
   role?: Prisma.StringFieldUpdateOperationsInput | string
   joiningDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1613,6 +1651,7 @@ export type EmployeeUncheckedUpdateWithoutReviewedCorrectionsInput = {
   managerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   joiningDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1638,6 +1677,7 @@ export type EmployeeCreateWithoutLeaveApplicationsInput = {
   role: string
   joiningDate?: Date | string | null
   createdAt?: Date | string
+  updatedAt?: Date | string
   status: string
   obsolete?: boolean
   sex?: string | null
@@ -1668,6 +1708,7 @@ export type EmployeeUncheckedCreateWithoutLeaveApplicationsInput = {
   managerId?: number | null
   joiningDate?: Date | string | null
   createdAt?: Date | string
+  updatedAt?: Date | string
   status: string
   obsolete?: boolean
   sex?: string | null
@@ -1698,6 +1739,7 @@ export type EmployeeCreateWithoutReviewedLeavesInput = {
   role: string
   joiningDate?: Date | string | null
   createdAt?: Date | string
+  updatedAt?: Date | string
   status: string
   obsolete?: boolean
   sex?: string | null
@@ -1728,6 +1770,7 @@ export type EmployeeUncheckedCreateWithoutReviewedLeavesInput = {
   managerId?: number | null
   joiningDate?: Date | string | null
   createdAt?: Date | string
+  updatedAt?: Date | string
   status: string
   obsolete?: boolean
   sex?: string | null
@@ -1758,6 +1801,7 @@ export type EmployeeCreateWithoutReportingManagerLeavesInput = {
   role: string
   joiningDate?: Date | string | null
   createdAt?: Date | string
+  updatedAt?: Date | string
   status: string
   obsolete?: boolean
   sex?: string | null
@@ -1788,6 +1832,7 @@ export type EmployeeUncheckedCreateWithoutReportingManagerLeavesInput = {
   managerId?: number | null
   joiningDate?: Date | string | null
   createdAt?: Date | string
+  updatedAt?: Date | string
   status: string
   obsolete?: boolean
   sex?: string | null
@@ -1829,6 +1874,7 @@ export type EmployeeUpdateWithoutLeaveApplicationsInput = {
   role?: Prisma.StringFieldUpdateOperationsInput | string
   joiningDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1859,6 +1905,7 @@ export type EmployeeUncheckedUpdateWithoutLeaveApplicationsInput = {
   managerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   joiningDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1895,6 +1942,7 @@ export type EmployeeUpdateWithoutReviewedLeavesInput = {
   role?: Prisma.StringFieldUpdateOperationsInput | string
   joiningDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1925,6 +1973,7 @@ export type EmployeeUncheckedUpdateWithoutReviewedLeavesInput = {
   managerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   joiningDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1961,6 +2010,7 @@ export type EmployeeUpdateWithoutReportingManagerLeavesInput = {
   role?: Prisma.StringFieldUpdateOperationsInput | string
   joiningDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1991,6 +2041,7 @@ export type EmployeeUncheckedUpdateWithoutReportingManagerLeavesInput = {
   managerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   joiningDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2016,6 +2067,7 @@ export type EmployeeCreateWithoutLeaveStatusChangesInput = {
   role: string
   joiningDate?: Date | string | null
   createdAt?: Date | string
+  updatedAt?: Date | string
   status: string
   obsolete?: boolean
   sex?: string | null
@@ -2046,6 +2098,7 @@ export type EmployeeUncheckedCreateWithoutLeaveStatusChangesInput = {
   managerId?: number | null
   joiningDate?: Date | string | null
   createdAt?: Date | string
+  updatedAt?: Date | string
   status: string
   obsolete?: boolean
   sex?: string | null
@@ -2087,6 +2140,7 @@ export type EmployeeUpdateWithoutLeaveStatusChangesInput = {
   role?: Prisma.StringFieldUpdateOperationsInput | string
   joiningDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2117,6 +2171,7 @@ export type EmployeeUncheckedUpdateWithoutLeaveStatusChangesInput = {
   managerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   joiningDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2142,6 +2197,7 @@ export type EmployeeCreateWithoutUploadedDocumentsInput = {
   role: string
   joiningDate?: Date | string | null
   createdAt?: Date | string
+  updatedAt?: Date | string
   status: string
   obsolete?: boolean
   sex?: string | null
@@ -2172,6 +2228,7 @@ export type EmployeeUncheckedCreateWithoutUploadedDocumentsInput = {
   managerId?: number | null
   joiningDate?: Date | string | null
   createdAt?: Date | string
+  updatedAt?: Date | string
   status: string
   obsolete?: boolean
   sex?: string | null
@@ -2213,6 +2270,7 @@ export type EmployeeUpdateWithoutUploadedDocumentsInput = {
   role?: Prisma.StringFieldUpdateOperationsInput | string
   joiningDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2243,6 +2301,7 @@ export type EmployeeUncheckedUpdateWithoutUploadedDocumentsInput = {
   managerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   joiningDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2268,6 +2327,7 @@ export type EmployeeCreateWithoutNotificationsInput = {
   role: string
   joiningDate?: Date | string | null
   createdAt?: Date | string
+  updatedAt?: Date | string
   status: string
   obsolete?: boolean
   sex?: string | null
@@ -2298,6 +2358,7 @@ export type EmployeeUncheckedCreateWithoutNotificationsInput = {
   managerId?: number | null
   joiningDate?: Date | string | null
   createdAt?: Date | string
+  updatedAt?: Date | string
   status: string
   obsolete?: boolean
   sex?: string | null
@@ -2339,6 +2400,7 @@ export type EmployeeUpdateWithoutNotificationsInput = {
   role?: Prisma.StringFieldUpdateOperationsInput | string
   joiningDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2369,6 +2431,7 @@ export type EmployeeUncheckedUpdateWithoutNotificationsInput = {
   managerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   joiningDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2394,6 +2457,7 @@ export type EmployeeCreateWithoutAuditLogsInput = {
   role: string
   joiningDate?: Date | string | null
   createdAt?: Date | string
+  updatedAt?: Date | string
   status: string
   obsolete?: boolean
   sex?: string | null
@@ -2424,6 +2488,7 @@ export type EmployeeUncheckedCreateWithoutAuditLogsInput = {
   managerId?: number | null
   joiningDate?: Date | string | null
   createdAt?: Date | string
+  updatedAt?: Date | string
   status: string
   obsolete?: boolean
   sex?: string | null
@@ -2465,6 +2530,7 @@ export type EmployeeUpdateWithoutAuditLogsInput = {
   role?: Prisma.StringFieldUpdateOperationsInput | string
   joiningDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2495,6 +2561,7 @@ export type EmployeeUncheckedUpdateWithoutAuditLogsInput = {
   managerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   joiningDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2520,6 +2587,7 @@ export type EmployeeCreateWithoutRefreshTokensInput = {
   role: string
   joiningDate?: Date | string | null
   createdAt?: Date | string
+  updatedAt?: Date | string
   status: string
   obsolete?: boolean
   sex?: string | null
@@ -2550,6 +2618,7 @@ export type EmployeeUncheckedCreateWithoutRefreshTokensInput = {
   managerId?: number | null
   joiningDate?: Date | string | null
   createdAt?: Date | string
+  updatedAt?: Date | string
   status: string
   obsolete?: boolean
   sex?: string | null
@@ -2591,6 +2660,7 @@ export type EmployeeUpdateWithoutRefreshTokensInput = {
   role?: Prisma.StringFieldUpdateOperationsInput | string
   joiningDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2621,6 +2691,7 @@ export type EmployeeUncheckedUpdateWithoutRefreshTokensInput = {
   managerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   joiningDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2646,6 +2717,7 @@ export type EmployeeCreateWithoutPasswordResetTokensInput = {
   role: string
   joiningDate?: Date | string | null
   createdAt?: Date | string
+  updatedAt?: Date | string
   status: string
   obsolete?: boolean
   sex?: string | null
@@ -2676,6 +2748,7 @@ export type EmployeeUncheckedCreateWithoutPasswordResetTokensInput = {
   managerId?: number | null
   joiningDate?: Date | string | null
   createdAt?: Date | string
+  updatedAt?: Date | string
   status: string
   obsolete?: boolean
   sex?: string | null
@@ -2717,6 +2790,7 @@ export type EmployeeUpdateWithoutPasswordResetTokensInput = {
   role?: Prisma.StringFieldUpdateOperationsInput | string
   joiningDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2747,6 +2821,7 @@ export type EmployeeUncheckedUpdateWithoutPasswordResetTokensInput = {
   managerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   joiningDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2774,6 +2849,7 @@ export type EmployeeCreateManyDepartmentInput = {
   managerId?: number | null
   joiningDate?: Date | string | null
   createdAt?: Date | string
+  updatedAt?: Date | string
   status: string
   obsolete?: boolean
   sex?: string | null
@@ -2787,6 +2863,7 @@ export type EmployeeUpdateWithoutDepartmentInput = {
   role?: Prisma.StringFieldUpdateOperationsInput | string
   joiningDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2816,6 +2893,7 @@ export type EmployeeUncheckedUpdateWithoutDepartmentInput = {
   managerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   joiningDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2844,6 +2922,7 @@ export type EmployeeUncheckedUpdateManyWithoutDepartmentInput = {
   managerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   joiningDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2859,6 +2938,7 @@ export type EmployeeCreateManyManagerInput = {
   role: string
   joiningDate?: Date | string | null
   createdAt?: Date | string
+  updatedAt?: Date | string
   status: string
   obsolete?: boolean
   sex?: string | null
@@ -2872,6 +2952,7 @@ export type EmployeeUpdateWithoutManagerInput = {
   role?: Prisma.StringFieldUpdateOperationsInput | string
   joiningDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2901,6 +2982,7 @@ export type EmployeeUncheckedUpdateWithoutManagerInput = {
   role?: Prisma.StringFieldUpdateOperationsInput | string
   joiningDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2929,6 +3011,7 @@ export type EmployeeUncheckedUpdateManyWithoutManagerInput = {
   role?: Prisma.StringFieldUpdateOperationsInput | string
   joiningDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sex?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3084,6 +3167,7 @@ export type EmployeeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   managerId?: boolean
   joiningDate?: boolean
   createdAt?: boolean
+  updatedAt?: boolean
   status?: boolean
   obsolete?: boolean
   sex?: boolean
@@ -3116,6 +3200,7 @@ export type EmployeeSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   managerId?: boolean
   joiningDate?: boolean
   createdAt?: boolean
+  updatedAt?: boolean
   status?: boolean
   obsolete?: boolean
   sex?: boolean
@@ -3134,6 +3219,7 @@ export type EmployeeSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
   managerId?: boolean
   joiningDate?: boolean
   createdAt?: boolean
+  updatedAt?: boolean
   status?: boolean
   obsolete?: boolean
   sex?: boolean
@@ -3152,12 +3238,13 @@ export type EmployeeSelectScalar = {
   managerId?: boolean
   joiningDate?: boolean
   createdAt?: boolean
+  updatedAt?: boolean
   status?: boolean
   obsolete?: boolean
   sex?: boolean
 }
 
-export type EmployeeOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"employeeId" | "firstName" | "lastName" | "email" | "passwordHash" | "departmentId" | "role" | "managerId" | "joiningDate" | "createdAt" | "status" | "obsolete" | "sex", ExtArgs["result"]["employee"]>
+export type EmployeeOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"employeeId" | "firstName" | "lastName" | "email" | "passwordHash" | "departmentId" | "role" | "managerId" | "joiningDate" | "createdAt" | "updatedAt" | "status" | "obsolete" | "sex", ExtArgs["result"]["employee"]>
 export type EmployeeInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   department?: boolean | Prisma.DepartmentDefaultArgs<ExtArgs>
   manager?: boolean | Prisma.Employee$managerArgs<ExtArgs>
@@ -3215,6 +3302,7 @@ export type $EmployeePayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     managerId: number | null
     joiningDate: Date | null
     createdAt: Date
+    updatedAt: Date
     status: string
     obsolete: boolean
     sex: string | null
@@ -3666,6 +3754,7 @@ export interface EmployeeFieldRefs {
   readonly managerId: Prisma.FieldRef<"Employee", 'Int'>
   readonly joiningDate: Prisma.FieldRef<"Employee", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"Employee", 'DateTime'>
+  readonly updatedAt: Prisma.FieldRef<"Employee", 'DateTime'>
   readonly status: Prisma.FieldRef<"Employee", 'String'>
   readonly obsolete: Prisma.FieldRef<"Employee", 'Boolean'>
   readonly sex: Prisma.FieldRef<"Employee", 'String'>

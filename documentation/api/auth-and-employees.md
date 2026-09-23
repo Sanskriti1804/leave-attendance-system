@@ -22,7 +22,8 @@ Soft-obsolete via PATCH. No DELETE. Default list omits `obsolete: true`. Paginat
 | POST | `/auth/login` | Email/password → `{accessToken, expiresIn, user}` | public |
 | POST | `/auth/refresh` | Refresh session | refresh token |
 | POST | `/auth/logout` | End session → 204 | Bearer * |
-| POST | `/auth/forgot-password` | Reset email; 204 always (TD) | public |
+| POST | `/auth/forgot-password` | `{email}` → generic 200 message; emails a 15-minute single-use link when SMTP is configured | public |
+| POST | `/auth/reset-password` | `{token, newPassword}` → sets password, marks token used | public |
 | POST | `/auth/update-password` | `{newPassword}` | Bearer * |
 | GET | `/auth/me` | Current user + employee | Bearer * |
 

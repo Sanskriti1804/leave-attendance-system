@@ -10,7 +10,8 @@ import {
 } from "../utils/security.js";
 import { findEmployeeByEmail, findEmployeeById } from "../employees/repository.js";
 import type { EmployeePublic } from "../employees/repository.js";
-import { sendPasswordResetEmail } from "../services/email.service.js";
+import { logger } from "../../../logger.js";
+import { isEmailDeliveryConfigured, sendPasswordResetEmail } from "../services/email.service.js";
 import * as authRepository from "./repository.js";
 import type {
   ChangePasswordBody,
@@ -196,6 +197,7 @@ export async function forgotPassword(body: ForgotPasswordBody) {
     const tokenHash = hashToken(rawResetToken);
     const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15-minute token lifetime
 
+    await authRepository.invalidateUnusedPasswordResetTokens(employee.employeeId);
     await authRepository.createPasswordResetToken({
       employeeId: employee.employeeId,
       tokenHash,
@@ -203,11 +205,24 @@ export async function forgotPassword(body: ForgotPasswordBody) {
     });
 
     //create a reset link for the employee to click on to reset their password
-    const resetLink = `${env.appUrl}/reset-password?token=${rawResetToken}`;
-    await sendPasswordResetEmail(employee.email, resetLink);
+    const resetLink = `${env.resetAppUrl}/reset-password?token=${encodeURIComponent(rawResetToken)}`;
+    try {
+      await sendPasswordResetEmail(employee.email, resetLink);
+      if (env.nodeEnv !== "production" && !isEmailDeliveryConfigured()) {
+        return {
+          message:
+            "Password reset email was not sent. Set RESEND_API_KEY in backend/.env and restart the API.",
+        };
+      }
+    } catch (err) {
+      const reason = err instanceof Error ? err.message : "email provider request failed";
+      logger.error({ reason }, "Password reset email failed");
+      if (env.nodeEnv !== "production") {
+        return { message: `Password reset email was not sent. ${reason}` };
+      }
+    }
   }
 
-  // Always return generic 200 response to prevent account enumeration
   return {
     message: "If your email is registered, you will receive password reset instructions shortly.",
   };

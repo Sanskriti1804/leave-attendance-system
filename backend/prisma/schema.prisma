@@ -11,6 +11,8 @@ model Department {
   departmentId   Int        @id @default(autoincrement())
   departmentName String     @db.VarChar(50)
   obsolete       Boolean    @default(false)
+  createdAt      DateTime   @default(now()) @db.Timestamptz(3)
+  updatedAt      DateTime   @updatedAt @db.Timestamptz(3)
   employees      Employee[]
 }
 
@@ -25,6 +27,7 @@ model Employee {
   managerId    Int?
   joiningDate  DateTime? @db.Date
   createdAt    DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt    DateTime  @updatedAt @db.Timestamptz(3)
   status       String
   obsolete     Boolean   @default(false)
   sex          String?   @db.VarChar(20)
@@ -80,6 +83,7 @@ model AttendanceCorrection {
   reviewedBy         Int?
   hrComments         String?
   createdAt          DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt          DateTime  @updatedAt @db.Timestamptz(3)
   reviewedAt         DateTime? @db.Timestamptz(3)
 
   employee   Employee   @relation(fields: [employeeId], references: [employeeId])
@@ -109,6 +113,8 @@ model LeavePolicy {
   includeHolidays          Boolean  @default(false)
   maxDays                  Decimal? @db.Decimal(5, 2)
   obsolete                 Boolean  @default(false)
+  createdAt                DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt                DateTime @updatedAt @db.Timestamptz(3)
 
   leaveType LeaveType @relation(fields: [leaveTypeId], references: [leaveTypeId])
 }
@@ -152,6 +158,8 @@ model LeaveDateSelection {
   leaveDate   DateTime @db.Date
   session     String   @db.VarChar(30)
   unit        Decimal  @db.Decimal(3, 1)
+  createdAt   DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime @updatedAt @db.Timestamptz(3)
 
   leave LeaveApplication @relation(fields: [leaveId], references: [leaveId], onDelete: Cascade)
 
@@ -167,6 +175,8 @@ model LeaveStatusHistory {
   newStatus   String   @db.VarChar(30)
   reason      String?
   changedAt   DateTime @default(now()) @db.Timestamptz(3)
+  createdAt   DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime @updatedAt @db.Timestamptz(3)
 
   leave     LeaveApplication @relation(fields: [leaveId], references: [leaveId], onDelete: Cascade)
   changedBy Employee?        @relation("LeaveStatusChangedBy", fields: [changedById], references: [employeeId])
@@ -184,6 +194,8 @@ model LeaveDocument {
   fileSize    Int
   uploadedBy  Int
   uploadedAt  DateTime @default(now()) @db.Timestamptz(3)
+  createdAt   DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime @updatedAt @db.Timestamptz(3)
 
   leave    LeaveApplication @relation(fields: [leaveId], references: [leaveId], onDelete: Cascade)
   uploader Employee         @relation(fields: [uploadedBy], references: [employeeId])
@@ -199,6 +211,7 @@ model Notification {
   message        String   @db.VarChar(100)
   isRead         Boolean  @default(false)
   createdAt      DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt      DateTime @updatedAt @db.Timestamptz(3)
 
   user Employee @relation(fields: [userId], references: [employeeId], onDelete: Cascade)
 
@@ -214,6 +227,7 @@ model AuditLog {
   oldValue   Json?
   newValue   Json?
   createdAt  DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt  DateTime @updatedAt @db.Timestamptz(3)
 
   user Employee @relation(fields: [userId], references: [employeeId])
 
@@ -224,14 +238,18 @@ model Holiday {
   holidayId   Int      @id @default(autoincrement())
   holidayName String   @db.VarChar(100)
   holidayDate DateTime @unique @db.Date
+  createdAt   DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime @updatedAt @db.Timestamptz(3)
 }
 
 model ConfigurationSetting {
   settingId       Int    @id @default(autoincrement())
   settingCategory String @db.VarChar(50)
   settingKey      String @db.VarChar(100)
-  settingValue    String @db.VarChar(100)
-  settingType     String @db.VarChar(20)
+  settingValue    String   @db.VarChar(100)
+  settingType     String   @db.VarChar(20)
+  createdAt       DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt       DateTime @updatedAt @db.Timestamptz(3)
 
   @@unique([settingCategory, settingKey])
 }
@@ -260,6 +278,7 @@ model PasswordResetToken {
   isUsed       Boolean  @default(false)
   expiresAt    DateTime @db.Timestamptz(3)
   createdAt    DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt    DateTime @updatedAt @db.Timestamptz(3)
 
   employee Employee @relation(fields: [employeeId], references: [employeeId], onDelete: Cascade)
 

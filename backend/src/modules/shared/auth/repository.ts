@@ -88,6 +88,13 @@ export async function rotateRefreshTokenAtomic(
   });
 }
 
+export function invalidateUnusedPasswordResetTokens(employeeId: number): Promise<{ count: number }> {
+  return prisma.passwordResetToken.updateMany({
+    where: { employeeId, isUsed: false },
+    data: { isUsed: true },
+  });
+}
+
 export function createPasswordResetToken(data: {
   employeeId: number;
   tokenHash: string;

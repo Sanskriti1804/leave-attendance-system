@@ -54,6 +54,7 @@ export type AttendanceCorrectionMinAggregateOutputType = {
   reviewedBy: number | null
   hrComments: string | null
   createdAt: Date | null
+  updatedAt: Date | null
   reviewedAt: Date | null
 }
 
@@ -71,6 +72,7 @@ export type AttendanceCorrectionMaxAggregateOutputType = {
   reviewedBy: number | null
   hrComments: string | null
   createdAt: Date | null
+  updatedAt: Date | null
   reviewedAt: Date | null
 }
 
@@ -88,6 +90,7 @@ export type AttendanceCorrectionCountAggregateOutputType = {
   reviewedBy: number
   hrComments: number
   createdAt: number
+  updatedAt: number
   reviewedAt: number
   _all: number
 }
@@ -121,6 +124,7 @@ export type AttendanceCorrectionMinAggregateInputType = {
   reviewedBy?: true
   hrComments?: true
   createdAt?: true
+  updatedAt?: true
   reviewedAt?: true
 }
 
@@ -138,6 +142,7 @@ export type AttendanceCorrectionMaxAggregateInputType = {
   reviewedBy?: true
   hrComments?: true
   createdAt?: true
+  updatedAt?: true
   reviewedAt?: true
 }
 
@@ -155,6 +160,7 @@ export type AttendanceCorrectionCountAggregateInputType = {
   reviewedBy?: true
   hrComments?: true
   createdAt?: true
+  updatedAt?: true
   reviewedAt?: true
   _all?: true
 }
@@ -259,6 +265,7 @@ export type AttendanceCorrectionGroupByOutputType = {
   reviewedBy: number | null
   hrComments: string | null
   createdAt: Date
+  updatedAt: Date
   reviewedAt: Date | null
   _count: AttendanceCorrectionCountAggregateOutputType | null
   _avg: AttendanceCorrectionAvgAggregateOutputType | null
@@ -299,6 +306,7 @@ export type AttendanceCorrectionWhereInput = {
   reviewedBy?: Prisma.IntNullableFilter<"AttendanceCorrection"> | number | null
   hrComments?: Prisma.StringNullableFilter<"AttendanceCorrection"> | string | null
   createdAt?: Prisma.DateTimeFilter<"AttendanceCorrection"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"AttendanceCorrection"> | Date | string
   reviewedAt?: Prisma.DateTimeNullableFilter<"AttendanceCorrection"> | Date | string | null
   employee?: Prisma.XOR<Prisma.EmployeeScalarRelationFilter, Prisma.EmployeeWhereInput>
   attendance?: Prisma.XOR<Prisma.AttendanceScalarRelationFilter, Prisma.AttendanceWhereInput>
@@ -319,6 +327,7 @@ export type AttendanceCorrectionOrderByWithRelationInput = {
   reviewedBy?: Prisma.SortOrderInput | Prisma.SortOrder
   hrComments?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
   reviewedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   employee?: Prisma.EmployeeOrderByWithRelationInput
   attendance?: Prisma.AttendanceOrderByWithRelationInput
@@ -342,6 +351,7 @@ export type AttendanceCorrectionWhereUniqueInput = Prisma.AtLeast<{
   reviewedBy?: Prisma.IntNullableFilter<"AttendanceCorrection"> | number | null
   hrComments?: Prisma.StringNullableFilter<"AttendanceCorrection"> | string | null
   createdAt?: Prisma.DateTimeFilter<"AttendanceCorrection"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"AttendanceCorrection"> | Date | string
   reviewedAt?: Prisma.DateTimeNullableFilter<"AttendanceCorrection"> | Date | string | null
   employee?: Prisma.XOR<Prisma.EmployeeScalarRelationFilter, Prisma.EmployeeWhereInput>
   attendance?: Prisma.XOR<Prisma.AttendanceScalarRelationFilter, Prisma.AttendanceWhereInput>
@@ -362,6 +372,7 @@ export type AttendanceCorrectionOrderByWithAggregationInput = {
   reviewedBy?: Prisma.SortOrderInput | Prisma.SortOrder
   hrComments?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
   reviewedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.AttendanceCorrectionCountOrderByAggregateInput
   _avg?: Prisma.AttendanceCorrectionAvgOrderByAggregateInput
@@ -387,6 +398,7 @@ export type AttendanceCorrectionScalarWhereWithAggregatesInput = {
   reviewedBy?: Prisma.IntNullableWithAggregatesFilter<"AttendanceCorrection"> | number | null
   hrComments?: Prisma.StringNullableWithAggregatesFilter<"AttendanceCorrection"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"AttendanceCorrection"> | Date | string
+  updatedAt?: Prisma.DateTimeWithAggregatesFilter<"AttendanceCorrection"> | Date | string
   reviewedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"AttendanceCorrection"> | Date | string | null
 }
 
@@ -400,6 +412,7 @@ export type AttendanceCorrectionCreateInput = {
   status?: string
   hrComments?: string | null
   createdAt?: Date | string
+  updatedAt?: Date | string
   reviewedAt?: Date | string | null
   employee: Prisma.EmployeeCreateNestedOneWithoutAttendanceCorrectionsInput
   attendance: Prisma.AttendanceCreateNestedOneWithoutCorrectionsInput
@@ -420,6 +433,7 @@ export type AttendanceCorrectionUncheckedCreateInput = {
   reviewedBy?: number | null
   hrComments?: string | null
   createdAt?: Date | string
+  updatedAt?: Date | string
   reviewedAt?: Date | string | null
 }
 
@@ -433,6 +447,7 @@ export type AttendanceCorrectionUpdateInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   hrComments?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   employee?: Prisma.EmployeeUpdateOneRequiredWithoutAttendanceCorrectionsNestedInput
   attendance?: Prisma.AttendanceUpdateOneRequiredWithoutCorrectionsNestedInput
@@ -453,6 +468,7 @@ export type AttendanceCorrectionUncheckedUpdateInput = {
   reviewedBy?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   hrComments?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
@@ -470,6 +486,7 @@ export type AttendanceCorrectionCreateManyInput = {
   reviewedBy?: number | null
   hrComments?: string | null
   createdAt?: Date | string
+  updatedAt?: Date | string
   reviewedAt?: Date | string | null
 }
 
@@ -483,6 +500,7 @@ export type AttendanceCorrectionUpdateManyMutationInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   hrComments?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
@@ -500,6 +518,7 @@ export type AttendanceCorrectionUncheckedUpdateManyInput = {
   reviewedBy?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   hrComments?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
@@ -527,6 +546,7 @@ export type AttendanceCorrectionCountOrderByAggregateInput = {
   reviewedBy?: Prisma.SortOrder
   hrComments?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
   reviewedAt?: Prisma.SortOrder
 }
 
@@ -551,6 +571,7 @@ export type AttendanceCorrectionMaxOrderByAggregateInput = {
   reviewedBy?: Prisma.SortOrder
   hrComments?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
   reviewedAt?: Prisma.SortOrder
 }
 
@@ -568,6 +589,7 @@ export type AttendanceCorrectionMinOrderByAggregateInput = {
   reviewedBy?: Prisma.SortOrder
   hrComments?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
   reviewedAt?: Prisma.SortOrder
 }
 
@@ -714,6 +736,7 @@ export type AttendanceCorrectionCreateWithoutEmployeeInput = {
   status?: string
   hrComments?: string | null
   createdAt?: Date | string
+  updatedAt?: Date | string
   reviewedAt?: Date | string | null
   attendance: Prisma.AttendanceCreateNestedOneWithoutCorrectionsInput
   reviewer?: Prisma.EmployeeCreateNestedOneWithoutReviewedCorrectionsInput
@@ -732,6 +755,7 @@ export type AttendanceCorrectionUncheckedCreateWithoutEmployeeInput = {
   reviewedBy?: number | null
   hrComments?: string | null
   createdAt?: Date | string
+  updatedAt?: Date | string
   reviewedAt?: Date | string | null
 }
 
@@ -755,6 +779,7 @@ export type AttendanceCorrectionCreateWithoutReviewerInput = {
   status?: string
   hrComments?: string | null
   createdAt?: Date | string
+  updatedAt?: Date | string
   reviewedAt?: Date | string | null
   employee: Prisma.EmployeeCreateNestedOneWithoutAttendanceCorrectionsInput
   attendance: Prisma.AttendanceCreateNestedOneWithoutCorrectionsInput
@@ -773,6 +798,7 @@ export type AttendanceCorrectionUncheckedCreateWithoutReviewerInput = {
   status?: string
   hrComments?: string | null
   createdAt?: Date | string
+  updatedAt?: Date | string
   reviewedAt?: Date | string | null
 }
 
@@ -819,6 +845,7 @@ export type AttendanceCorrectionScalarWhereInput = {
   reviewedBy?: Prisma.IntNullableFilter<"AttendanceCorrection"> | number | null
   hrComments?: Prisma.StringNullableFilter<"AttendanceCorrection"> | string | null
   createdAt?: Prisma.DateTimeFilter<"AttendanceCorrection"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"AttendanceCorrection"> | Date | string
   reviewedAt?: Prisma.DateTimeNullableFilter<"AttendanceCorrection"> | Date | string | null
 }
 
@@ -848,6 +875,7 @@ export type AttendanceCorrectionCreateWithoutAttendanceInput = {
   status?: string
   hrComments?: string | null
   createdAt?: Date | string
+  updatedAt?: Date | string
   reviewedAt?: Date | string | null
   employee: Prisma.EmployeeCreateNestedOneWithoutAttendanceCorrectionsInput
   reviewer?: Prisma.EmployeeCreateNestedOneWithoutReviewedCorrectionsInput
@@ -866,6 +894,7 @@ export type AttendanceCorrectionUncheckedCreateWithoutAttendanceInput = {
   reviewedBy?: number | null
   hrComments?: string | null
   createdAt?: Date | string
+  updatedAt?: Date | string
   reviewedAt?: Date | string | null
 }
 
@@ -908,6 +937,7 @@ export type AttendanceCorrectionCreateManyEmployeeInput = {
   reviewedBy?: number | null
   hrComments?: string | null
   createdAt?: Date | string
+  updatedAt?: Date | string
   reviewedAt?: Date | string | null
 }
 
@@ -924,6 +954,7 @@ export type AttendanceCorrectionCreateManyReviewerInput = {
   status?: string
   hrComments?: string | null
   createdAt?: Date | string
+  updatedAt?: Date | string
   reviewedAt?: Date | string | null
 }
 
@@ -937,6 +968,7 @@ export type AttendanceCorrectionUpdateWithoutEmployeeInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   hrComments?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   attendance?: Prisma.AttendanceUpdateOneRequiredWithoutCorrectionsNestedInput
   reviewer?: Prisma.EmployeeUpdateOneWithoutReviewedCorrectionsNestedInput
@@ -955,6 +987,7 @@ export type AttendanceCorrectionUncheckedUpdateWithoutEmployeeInput = {
   reviewedBy?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   hrComments?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
@@ -971,6 +1004,7 @@ export type AttendanceCorrectionUncheckedUpdateManyWithoutEmployeeInput = {
   reviewedBy?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   hrComments?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
@@ -984,6 +1018,7 @@ export type AttendanceCorrectionUpdateWithoutReviewerInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   hrComments?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   employee?: Prisma.EmployeeUpdateOneRequiredWithoutAttendanceCorrectionsNestedInput
   attendance?: Prisma.AttendanceUpdateOneRequiredWithoutCorrectionsNestedInput
@@ -1002,6 +1037,7 @@ export type AttendanceCorrectionUncheckedUpdateWithoutReviewerInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   hrComments?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
@@ -1018,6 +1054,7 @@ export type AttendanceCorrectionUncheckedUpdateManyWithoutReviewerInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   hrComments?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
@@ -1034,6 +1071,7 @@ export type AttendanceCorrectionCreateManyAttendanceInput = {
   reviewedBy?: number | null
   hrComments?: string | null
   createdAt?: Date | string
+  updatedAt?: Date | string
   reviewedAt?: Date | string | null
 }
 
@@ -1047,6 +1085,7 @@ export type AttendanceCorrectionUpdateWithoutAttendanceInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   hrComments?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   employee?: Prisma.EmployeeUpdateOneRequiredWithoutAttendanceCorrectionsNestedInput
   reviewer?: Prisma.EmployeeUpdateOneWithoutReviewedCorrectionsNestedInput
@@ -1065,6 +1104,7 @@ export type AttendanceCorrectionUncheckedUpdateWithoutAttendanceInput = {
   reviewedBy?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   hrComments?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
@@ -1081,6 +1121,7 @@ export type AttendanceCorrectionUncheckedUpdateManyWithoutAttendanceInput = {
   reviewedBy?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   hrComments?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
@@ -1100,6 +1141,7 @@ export type AttendanceCorrectionSelect<ExtArgs extends runtime.Types.Extensions.
   reviewedBy?: boolean
   hrComments?: boolean
   createdAt?: boolean
+  updatedAt?: boolean
   reviewedAt?: boolean
   employee?: boolean | Prisma.EmployeeDefaultArgs<ExtArgs>
   attendance?: boolean | Prisma.AttendanceDefaultArgs<ExtArgs>
@@ -1120,6 +1162,7 @@ export type AttendanceCorrectionSelectCreateManyAndReturn<ExtArgs extends runtim
   reviewedBy?: boolean
   hrComments?: boolean
   createdAt?: boolean
+  updatedAt?: boolean
   reviewedAt?: boolean
   employee?: boolean | Prisma.EmployeeDefaultArgs<ExtArgs>
   attendance?: boolean | Prisma.AttendanceDefaultArgs<ExtArgs>
@@ -1140,6 +1183,7 @@ export type AttendanceCorrectionSelectUpdateManyAndReturn<ExtArgs extends runtim
   reviewedBy?: boolean
   hrComments?: boolean
   createdAt?: boolean
+  updatedAt?: boolean
   reviewedAt?: boolean
   employee?: boolean | Prisma.EmployeeDefaultArgs<ExtArgs>
   attendance?: boolean | Prisma.AttendanceDefaultArgs<ExtArgs>
@@ -1160,10 +1204,11 @@ export type AttendanceCorrectionSelectScalar = {
   reviewedBy?: boolean
   hrComments?: boolean
   createdAt?: boolean
+  updatedAt?: boolean
   reviewedAt?: boolean
 }
 
-export type AttendanceCorrectionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"correctionId" | "employeeId" | "attendanceId" | "correctionDate" | "correctionType" | "correctLoginTime" | "correctLogoutTime" | "reason" | "supportingDocument" | "status" | "reviewedBy" | "hrComments" | "createdAt" | "reviewedAt", ExtArgs["result"]["attendanceCorrection"]>
+export type AttendanceCorrectionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"correctionId" | "employeeId" | "attendanceId" | "correctionDate" | "correctionType" | "correctLoginTime" | "correctLogoutTime" | "reason" | "supportingDocument" | "status" | "reviewedBy" | "hrComments" | "createdAt" | "updatedAt" | "reviewedAt", ExtArgs["result"]["attendanceCorrection"]>
 export type AttendanceCorrectionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   employee?: boolean | Prisma.EmployeeDefaultArgs<ExtArgs>
   attendance?: boolean | Prisma.AttendanceDefaultArgs<ExtArgs>
@@ -1201,6 +1246,7 @@ export type $AttendanceCorrectionPayload<ExtArgs extends runtime.Types.Extension
     reviewedBy: number | null
     hrComments: string | null
     createdAt: Date
+    updatedAt: Date
     reviewedAt: Date | null
   }, ExtArgs["result"]["attendanceCorrection"]>
   composites: {}
@@ -1641,6 +1687,7 @@ export interface AttendanceCorrectionFieldRefs {
   readonly reviewedBy: Prisma.FieldRef<"AttendanceCorrection", 'Int'>
   readonly hrComments: Prisma.FieldRef<"AttendanceCorrection", 'String'>
   readonly createdAt: Prisma.FieldRef<"AttendanceCorrection", 'DateTime'>
+  readonly updatedAt: Prisma.FieldRef<"AttendanceCorrection", 'DateTime'>
   readonly reviewedAt: Prisma.FieldRef<"AttendanceCorrection", 'DateTime'>
 }
     

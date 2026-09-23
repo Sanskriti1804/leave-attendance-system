@@ -48,6 +48,8 @@ export type LeavePolicyMinAggregateOutputType = {
   includeHolidays: boolean | null
   maxDays: runtime.Decimal | null
   obsolete: boolean | null
+  createdAt: Date | null
+  updatedAt: Date | null
 }
 
 export type LeavePolicyMaxAggregateOutputType = {
@@ -58,6 +60,8 @@ export type LeavePolicyMaxAggregateOutputType = {
   includeHolidays: boolean | null
   maxDays: runtime.Decimal | null
   obsolete: boolean | null
+  createdAt: Date | null
+  updatedAt: Date | null
 }
 
 export type LeavePolicyCountAggregateOutputType = {
@@ -68,6 +72,8 @@ export type LeavePolicyCountAggregateOutputType = {
   includeHolidays: number
   maxDays: number
   obsolete: number
+  createdAt: number
+  updatedAt: number
   _all: number
 }
 
@@ -94,6 +100,8 @@ export type LeavePolicyMinAggregateInputType = {
   includeHolidays?: true
   maxDays?: true
   obsolete?: true
+  createdAt?: true
+  updatedAt?: true
 }
 
 export type LeavePolicyMaxAggregateInputType = {
@@ -104,6 +112,8 @@ export type LeavePolicyMaxAggregateInputType = {
   includeHolidays?: true
   maxDays?: true
   obsolete?: true
+  createdAt?: true
+  updatedAt?: true
 }
 
 export type LeavePolicyCountAggregateInputType = {
@@ -114,6 +124,8 @@ export type LeavePolicyCountAggregateInputType = {
   includeHolidays?: true
   maxDays?: true
   obsolete?: true
+  createdAt?: true
+  updatedAt?: true
   _all?: true
 }
 
@@ -211,6 +223,8 @@ export type LeavePolicyGroupByOutputType = {
   includeHolidays: boolean
   maxDays: runtime.Decimal | null
   obsolete: boolean
+  createdAt: Date
+  updatedAt: Date
   _count: LeavePolicyCountAggregateOutputType | null
   _avg: LeavePolicyAvgAggregateOutputType | null
   _sum: LeavePolicySumAggregateOutputType | null
@@ -244,6 +258,8 @@ export type LeavePolicyWhereInput = {
   includeHolidays?: Prisma.BoolFilter<"LeavePolicy"> | boolean
   maxDays?: Prisma.DecimalNullableFilter<"LeavePolicy"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   obsolete?: Prisma.BoolFilter<"LeavePolicy"> | boolean
+  createdAt?: Prisma.DateTimeFilter<"LeavePolicy"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"LeavePolicy"> | Date | string
   leaveType?: Prisma.XOR<Prisma.LeaveTypeScalarRelationFilter, Prisma.LeaveTypeWhereInput>
 }
 
@@ -255,6 +271,8 @@ export type LeavePolicyOrderByWithRelationInput = {
   includeHolidays?: Prisma.SortOrder
   maxDays?: Prisma.SortOrderInput | Prisma.SortOrder
   obsolete?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
   leaveType?: Prisma.LeaveTypeOrderByWithRelationInput
 }
 
@@ -269,6 +287,8 @@ export type LeavePolicyWhereUniqueInput = Prisma.AtLeast<{
   includeHolidays?: Prisma.BoolFilter<"LeavePolicy"> | boolean
   maxDays?: Prisma.DecimalNullableFilter<"LeavePolicy"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   obsolete?: Prisma.BoolFilter<"LeavePolicy"> | boolean
+  createdAt?: Prisma.DateTimeFilter<"LeavePolicy"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"LeavePolicy"> | Date | string
   leaveType?: Prisma.XOR<Prisma.LeaveTypeScalarRelationFilter, Prisma.LeaveTypeWhereInput>
 }, "policyId">
 
@@ -280,6 +300,8 @@ export type LeavePolicyOrderByWithAggregationInput = {
   includeHolidays?: Prisma.SortOrder
   maxDays?: Prisma.SortOrderInput | Prisma.SortOrder
   obsolete?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
   _count?: Prisma.LeavePolicyCountOrderByAggregateInput
   _avg?: Prisma.LeavePolicyAvgOrderByAggregateInput
   _max?: Prisma.LeavePolicyMaxOrderByAggregateInput
@@ -298,6 +320,8 @@ export type LeavePolicyScalarWhereWithAggregatesInput = {
   includeHolidays?: Prisma.BoolWithAggregatesFilter<"LeavePolicy"> | boolean
   maxDays?: Prisma.DecimalNullableWithAggregatesFilter<"LeavePolicy"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   obsolete?: Prisma.BoolWithAggregatesFilter<"LeavePolicy"> | boolean
+  createdAt?: Prisma.DateTimeWithAggregatesFilter<"LeavePolicy"> | Date | string
+  updatedAt?: Prisma.DateTimeWithAggregatesFilter<"LeavePolicy"> | Date | string
 }
 
 export type LeavePolicyCreateInput = {
@@ -306,6 +330,8 @@ export type LeavePolicyCreateInput = {
   includeHolidays?: boolean
   maxDays?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   obsolete?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
   leaveType: Prisma.LeaveTypeCreateNestedOneWithoutPoliciesInput
 }
 
@@ -317,6 +343,8 @@ export type LeavePolicyUncheckedCreateInput = {
   includeHolidays?: boolean
   maxDays?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   obsolete?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type LeavePolicyUpdateInput = {
@@ -325,6 +353,8 @@ export type LeavePolicyUpdateInput = {
   includeHolidays?: Prisma.BoolFieldUpdateOperationsInput | boolean
   maxDays?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   leaveType?: Prisma.LeaveTypeUpdateOneRequiredWithoutPoliciesNestedInput
 }
 
@@ -336,6 +366,8 @@ export type LeavePolicyUncheckedUpdateInput = {
   includeHolidays?: Prisma.BoolFieldUpdateOperationsInput | boolean
   maxDays?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type LeavePolicyCreateManyInput = {
@@ -346,6 +378,8 @@ export type LeavePolicyCreateManyInput = {
   includeHolidays?: boolean
   maxDays?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   obsolete?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type LeavePolicyUpdateManyMutationInput = {
@@ -354,6 +388,8 @@ export type LeavePolicyUpdateManyMutationInput = {
   includeHolidays?: Prisma.BoolFieldUpdateOperationsInput | boolean
   maxDays?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type LeavePolicyUncheckedUpdateManyInput = {
@@ -364,6 +400,8 @@ export type LeavePolicyUncheckedUpdateManyInput = {
   includeHolidays?: Prisma.BoolFieldUpdateOperationsInput | boolean
   maxDays?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type LeavePolicyListRelationFilter = {
@@ -384,6 +422,8 @@ export type LeavePolicyCountOrderByAggregateInput = {
   includeHolidays?: Prisma.SortOrder
   maxDays?: Prisma.SortOrder
   obsolete?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type LeavePolicyAvgOrderByAggregateInput = {
@@ -401,6 +441,8 @@ export type LeavePolicyMaxOrderByAggregateInput = {
   includeHolidays?: Prisma.SortOrder
   maxDays?: Prisma.SortOrder
   obsolete?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type LeavePolicyMinOrderByAggregateInput = {
@@ -411,6 +453,8 @@ export type LeavePolicyMinOrderByAggregateInput = {
   includeHolidays?: Prisma.SortOrder
   maxDays?: Prisma.SortOrder
   obsolete?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type LeavePolicySumOrderByAggregateInput = {
@@ -476,6 +520,8 @@ export type LeavePolicyCreateWithoutLeaveTypeInput = {
   includeHolidays?: boolean
   maxDays?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   obsolete?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type LeavePolicyUncheckedCreateWithoutLeaveTypeInput = {
@@ -485,6 +531,8 @@ export type LeavePolicyUncheckedCreateWithoutLeaveTypeInput = {
   includeHolidays?: boolean
   maxDays?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   obsolete?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type LeavePolicyCreateOrConnectWithoutLeaveTypeInput = {
@@ -524,6 +572,8 @@ export type LeavePolicyScalarWhereInput = {
   includeHolidays?: Prisma.BoolFilter<"LeavePolicy"> | boolean
   maxDays?: Prisma.DecimalNullableFilter<"LeavePolicy"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   obsolete?: Prisma.BoolFilter<"LeavePolicy"> | boolean
+  createdAt?: Prisma.DateTimeFilter<"LeavePolicy"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"LeavePolicy"> | Date | string
 }
 
 export type LeavePolicyCreateManyLeaveTypeInput = {
@@ -533,6 +583,8 @@ export type LeavePolicyCreateManyLeaveTypeInput = {
   includeHolidays?: boolean
   maxDays?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   obsolete?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type LeavePolicyUpdateWithoutLeaveTypeInput = {
@@ -541,6 +593,8 @@ export type LeavePolicyUpdateWithoutLeaveTypeInput = {
   includeHolidays?: Prisma.BoolFieldUpdateOperationsInput | boolean
   maxDays?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type LeavePolicyUncheckedUpdateWithoutLeaveTypeInput = {
@@ -550,6 +604,8 @@ export type LeavePolicyUncheckedUpdateWithoutLeaveTypeInput = {
   includeHolidays?: Prisma.BoolFieldUpdateOperationsInput | boolean
   maxDays?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type LeavePolicyUncheckedUpdateManyWithoutLeaveTypeInput = {
@@ -559,6 +615,8 @@ export type LeavePolicyUncheckedUpdateManyWithoutLeaveTypeInput = {
   includeHolidays?: Prisma.BoolFieldUpdateOperationsInput | boolean
   maxDays?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   obsolete?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 
@@ -571,6 +629,8 @@ export type LeavePolicySelect<ExtArgs extends runtime.Types.Extensions.InternalA
   includeHolidays?: boolean
   maxDays?: boolean
   obsolete?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
   leaveType?: boolean | Prisma.LeaveTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["leavePolicy"]>
 
@@ -582,6 +642,8 @@ export type LeavePolicySelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   includeHolidays?: boolean
   maxDays?: boolean
   obsolete?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
   leaveType?: boolean | Prisma.LeaveTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["leavePolicy"]>
 
@@ -593,6 +655,8 @@ export type LeavePolicySelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   includeHolidays?: boolean
   maxDays?: boolean
   obsolete?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
   leaveType?: boolean | Prisma.LeaveTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["leavePolicy"]>
 
@@ -604,9 +668,11 @@ export type LeavePolicySelectScalar = {
   includeHolidays?: boolean
   maxDays?: boolean
   obsolete?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
 }
 
-export type LeavePolicyOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"policyId" | "leaveTypeId" | "medicalDocumentAfterDays" | "includeWeekends" | "includeHolidays" | "maxDays" | "obsolete", ExtArgs["result"]["leavePolicy"]>
+export type LeavePolicyOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"policyId" | "leaveTypeId" | "medicalDocumentAfterDays" | "includeWeekends" | "includeHolidays" | "maxDays" | "obsolete" | "createdAt" | "updatedAt", ExtArgs["result"]["leavePolicy"]>
 export type LeavePolicyInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   leaveType?: boolean | Prisma.LeaveTypeDefaultArgs<ExtArgs>
 }
@@ -630,6 +696,8 @@ export type $LeavePolicyPayload<ExtArgs extends runtime.Types.Extensions.Interna
     includeHolidays: boolean
     maxDays: runtime.Decimal | null
     obsolete: boolean
+    createdAt: Date
+    updatedAt: Date
   }, ExtArgs["result"]["leavePolicy"]>
   composites: {}
 }
@@ -1061,6 +1129,8 @@ export interface LeavePolicyFieldRefs {
   readonly includeHolidays: Prisma.FieldRef<"LeavePolicy", 'Boolean'>
   readonly maxDays: Prisma.FieldRef<"LeavePolicy", 'Decimal'>
   readonly obsolete: Prisma.FieldRef<"LeavePolicy", 'Boolean'>
+  readonly createdAt: Prisma.FieldRef<"LeavePolicy", 'DateTime'>
+  readonly updatedAt: Prisma.FieldRef<"LeavePolicy", 'DateTime'>
 }
     
 

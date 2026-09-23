@@ -46,6 +46,8 @@ export type LeaveStatusHistoryMinAggregateOutputType = {
   newStatus: string | null
   reason: string | null
   changedAt: Date | null
+  createdAt: Date | null
+  updatedAt: Date | null
 }
 
 export type LeaveStatusHistoryMaxAggregateOutputType = {
@@ -56,6 +58,8 @@ export type LeaveStatusHistoryMaxAggregateOutputType = {
   newStatus: string | null
   reason: string | null
   changedAt: Date | null
+  createdAt: Date | null
+  updatedAt: Date | null
 }
 
 export type LeaveStatusHistoryCountAggregateOutputType = {
@@ -66,6 +70,8 @@ export type LeaveStatusHistoryCountAggregateOutputType = {
   newStatus: number
   reason: number
   changedAt: number
+  createdAt: number
+  updatedAt: number
   _all: number
 }
 
@@ -90,6 +96,8 @@ export type LeaveStatusHistoryMinAggregateInputType = {
   newStatus?: true
   reason?: true
   changedAt?: true
+  createdAt?: true
+  updatedAt?: true
 }
 
 export type LeaveStatusHistoryMaxAggregateInputType = {
@@ -100,6 +108,8 @@ export type LeaveStatusHistoryMaxAggregateInputType = {
   newStatus?: true
   reason?: true
   changedAt?: true
+  createdAt?: true
+  updatedAt?: true
 }
 
 export type LeaveStatusHistoryCountAggregateInputType = {
@@ -110,6 +120,8 @@ export type LeaveStatusHistoryCountAggregateInputType = {
   newStatus?: true
   reason?: true
   changedAt?: true
+  createdAt?: true
+  updatedAt?: true
   _all?: true
 }
 
@@ -207,6 +219,8 @@ export type LeaveStatusHistoryGroupByOutputType = {
   newStatus: string
   reason: string | null
   changedAt: Date
+  createdAt: Date
+  updatedAt: Date
   _count: LeaveStatusHistoryCountAggregateOutputType | null
   _avg: LeaveStatusHistoryAvgAggregateOutputType | null
   _sum: LeaveStatusHistorySumAggregateOutputType | null
@@ -240,6 +254,8 @@ export type LeaveStatusHistoryWhereInput = {
   newStatus?: Prisma.StringFilter<"LeaveStatusHistory"> | string
   reason?: Prisma.StringNullableFilter<"LeaveStatusHistory"> | string | null
   changedAt?: Prisma.DateTimeFilter<"LeaveStatusHistory"> | Date | string
+  createdAt?: Prisma.DateTimeFilter<"LeaveStatusHistory"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"LeaveStatusHistory"> | Date | string
   leave?: Prisma.XOR<Prisma.LeaveApplicationScalarRelationFilter, Prisma.LeaveApplicationWhereInput>
   changedBy?: Prisma.XOR<Prisma.EmployeeNullableScalarRelationFilter, Prisma.EmployeeWhereInput> | null
 }
@@ -252,6 +268,8 @@ export type LeaveStatusHistoryOrderByWithRelationInput = {
   newStatus?: Prisma.SortOrder
   reason?: Prisma.SortOrderInput | Prisma.SortOrder
   changedAt?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
   leave?: Prisma.LeaveApplicationOrderByWithRelationInput
   changedBy?: Prisma.EmployeeOrderByWithRelationInput
 }
@@ -267,6 +285,8 @@ export type LeaveStatusHistoryWhereUniqueInput = Prisma.AtLeast<{
   newStatus?: Prisma.StringFilter<"LeaveStatusHistory"> | string
   reason?: Prisma.StringNullableFilter<"LeaveStatusHistory"> | string | null
   changedAt?: Prisma.DateTimeFilter<"LeaveStatusHistory"> | Date | string
+  createdAt?: Prisma.DateTimeFilter<"LeaveStatusHistory"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"LeaveStatusHistory"> | Date | string
   leave?: Prisma.XOR<Prisma.LeaveApplicationScalarRelationFilter, Prisma.LeaveApplicationWhereInput>
   changedBy?: Prisma.XOR<Prisma.EmployeeNullableScalarRelationFilter, Prisma.EmployeeWhereInput> | null
 }, "historyId">
@@ -279,6 +299,8 @@ export type LeaveStatusHistoryOrderByWithAggregationInput = {
   newStatus?: Prisma.SortOrder
   reason?: Prisma.SortOrderInput | Prisma.SortOrder
   changedAt?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
   _count?: Prisma.LeaveStatusHistoryCountOrderByAggregateInput
   _avg?: Prisma.LeaveStatusHistoryAvgOrderByAggregateInput
   _max?: Prisma.LeaveStatusHistoryMaxOrderByAggregateInput
@@ -297,6 +319,8 @@ export type LeaveStatusHistoryScalarWhereWithAggregatesInput = {
   newStatus?: Prisma.StringWithAggregatesFilter<"LeaveStatusHistory"> | string
   reason?: Prisma.StringNullableWithAggregatesFilter<"LeaveStatusHistory"> | string | null
   changedAt?: Prisma.DateTimeWithAggregatesFilter<"LeaveStatusHistory"> | Date | string
+  createdAt?: Prisma.DateTimeWithAggregatesFilter<"LeaveStatusHistory"> | Date | string
+  updatedAt?: Prisma.DateTimeWithAggregatesFilter<"LeaveStatusHistory"> | Date | string
 }
 
 export type LeaveStatusHistoryCreateInput = {
@@ -304,6 +328,8 @@ export type LeaveStatusHistoryCreateInput = {
   newStatus: string
   reason?: string | null
   changedAt?: Date | string
+  createdAt?: Date | string
+  updatedAt?: Date | string
   leave: Prisma.LeaveApplicationCreateNestedOneWithoutStatusHistoryInput
   changedBy?: Prisma.EmployeeCreateNestedOneWithoutLeaveStatusChangesInput
 }
@@ -316,6 +342,8 @@ export type LeaveStatusHistoryUncheckedCreateInput = {
   newStatus: string
   reason?: string | null
   changedAt?: Date | string
+  createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type LeaveStatusHistoryUpdateInput = {
@@ -323,6 +351,8 @@ export type LeaveStatusHistoryUpdateInput = {
   newStatus?: Prisma.StringFieldUpdateOperationsInput | string
   reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   changedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   leave?: Prisma.LeaveApplicationUpdateOneRequiredWithoutStatusHistoryNestedInput
   changedBy?: Prisma.EmployeeUpdateOneWithoutLeaveStatusChangesNestedInput
 }
@@ -335,6 +365,8 @@ export type LeaveStatusHistoryUncheckedUpdateInput = {
   newStatus?: Prisma.StringFieldUpdateOperationsInput | string
   reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   changedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type LeaveStatusHistoryCreateManyInput = {
@@ -345,6 +377,8 @@ export type LeaveStatusHistoryCreateManyInput = {
   newStatus: string
   reason?: string | null
   changedAt?: Date | string
+  createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type LeaveStatusHistoryUpdateManyMutationInput = {
@@ -352,6 +386,8 @@ export type LeaveStatusHistoryUpdateManyMutationInput = {
   newStatus?: Prisma.StringFieldUpdateOperationsInput | string
   reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   changedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type LeaveStatusHistoryUncheckedUpdateManyInput = {
@@ -362,6 +398,8 @@ export type LeaveStatusHistoryUncheckedUpdateManyInput = {
   newStatus?: Prisma.StringFieldUpdateOperationsInput | string
   reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   changedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type LeaveStatusHistoryListRelationFilter = {
@@ -382,6 +420,8 @@ export type LeaveStatusHistoryCountOrderByAggregateInput = {
   newStatus?: Prisma.SortOrder
   reason?: Prisma.SortOrder
   changedAt?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type LeaveStatusHistoryAvgOrderByAggregateInput = {
@@ -398,6 +438,8 @@ export type LeaveStatusHistoryMaxOrderByAggregateInput = {
   newStatus?: Prisma.SortOrder
   reason?: Prisma.SortOrder
   changedAt?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type LeaveStatusHistoryMinOrderByAggregateInput = {
@@ -408,6 +450,8 @@ export type LeaveStatusHistoryMinOrderByAggregateInput = {
   newStatus?: Prisma.SortOrder
   reason?: Prisma.SortOrder
   changedAt?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type LeaveStatusHistorySumOrderByAggregateInput = {
@@ -505,6 +549,8 @@ export type LeaveStatusHistoryCreateWithoutChangedByInput = {
   newStatus: string
   reason?: string | null
   changedAt?: Date | string
+  createdAt?: Date | string
+  updatedAt?: Date | string
   leave: Prisma.LeaveApplicationCreateNestedOneWithoutStatusHistoryInput
 }
 
@@ -515,6 +561,8 @@ export type LeaveStatusHistoryUncheckedCreateWithoutChangedByInput = {
   newStatus: string
   reason?: string | null
   changedAt?: Date | string
+  createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type LeaveStatusHistoryCreateOrConnectWithoutChangedByInput = {
@@ -554,6 +602,8 @@ export type LeaveStatusHistoryScalarWhereInput = {
   newStatus?: Prisma.StringFilter<"LeaveStatusHistory"> | string
   reason?: Prisma.StringNullableFilter<"LeaveStatusHistory"> | string | null
   changedAt?: Prisma.DateTimeFilter<"LeaveStatusHistory"> | Date | string
+  createdAt?: Prisma.DateTimeFilter<"LeaveStatusHistory"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"LeaveStatusHistory"> | Date | string
 }
 
 export type LeaveStatusHistoryCreateWithoutLeaveInput = {
@@ -561,6 +611,8 @@ export type LeaveStatusHistoryCreateWithoutLeaveInput = {
   newStatus: string
   reason?: string | null
   changedAt?: Date | string
+  createdAt?: Date | string
+  updatedAt?: Date | string
   changedBy?: Prisma.EmployeeCreateNestedOneWithoutLeaveStatusChangesInput
 }
 
@@ -571,6 +623,8 @@ export type LeaveStatusHistoryUncheckedCreateWithoutLeaveInput = {
   newStatus: string
   reason?: string | null
   changedAt?: Date | string
+  createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type LeaveStatusHistoryCreateOrConnectWithoutLeaveInput = {
@@ -606,6 +660,8 @@ export type LeaveStatusHistoryCreateManyChangedByInput = {
   newStatus: string
   reason?: string | null
   changedAt?: Date | string
+  createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type LeaveStatusHistoryUpdateWithoutChangedByInput = {
@@ -613,6 +669,8 @@ export type LeaveStatusHistoryUpdateWithoutChangedByInput = {
   newStatus?: Prisma.StringFieldUpdateOperationsInput | string
   reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   changedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   leave?: Prisma.LeaveApplicationUpdateOneRequiredWithoutStatusHistoryNestedInput
 }
 
@@ -623,6 +681,8 @@ export type LeaveStatusHistoryUncheckedUpdateWithoutChangedByInput = {
   newStatus?: Prisma.StringFieldUpdateOperationsInput | string
   reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   changedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type LeaveStatusHistoryUncheckedUpdateManyWithoutChangedByInput = {
@@ -632,6 +692,8 @@ export type LeaveStatusHistoryUncheckedUpdateManyWithoutChangedByInput = {
   newStatus?: Prisma.StringFieldUpdateOperationsInput | string
   reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   changedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type LeaveStatusHistoryCreateManyLeaveInput = {
@@ -641,6 +703,8 @@ export type LeaveStatusHistoryCreateManyLeaveInput = {
   newStatus: string
   reason?: string | null
   changedAt?: Date | string
+  createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type LeaveStatusHistoryUpdateWithoutLeaveInput = {
@@ -648,6 +712,8 @@ export type LeaveStatusHistoryUpdateWithoutLeaveInput = {
   newStatus?: Prisma.StringFieldUpdateOperationsInput | string
   reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   changedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   changedBy?: Prisma.EmployeeUpdateOneWithoutLeaveStatusChangesNestedInput
 }
 
@@ -658,6 +724,8 @@ export type LeaveStatusHistoryUncheckedUpdateWithoutLeaveInput = {
   newStatus?: Prisma.StringFieldUpdateOperationsInput | string
   reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   changedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type LeaveStatusHistoryUncheckedUpdateManyWithoutLeaveInput = {
@@ -667,6 +735,8 @@ export type LeaveStatusHistoryUncheckedUpdateManyWithoutLeaveInput = {
   newStatus?: Prisma.StringFieldUpdateOperationsInput | string
   reason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   changedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 
@@ -679,6 +749,8 @@ export type LeaveStatusHistorySelect<ExtArgs extends runtime.Types.Extensions.In
   newStatus?: boolean
   reason?: boolean
   changedAt?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
   leave?: boolean | Prisma.LeaveApplicationDefaultArgs<ExtArgs>
   changedBy?: boolean | Prisma.LeaveStatusHistory$changedByArgs<ExtArgs>
 }, ExtArgs["result"]["leaveStatusHistory"]>
@@ -691,6 +763,8 @@ export type LeaveStatusHistorySelectCreateManyAndReturn<ExtArgs extends runtime.
   newStatus?: boolean
   reason?: boolean
   changedAt?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
   leave?: boolean | Prisma.LeaveApplicationDefaultArgs<ExtArgs>
   changedBy?: boolean | Prisma.LeaveStatusHistory$changedByArgs<ExtArgs>
 }, ExtArgs["result"]["leaveStatusHistory"]>
@@ -703,6 +777,8 @@ export type LeaveStatusHistorySelectUpdateManyAndReturn<ExtArgs extends runtime.
   newStatus?: boolean
   reason?: boolean
   changedAt?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
   leave?: boolean | Prisma.LeaveApplicationDefaultArgs<ExtArgs>
   changedBy?: boolean | Prisma.LeaveStatusHistory$changedByArgs<ExtArgs>
 }, ExtArgs["result"]["leaveStatusHistory"]>
@@ -715,9 +791,11 @@ export type LeaveStatusHistorySelectScalar = {
   newStatus?: boolean
   reason?: boolean
   changedAt?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
 }
 
-export type LeaveStatusHistoryOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"historyId" | "leaveId" | "changedById" | "oldStatus" | "newStatus" | "reason" | "changedAt", ExtArgs["result"]["leaveStatusHistory"]>
+export type LeaveStatusHistoryOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"historyId" | "leaveId" | "changedById" | "oldStatus" | "newStatus" | "reason" | "changedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["leaveStatusHistory"]>
 export type LeaveStatusHistoryInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   leave?: boolean | Prisma.LeaveApplicationDefaultArgs<ExtArgs>
   changedBy?: boolean | Prisma.LeaveStatusHistory$changedByArgs<ExtArgs>
@@ -745,6 +823,8 @@ export type $LeaveStatusHistoryPayload<ExtArgs extends runtime.Types.Extensions.
     newStatus: string
     reason: string | null
     changedAt: Date
+    createdAt: Date
+    updatedAt: Date
   }, ExtArgs["result"]["leaveStatusHistory"]>
   composites: {}
 }
@@ -1177,6 +1257,8 @@ export interface LeaveStatusHistoryFieldRefs {
   readonly newStatus: Prisma.FieldRef<"LeaveStatusHistory", 'String'>
   readonly reason: Prisma.FieldRef<"LeaveStatusHistory", 'String'>
   readonly changedAt: Prisma.FieldRef<"LeaveStatusHistory", 'DateTime'>
+  readonly createdAt: Prisma.FieldRef<"LeaveStatusHistory", 'DateTime'>
+  readonly updatedAt: Prisma.FieldRef<"LeaveStatusHistory", 'DateTime'>
 }
     
 

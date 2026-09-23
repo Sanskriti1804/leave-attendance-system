@@ -44,6 +44,8 @@ export type LeaveDateSelectionMinAggregateOutputType = {
   leaveDate: Date | null
   session: string | null
   unit: runtime.Decimal | null
+  createdAt: Date | null
+  updatedAt: Date | null
 }
 
 export type LeaveDateSelectionMaxAggregateOutputType = {
@@ -52,6 +54,8 @@ export type LeaveDateSelectionMaxAggregateOutputType = {
   leaveDate: Date | null
   session: string | null
   unit: runtime.Decimal | null
+  createdAt: Date | null
+  updatedAt: Date | null
 }
 
 export type LeaveDateSelectionCountAggregateOutputType = {
@@ -60,6 +64,8 @@ export type LeaveDateSelectionCountAggregateOutputType = {
   leaveDate: number
   session: number
   unit: number
+  createdAt: number
+  updatedAt: number
   _all: number
 }
 
@@ -82,6 +88,8 @@ export type LeaveDateSelectionMinAggregateInputType = {
   leaveDate?: true
   session?: true
   unit?: true
+  createdAt?: true
+  updatedAt?: true
 }
 
 export type LeaveDateSelectionMaxAggregateInputType = {
@@ -90,6 +98,8 @@ export type LeaveDateSelectionMaxAggregateInputType = {
   leaveDate?: true
   session?: true
   unit?: true
+  createdAt?: true
+  updatedAt?: true
 }
 
 export type LeaveDateSelectionCountAggregateInputType = {
@@ -98,6 +108,8 @@ export type LeaveDateSelectionCountAggregateInputType = {
   leaveDate?: true
   session?: true
   unit?: true
+  createdAt?: true
+  updatedAt?: true
   _all?: true
 }
 
@@ -193,6 +205,8 @@ export type LeaveDateSelectionGroupByOutputType = {
   leaveDate: Date
   session: string
   unit: runtime.Decimal
+  createdAt: Date
+  updatedAt: Date
   _count: LeaveDateSelectionCountAggregateOutputType | null
   _avg: LeaveDateSelectionAvgAggregateOutputType | null
   _sum: LeaveDateSelectionSumAggregateOutputType | null
@@ -224,6 +238,8 @@ export type LeaveDateSelectionWhereInput = {
   leaveDate?: Prisma.DateTimeFilter<"LeaveDateSelection"> | Date | string
   session?: Prisma.StringFilter<"LeaveDateSelection"> | string
   unit?: Prisma.DecimalFilter<"LeaveDateSelection"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  createdAt?: Prisma.DateTimeFilter<"LeaveDateSelection"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"LeaveDateSelection"> | Date | string
   leave?: Prisma.XOR<Prisma.LeaveApplicationScalarRelationFilter, Prisma.LeaveApplicationWhereInput>
 }
 
@@ -233,6 +249,8 @@ export type LeaveDateSelectionOrderByWithRelationInput = {
   leaveDate?: Prisma.SortOrder
   session?: Prisma.SortOrder
   unit?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
   leave?: Prisma.LeaveApplicationOrderByWithRelationInput
 }
 
@@ -246,6 +264,8 @@ export type LeaveDateSelectionWhereUniqueInput = Prisma.AtLeast<{
   leaveDate?: Prisma.DateTimeFilter<"LeaveDateSelection"> | Date | string
   session?: Prisma.StringFilter<"LeaveDateSelection"> | string
   unit?: Prisma.DecimalFilter<"LeaveDateSelection"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  createdAt?: Prisma.DateTimeFilter<"LeaveDateSelection"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"LeaveDateSelection"> | Date | string
   leave?: Prisma.XOR<Prisma.LeaveApplicationScalarRelationFilter, Prisma.LeaveApplicationWhereInput>
 }, "selectionId" | "leaveId_leaveDate">
 
@@ -255,6 +275,8 @@ export type LeaveDateSelectionOrderByWithAggregationInput = {
   leaveDate?: Prisma.SortOrder
   session?: Prisma.SortOrder
   unit?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
   _count?: Prisma.LeaveDateSelectionCountOrderByAggregateInput
   _avg?: Prisma.LeaveDateSelectionAvgOrderByAggregateInput
   _max?: Prisma.LeaveDateSelectionMaxOrderByAggregateInput
@@ -271,12 +293,16 @@ export type LeaveDateSelectionScalarWhereWithAggregatesInput = {
   leaveDate?: Prisma.DateTimeWithAggregatesFilter<"LeaveDateSelection"> | Date | string
   session?: Prisma.StringWithAggregatesFilter<"LeaveDateSelection"> | string
   unit?: Prisma.DecimalWithAggregatesFilter<"LeaveDateSelection"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  createdAt?: Prisma.DateTimeWithAggregatesFilter<"LeaveDateSelection"> | Date | string
+  updatedAt?: Prisma.DateTimeWithAggregatesFilter<"LeaveDateSelection"> | Date | string
 }
 
 export type LeaveDateSelectionCreateInput = {
   leaveDate: Date | string
   session: string
   unit: runtime.Decimal | runtime.DecimalJsLike | number | string
+  createdAt?: Date | string
+  updatedAt?: Date | string
   leave: Prisma.LeaveApplicationCreateNestedOneWithoutDateSelectionsInput
 }
 
@@ -286,12 +312,16 @@ export type LeaveDateSelectionUncheckedCreateInput = {
   leaveDate: Date | string
   session: string
   unit: runtime.Decimal | runtime.DecimalJsLike | number | string
+  createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type LeaveDateSelectionUpdateInput = {
   leaveDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   session?: Prisma.StringFieldUpdateOperationsInput | string
   unit?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   leave?: Prisma.LeaveApplicationUpdateOneRequiredWithoutDateSelectionsNestedInput
 }
 
@@ -301,6 +331,8 @@ export type LeaveDateSelectionUncheckedUpdateInput = {
   leaveDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   session?: Prisma.StringFieldUpdateOperationsInput | string
   unit?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type LeaveDateSelectionCreateManyInput = {
@@ -309,12 +341,16 @@ export type LeaveDateSelectionCreateManyInput = {
   leaveDate: Date | string
   session: string
   unit: runtime.Decimal | runtime.DecimalJsLike | number | string
+  createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type LeaveDateSelectionUpdateManyMutationInput = {
   leaveDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   session?: Prisma.StringFieldUpdateOperationsInput | string
   unit?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type LeaveDateSelectionUncheckedUpdateManyInput = {
@@ -323,6 +359,8 @@ export type LeaveDateSelectionUncheckedUpdateManyInput = {
   leaveDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   session?: Prisma.StringFieldUpdateOperationsInput | string
   unit?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type LeaveDateSelectionListRelationFilter = {
@@ -346,6 +384,8 @@ export type LeaveDateSelectionCountOrderByAggregateInput = {
   leaveDate?: Prisma.SortOrder
   session?: Prisma.SortOrder
   unit?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type LeaveDateSelectionAvgOrderByAggregateInput = {
@@ -360,6 +400,8 @@ export type LeaveDateSelectionMaxOrderByAggregateInput = {
   leaveDate?: Prisma.SortOrder
   session?: Prisma.SortOrder
   unit?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type LeaveDateSelectionMinOrderByAggregateInput = {
@@ -368,6 +410,8 @@ export type LeaveDateSelectionMinOrderByAggregateInput = {
   leaveDate?: Prisma.SortOrder
   session?: Prisma.SortOrder
   unit?: Prisma.SortOrder
+  createdAt?: Prisma.SortOrder
+  updatedAt?: Prisma.SortOrder
 }
 
 export type LeaveDateSelectionSumOrderByAggregateInput = {
@@ -422,6 +466,8 @@ export type LeaveDateSelectionCreateWithoutLeaveInput = {
   leaveDate: Date | string
   session: string
   unit: runtime.Decimal | runtime.DecimalJsLike | number | string
+  createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type LeaveDateSelectionUncheckedCreateWithoutLeaveInput = {
@@ -429,6 +475,8 @@ export type LeaveDateSelectionUncheckedCreateWithoutLeaveInput = {
   leaveDate: Date | string
   session: string
   unit: runtime.Decimal | runtime.DecimalJsLike | number | string
+  createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type LeaveDateSelectionCreateOrConnectWithoutLeaveInput = {
@@ -466,6 +514,8 @@ export type LeaveDateSelectionScalarWhereInput = {
   leaveDate?: Prisma.DateTimeFilter<"LeaveDateSelection"> | Date | string
   session?: Prisma.StringFilter<"LeaveDateSelection"> | string
   unit?: Prisma.DecimalFilter<"LeaveDateSelection"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  createdAt?: Prisma.DateTimeFilter<"LeaveDateSelection"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"LeaveDateSelection"> | Date | string
 }
 
 export type LeaveDateSelectionCreateManyLeaveInput = {
@@ -473,12 +523,16 @@ export type LeaveDateSelectionCreateManyLeaveInput = {
   leaveDate: Date | string
   session: string
   unit: runtime.Decimal | runtime.DecimalJsLike | number | string
+  createdAt?: Date | string
+  updatedAt?: Date | string
 }
 
 export type LeaveDateSelectionUpdateWithoutLeaveInput = {
   leaveDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   session?: Prisma.StringFieldUpdateOperationsInput | string
   unit?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type LeaveDateSelectionUncheckedUpdateWithoutLeaveInput = {
@@ -486,6 +540,8 @@ export type LeaveDateSelectionUncheckedUpdateWithoutLeaveInput = {
   leaveDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   session?: Prisma.StringFieldUpdateOperationsInput | string
   unit?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type LeaveDateSelectionUncheckedUpdateManyWithoutLeaveInput = {
@@ -493,6 +549,8 @@ export type LeaveDateSelectionUncheckedUpdateManyWithoutLeaveInput = {
   leaveDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   session?: Prisma.StringFieldUpdateOperationsInput | string
   unit?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 
@@ -503,6 +561,8 @@ export type LeaveDateSelectionSelect<ExtArgs extends runtime.Types.Extensions.In
   leaveDate?: boolean
   session?: boolean
   unit?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
   leave?: boolean | Prisma.LeaveApplicationDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["leaveDateSelection"]>
 
@@ -512,6 +572,8 @@ export type LeaveDateSelectionSelectCreateManyAndReturn<ExtArgs extends runtime.
   leaveDate?: boolean
   session?: boolean
   unit?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
   leave?: boolean | Prisma.LeaveApplicationDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["leaveDateSelection"]>
 
@@ -521,6 +583,8 @@ export type LeaveDateSelectionSelectUpdateManyAndReturn<ExtArgs extends runtime.
   leaveDate?: boolean
   session?: boolean
   unit?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
   leave?: boolean | Prisma.LeaveApplicationDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["leaveDateSelection"]>
 
@@ -530,9 +594,11 @@ export type LeaveDateSelectionSelectScalar = {
   leaveDate?: boolean
   session?: boolean
   unit?: boolean
+  createdAt?: boolean
+  updatedAt?: boolean
 }
 
-export type LeaveDateSelectionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"selectionId" | "leaveId" | "leaveDate" | "session" | "unit", ExtArgs["result"]["leaveDateSelection"]>
+export type LeaveDateSelectionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"selectionId" | "leaveId" | "leaveDate" | "session" | "unit" | "createdAt" | "updatedAt", ExtArgs["result"]["leaveDateSelection"]>
 export type LeaveDateSelectionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   leave?: boolean | Prisma.LeaveApplicationDefaultArgs<ExtArgs>
 }
@@ -554,6 +620,8 @@ export type $LeaveDateSelectionPayload<ExtArgs extends runtime.Types.Extensions.
     leaveDate: Date
     session: string
     unit: runtime.Decimal
+    createdAt: Date
+    updatedAt: Date
   }, ExtArgs["result"]["leaveDateSelection"]>
   composites: {}
 }
@@ -983,6 +1051,8 @@ export interface LeaveDateSelectionFieldRefs {
   readonly leaveDate: Prisma.FieldRef<"LeaveDateSelection", 'DateTime'>
   readonly session: Prisma.FieldRef<"LeaveDateSelection", 'String'>
   readonly unit: Prisma.FieldRef<"LeaveDateSelection", 'Decimal'>
+  readonly createdAt: Prisma.FieldRef<"LeaveDateSelection", 'DateTime'>
+  readonly updatedAt: Prisma.FieldRef<"LeaveDateSelection", 'DateTime'>
 }
     
 
