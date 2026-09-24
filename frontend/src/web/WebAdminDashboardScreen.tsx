@@ -4,6 +4,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { getSession } from "../../services/auth";
 import { displayName, getMe, listEmployees, listLeaves, type EmployeePublic, type LeaveApplication } from "../../services/resources";
+import { matchesPeopleQuery } from "../utils/workforce";
 import { colors } from "../theme";
 import { WebCard, WebShell } from "./WebShell";
 
@@ -29,6 +30,7 @@ export default function WebAdminDashboardScreen() {
   const [approved, setApproved] = useState<LeaveApplication[]>([]);
   const [query, setQuery] = useState("");
   const [employeeTotal, setEmployeeTotal] = useState<number | null>(null);
+  const [employees, setEmployees] = useState<EmployeePublic[]>([]);
 
   useEffect(() => {
     let cancelled = false;
@@ -43,6 +45,7 @@ export default function WebAdminDashboardScreen() {
       try {
         const people = await listEmployees();
         if (!cancelled) {
+          setEmployees(people.items);
           setEmployeeTotal(people.total ?? people.items.length);
         }
       } catch {
@@ -69,6 +72,15 @@ export default function WebAdminDashboardScreen() {
 
   const today = new Date().toISOString().slice(0, 10);
   const onLeaveToday = approved.filter((row) => row.startDate <= today && row.endDate >= today).length;
+  const term = query.trim().toLowerCase();
+  const matchedPeople = term ? employees.filter((row) => matchesPeopleQuery(row, term)).slice(0, 6) : [];
+  const matchedLeaves = term
+    ? pending.filter((row) => {
+        const person = employees.find((employee) => employee.employeeId === row.employeeId);
+        const haystack = [person ? displayName(person) : "", row.reason, row.status, String(row.leaveId)].join(" ").toLowerCase();
+        return haystack.includes(term);
+      }).slice(0, 6)
+    : [];
 
   return (
     <WebShell title="Admin Dashboard" variant="admin" activeRoute="home">
@@ -87,6 +99,20 @@ export default function WebAdminDashboardScreen() {
           placeholderTextColor={colors.secondary}
         />
       </View>
+      {term ? (
+        <WebCard>
+          <Text style={styles.kicker}>Matches</Text>
+          {matchedPeople.length === 0 && matchedLeaves.length === 0 ? <Text style={styles.meta}>No employees or pending leave match.</Text> : null}
+          {matchedPeople.map((row) => (
+            <Text key={row.employeeId} style={styles.meta}>{displayName(row)} · {row.email}</Text>
+          ))}
+          {matchedLeaves.map((row) => (
+            <Text key={row.leaveId} style={styles.meta}>
+              Leave #{row.leaveId} · {row.status === "SUBMITTED" ? "Approver approval pending" : row.status.replaceAll("_", " ")} · {row.reason}
+            </Text>
+          ))}
+        </WebCard>
+      ) : null}
       <View style={styles.stats}>
         <WebCard style={styles.stat}>
           <MaterialIcons name="groups" size={18} color={colors.accent} />

@@ -18,6 +18,7 @@ import {
   type LeaveApplication,
   type LeaveType,
 } from "../../services/resources";
+import { UserAvatar } from "../components/ui/UserAvatar";
 import { colors } from "../theme";
 import { WebCard, WebShell } from "./WebShell";
 
@@ -110,16 +111,24 @@ export default function WebAdminReviewScreen() {
         </View>
         {queued.map((leave) => (
           <View key={leave.leaveId} style={styles.row}>
-            <View style={styles.colPerson}>
-              <Text style={styles.name}>{employeeName(leave.employeeId)}</Text>
-              <Text style={styles.meta}>{typeOf(leave.leaveTypeId)?.name ?? `Type ${leave.leaveTypeId}`}</Text>
+            <View style={[styles.colPerson, styles.personRow]}>
+              <UserAvatar employee={employees.find((item) => item.employeeId === leave.employeeId) ?? null} size={32} />
+              <View style={{ flex: 1 }}>
+                <Text style={styles.name}>{employeeName(leave.employeeId)}</Text>
+                <Text style={styles.meta}>{typeOf(leave.leaveTypeId)?.name ?? `Type ${leave.leaveTypeId}`}</Text>
+              </View>
             </View>
             <Text style={[styles.meta, styles.colDates]}>
               {leave.startDate} – {leave.endDate}
               {"\n"}
               {leave.numberOfDays}d
             </Text>
-            <Text style={[styles.meta, styles.colStatus]}>{leave.status.replaceAll("_", " ")}</Text>
+            <View style={styles.colStatus}>
+              <Text style={styles.meta}>{leave.status.replaceAll("_", " ")}</Text>
+              {leave.status === "SUBMITTED" && leave.managerApprovalStatus === "PENDING" ? (
+                <Text style={styles.note}>Approver approval pending</Text>
+              ) : null}
+            </View>
             <View style={styles.colReason}>
               <Text style={styles.meta} numberOfLines={2}>
                 {leave.reason}
@@ -174,20 +183,6 @@ export default function WebAdminReviewScreen() {
                     <MaterialIcons name="note-add" size={16} color={colors.secondary} />
                     <Text style={styles.noteBtnText}>Add HR Note</Text>
                   </TouchableOpacity>
-                  {leave.documents?.[0] ? (
-                    <TouchableOpacity
-                      style={styles.downloadBtn}
-                      onPress={() => {
-                        const doc = leave.documents![0]!;
-                        void downloadLeaveDocument(doc.documentId, doc.fileName).catch((err) => {
-                          setError(apiErrorMessage(err));
-                        });
-                      }}
-                    >
-                      <MaterialIcons name="download" size={16} color={colors.onPrimary} />
-                      <Text style={styles.downloadBtnText}>Medical file</Text>
-                    </TouchableOpacity>
-                  ) : null}
                 </View>
               ) : canAct && leave.status === "SUBMITTED" && leave.reportingManagerEmployeeId === me?.employeeId ? (
                 <View style={styles.actionsBox}>
@@ -230,10 +225,25 @@ export default function WebAdminReviewScreen() {
                   </View>
                 </View>
               ) : canAct && leave.status === "SUBMITTED" ? (
-                <Text style={styles.meta}>Awaiting manager</Text>
+                <Text style={styles.meta}>Approver approval pending</Text>
               ) : (
                 <Text style={styles.meta}>—</Text>
               )}
+              {leave.documents?.[0] ? (
+                <TouchableOpacity
+                  style={styles.downloadBtn}
+                  onPress={() => {
+                    const doc = leave.documents?.[0];
+                    if (!doc) return;
+                    void downloadLeaveDocument(doc.documentId, doc.fileName).catch((err) => {
+                      setError(apiErrorMessage(err));
+                    });
+                  }}
+                >
+                  <MaterialIcons name="download" size={16} color={colors.onPrimary} />
+                  <Text style={styles.downloadBtnText}>Medical file</Text>
+                </TouchableOpacity>
+              ) : null}
             </View>
           </View>
         ))}
@@ -291,18 +301,19 @@ const styles = StyleSheet.create({
   th: { fontSize: 11, fontWeight: "700", color: colors.secondary, textTransform: "uppercase", letterSpacing: 0.6 },
   row: {
     flexDirection: "row",
-    alignItems: "center",
+    alignItems: "flex-start",
     paddingHorizontal: 12,
     paddingVertical: 14,
     borderBottomWidth: 1,
     borderBottomColor: colors.surfaceContainerHighest,
     gap: 12,
   },
-  colPerson: { flex: 1.3, minWidth: 140, justifyContent: "center" },
+  colPerson: { flex: 1.3, minWidth: 140, justifyContent: "center", gap: 2 },
+  personRow: { flexDirection: "row", alignItems: "center", gap: 8 },
   colDates: { flex: 1.2, minWidth: 130, justifyContent: "center" },
   colStatus: { flex: 0.9, minWidth: 110, justifyContent: "center" },
   colReason: { flex: 1.6, minWidth: 160, gap: 4, justifyContent: "center" },
-  colActions: { flex: 1.8, minWidth: 280, justifyContent: "center" },
+  colActions: { flex: 1.8, minWidth: 280, justifyContent: "center", gap: 8 },
   name: { fontSize: 14, fontWeight: "700", color: colors.onSurface },
   meta: { fontSize: 12, color: colors.secondary },
   note: { fontSize: 11, color: colors.accentDeep },

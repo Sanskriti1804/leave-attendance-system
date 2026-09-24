@@ -150,6 +150,7 @@ export default function PeopleDirectoryScreen() {
                     <UserAvatar employee={row} size={44} />
                     <Text style={styles.name} numberOfLines={1}>{displayName(row)}</Text>
                     {isTeamLead(items, row.employeeId) ? <Text style={styles.leadTag}>Team Lead</Text> : null}
+                    {isTeamLead(items, row.employeeId) ? <Text style={styles.leadTag}>Approver</Text> : null}
                     <Text style={styles.meta} numberOfLines={1}>
                       {row.role.replaceAll("_", " ")} · EMP-{row.employeeId}
                     </Text>

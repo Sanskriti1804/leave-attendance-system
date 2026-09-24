@@ -9,7 +9,6 @@ import {
   createLeaveDraft,
   displayName,
   getDepartment,
-  getEmployee,
   getMe,
   getOrgSettings,
   getLeave,
@@ -157,13 +156,10 @@ export default function ApplyLeaveScreen() {
             if (!signal?.cancelled) setDepartmentName("—");
           }
         }
-        if (profile.managerId) {
-          try {
-            const manager = await getEmployee(profile.managerId);
-            if (!signal?.cancelled) setManagerName(displayName(manager));
-          } catch {
-            if (!signal?.cancelled) setManagerName("—");
-          }
+        if (profile.managerName) {
+          if (!signal?.cancelled) setManagerName(profile.managerName);
+        } else if (profile.managerId) {
+          setManagerName("—");
         } else {
           setManagerName("HR review");
         }
@@ -262,6 +258,10 @@ export default function ApplyLeaveScreen() {
   const fromDate = sortedDates[0];
   const toDate = waitingForTo ? undefined : sortedDates[sortedDates.length - 1];
   const selectedType = types.find((row) => row.leaveTypeId === leaveTypeId);
+  const showMedicalUpload = /sick/i.test(selectedType?.name ?? "");
+  useEffect(() => {
+    if (!showMedicalUpload) setPickedFile(null);
+  }, [showMedicalUpload]);
   const leaveDayCount = sortedDates.reduce(
     (sum, date) => sum + (dateSessions[date] === "FIRST_HALF" || dateSessions[date] === "SECOND_HALF" ? 0.5 : 1),
     0,
@@ -687,7 +687,7 @@ export default function ApplyLeaveScreen() {
           <Text style={styles.charCount}>{reason.length} / 500</Text>
         </View>
 
-        <TouchableOpacity style={styles.uploadCard} onPress={() => void pickMedicalFile()} activeOpacity={0.8}>
+        {showMedicalUpload ? <TouchableOpacity style={styles.uploadCard} onPress={() => void pickMedicalFile()} activeOpacity={0.8}>
           <View style={styles.uploadHeader}>
             <View style={styles.uploadTitleRow}>
               <MaterialIcons name="attachment" size={18} color={colors.primary} />
@@ -711,7 +711,7 @@ export default function ApplyLeaveScreen() {
             </View>
           </View>
           <Text style={styles.uploadFormats}>Accepted Formats: PDF, JPG, PNG (server cap LEAVE_DOCUMENT_MAX_BYTES)</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> : null}
 
         <View style={styles.attestCard}>
           <View style={styles.attestHeaderRow}>
@@ -745,6 +745,7 @@ export default function ApplyLeaveScreen() {
       <ThemedToast message={toast} />
       <ThemedDialog
         visible={dateBlock != null}
+        compact
         title="Date not available"
         message={dateBlock ?? ""}
         onRequestClose={() => setDateBlock(null)}

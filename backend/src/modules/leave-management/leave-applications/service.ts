@@ -386,7 +386,10 @@ async function applySubmitTransitions(
     return approved;
   }
 
-  if (leave.reportingManagerEmployeeId) {
+  const leadsTeam = await tx.employee.count({
+    where: { managerId: leave.employeeId, obsolete: false, status: "ACTIVE" },
+  });
+  if (!leadsTeam && leave.reportingManagerEmployeeId) {
     return tx.leaveApplication.update({
       where: { leaveId: leave.leaveId },
       data: {

@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, ActivityIndicator } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
-import { ScreenGradient } from "../../components/ui/AppChrome";
+import { ScreenGradient, ThemedDialog } from "../../components/ui/AppChrome";
 import { TopNavBar, useTopNavContentInset } from "../../components/ui/AdminComponents";
 import { EmployeeBottomNavBar } from "../../components/ui/EmployeeComponents";
 import { useRouter } from "expo-router";
@@ -97,6 +97,7 @@ export default function MyLeaveListScreen() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<number | null>(null);
+  const [noteText, setNoteText] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -289,7 +290,9 @@ export default function MyLeaveListScreen() {
                         <MaterialIcons name="chat-bubble" size={16} color={colors.onSurface} />
                         <Text style={styles.commentTitle}>HR CLARIFICATION COMMENT</Text>
                       </View>
-                      <Text style={styles.commentDesc}>“{leave.hrComments}”</Text>
+                      <TouchableOpacity onPress={() => setNoteText(leave.hrComments)}>
+                        <Text style={styles.commentDesc}>“{leave.hrComments}”</Text>
+                      </TouchableOpacity>
                     </View>
                   ) : (
                     <View style={styles.cardReasonBox}>
@@ -298,10 +301,10 @@ export default function MyLeaveListScreen() {
                         <Text style={styles.reasonText}>Reason: {leave.reason}</Text>
                       </View>
                       {leave.hrComments ? (
-                        <View style={styles.fileRow}>
+                        <TouchableOpacity style={styles.fileRow} onPress={() => setNoteText(leave.hrComments)}>
                           <MaterialIcons name="verified-user" size={16} color={colors.secondary} />
-                          <Text style={styles.fileText}>{leave.hrComments}</Text>
-                        </View>
+                          <Text style={styles.fileText}>HR note · View</Text>
+                        </TouchableOpacity>
                       ) : types.find((row) => row.leaveTypeId === leave.leaveTypeId)?.requiresMedicalDocument ? (
                         <View style={styles.fileRow}>
                           <MaterialIcons name="lock" size={15} color={colors.secondary} />
@@ -390,6 +393,14 @@ export default function MyLeaveListScreen() {
             })}
           </View>
         </ScrollView>
+        <ThemedDialog
+          visible={noteText != null}
+          compact
+          title="HR note"
+          message={noteText ?? ""}
+          onRequestClose={() => setNoteText(null)}
+          actions={[{ label: "Close", onPress: () => setNoteText(null), primary: true }]}
+        />
         <EmployeeBottomNavBar activeRoute="leave" />
       </SafeAreaView>
     </ScreenGradient>

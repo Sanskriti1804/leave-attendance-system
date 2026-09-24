@@ -20,6 +20,7 @@ import {
 } from "../../services/resources";
 import { colors } from "../theme";
 import { WebCard, WebShell } from "./WebShell";
+import { ThemedDialog } from "../components/ui/AppChrome";
 
 function matchesFilter(status: string, filter: string): boolean {
   if (filter === "all") return true;
@@ -38,6 +39,7 @@ export default function WebLeaveListScreen() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<number | null>(null);
+  const [noteText, setNoteText] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -119,9 +121,14 @@ export default function WebLeaveListScreen() {
             </Text>
             <Text style={[styles.td, { flex: 0.8 }]}>{leave.numberOfDays}</Text>
             <Text style={[styles.td, { flex: 1.2 }]}>{leave.status.replaceAll("_", " ")}</Text>
-            <Text style={[styles.td, { flex: 2 }]} numberOfLines={2}>
-              {leave.reason}
-            </Text>
+            <View style={{ flex: 2, gap: 4 }}>
+              <Text style={styles.td} numberOfLines={2}>{leave.reason}</Text>
+              {leave.hrComments ? (
+                <TouchableOpacity onPress={() => setNoteText(leave.hrComments)}>
+                  <Text style={styles.link}>View HR note</Text>
+                </TouchableOpacity>
+              ) : null}
+            </View>
             <View style={{ flex: 1, flexDirection: "row", gap: 8, flexWrap: "wrap" }}>
               {leave.status === "DRAFT" && leave.employeeId === me?.employeeId ? (
                 <>
@@ -227,6 +234,14 @@ export default function WebLeaveListScreen() {
         ))}
         {!loading && filtered.length === 0 ? <Text style={styles.meta}>No leave applications for this filter.</Text> : null}
       </WebCard>
+      <ThemedDialog
+        visible={noteText != null}
+        compact
+        title="HR note"
+        message={noteText ?? ""}
+        onRequestClose={() => setNoteText(null)}
+        actions={[{ label: "Close", onPress: () => setNoteText(null), primary: true }]}
+      />
     </WebShell>
   );
 }

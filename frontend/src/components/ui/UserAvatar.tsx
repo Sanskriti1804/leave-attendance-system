@@ -4,10 +4,15 @@ import { colors } from "../../theme";
 import { getProfilePhotoUri, subscribeProfilePhotos } from "../../../services/profilePhoto";
 
 export function employeeInitials(employee?: { firstName?: string | null; lastName?: string | null } | null, fallback = "—"): string {
-  if (!employee?.firstName) {
+  const first = employee?.firstName?.trim() ?? "";
+  const last = employee?.lastName?.trim() ?? "";
+  if (!first && !last) {
     return fallback;
   }
-  return `${employee.firstName[0] ?? ""}${employee.lastName?.[0] ?? ""}`.toUpperCase();
+  const firstParts = first.split(/\s+/).filter(Boolean);
+  const a = firstParts[0]?.[0] ?? "";
+  const b = last[0] ?? firstParts[1]?.[0] ?? "";
+  return `${a}${b}`.toUpperCase() || fallback;
 }
 
 export function UserAvatar({

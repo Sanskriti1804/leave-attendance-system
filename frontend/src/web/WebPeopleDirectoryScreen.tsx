@@ -134,6 +134,7 @@ export default function WebPeopleDirectoryScreen() {
                 <UserAvatar employee={row} size={40} />
                 <Text style={styles.name}>{displayName(row)}</Text>
                 {isTeamLead(items, row.employeeId) ? <Text style={styles.lead}>Team Lead</Text> : null}
+                {isTeamLead(items, row.employeeId) ? <Text style={styles.lead}>Approver</Text> : null}
                 <Text style={styles.meta}>{row.email}</Text>
                 <Text style={styles.td}>EMP-{row.employeeId} · {row.role.replaceAll("_", " ")}</Text>
               </TouchableOpacity>

@@ -106,6 +106,7 @@ export function ThemedDialog({
   children,
   onRequestClose,
   actions,
+  compact,
 }: {
   visible: boolean;
   title: string;
@@ -113,11 +114,12 @@ export function ThemedDialog({
   children?: React.ReactNode;
   onRequestClose: () => void;
   actions?: { label: string; onPress: () => void; primary?: boolean }[];
+  compact?: boolean;
 }) {
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onRequestClose}>
       <Pressable style={styles.dialogBackdrop} onPress={onRequestClose}>
-        <Pressable style={styles.dialogCard} onPress={(event) => event.stopPropagation()}>
+        <Pressable style={[styles.dialogCard, compact && styles.dialogCardCompact]} onPress={(event) => event.stopPropagation()}>
           <View style={styles.dialogHeader}>
             <Text style={styles.dialogTitle}>{title}</Text>
             <TouchableOpacity onPress={onRequestClose} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
@@ -176,6 +178,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "rgba(16,16,16,0.45)",
     justifyContent: "center",
+    alignItems: "center",
     padding: 24,
   },
   dialogCard: {
@@ -192,6 +195,11 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.14,
     shadowRadius: 36,
     elevation: 8,
+  },
+  dialogCardCompact: {
+    alignSelf: "center",
+    width: "100%",
+    maxWidth: 360,
   },
   dialogHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
   dialogTitle: { fontFamily: "Inter", fontSize: 17, fontWeight: "600", color: colors.onSurface, flex: 1, paddingRight: 8 },

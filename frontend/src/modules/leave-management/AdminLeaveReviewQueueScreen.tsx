@@ -279,7 +279,7 @@ export default function AdminLeaveReviewQueueScreen() {
                           <Text style={styles.fileSize}>Employee download blocked (MED-09)</Text>
                         </View>
                       </View>
-                      {canAct ? (
+                      {leave.documents?.[0] ? (
                         <TouchableOpacity
                           style={styles.downloadBtn}
                           onPress={() => {

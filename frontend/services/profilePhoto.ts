@@ -90,7 +90,25 @@ export async function pickAndSaveProfilePhoto(employeeId: number): Promise<strin
   if (result.canceled || !result.assets?.[0]?.uri) {
     return null;
   }
-  const uri = result.assets[0].uri;
+  const uri = await persistablePhotoUri(result.assets[0].uri);
   await setProfilePhotoUri(employeeId, uri);
   return uri;
+}
+
+async function persistablePhotoUri(uri: string): Promise<string> {
+  if (Platform.OS !== "web" || uri.startsWith("data:")) {
+    return uri;
+  }
+  try {
+    const response = await fetch(uri);
+    const blob = await response.blob();
+    return await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result));
+      reader.onerror = () => reject(reader.error);
+      reader.readAsDataURL(blob);
+    });
+  } catch {
+    return uri;
+  }
 }

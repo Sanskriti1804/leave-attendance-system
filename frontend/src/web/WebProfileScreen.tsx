@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
 import { getSession } from "../../services/auth";
-import { apiErrorMessage, displayName, getDepartment, getEmployee, getMe, getOrgSettings, type EmployeePublic, type OrganisationSettings } from "../../services/resources";
+import { apiErrorMessage, displayName, getDepartment, getMe, getOrgSettings, type EmployeePublic, type OrganisationSettings } from "../../services/resources";
 import { colors } from "../theme";
 import { WebCard, WebShell } from "./WebShell";
 import { UserAvatar } from "../components/ui/UserAvatar";
@@ -61,13 +61,8 @@ export default function WebProfileScreen() {
             setDepartmentName(`Dept ${profile.departmentId}`);
           }
         }
-        if (profile?.managerId) {
-          try {
-            const manager = await getEmployee(profile.managerId);
-            if (!cancelled) setManagerName(displayName(manager));
-          } catch {
-            setManagerName("—");
-          }
+        if (!cancelled) {
+          setManagerName(profile?.managerName?.trim() || (profile?.managerId ? "—" : "Not assigned"));
         }
       } catch (err) {
         if (!cancelled) setError(apiErrorMessage(err));

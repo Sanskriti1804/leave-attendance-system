@@ -8,7 +8,6 @@ import {
   apiErrorMessage,
   displayName,
   getDepartment,
-  getEmployee,
   getMe,
   getOrgSettings,
   type EmployeePublic,
@@ -72,15 +71,8 @@ export default function ProfileSettingsScreen() {
             setDepartmentName(`Dept ${profile.departmentId}`);
           }
         }
-        if (profile?.managerId) {
-          try {
-            const manager = await getEmployee(profile.managerId);
-            if (!cancelled) {
-              setManagerName(displayName(manager));
-            }
-          } catch {
-            setManagerName("—");
-          }
+        if (!cancelled) {
+          setManagerName(profile?.managerName?.trim() || (profile?.managerId ? "—" : "Not assigned"));
         }
       } catch (err) {
         if (!cancelled) {

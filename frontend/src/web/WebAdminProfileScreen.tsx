@@ -106,7 +106,7 @@ export default function WebAdminProfileScreen() {
 
   if (panel === "audits") {
     return (
-      <WebShell title="Audits" variant="admin" activeRoute="more">
+      <WebShell title="Recent Activities" variant="admin" activeRoute="more">
         <TouchableOpacity style={styles.backLink} onPress={() => setPanel("profile")}>
           <MaterialIcons name="arrow-back" size={16} color={colors.accentDeep} />
           <Text style={styles.linkInline}>Back to profile</Text>
@@ -135,6 +135,7 @@ export default function WebAdminProfileScreen() {
         />
         <Text style={styles.name}>{name}</Text>
         {showLead ? <Text style={styles.activeTag}>Team Lead</Text> : null}
+        {showLead ? <Text style={styles.activeTag}>Approver</Text> : null}
         {error ? <Text style={styles.label}>{error}</Text> : null}
       </View>
       <View style={styles.stack}>
@@ -230,8 +231,8 @@ export default function WebAdminProfileScreen() {
                 <MaterialIcons name="history" size={18} color={colors.onPrimary} />
               </View>
               <View style={styles.navCopy}>
-                <Text style={styles.navTitle}>Audits</Text>
-                <Text style={styles.navMeta}>Open audit trail</Text>
+              <Text style={styles.navTitle}>Recent Activities</Text>
+              <Text style={styles.navMeta}>Open audit trail</Text>
               </View>
               <MaterialIcons name="chevron-right" size={18} color={colors.secondary} />
             </TouchableOpacity>

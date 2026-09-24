@@ -10,6 +10,7 @@ export type EmployeePublic = {
   departmentId: number;
   role: string;
   managerId: number | null;
+  managerName?: string | null;
   joiningDate: string | null;
   createdAt: string;
   status: string;

@@ -252,7 +252,15 @@ async function main() {
     where: { email: "eve.employee@example.com" },
   });
 
-  for (const report of [bob, dana, eve]) {
+  if (bob.managerId !== dana.employeeId) {
+    await prisma.employee.update({
+      where: { employeeId: bob.employeeId },
+      data: { managerId: dana.employeeId },
+    });
+    console.log("Set Bob's manager to Dana");
+  }
+
+  for (const report of [dana, eve]) {
     if (report.managerId !== alice.employeeId) {
       await prisma.employee.update({
         where: { employeeId: report.employeeId },

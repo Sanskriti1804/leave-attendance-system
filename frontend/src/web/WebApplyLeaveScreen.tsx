@@ -8,7 +8,6 @@ import {
   createLeaveDraft,
   displayName,
   getDepartment,
-  getEmployee,
   getLeave,
   getMe,
   getOrgSettings,
@@ -82,6 +81,7 @@ export default function WebApplyLeaveScreen() {
   const [durationInfoOpen, setDurationInfoOpen] = useState(false);
   const [attested, setAttested] = useState(false);
   const [dateBlock, setDateBlock] = useState<string | null>(null);
+  const [hoverTip, setHoverTip] = useState<{ civil: string; text: string } | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const [viewMonth, setViewMonth] = useState(() => {
     const now = new Date();
@@ -150,13 +150,10 @@ export default function WebApplyLeaveScreen() {
             if (!signal?.cancelled) setDepartmentName("—");
           }
         }
-        if (profile.managerId) {
-          try {
-            const manager = await getEmployee(profile.managerId);
-            if (!signal?.cancelled) setManagerName(displayName(manager));
-          } catch {
-            if (!signal?.cancelled) setManagerName("—");
-          }
+        if (profile.managerName) {
+          if (!signal?.cancelled) setManagerName(profile.managerName);
+        } else if (profile.managerId) {
+          setManagerName("—");
         } else {
           setManagerName("HR review");
         }
@@ -246,6 +243,10 @@ export default function WebApplyLeaveScreen() {
   const fromDate = sortedDates[0];
   const toDate = waitingForTo ? undefined : sortedDates[sortedDates.length - 1];
   const selectedType = types.find((row) => row.leaveTypeId === leaveTypeId);
+  const showMedicalUpload = /sick/i.test(selectedType?.name ?? "");
+  useEffect(() => {
+    if (!showMedicalUpload) setPickedFile(null);
+  }, [showMedicalUpload]);
   const leaveDayCount = sortedDates.reduce(
     (sum, date) => sum + (dateSessions[date] === "FIRST_HALF" || dateSessions[date] === "SECOND_HALF" ? 0.5 : 1),
     0,
@@ -523,11 +524,22 @@ export default function WebApplyLeaveScreen() {
             <View style={styles.calendarGrid}>
               {cells.map((cell) => {
                 if (!cell.inMonth || cell.unavailable) {
+                  const reason = cell.inMonth ? dateUnavailableReason(cell.civil) : null;
                   return (
-                    <View key={cell.civil} style={styles.calCell}>
+                    <View
+                      key={cell.civil}
+                      style={styles.calCell}
+                      onMouseEnter={reason ? () => setHoverTip({ civil: cell.civil, text: reason }) : undefined}
+                      onMouseLeave={reason ? () => setHoverTip((current) => (current?.civil === cell.civil ? null : current)) : undefined}
+                    >
                       <Text style={styles.calTextOff} numberOfLines={1}>
                         {pad2(cell.day)}
                       </Text>
+                      {hoverTip?.civil === cell.civil ? (
+                        <View style={styles.dateTip}>
+                          <Text style={styles.dateTipText}>{hoverTip.text}</Text>
+                        </View>
+                      ) : null}
                     </View>
                   );
                 }
@@ -633,7 +645,7 @@ export default function WebApplyLeaveScreen() {
           <Text style={styles.charCount}>{reason.length} / 500</Text>
         </View>
 
-        <TouchableOpacity style={styles.uploadCard} onPress={pickMedicalFile} activeOpacity={0.8}>
+        {showMedicalUpload ? <TouchableOpacity style={styles.uploadCard} onPress={pickMedicalFile} activeOpacity={0.8}>
           <View style={styles.uploadHeader}>
             <View style={styles.uploadTitleRow}>
               <MaterialIcons name="attachment" size={18} color={colors.primary} />
@@ -657,7 +669,7 @@ export default function WebApplyLeaveScreen() {
             </View>
           </View>
           <Text style={styles.uploadFormats}>Accepted Formats: PDF, JPG, PNG (server cap LEAVE_DOCUMENT_MAX_BYTES)</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> : null}
 
         <View style={styles.attestCard}>
           <View style={styles.attestHeaderRow}>
@@ -688,6 +700,7 @@ export default function WebApplyLeaveScreen() {
       <ThemedToast message={toast} />
       <ThemedDialog
         visible={dateBlock != null}
+        compact
         title="Date not available"
         message={dateBlock ?? ""}
         onRequestClose={() => setDateBlock(null)}
@@ -761,7 +774,21 @@ const styles = StyleSheet.create({
   calendarDayHeader: { width: "14.28%", textAlign: "center", fontSize: 11, fontWeight: "600", color: colors.secondary },
   calendarDayHeaderWeekend: { color: colors.onSurfaceVariant },
   calendarGrid: { flexDirection: "row", flexWrap: "wrap" },
-  calCell: { width: "14.28%", minHeight: 36, alignItems: "center", justifyContent: "center" },
+  calCell: { width: "14.28%", minHeight: 36, alignItems: "center", justifyContent: "center", position: "relative" },
+  dateTip: {
+    position: "absolute",
+    top: 32,
+    left: 0,
+    zIndex: 5,
+    width: 180,
+    backgroundColor: colors.surfaceContainerLowest,
+    borderWidth: 1,
+    borderColor: colors.glassBorder,
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 6,
+  },
+  dateTipText: { fontSize: 11, lineHeight: 15, color: colors.onSurface },
   calTextOff: { textAlign: "center", fontSize: 12, color: "rgba(88, 95, 108, 0.4)" },
   calText: { textAlign: "center", fontSize: 12, color: colors.onSurface },
   calTextWeekend: { textAlign: "center", fontSize: 12, color: "rgba(88, 95, 108, 0.7)" },

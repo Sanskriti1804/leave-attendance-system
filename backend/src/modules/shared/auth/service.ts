@@ -161,7 +161,11 @@ export async function getMe(employeeId: number) {
   if (!employee || employee.obsolete || employee.status !== "ACTIVE") {
     throw new HttpError(404, "NOT_FOUND", "Employee not found or inactive");
   }
-  return toPublicEmployee(employee);
+  const manager = employee.managerId ? await findEmployeeById(employee.managerId) : null;
+  const managerName = manager
+    ? [manager.firstName, manager.lastName].filter(Boolean).join(" ").trim()
+    : null;
+  return { ...toPublicEmployee(employee), managerName: managerName || null };
 }
 
 export async function changePassword(employeeId: number, body: ChangePasswordBody) {

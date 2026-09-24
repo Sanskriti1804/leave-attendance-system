@@ -130,6 +130,11 @@ export default function AdminProfileScreen() {
                 <Text style={styles.activeTagText}>Team Lead</Text>
               </View>
             ) : null}
+            {showLead ? (
+              <View style={styles.activeTag}>
+                <Text style={styles.activeTagText}>Approver</Text>
+              </View>
+            ) : null}
           </View>
 
           <View style={styles.card}>
