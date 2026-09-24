@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -7,6 +7,8 @@ import {
   StyleSheet,
   useWindowDimensions,
   Platform,
+  Modal,
+  Pressable,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -15,6 +17,8 @@ import { colors, pageGradient } from "../theme";
 import type { AdminNavId, EmployeeNavId } from "../components/ui/AppChrome";
 import { ProfileIcon } from "../components/ui/AdminComponents";
 import { webCardChrome, webFont } from "./webUi";
+import { listMyNotifications, type AppNotification } from "../../services/resources";
+import { displayNotification } from "../utils/notifications";
 
 const ADMIN_ITEMS: { id: AdminNavId; label: string; icon: keyof typeof MaterialIcons.glyphMap; route: string }[] = [
   { id: "home", label: "Dashboard", icon: "dashboard", route: "/admin" },
@@ -134,6 +138,7 @@ export function WebShell({
                 {title}
               </Text>
             </View>
+            <TopAlerts />
             <ProfileIcon />
           </View>
           <ScrollView
@@ -145,6 +150,57 @@ export function WebShell({
         </View>
       </View>
     </LinearGradient>
+  );
+}
+
+function TopAlerts() {
+  const [open, setOpen] = useState(false);
+  const [items, setItems] = useState<AppNotification[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    void listMyNotifications()
+      .then((result) => {
+        if (!cancelled) setItems(result.items ?? []);
+      })
+      .catch(() => {
+        if (!cancelled) setItems([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const unread = items.filter((row) => !row.isRead).length;
+
+  return (
+    <>
+      <TouchableOpacity style={styles.bell} onPress={() => setOpen(true)} accessibilityLabel="Notifications">
+        <MaterialIcons name="notifications" size={20} color={colors.onSurface} />
+        {unread > 0 ? (
+          <View style={styles.badge}>
+            <Text style={styles.badgeText}>{unread > 9 ? "9+" : String(unread)}</Text>
+          </View>
+        ) : null}
+      </TouchableOpacity>
+      <Modal visible={open} transparent animationType="fade" onRequestClose={() => setOpen(false)}>
+        <View style={styles.alertLayer}>
+          <Pressable style={styles.alertBackdrop} onPress={() => setOpen(false)} />
+          <View style={styles.alertPanel}>
+            <Text style={styles.alertTitle}>Notifications</Text>
+            {items.length === 0 ? <Text style={styles.alertEmpty}>No notifications yet.</Text> : null}
+            {items.slice(0, 6).map((item) => {
+              const copy = displayNotification(item);
+              return (
+                <Text key={item.notificationId} style={styles.alertItem}>
+                  {copy.title}
+                </Text>
+              );
+            })}
+          </View>
+        </View>
+      </Modal>
+    </>
   );
 }
 
@@ -252,6 +308,49 @@ const styles = StyleSheet.create({
     color: colors.onSurface,
     letterSpacing: -0.4,
   },
+  bell: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: colors.surfaceContainerLowest,
+    borderWidth: 1,
+    borderColor: colors.glassBorder,
+  },
+  badge: {
+    position: "absolute",
+    top: 2,
+    right: 2,
+    minWidth: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: colors.sessionFirstHalf,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 3,
+  },
+  badgeText: { color: colors.onPrimary, fontSize: 9, fontWeight: "700" },
+  alertLayer: { flex: 1 },
+  alertBackdrop: { ...StyleSheet.absoluteFillObject },
+  alertPanel: {
+    position: "absolute",
+    top: 72,
+    right: 28,
+    width: 280,
+    maxWidth: "90%",
+    backgroundColor: colors.surfaceContainerLowest,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: colors.glassBorder,
+    padding: 12,
+    gap: 8,
+    zIndex: 2,
+    elevation: 8,
+  },
+  alertTitle: { fontFamily: webFont, fontSize: 12, fontWeight: "700", color: colors.secondary, textTransform: "uppercase" },
+  alertEmpty: { fontFamily: webFont, fontSize: 13, color: colors.secondary },
+  alertItem: { fontFamily: webFont, fontSize: 13, color: colors.onSurface },
   scroll: { flex: 1 },
   scrollInner: { paddingHorizontal: 28, paddingTop: 8, paddingBottom: 48 },
   scrollInnerCompact: { paddingHorizontal: 16 },

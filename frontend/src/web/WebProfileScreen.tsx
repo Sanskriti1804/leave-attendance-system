@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { getSession } from "../../services/auth";
 import { apiErrorMessage, displayName, getDepartment, getMe, getOrgSettings, type EmployeePublic, type OrganisationSettings } from "../../services/resources";
@@ -78,12 +79,23 @@ export default function WebProfileScreen() {
   return (
     <WebShell title="Profile" variant="employee" activeRoute="profile">
       <View style={styles.heroBlock}>
-        <UserAvatar
-          employee={me}
-          size={104}
-          fallback={avatarInitials(me)}
-          onPress={me ? () => { void pickAndSaveProfilePhoto(me.employeeId); } : undefined}
-        />
+        <View style={styles.avatarWrap}>
+          <UserAvatar
+            employee={me}
+            size={104}
+            fallback={avatarInitials(me)}
+            onPress={me ? () => { void pickAndSaveProfilePhoto(me.employeeId); } : undefined}
+          />
+          {me ? (
+            <TouchableOpacity
+              style={styles.pencil}
+              onPress={() => void pickAndSaveProfilePhoto(me.employeeId)}
+              accessibilityLabel="Change profile picture"
+            >
+              <MaterialIcons name="edit" size={14} color={colors.onPrimary} />
+            </TouchableOpacity>
+          ) : null}
+        </View>
         <Text style={styles.name}>{name}</Text>
         {error ? <Text style={styles.label}>{error}</Text> : null}
       </View>
@@ -136,6 +148,18 @@ const styles = StyleSheet.create({
   stack: { flexDirection: "column", gap: 20, width: "100%", paddingBottom: 8 },
   fullCard: { width: "100%", alignSelf: "stretch", paddingVertical: 8 },
   heroBlock: { alignItems: "center", gap: 14, paddingVertical: 24, width: "100%" },
+  avatarWrap: { width: 104, height: 104 },
+  pencil: {
+    position: "absolute",
+    right: 2,
+    bottom: 2,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: colors.primary,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   name: { fontSize: 22, fontWeight: "700", color: colors.onSurface, textAlign: "center" },
   activeTag: { backgroundColor: colors.accent, color: colors.onPrimary, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4, fontSize: 11, fontWeight: "700", overflow: "hidden", textTransform: "uppercase" },
   cardHead: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 8 },
