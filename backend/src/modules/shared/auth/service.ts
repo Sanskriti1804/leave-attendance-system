@@ -215,7 +215,7 @@ export async function forgotPassword(body: ForgotPasswordBody) {
       if (env.nodeEnv !== "production" && !isEmailDeliveryConfigured()) {
         return {
           message:
-            "Password reset email was not sent. Set RESEND_API_KEY in backend/.env and restart the API.",
+            "Password reset email was not sent. Set SENDGRID_API_KEY in backend/.env and restart the API.",
         };
       }
     } catch (err) {

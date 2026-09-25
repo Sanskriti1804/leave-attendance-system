@@ -65,18 +65,40 @@ export default function WebAttendanceScreen() {
   }, [data, filter]);
 
   const totalPages = Math.max(1, Math.ceil((data?.total ?? 0) / (data?.pageSize ?? 10)));
-  const currentMonth = month === getTodayIST().slice(0, 7);
+  const [monthOpen, setMonthOpen] = useState(false);
+  const monthOptions = useMemo(() => {
+    const options: string[] = [];
+    let cursor = getTodayIST().slice(0, 7);
+    for (let index = 0; index < 12; index += 1) {
+      options.push(cursor);
+      cursor = shiftMonth(cursor, -1);
+    }
+    return options;
+  }, []);
 
   return (
     <WebShell title="Attendance" variant="employee" activeRoute="attendance">
-      <View style={styles.top}>
-        <TouchableOpacity onPress={() => { setMonth((current: string) => shiftMonth(current, -1)); setPage(1); }}>
-          <Text style={styles.link}>Previous</Text>
+      <View style={styles.monthWrap}>
+        <TouchableOpacity style={styles.monthButton} onPress={() => setMonthOpen((open) => !open)} accessibilityLabel="Select month">
+          <Text style={styles.title}>{monthTitle(month)}</Text>
+          <Text style={styles.link}>{monthOpen ? "Close" : "Change month"}</Text>
         </TouchableOpacity>
-        <Text style={styles.title}>{monthTitle(month)}</Text>
-        <TouchableOpacity disabled={currentMonth} onPress={() => { if (!currentMonth) { setMonth((current: string) => shiftMonth(current, 1)); setPage(1); } }}>
-          <Text style={[styles.link, currentMonth && styles.disabled]}>Next</Text>
-        </TouchableOpacity>
+        {monthOpen ? (
+          <View style={styles.monthMenu}>
+            {monthOptions.map((option) => (
+              <TouchableOpacity
+                key={option}
+                onPress={() => {
+                  setMonth(option);
+                  setPage(1);
+                  setMonthOpen(false);
+                }}
+              >
+                <Text style={[styles.link, option === month && styles.monthActive]}>{monthTitle(option)}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        ) : null}
       </View>
       <View style={styles.stats}>
         <WebCard style={styles.stat}><Text style={styles.kicker}>Present</Text><Text style={styles.num}>{data?.summary.totalPresent ?? 0}</Text></WebCard>
@@ -132,6 +154,10 @@ export default function WebAttendanceScreen() {
 
 const styles = StyleSheet.create({
   top: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
+  monthWrap: { gap: 8, alignSelf: "flex-start", maxWidth: "100%" },
+  monthButton: { flexDirection: "row", alignItems: "center", gap: 12, flexWrap: "wrap" },
+  monthMenu: { backgroundColor: colors.surfaceContainerLowest, borderRadius: 12, borderWidth: 1, borderColor: colors.border, padding: 8, gap: 6, minWidth: 220 },
+  monthActive: { color: colors.onSurface },
   title: { fontSize: 18, fontWeight: "700", color: colors.onSurface },
   link: { fontSize: 13, fontWeight: "700", color: colors.accentDeep },
   disabled: { opacity: 0.4 },

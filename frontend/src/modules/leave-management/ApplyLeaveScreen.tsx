@@ -77,6 +77,7 @@ export default function ApplyLeaveScreen() {
   const [types, setTypes] = useState<LeaveType[]>([]);
   const [leaveTypeId, setLeaveTypeId] = useState<number | null>(null);
   const [reason, setReason] = useState("");
+  const [reasonMissing, setReasonMissing] = useState(false);
   const [selectedDates, setSelectedDates] = useState<string[]>([]);
   const [dateSessions, setDateSessions] = useState<Record<string, DaySession>>({});
   const [dateOverrides, setDateOverrides] = useState<Record<string, true>>({});
@@ -372,9 +373,11 @@ export default function ApplyLeaveScreen() {
       return;
     }
     if (!reason.trim()) {
+      if (kind === "submit") setReasonMissing(true);
       setError("Reason is required.");
       return;
     }
+    setReasonMissing(false);
     if (sortedDates.length === 0) {
       setError("Select at least one date.");
       return;
@@ -646,11 +649,14 @@ export default function ApplyLeaveScreen() {
         <View style={styles.reasonCard}>
           <Text style={styles.reasonTitle}>Absence Justification</Text>
           <TextInput
-            style={styles.reasonInput}
+            style={[styles.reasonInput, reasonMissing && styles.reasonInputError]}
             multiline
             numberOfLines={3}
             value={reason}
-            onChangeText={setReason}
+            onChangeText={(value) => {
+              setReason(value);
+              if (value.trim()) setReasonMissing(false);
+            }}
             maxLength={500}
             placeholder="Reason for leave"
             placeholderTextColor={colors.secondary}
@@ -822,7 +828,8 @@ const styles = StyleSheet.create({
   durationBadgeText: { fontSize: 16, fontWeight: '600', color: colors.onPrimary },
   reasonCard: { backgroundColor: colors.surfaceContainerLowest, borderRadius: 16, padding: 16, gap: 8, borderWidth: 1, borderColor: colors.glassBorder },
   reasonTitle: { fontSize: 12, fontWeight: '500', color: colors.onSurface },
-  reasonInput: { backgroundColor: colors.surfaceContainerLow, color: colors.onSurface, fontSize: 14, borderRadius: 12, padding: 12, minHeight: 80, textAlignVertical: 'top' },
+  reasonInput: { backgroundColor: colors.surfaceContainerLow, color: colors.onSurface, fontSize: 14, borderRadius: 12, padding: 12, minHeight: 80, textAlignVertical: 'top', borderWidth: 1, borderColor: 'transparent' },
+  reasonInputError: { borderColor: colors.error },
   charCount: { fontSize: 11, fontWeight: '600', color: colors.secondary },
   uploadCard: { backgroundColor: colors.surfaceContainerLowest, borderRadius: 16, padding: 16, gap: 12, borderWidth: 1, borderColor: colors.glassBorder },
   uploadHeader: { gap: 4 },

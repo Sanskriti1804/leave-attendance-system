@@ -87,7 +87,7 @@ export function WebShell({
           <View style={[styles.sidebar, stacked && styles.sidebarStacked]}>
             {!stacked ? (
               <View style={styles.brandBlock}>
-                <Text style={styles.brand}>LAMS SCG</Text>
+                <Text style={styles.brand}>Symbiotic Consulting Group</Text>
                 <Text style={styles.brandSub}>{variant === "admin" ? "HR Operations" : "Employee portal"}</Text>
               </View>
             ) : null}

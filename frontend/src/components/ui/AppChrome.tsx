@@ -156,19 +156,15 @@ export function ThemedToast({
   message: string | null;
   onDismiss?: () => void;
 }) {
-  if (!message) {
-    return null;
-  }
+  const close = () => onDismiss?.();
   return (
-    <Pressable
-      pointerEvents={onDismiss ? "auto" : "none"}
-      style={onDismiss ? styles.toastDismissLayer : styles.toastBox}
-      onPress={onDismiss}
-    >
-      <View style={onDismiss ? styles.toastBox : undefined} pointerEvents="none">
-        <Text style={styles.toastText}>{message}</Text>
-      </View>
-    </Pressable>
+    <ThemedDialog
+      visible={Boolean(message)}
+      title="Notice"
+      message={message ?? ""}
+      onRequestClose={close}
+      actions={[{ label: "OK", onPress: close, primary: true }]}
+    />
   );
 }
 

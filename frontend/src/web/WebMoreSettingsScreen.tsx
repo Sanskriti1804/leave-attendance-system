@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, Switch, TextInput, TouchableOpacity, Alert } from "react-native";
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert } from "react-native";
 import { useRouter } from "expo-router";
 import { logout } from "../../services/auth";
 import { apiErrorMessage, changePassword, getMe, getOrgSettings, type OrganisationSettings } from "../../services/resources";
@@ -10,9 +10,6 @@ export default function WebMoreSettingsScreen() {
   const router = useRouter();
   const [role, setRole] = useState("employee");
   const [settings, setSettings] = useState<OrganisationSettings | null>(null);
-  const [leaveAlerts, setLeaveAlerts] = useState(true);
-  const [attendanceReminders, setAttendanceReminders] = useState(true);
-  const [hrAnnouncements, setHrAnnouncements] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -44,13 +41,6 @@ export default function WebMoreSettingsScreen() {
           </TouchableOpacity>
         </WebCard>
       ) : null}
-      <WebCard>
-        <Text style={styles.section}>Notification Preferences</Text>
-        <Pref label="Leave status updates" value={leaveAlerts} onChange={setLeaveAlerts} />
-        <Pref label="Attendance & Missed Punch Reminders" value={attendanceReminders} onChange={setAttendanceReminders} />
-        <Pref label="HR Announcements" value={hrAnnouncements} onChange={setHrAnnouncements} />
-        <Text style={styles.meta}>Preference switches apply on this device.</Text>
-      </WebCard>
       <WebCard>
         <Text style={styles.section}>Attendance Preferences</Text>
         <Text style={styles.meta}>Timezone: {settings?.timezone ?? "America/New_York (EST)"}</Text>
@@ -103,15 +93,6 @@ export default function WebMoreSettingsScreen() {
         </TouchableOpacity>
       </WebCard>
     </WebShell>
-  );
-}
-
-function Pref({ label, value, onChange }: { label: string; value: boolean; onChange: (v: boolean) => void }) {
-  return (
-    <View style={styles.pref}>
-      <Text style={styles.body}>{label}</Text>
-      <Switch value={value} onValueChange={onChange} />
-    </View>
   );
 }
 

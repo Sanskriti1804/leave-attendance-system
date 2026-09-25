@@ -114,7 +114,7 @@ export default function LoginScreen() {
                 source={{ uri: "https://lh3.googleusercontent.com/aida/AEtjO1WvXJpikhF3ORODpwSEf_WIYP1zR6qGd9BgV3Iq-mpFkjyJTAq2tzwCOahKanD6vR9cVHrKQpPZExVLPa1vVTYzHTqbo_n04_lyUjB3PQzr12t5gX2klg8tbXAC12uQYQpc3rGVlJwSfgI7_RgpbsgKr5yBVDasxep8sO0RqzB2uMpl0tnBVZrfAYpwwWmsbv4J7_cT5kxTOU6QO3NantBvxeIijfJj7aN2kBLvGNqWIHIraU3I13Vcoxo" }}
                 style={styles.logoIcon}
               />
-              <Text style={styles.logoText}>LAMS SCG</Text>
+              <Text style={styles.logoText}>Symbiotic Consulting Group</Text>
             </View>
             <View style={styles.pulseContainer}>
               <View style={styles.pulseDot} />

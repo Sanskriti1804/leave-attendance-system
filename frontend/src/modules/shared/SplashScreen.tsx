@@ -65,7 +65,7 @@ export default function SplashScreen() {
             />
           </View>
           <Text style={styles.title}>
-            LAMS <Text style={styles.titleSecondary}>SCG</Text>
+            Symbiotic Consulting Group
           </Text>
           <Text style={styles.subtitle}>Leave & Attendance Management System</Text>
         </View>

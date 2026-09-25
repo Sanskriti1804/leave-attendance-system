@@ -42,7 +42,7 @@ export default function WebSplashScreen() {
           style={styles.logo}
         />
         <Text style={styles.title}>
-          LAMS <Text style={styles.muted}>SCG</Text>
+          Symbiotic Consulting Group
         </Text>
         <Text style={styles.sub}>Leave & Attendance Management System</Text>
       </View>

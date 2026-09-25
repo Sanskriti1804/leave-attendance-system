@@ -89,7 +89,7 @@ export default function WebLoginScreen() {
         <View style={styles.brandPane}>
           <Text style={styles.kicker}>Leave & Attendance</Text>
           <Image source={{ uri: LOGO }} style={styles.logo} />
-          <Text style={styles.brand}>LAMS SCG</Text>
+          <Text style={styles.brand}>Symbiotic Consulting Group</Text>
           <Text style={styles.tagline}>Leave & Attendance Management System</Text>
           <Text style={styles.copy}>
             Authenticate with your corporate credentials to access workforce ledgers and attendance punches.
