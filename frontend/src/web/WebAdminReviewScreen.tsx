@@ -128,6 +128,9 @@ export default function WebAdminReviewScreen() {
               {leave.status === "SUBMITTED" && leave.managerApprovalStatus === "PENDING" ? (
                 <Text style={styles.note}>Approver approval pending</Text>
               ) : null}
+              {leave.status === "PENDING_HR_REVIEW" && leave.managerApprovalStatus === "APPROVED" ? (
+                <Text style={styles.note}>Mentor: Approved</Text>
+              ) : null}
             </View>
             <View style={styles.colReason}>
               <Text style={styles.meta} numberOfLines={2}>

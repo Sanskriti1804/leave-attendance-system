@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, KeyboardAvoidingView, Platform } from "react-native";
+import { MaterialIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { apiErrorMessage, submitPasswordReset } from "../../../services/resources";
 import { colors } from "../../theme";
@@ -20,6 +21,8 @@ export default function ResetPasswordScreen() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   const submit = async () => {
     setError(null);
@@ -61,25 +64,35 @@ export default function ResetPasswordScreen() {
         ) : (
           <>
             <Text style={styles.label}>New password</Text>
-            <TextInput
-              style={styles.input}
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-              autoCapitalize="none"
-              placeholder="New password"
-              placeholderTextColor={colors.onSurfaceVariant}
-            />
+            <View style={styles.field}>
+              <TextInput
+                style={styles.input}
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry={!showPassword}
+                autoCapitalize="none"
+                placeholder="New password"
+                placeholderTextColor={colors.onSurfaceVariant}
+              />
+              <TouchableOpacity onPress={() => setShowPassword((value) => !value)} accessibilityLabel="Show password">
+                <MaterialIcons name={showPassword ? "visibility" : "visibility-off"} size={18} color={colors.secondary} />
+              </TouchableOpacity>
+            </View>
             <Text style={styles.label}>Confirm password</Text>
-            <TextInput
-              style={styles.input}
-              value={confirm}
-              onChangeText={setConfirm}
-              secureTextEntry
-              autoCapitalize="none"
-              placeholder="Confirm password"
-              placeholderTextColor={colors.onSurfaceVariant}
-            />
+            <View style={styles.field}>
+              <TextInput
+                style={styles.input}
+                value={confirm}
+                onChangeText={setConfirm}
+                secureTextEntry={!showConfirm}
+                autoCapitalize="none"
+                placeholder="Confirm password"
+                placeholderTextColor={colors.onSurfaceVariant}
+              />
+              <TouchableOpacity onPress={() => setShowConfirm((value) => !value)} accessibilityLabel="Show password">
+                <MaterialIcons name={showConfirm ? "visibility" : "visibility-off"} size={18} color={colors.secondary} />
+              </TouchableOpacity>
+            </View>
             {error ? <Text style={styles.error}>{error}</Text> : null}
             <TouchableOpacity style={styles.button} onPress={() => void submit()} disabled={busy}>
               <Text style={styles.buttonText}>{busy ? "Saving…" : "Update password"}</Text>
@@ -105,14 +118,20 @@ const styles = StyleSheet.create({
   title: { fontSize: 22, fontWeight: "700", color: colors.onSurface },
   copy: { color: colors.onSurfaceVariant, marginBottom: 8 },
   label: { color: colors.onSurface, fontWeight: "600" },
-  input: {
+  field: {
+    flexDirection: "row",
+    alignItems: "center",
     borderWidth: 1,
     borderColor: colors.border,
     borderRadius: 10,
+    paddingRight: 12,
+    backgroundColor: colors.surfaceContainerLow,
+  },
+  input: {
+    flex: 1,
     paddingHorizontal: 12,
     paddingVertical: 12,
     color: colors.onSurface,
-    backgroundColor: colors.surfaceContainerLow,
   },
   button: {
     marginTop: 8,

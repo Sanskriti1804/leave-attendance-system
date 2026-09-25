@@ -3,7 +3,7 @@ import { View, Text, TextInput, StyleSheet, TouchableOpacity, KeyboardAvoidingVi
 import { useRouter } from "expo-router";
 import { MaterialIcons } from '@expo/vector-icons';
 import { ScreenGradient, ThemedDialog, ThemedToast } from "../../components/ui/AppChrome";
-import { login as authLogin, passLogin } from "../../../services/auth";
+import { login as authLogin } from "../../../services/auth";
 import { getMe, requestPasswordReset, apiErrorMessage } from "../../../services/resources";
 import { getPostLoginRoute } from "./SplashScreen";
 import { colors as themeColors } from "../../theme";
@@ -63,19 +63,6 @@ export default function LoginScreen() {
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handlePass = async () => {
-    setError(null);
-    setLoading(true);
-    try {
-      await passLogin();
-      router.replace("/admin");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Pass failed.");
     } finally {
       setLoading(false);
     }
@@ -217,14 +204,7 @@ export default function LoginScreen() {
           </View>
 
           <View style={styles.footer}>
-            <TouchableOpacity 
-              style={styles.passButton} 
-              onPress={handlePass}
-              disabled={loading}
-            >
-              <Text style={styles.passButtonText}>Pass (Dev)</Text>
-            </TouchableOpacity>
-            <Text style={styles.versionText}>Version 4.12.0</Text>
+            <Text style={styles.versionText}>Version 1.0.0</Text>
           </View>
 
         </KeyboardAvoidingView>

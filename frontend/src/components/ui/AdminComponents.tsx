@@ -26,10 +26,16 @@ export function ProfileIcon() {
       .then(setMe)
       .catch(() => setMe(null));
   }, []);
+  const router = useRouter();
+  const profileRoute = me?.role === "employee" ? "/(tabs)/profile" : "/admin-profile";
   return (
-    <View style={styles.profileIconContainer}>
+    <TouchableOpacity
+      style={styles.profileIconContainer}
+      onPress={() => router.push(profileRoute as never)}
+      accessibilityLabel="Profile"
+    >
       <UserAvatar employee={me} size={32} fallback="HR" />
-    </View>
+    </TouchableOpacity>
   );
 }
 

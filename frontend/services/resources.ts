@@ -35,6 +35,7 @@ export type OrganisationSettings = {
   medicalDocOptional1To2Days?: boolean;
   medicalDocExceedsDays?: number;
   maxAdvanceDays: number;
+  leaveApproverEmployeeId?: number | null;
 };
 
 export type LeaveType = {
@@ -195,6 +196,10 @@ export function listHolidays(from?: string, to?: string): Promise<{ items: Holid
 
 export function createHoliday(body: { date: string; name: string }): Promise<Holiday> {
   return authorizedRequest<Holiday>("/api/v1/holidays", { method: "POST", body });
+}
+
+export function deleteHoliday(holidayId: number): Promise<void> {
+  return authorizedRequest<void>(`/api/v1/holidays/${holidayId}`, { method: "DELETE" });
 }
 
 export type AppNotification = {

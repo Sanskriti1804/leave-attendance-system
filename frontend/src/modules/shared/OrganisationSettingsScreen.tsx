@@ -12,6 +12,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import {
   apiErrorMessage,
   createHoliday,
+  deleteHoliday,
   getMe,
   getOrgSettings,
   listHolidays,
@@ -48,6 +49,21 @@ function formatOffs(weeklyOffDow: number[]): string {
     .join(", ");
 }
 
+function recurringHolidayLabel(value: string | null): string {
+  if (!value || value.length < 10) return value ?? "—";
+  const date = new Date(2000, Number(value.slice(5, 7)) - 1, Number(value.slice(8, 10)));
+  return date.toLocaleDateString("en-US", { day: "2-digit", month: "long" });
+}
+
+function recurringHolidayDate(monthDay: string): string | null {
+  const match = /^(\d{2})-(\d{2})$/.exec(monthDay.trim());
+  if (!match) return null;
+  const month = Number(match[1]);
+  const day = Number(match[2]);
+  if (month < 1 || month > 12 || day < 1 || day > 31) return null;
+  return `2000-${match[1]}-${match[2]}`;
+}
+
 export default function OrganisationSettingsScreen() {
   const topInset = useTopNavContentInset();
   const [role, setRole] = useState<string>("admin");
@@ -63,6 +79,7 @@ export default function OrganisationSettingsScreen() {
   const [holidays, setHolidays] = useState<Holiday[]>([]);
   const [holidayDate, setHolidayDate] = useState("");
   const [holidayName, setHolidayName] = useState("");
+  const [editingHolidayId, setEditingHolidayId] = useState<number | null>(null);
 
   const isGuest = role === "guest_admin";
   const canEdit = role === "admin";
@@ -159,17 +176,32 @@ export default function OrganisationSettingsScreen() {
     if (!canEdit) {
       return;
     }
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(holidayDate) || !holidayName.trim()) {
-      setDialog({ title: "Invalid holiday", message: "Use YYYY-MM-DD and a holiday name." });
+    const storedDate = recurringHolidayDate(holidayDate);
+    if (!storedDate || !holidayName.trim()) {
+      setDialog({ title: "Invalid holiday", message: "Use MM-DD and a holiday name." });
       return;
     }
     try {
-      const created = await createHoliday({ date: holidayDate, name: holidayName.trim() });
-      setHolidays((prev) => [...prev, created].sort((a, b) => (a.holidayDate ?? "").localeCompare(b.holidayDate ?? "")));
+      if (editingHolidayId != null) {
+        await deleteHoliday(editingHolidayId);
+        setHolidays((prev) => prev.filter((row) => row.holidayId !== editingHolidayId));
+      }
+      const created = await createHoliday({ date: storedDate, name: holidayName.trim() });
+      setHolidays((prev) => [...prev.filter((row) => row.holidayId !== created.holidayId), created].sort((a, b) => (a.holidayDate ?? "").localeCompare(b.holidayDate ?? "")));
       setHolidayDate("");
       setHolidayName("");
+      setEditingHolidayId(null);
     } catch (err) {
-      setDialog({ title: "Could not add holiday", message: apiErrorMessage(err) });
+      setDialog({ title: "Could not save holiday", message: apiErrorMessage(err) });
+    }
+  };
+
+  const removeHoliday = async (holidayId: number) => {
+    try {
+      await deleteHoliday(holidayId);
+      setHolidays((prev) => prev.filter((row) => row.holidayId !== holidayId));
+    } catch (err) {
+      setDialog({ title: "Could not remove holiday", message: apiErrorMessage(err) });
     }
   };
 
@@ -274,9 +306,27 @@ export default function OrganisationSettingsScreen() {
             <Text style={styles.cardTitle}>Holiday calendar</Text>
             <Text style={styles.meta}>Configured holidays cannot be selected on Apply Leave.</Text>
             {holidays.map((row) => (
-              <Text key={`${row.holidayDate}-${row.holidayName}`} style={styles.infoValue}>
-                {row.holidayDate} · {row.holidayName}
-              </Text>
+              <View key={row.holidayId} style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
+                <Text style={styles.infoValue}>
+                  {recurringHolidayLabel(row.holidayDate)} · {row.holidayName}
+                </Text>
+                {canEdit ? (
+                  <View style={{ flexDirection: "row", gap: 8 }}>
+                    <TouchableOpacity
+                      onPress={() => {
+                        setEditingHolidayId(row.holidayId);
+                        setHolidayDate(row.holidayDate?.slice(5) ?? "");
+                        setHolidayName(row.holidayName);
+                      }}
+                    >
+                      <Text style={styles.meta}>Change</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => void removeHoliday(row.holidayId)}>
+                      <Text style={styles.meta}>Remove</Text>
+                    </TouchableOpacity>
+                  </View>
+                ) : null}
+              </View>
             ))}
             {canEdit ? (
               <>
@@ -284,7 +334,7 @@ export default function OrganisationSettingsScreen() {
                   style={styles.input}
                   value={holidayDate}
                   onChangeText={setHolidayDate}
-                  placeholder="YYYY-MM-DD"
+                  placeholder="MM-DD"
                   placeholderTextColor={colors.secondary}
                 />
                 <TextInput
@@ -295,7 +345,7 @@ export default function OrganisationSettingsScreen() {
                   placeholderTextColor={colors.secondary}
                 />
                 <TouchableOpacity style={styles.save} onPress={() => void addHoliday()}>
-                  <Text style={styles.saveText}>Add holiday</Text>
+                  <Text style={styles.saveText}>{editingHolidayId != null ? "Save holiday" : "Add holiday"}</Text>
                 </TouchableOpacity>
               </>
             ) : null}

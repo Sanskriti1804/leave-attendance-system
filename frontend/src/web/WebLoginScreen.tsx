@@ -3,7 +3,7 @@ import { View, Text, TextInput, StyleSheet, TouchableOpacity, Image } from "reac
 import { useRouter } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { login as authLogin, passLogin } from "../../services/auth";
+import { login as authLogin } from "../../services/auth";
 import { getMe, requestPasswordReset, apiErrorMessage } from "../../services/resources";
 import { getPostLoginRoute } from "../modules/shared/SplashScreen";
 import { colors, pageGradient } from "../theme";
@@ -54,19 +54,6 @@ export default function WebLoginScreen() {
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handlePass = async () => {
-    setError(null);
-    setLoading(true);
-    try {
-      await passLogin();
-      router.replace("/admin");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Pass failed.");
     } finally {
       setLoading(false);
     }
@@ -155,10 +142,7 @@ export default function WebLoginScreen() {
               <Text style={styles.ctaText}>{loading ? "Verifying..." : "Sign in"}</Text>
             </TouchableOpacity>
             <View style={styles.footer}>
-              <Text style={styles.version}>V4.12.0</Text>
-              <TouchableOpacity onPress={() => void handlePass()} disabled={loading}>
-                <Text style={styles.link}>Pass (Dev)</Text>
-              </TouchableOpacity>
+              <Text style={styles.version}>Version 1.0.0</Text>
             </View>
           </WebCard>
         </View>

@@ -14,6 +14,7 @@ export type OrganisationSettings = {
   medicalDocOptional1To2Days: boolean;
   medicalDocExceedsDays: number;
   maxAdvanceDays: number;
+  leaveApproverEmployeeId: number | null;
 };
 
 const DEFAULTS: OrganisationSettings = {
@@ -27,6 +28,7 @@ const DEFAULTS: OrganisationSettings = {
   medicalDocOptional1To2Days: true,
   medicalDocExceedsDays: 2,
   maxAdvanceDays: env.leaveMaxAdvanceDays,
+  leaveApproverEmployeeId: null,
 };
 
 type SettingType = "string" | "number" | "boolean" | "json";
@@ -42,6 +44,7 @@ const KEY_TYPES: Record<keyof OrganisationSettings, SettingType> = {
   medicalDocOptional1To2Days: "boolean",
   medicalDocExceedsDays: "number",
   maxAdvanceDays: "number",
+  leaveApproverEmployeeId: "number",
 };
 
 function parseValue(row: ConfigurationSetting): unknown {
@@ -77,6 +80,11 @@ function toOrganisationSettings(rows: ConfigurationSetting[]): OrganisationSetti
     const parsed = parseValue(row);
     if (key === "workStart" || key === "workEnd") {
       settings[key] = parsed === "" || parsed == null ? null : String(parsed);
+      continue;
+    }
+    if (key === "leaveApproverEmployeeId") {
+      const id = Number(parsed);
+      settings.leaveApproverEmployeeId = Number.isInteger(id) && id > 0 ? id : null;
       continue;
     }
     (settings[key] as unknown) = parsed;

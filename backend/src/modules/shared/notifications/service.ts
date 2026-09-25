@@ -64,11 +64,16 @@ async function ensureAttendanceReminders(employeeId: number): Promise<void> {
   const settings = await getOrganisationSettings();
   const today = todayInIst();
   const weeklyOff = new Set(settings.weeklyOffDow);
+  const holidayRows = await prisma.holiday.findMany({ select: { holidayDate: true } });
+  const holidayMonthDays = new Set(
+    holidayRows
+      .map((row) => row.holidayDate.toISOString().slice(5, 10))
+      .filter((value) => /^\d{2}-\d{2}$/.test(value)),
+  );
   let cursor = addCalendarDays(today, -1);
   let workDay: string | null = null;
   for (let i = 0; i < 14; i += 1) {
-    const holiday = await prisma.holiday.findUnique({ where: { holidayDate: fromCivilDate(cursor) } });
-    if (!weeklyOff.has(isoWeekday(cursor)) && !holiday) {
+    if (!weeklyOff.has(isoWeekday(cursor)) && !holidayMonthDays.has(cursor.slice(5))) {
       workDay = cursor;
       break;
     }

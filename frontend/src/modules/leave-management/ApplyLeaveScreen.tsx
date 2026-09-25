@@ -21,7 +21,7 @@ import {
   type LeaveType,
 } from '../../../services/resources';
 import { UserAvatar } from '../../components/ui/UserAvatar';
-import { addCalendarDaysIST, enumerateCivilRange, getTodayIST, isoWeekdayCivil } from '../../utils/date';
+import { addCalendarDaysIST, getTodayIST, isoWeekdayCivil } from '../../utils/date';
 import { useLocalSearchParams } from 'expo-router';
 import { colors } from '../../theme';
 
@@ -73,7 +73,6 @@ export default function ApplyLeaveScreen() {
   const draftId = Number(params.draftId);
   const editingLeaveId = Number.isInteger(draftId) && draftId > 0 ? draftId : null;
   const [me, setMe] = useState<EmployeePublic | null>(null);
-  const [managerName, setManagerName] = useState("—");
   const [departmentName, setDepartmentName] = useState("—");
   const [types, setTypes] = useState<LeaveType[]>([]);
   const [leaveTypeId, setLeaveTypeId] = useState<number | null>(null);
@@ -86,7 +85,6 @@ export default function ApplyLeaveScreen() {
   const [rangeAnchor, setRangeAnchor] = useState<string | null>(null);
   const [sessionDialog, setSessionDialog] = useState<{ civil: string; step: "mode" | "half" } | null>(null);
   const [durationInfoOpen, setDurationInfoOpen] = useState(false);
-  const [attested, setAttested] = useState(false);
   const [dateBlock, setDateBlock] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const [viewMonth, setViewMonth] = useState(() => {
@@ -118,14 +116,15 @@ export default function ApplyLeaveScreen() {
       setMaxAdvanceDays(settings.maxAdvanceDays);
       setWeeklyOffDow(settings.weeklyOffDow?.length ? settings.weeklyOffDow : [6, 7]);
       try {
-        const holidays = await listHolidays(today, addCalendarDaysIST(today, Math.max(settings.maxAdvanceDays, 366)));
+        const holidays = await listHolidays();
         if (!signal?.cancelled) {
           const names: Record<string, string> = {};
           const dates = new Set<string>();
           for (const row of holidays.items) {
             if (!row.holidayDate) continue;
-            dates.add(row.holidayDate);
-            names[row.holidayDate] = row.holidayName;
+            const monthDay = row.holidayDate.slice(5);
+            dates.add(monthDay);
+            names[monthDay] = row.holidayName;
           }
           setHolidayDates(dates);
           setHolidayNames(names);
@@ -155,13 +154,6 @@ export default function ApplyLeaveScreen() {
           } catch {
             if (!signal?.cancelled) setDepartmentName("—");
           }
-        }
-        if (profile.managerName) {
-          if (!signal?.cancelled) setManagerName(profile.managerName);
-        } else if (profile.managerId) {
-          setManagerName("—");
-        } else {
-          setManagerName("HR review");
         }
       }
       if (editingLeaveId) {
@@ -209,8 +201,9 @@ export default function ApplyLeaveScreen() {
   }, [toast]);
 
   function dateUnavailableReason(civil: string): string | null {
-    if (holidayDates.has(civil)) {
-      const name = holidayNames[civil];
+    const monthDay = civil.slice(5);
+    if (holidayDates.has(monthDay)) {
+      const name = holidayNames[monthDay];
       return name
         ? `This date is an organization holiday (${name}).`
         : "This date is an organization holiday.";
@@ -326,23 +319,6 @@ export default function ApplyLeaveScreen() {
     setDateOverrides((current) => ({ ...current, [civil]: true }));
   }
 
-  function applyRange(from: string, to: string) {
-    const session = durationMode === "HALF" ? "FIRST_HALF" : "FULL_DAY";
-    const range = enumerateCivilRange(from, to).filter((date) => date === from || date === to || !isDateUnavailable(date));
-    const selectable = range.filter((date) => !isDateUnavailable(date));
-    setSelectedDates(selectable);
-    setDateSessions((current) => {
-      const next = { ...current };
-      for (const date of selectable) {
-        if (!dateOverrides[date]) {
-          next[date] = current[date] ?? session;
-        }
-      }
-      return next;
-    });
-    setWaitingForTo(false);
-  }
-
   function openDateSessionMenu(civil: string) {
     const blocked = dateUnavailableReason(civil);
     if (blocked) {
@@ -381,14 +357,13 @@ export default function ApplyLeaveScreen() {
       }
       return;
     }
-    if (rangeAnchor) {
-      applyRange(rangeAnchor, civil);
-      return;
-    }
-    setSelectedDates([civil]);
-    setDateSessions((current) => ({ ...current, [civil]: current[civil] ?? "FULL_DAY" }));
+    setSelectedDates((current) => [...current, civil].sort());
+    setDateSessions((current) => ({
+      ...current,
+      [civil]: current[civil] ?? (durationMode === "HALF" ? "FIRST_HALF" : "FULL_DAY"),
+    }));
     setRangeAnchor(civil);
-    setWaitingForTo(true);
+    setWaitingForTo(false);
   }
 
   async function submit(kind: "submit" | "draft") {
@@ -407,10 +382,6 @@ export default function ApplyLeaveScreen() {
     const blocked = sortedDates.filter((date) => isDateUnavailable(date));
     if (blocked.length > 0) {
       setToast("Leave cannot include past dates, dates beyond the advance limit, weekly offs, or holidays.");
-      return;
-    }
-    if (!attested) {
-      setError("Manager notification attestation is required.");
       return;
     }
     setSubmitting(true);
@@ -479,9 +450,9 @@ export default function ApplyLeaveScreen() {
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                   <Text style={styles.empName}>{loading ? "—" : displayName(me)}</Text>
                 </View>
-                <Text style={styles.empRole}>{departmentName}</Text>
                 <Text style={styles.approverLabel}>Approver</Text>
-                <Text style={styles.approverName}>{managerName}</Text>
+                <Text style={styles.approverName}>{me?.managerName?.trim() || "Not assigned"}</Text>
+                <Text style={styles.empRole}>{departmentName}</Text>
               </View>
             </View>
           </View>
@@ -663,7 +634,7 @@ export default function ApplyLeaveScreen() {
             <View>
               <Text style={styles.durationTitle}>{sortedDates.length} Selected Day{sortedDates.length === 1 ? "" : "s"}</Text>
               <Text style={styles.durationSubtitle}>
-                {fromDate && toDate ? `${formatLong(fromDate)} to ${formatLong(toDate)}` : fromDate ? `${formatLong(fromDate)} to Select date` : "Tap calendar days"}
+                {sortedDates.length > 0 ? sortedDates.map((date) => formatLong(date)).join(", ") : "Tap calendar days"}
               </Text>
             </View>
             <View style={styles.durationBadge}>
@@ -712,21 +683,6 @@ export default function ApplyLeaveScreen() {
           </View>
           <Text style={styles.uploadFormats}>Accepted Formats: PDF, JPG, PNG (server cap LEAVE_DOCUMENT_MAX_BYTES)</Text>
         </TouchableOpacity> : null}
-
-        <View style={styles.attestCard}>
-          <View style={styles.attestHeaderRow}>
-            <Text style={styles.attestTitle}>Operational Notification</Text>
-            <Text style={styles.attestRequired}>Manager proof required</Text>
-          </View>
-          <View style={styles.checkboxRow}>
-            <TouchableOpacity style={[styles.checkbox, attested && styles.checkboxOn]} onPress={() => setAttested((value) => !value)}>
-              {attested ? <MaterialIcons name="check" size={16} color={colors.onPrimary} /> : null}
-            </TouchableOpacity>
-            <Text style={styles.checkboxText}>
-              I have notified my reporting manager and received approval for this leave.
-            </Text>
-          </View>
-        </View>
 
         {loading ? <ActivityIndicator color={colors.primary} /> : null}
         {error ? <Text style={styles.policyText}>{error}</Text> : null}
@@ -853,7 +809,7 @@ const styles = StyleSheet.create({
   legendItem: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 4 },
   legendDot: { width: 12, height: 12, borderRadius: 6 },
   legendText: { fontSize: 12, color: colors.onSurface },
-  dateRangeBox: { flexDirection: 'row', gap: 8, justifyContent: 'space-between' },
+  dateRangeBox: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, justifyContent: 'space-between' },
   dateRangeItem: { width: '48%', backgroundColor: colors.surfaceContainerLow, padding: 10, borderRadius: 12, gap: 4, borderWidth: 1, borderColor: colors.glassBorder },
   dateRangeLabel: { fontSize: 11, fontWeight: '600', color: colors.secondary },
   dateRangeValRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },

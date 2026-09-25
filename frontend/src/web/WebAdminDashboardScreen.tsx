@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, TextInput, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, LayoutAnimation } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { getSession } from "../../services/auth";
@@ -30,6 +30,7 @@ export default function WebAdminDashboardScreen() {
   const [approved, setApproved] = useState<LeaveApplication[]>([]);
   const [query, setQuery] = useState("");
   const [employeeTotal, setEmployeeTotal] = useState<number | null>(null);
+  const [openMetric, setOpenMetric] = useState<"active" | "leave" | "pending" | null>(null);
   const [employees, setEmployees] = useState<EmployeePublic[]>([]);
 
   useEffect(() => {
@@ -114,16 +115,39 @@ export default function WebAdminDashboardScreen() {
         </WebCard>
       ) : null}
       <View style={styles.stats}>
+        <TouchableOpacity
+          style={{ flexGrow: 1, flexBasis: 200 }}
+          onPress={() => {
+            LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+            setOpenMetric((current) => (current === "active" ? null : "active"));
+          }}
+        >
         <WebCard style={styles.stat}>
           <MaterialIcons name="groups" size={18} color={colors.accent} />
           <Text style={styles.kicker}>Active entities</Text>
           <Text style={styles.num}>{employeeTotal ?? 0}</Text>
         </WebCard>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={{ flexGrow: 1, flexBasis: 200 }}
+          onPress={() => {
+            LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+            setOpenMetric((current) => (current === "leave" ? null : "leave"));
+          }}
+        >
         <WebCard style={styles.stat}>
           <MaterialIcons name="event-busy" size={18} color={colors.accent} />
           <Text style={styles.kicker}>On leave today</Text>
           <Text style={styles.num}>{onLeaveToday}</Text>
         </WebCard>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={{ flexGrow: 1, flexBasis: 200 }}
+          onPress={() => {
+            LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+            setOpenMetric((current) => (current === "pending" ? null : "pending"));
+          }}
+        >
         <WebCard style={styles.stat}>
           <MaterialIcons name="pending" size={18} color={colors.accent} />
           <Text style={styles.kicker}>Pending reviews</Text>
@@ -132,7 +156,20 @@ export default function WebAdminDashboardScreen() {
             <Text style={styles.ctaText}>Review Queue</Text>
           </TouchableOpacity>
         </WebCard>
+        </TouchableOpacity>
       </View>
+      {openMetric ? (
+        <WebCard>
+          {(openMetric === "active"
+            ? employees.filter((row) => row.status === "ACTIVE" && !row.obsolete)
+            : openMetric === "leave"
+              ? employees.filter((row) => approved.some((leave) => leave.employeeId === row.employeeId && leave.startDate <= new Date().toISOString().slice(0, 10) && leave.endDate >= new Date().toISOString().slice(0, 10)))
+              : pending.map((row) => employees.find((employee) => employee.employeeId === row.employeeId)).filter((row): row is EmployeePublic => Boolean(row))
+          ).slice(0, 8).map((row) => (
+            <Text key={row.employeeId} style={styles.meta}>{displayName(row)}</Text>
+          ))}
+        </WebCard>
+      ) : null}
       <Text style={styles.section}>HR Quick Actions</Text>
       <View style={styles.actionGrid}>
         {ACTIONS.map((action) => (

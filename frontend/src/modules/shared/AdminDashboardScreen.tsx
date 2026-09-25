@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { View, Text, ScrollView, TouchableOpacity, SafeAreaView, TextInput } from "react-native";
+import { View, Text, ScrollView, TouchableOpacity, SafeAreaView, TextInput, LayoutAnimation, Platform, UIManager } from "react-native";
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from "expo-router";
 import { getSession } from "../../../services/auth";
@@ -17,6 +17,10 @@ import { UIFallbackIndicator } from "../../components/ui/UIFallback";
 import { computeWorkforce, civilToday } from "../../utils/workforce";
 import { colors } from "../../theme";
 
+if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
+
 export default function AdminDashboardScreen() {
   const router = useRouter();
   const topInset = useTopNavContentInset();
@@ -27,6 +31,7 @@ export default function AdminDashboardScreen() {
   const [approved, setApproved] = useState<LeaveApplication[]>([]);
   const [query, setQuery] = useState("");
   const [employeeTotal, setEmployeeTotal] = useState<number | null>(null);
+  const [openMetric, setOpenMetric] = useState<"present" | "leave" | "inactive" | "pending" | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -70,6 +75,26 @@ export default function AdminDashboardScreen() {
 
   const todayCivil = civilToday();
   const workforce = useMemo(() => computeWorkforce(employees, approved, todayCivil), [employees, approved, todayCivil]);
+  const onLeaveIds = new Set(
+    approved.filter((row) => row.status === "APPROVED" && row.startDate <= todayCivil && row.endDate >= todayCivil).map((row) => row.employeeId),
+  );
+  const metricNames =
+    openMetric === "present"
+      ? employees.filter((row) => row.status === "ACTIVE" && !row.obsolete && !onLeaveIds.has(row.employeeId)).map(displayName)
+      : openMetric === "leave"
+        ? employees.filter((row) => onLeaveIds.has(row.employeeId)).map(displayName)
+        : openMetric === "inactive"
+          ? employees.filter((row) => row.status !== "ACTIVE" || row.obsolete).map(displayName)
+          : openMetric === "pending"
+            ? pending.map((row) => {
+                const person = employees.find((employee) => employee.employeeId === row.employeeId);
+                return person ? displayName(person) : `Leave #${row.leaveId}`;
+              })
+            : [];
+  const toggleMetric = (key: "present" | "leave" | "inactive" | "pending") => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setOpenMetric((current) => (current === key ? null : key));
+  };
 
   return (
     <ScreenGradient>
@@ -115,18 +140,26 @@ export default function AdminDashboardScreen() {
 
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 4 }}>
               <View style={{ width: '48%' }}>
-                <StatsCard title="Present" iconName="how-to-reg" iconColor={colors.onSurface} count={employeeTotal === null ? "..." : workforce.present.toString()} subtitle={`${workforce.percent}%`} borderColor={colors.accent} />
+                <StatsCard title="Present" iconName="how-to-reg" iconColor={colors.onSurface} count={employeeTotal === null ? "..." : workforce.present.toString()} subtitle={`${workforce.percent}%`} borderColor={colors.accent} onPress={() => toggleMetric("present")} />
               </View>
               <View style={{ width: '48%' }}>
-                <StatsCard title="On Leave" iconName="event-busy" iconColor={colors.onSurface} count={employeeTotal === null ? "..." : workforce.onLeave.toString()} subtitle="Approved" borderColor={colors.sessionSecondHalf} />
+                <StatsCard title="On Leave" iconName="event-busy" iconColor={colors.onSurface} count={employeeTotal === null ? "..." : workforce.onLeave.toString()} subtitle="Approved" borderColor={colors.sessionSecondHalf} onPress={() => toggleMetric("leave")} />
               </View>
               <View style={{ width: '48%' }}>
-                <StatsCard title="Inactive" iconName="person-off" iconColor={colors.error} countColor={colors.error} count={employeeTotal === null ? "..." : workforce.inactive.toString()} subtitle="Not Active" borderColor={colors.error} />
+                <StatsCard title="Inactive" iconName="person-off" iconColor={colors.error} countColor={colors.error} count={employeeTotal === null ? "..." : workforce.inactive.toString()} subtitle="Not Active" borderColor={colors.error} onPress={() => toggleMetric("inactive")} />
               </View>
               <View style={{ width: '48%' }}>
-                <StatsCard title="Pending reviews" iconName="pending" iconColor={colors.secondary} count={pending.length.toString()} subtitle="Live queue" borderColor={colors.secondary} />
+                <StatsCard title="Pending reviews" iconName="pending" iconColor={colors.secondary} count={pending.length.toString()} subtitle="Live queue" borderColor={colors.secondary} onPress={() => toggleMetric("pending")} />
               </View>
             </View>
+            {openMetric ? (
+              <View style={{ gap: 4 }}>
+                {metricNames.length === 0 ? <Text style={{ fontFamily: "Inter", fontSize: 12, color: colors.secondary }}>No matching people.</Text> : null}
+                {metricNames.slice(0, 8).map((name) => (
+                  <Text key={name} style={{ fontFamily: "Inter", fontSize: 13, color: colors.onSurface }}>{name}</Text>
+                ))}
+              </View>
+            ) : null}
 
             <View style={{ backgroundColor: colors.surfaceContainerLow, borderWidth: 1, borderColor: colors.glassBorder, borderRadius: 14, marginTop: 4, padding: 4 }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 10 }}>

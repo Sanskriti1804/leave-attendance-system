@@ -15,6 +15,7 @@ import { prisma } from "../../shared/db/index.js";
 import { createStatusHistory } from "../leave-status-history/repository.js";
 import { assertMedicalDocumentsForSubmit } from "../leave-documents/service.js";
 import { getLeaveAdvanceConfig, getOrganisationLeaveConfig } from "../leave-policies/service.js";
+import { getOrganisationSettings } from "../../shared/organisation-settings/service.js";
 import { createAuditLog } from "../../shared/audit-logs/repository.js";
 import {
   notifyLeaveDecision,
@@ -164,15 +165,12 @@ function deriveSummary(prepared: PreparedSelection[]) {
 async function assertCountableDates(prepared: PreparedSelection[]): Promise<void> {
   const settings = await getOrganisationLeaveConfig();
   const weekendDows = settings.weeklyOffDow;
-  const holidayDates = new Set<string>();
-  const holidays = await findManyHolidays({
-    from: fromCivilDate(prepared[0]!.civilDate),
-    to: fromCivilDate(prepared[prepared.length - 1]!.civilDate),
-  });
+  const holidayMonthDays = new Set<string>();
+  const holidays = await findManyHolidays({});
   for (const holiday of holidays) {
     const civil = toCivilDate(holiday.holidayDate);
     if (civil) {
-      holidayDates.add(civil);
+      holidayMonthDays.add(civil.slice(5));
     }
   }
 
@@ -184,7 +182,7 @@ async function assertCountableDates(prepared: PreparedSelection[]): Promise<void
         `Selected date ${row.civilDate} falls on a weekly off and cannot be used for leave`,
       );
     }
-    if (holidayDates.has(row.civilDate)) {
+    if (holidayMonthDays.has(row.civilDate.slice(5))) {
       throw new HttpError(
         422,
         "VALIDATION_ERROR",
@@ -353,6 +351,20 @@ async function persistLeave(
   });
 }
 
+async function reportingManagerForSubmit(employee: {
+  employeeId: number;
+  managerId: number | null;
+}): Promise<number | null> {
+  const [reportCount, settings] = await Promise.all([
+    prisma.employee.count({ where: { managerId: employee.employeeId, obsolete: false } }),
+    getOrganisationSettings(),
+  ]);
+  if (reportCount > 0 || settings.leaveApproverEmployeeId === employee.employeeId) {
+    return null;
+  }
+  return employee.managerId;
+}
+
 async function applySubmitTransitions(
   tx: Prisma.TransactionClient,
   leave: LeaveWithSelections,
@@ -386,10 +398,7 @@ async function applySubmitTransitions(
     return approved;
   }
 
-  const leadsTeam = await tx.employee.count({
-    where: { managerId: leave.employeeId, obsolete: false, status: "ACTIVE" },
-  });
-  if (!leadsTeam && leave.reportingManagerEmployeeId) {
+  if (leave.reportingManagerEmployeeId && leave.reportingManagerEmployeeId !== leave.employeeId) {
     return tx.leaveApplication.update({
       where: { leaveId: leave.leaveId },
       data: {
@@ -483,13 +492,14 @@ export async function submitNew(actor: AuthTokenPayload, body: LeaveApplicationB
   const { prepared, warnings } = await validatePayload(body, employee, undefined, {
     requireMedicalDocuments: true,
   });
+  const reportingManagerEmployeeId = await reportingManagerForSubmit(employee);
   const leave = await prisma.$transaction(async (tx) => {
     const draft = await persistLeave(tx, {
       employeeId: employee.employeeId,
       leaveTypeId: body.leaveTypeId,
       reason: body.reason,
       prepared,
-      reportingManagerEmployeeId: employee.managerId,
+      reportingManagerEmployeeId,
       status: "DRAFT",
       managerApprovalStatus: null,
     });
@@ -565,6 +575,7 @@ export async function submitDraft(actor: AuthTokenPayload, leaveId: number) {
   const { prepared, warnings } = await validatePayload(body, employee, leaveId, {
     requireMedicalDocuments: true,
   });
+  const reportingManagerEmployeeId = await reportingManagerForSubmit(employee);
   const submitted = await prisma.$transaction(async (tx) => {
     const updated = await persistLeave(tx, {
       leaveId,
@@ -572,7 +583,7 @@ export async function submitDraft(actor: AuthTokenPayload, leaveId: number) {
       leaveTypeId: body.leaveTypeId,
       reason: body.reason,
       prepared,
-      reportingManagerEmployeeId: employee.managerId,
+      reportingManagerEmployeeId,
       status: "DRAFT",
       managerApprovalStatus: null,
     });

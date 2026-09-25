@@ -5,9 +5,11 @@ import {
   apiErrorMessage,
   displayName,
   getMe,
+  getOrgSettings,
   listDepartments,
   listEmployees,
   patchEmployee,
+  patchOrgSettings,
   type Department,
   type EmployeePublic,
 } from "../../services/resources";
@@ -27,6 +29,7 @@ export default function WebPeopleDirectoryScreen() {
   const [selected, setSelected] = useState<EmployeePublic | null>(null);
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
+  const [approverId, setApproverId] = useState<number | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -34,14 +37,16 @@ export default function WebPeopleDirectoryScreen() {
       try {
         await getSession();
         const profile = await getMe().catch(() => null);
-        const [people, depts] = await Promise.all([
+        const [people, depts, settings] = await Promise.all([
           listEmployees(),
           listDepartments().catch(() => ({ items: [] as Department[] })),
+          getOrgSettings().catch(() => null),
         ]);
         if (!cancelled) {
           setMe(profile);
           setItems(people.items);
           setDepartments(depts.items);
+          setApproverId(settings?.leaveApproverEmployeeId ?? null);
         }
       } catch (err) {
         if (!cancelled) setError(err instanceof Error ? err.message : "Unable to load directory.");
@@ -99,6 +104,45 @@ export default function WebPeopleDirectoryScreen() {
       setSaving(false);
     }
   }
+
+  async function designateApprover(person: EmployeePublic) {
+    if (!canAssign) {
+      setToast("Guest Admin cannot change reporting relationships.");
+      return;
+    }
+    if (approverId != null && approverId !== person.employeeId) {
+      setToast("Only one Approver can exist. Remove the current Approver before assigning another.");
+      return;
+    }
+    setSaving(true);
+    try {
+      const settings = await patchOrgSettings({ leaveApproverEmployeeId: person.employeeId });
+      setApproverId(settings.leaveApproverEmployeeId ?? person.employeeId);
+      setToast(`${displayName(person)} is now the Approver.`);
+    } catch (err) {
+      setToast(apiErrorMessage(err));
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function removeApprover(person: EmployeePublic) {
+    if (!canAssign) {
+      setToast("Guest Admin cannot change reporting relationships.");
+      return;
+    }
+    setSaving(true);
+    try {
+      await patchOrgSettings({ leaveApproverEmployeeId: null });
+      setApproverId(null);
+      setToast(`${displayName(person)} is no longer the Approver.`);
+    } catch (err) {
+      setToast(apiErrorMessage(err));
+    } finally {
+      setSaving(false);
+    }
+  }
+
   const groups = useMemo(() => {
     const filtered = items.filter((row) => matchesPeopleQuery(row, query, deptName(row.departmentId)));
     const byDept = new Map<string, EmployeePublic[]>();
@@ -134,7 +178,7 @@ export default function WebPeopleDirectoryScreen() {
                 <UserAvatar employee={row} size={40} />
                 <Text style={styles.name}>{displayName(row)}</Text>
                 {isTeamLead(items, row.employeeId) ? <Text style={styles.lead}>Team Lead</Text> : null}
-                {isTeamLead(items, row.employeeId) ? <Text style={styles.lead}>Approver</Text> : null}
+                {approverId === row.employeeId ? <Text style={styles.lead}>Approver</Text> : null}
                 <Text style={styles.meta}>{row.email}</Text>
                 <Text style={styles.td}>EMP-{row.employeeId} · {row.role.replaceAll("_", " ")}</Text>
               </TouchableOpacity>
@@ -155,7 +199,10 @@ export default function WebPeopleDirectoryScreen() {
                   ? [
                       isTeamLead(items, selected.employeeId)
                         ? { label: saving ? "Saving…" : "Remove Team Lead", onPress: () => void removeTeamLead(selected), primary: true }
-                        : { label: saving ? "Saving…" : "Designate Team Lead", onPress: () => void designateTeamLead(selected), primary: true },
+                        : { label: saving ? "Saving…" : "Team Lead", onPress: () => void designateTeamLead(selected), primary: true },
+                      approverId === selected.employeeId
+                        ? { label: saving ? "Saving…" : "Remove Approver", onPress: () => void removeApprover(selected) }
+                        : { label: saving ? "Saving…" : "Approver", onPress: () => void designateApprover(selected) },
                     ]
                   : []),
               ]
@@ -165,6 +212,7 @@ export default function WebPeopleDirectoryScreen() {
         {selected ? (
           <View style={{ gap: 6 }}>
             {isTeamLead(items, selected.employeeId) ? <Text style={styles.lead}>Team Lead</Text> : null}
+            {approverId === selected.employeeId ? <Text style={styles.lead}>Approver</Text> : null}
             <Text style={styles.meta}>{selected.email}</Text>
             <Text style={styles.meta}>{deptName(selected.departmentId)}</Text>
             <Text style={styles.td}>{selected.role.replaceAll("_", " ")} · EMP-{selected.employeeId}</Text>

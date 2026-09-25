@@ -353,6 +353,9 @@ export default function AdminLeaveReviewQueueScreen() {
                       <MaterialIcons name="visibility" size={18} color={colors.secondary} />
                       <View>
                         <Text style={styles.guestNoticeTitle}>{isGuest ? "GUEST VIEW ACCESS" : leave.status.replaceAll("_", " ")}</Text>
+                        {leave.status === "PENDING_HR_REVIEW" && leave.managerApprovalStatus === "APPROVED" ? (
+                          <Text style={styles.empRole}>Mentor: Approved</Text>
+                        ) : null}
                         <Text style={styles.guestNoticeSub}>
                           {isGuest ? "Read-only view • Actions restricted to HR Admin" : leave.status}
                         </Text>

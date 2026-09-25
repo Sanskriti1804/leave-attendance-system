@@ -26,7 +26,9 @@ export async function listHolidays(query: ListHolidaysQuery) {
 
 export async function createHoliday(body: CreateHolidayBody) {
   const holidayDate = fromCivilDate(body.date);
-  const existing = await holidayRepository.findHolidayByDate(holidayDate);
+  const monthDay = body.date.slice(5);
+  const existingRows = await holidayRepository.findManyHolidays({});
+  const existing = existingRows.find((row) => toCivilDate(row.holidayDate)?.slice(5) === monthDay);
   if (existing) {
     throw new HttpError(409, "CONFLICT", "A holiday already exists for this date");
   }

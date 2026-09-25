@@ -22,7 +22,7 @@ Manager approval **inside** the application when a reporting manager is assigned
 
 ## User Flow
 
-1. Manager approval occurs in-app when `reportingManagerEmployeeId` is set; otherwise the application goes to HR review. An applicant who is already another active employee’s approver (`managerId`) skips their own manager step and is submitted as `PENDING_HR_REVIEW`. HR can still see `SUBMITTED` requests while approver approval is pending; HR approve/reject stays limited to `PENDING_HR_REVIEW`.
+1. Manager approval occurs in-app when `reportingManagerEmployeeId` is set; otherwise the application goes to HR review. An applicant who is a Team Lead (another active employee’s `managerId`) or the single organisation Approver (`org-settings.leaveApproverEmployeeId`) skips their own manager step and is submitted as `PENDING_HR_REVIEW`. Other employees still follow the manager then HR path. HR can still see `SUBMITTED` requests while approver approval is pending; HR approve/reject stays limited to `PENDING_HR_REVIEW`.
 2. No reporting manager → HR-direct (LV-WF-13).
 3. HR Approve / Reject. HR/Admin self-leave is auto-approved (`SUBMITTED → APPROVED`); they cannot manually approve their own leave.
 4. Approved leave drives attendance (see leave-attendance-integration).
@@ -53,6 +53,8 @@ Submit, approve, reject with comments (NOTIF Confirmed).
 LV-APP-18 HR absence. Who may cancel/withdraw already approved leave.
 
 ## Change History
+
+2026-09-25 — Team Lead and the single organisation Approver submit their own leave directly to HR review. Other employees still use the reporting-manager step when `managerId` is set.
 
 2026-09-22 — Web Leave Review uses aligned columns and distinct action buttons; HR note opens a centered, max-width dialog. Approve/reject/download/manager actions and APIs are unchanged. Android review UI unchanged.
 

@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert } from "reac
 import {
   apiErrorMessage,
   createHoliday,
+  deleteHoliday,
   getMe,
   getOrgSettings,
   listHolidays,
@@ -12,6 +13,21 @@ import {
 } from "../../services/resources";
 import { colors } from "../theme";
 import { WebCard, WebShell } from "./WebShell";
+
+function recurringHolidayLabel(value: string | null): string {
+  if (!value || value.length < 10) return value ?? "—";
+  const date = new Date(2000, Number(value.slice(5, 7)) - 1, Number(value.slice(8, 10)));
+  return date.toLocaleDateString("en-US", { day: "2-digit", month: "long" });
+}
+
+function recurringHolidayDate(monthDay: string): string | null {
+  const match = /^(\d{2})-(\d{2})$/.exec(monthDay.trim());
+  if (!match) return null;
+  const month = Number(match[1]);
+  const day = Number(match[2]);
+  if (month < 1 || month > 12 || day < 1 || day > 31) return null;
+  return `2000-${match[1]}-${match[2]}`;
+}
 
 const DOW = [
   { id: 1, label: "Mon" },
@@ -36,6 +52,7 @@ export default function WebOrganisationSettingsScreen() {
   const [holidays, setHolidays] = useState<Holiday[]>([]);
   const [holidayDate, setHolidayDate] = useState("");
   const [holidayName, setHolidayName] = useState("");
+  const [editingHolidayId, setEditingHolidayId] = useState<number | null>(null);
   const canEdit = role === "admin";
   const isGuest = role === "guest_admin";
 
@@ -117,32 +134,62 @@ export default function WebOrganisationSettingsScreen() {
         </Text>
         {error ? <Text style={styles.err}>{error}</Text> : null}
         {holidays.map((row) => (
-          <Text key={`${row.holidayDate}-${row.holidayName}`} style={styles.meta}>
-            {row.holidayDate} · {row.holidayName}
-          </Text>
+          <View key={row.holidayId} style={styles.row}>
+            <Text style={styles.meta}>
+              {recurringHolidayLabel(row.holidayDate)} · {row.holidayName}
+            </Text>
+            {canEdit ? (
+              <>
+                <TouchableOpacity
+                  onPress={() => {
+                    setEditingHolidayId(row.holidayId);
+                    setHolidayDate(row.holidayDate?.slice(5) ?? "");
+                    setHolidayName(row.holidayName);
+                  }}
+                >
+                  <Text style={styles.meta}>Change</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => {
+                    void deleteHoliday(row.holidayId)
+                      .then(() => setHolidays((prev) => prev.filter((item) => item.holidayId !== row.holidayId)))
+                      .catch((err) => Alert.alert("Could not remove holiday", apiErrorMessage(err)));
+                  }}
+                >
+                  <Text style={styles.meta}>Remove</Text>
+                </TouchableOpacity>
+              </>
+            ) : null}
+          </View>
         ))}
         {canEdit ? (
           <>
-            <TextInput style={styles.input} value={holidayDate} onChangeText={setHolidayDate} placeholder="YYYY-MM-DD" placeholderTextColor={colors.secondary} />
+            <TextInput style={styles.input} value={holidayDate} onChangeText={setHolidayDate} placeholder="MM-DD" placeholderTextColor={colors.secondary} />
             <TextInput style={styles.input} value={holidayName} onChangeText={setHolidayName} placeholder="Holiday name" placeholderTextColor={colors.secondary} />
             <TouchableOpacity
               style={styles.save}
               onPress={async () => {
-                if (!/^\d{4}-\d{2}-\d{2}$/.test(holidayDate) || !holidayName.trim()) {
-                  Alert.alert("Invalid holiday", "Use YYYY-MM-DD and a holiday name.");
+                const storedDate = recurringHolidayDate(holidayDate);
+                if (!storedDate || !holidayName.trim()) {
+                  Alert.alert("Invalid holiday", "Use MM-DD and a holiday name.");
                   return;
                 }
                 try {
-                  const created = await createHoliday({ date: holidayDate, name: holidayName.trim() });
-                  setHolidays((prev) => [...prev, created].sort((a, b) => (a.holidayDate ?? "").localeCompare(b.holidayDate ?? "")));
+                  if (editingHolidayId != null) {
+                    await deleteHoliday(editingHolidayId);
+                    setHolidays((prev) => prev.filter((item) => item.holidayId !== editingHolidayId));
+                  }
+                  const created = await createHoliday({ date: storedDate, name: holidayName.trim() });
+                  setHolidays((prev) => [...prev.filter((item) => item.holidayId !== created.holidayId), created].sort((a, b) => (a.holidayDate ?? "").localeCompare(b.holidayDate ?? "")));
                   setHolidayDate("");
                   setHolidayName("");
+                  setEditingHolidayId(null);
                 } catch (err) {
-                  Alert.alert("Could not add holiday", apiErrorMessage(err));
+                  Alert.alert("Could not save holiday", apiErrorMessage(err));
                 }
               }}
             >
-              <Text style={styles.saveText}>Add holiday</Text>
+              <Text style={styles.saveText}>{editingHolidayId != null ? "Save holiday" : "Add holiday"}</Text>
             </TouchableOpacity>
           </>
         ) : null}
@@ -189,6 +236,7 @@ export default function WebOrganisationSettingsScreen() {
 
 const styles = StyleSheet.create({
   cols: { flexDirection: "row", flexWrap: "wrap", gap: 16 },
+  row: { flexDirection: "row", alignItems: "center", gap: 12, flexWrap: "wrap" },
   col: { flexGrow: 1, flexBasis: 280, gap: 8 },
   h: { fontSize: 16, fontWeight: "700", color: colors.onSurface },
   hero: { fontSize: 22, fontWeight: "700", color: colors.onSurface },
