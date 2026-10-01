@@ -21,7 +21,7 @@ import {
   type LeaveType,
 } from '../../../services/resources';
 import { UserAvatar } from '../../components/ui/UserAvatar';
-import { addCalendarDaysIST, getTodayIST, isoWeekdayCivil } from '../../utils/date';
+import { addCalendarDaysIST, enumerateCivilRange, getTodayIST, isoWeekdayCivil } from '../../utils/date';
 import { useLocalSearchParams } from 'expo-router';
 import { colors } from '../../theme';
 
@@ -84,7 +84,8 @@ export default function ApplyLeaveScreen() {
   const [durationMode, setDurationMode] = useState<DurationMode>("FULL");
   const [waitingForTo, setWaitingForTo] = useState(false);
   const [rangeAnchor, setRangeAnchor] = useState<string | null>(null);
-  const [sessionDialog, setSessionDialog] = useState<{ civil: string; step: "mode" | "half" } | null>(null);
+  const [expandedCivil, setExpandedCivil] = useState<string | null>(null);
+  const [sessionTarget, setSessionTarget] = useState<string | null>(null);
   const [durationInfoOpen, setDurationInfoOpen] = useState(false);
   const [dateBlock, setDateBlock] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
@@ -264,13 +265,15 @@ export default function ApplyLeaveScreen() {
   function applyDurationMode(mode: DurationMode, half: DaySession = "FIRST_HALF") {
     setDurationMode(mode);
     const session = sessionForMode(mode, half);
+    const targets = sessionTarget ? [sessionTarget] : selectedDates;
     setDateSessions((current) => {
       const next = { ...current };
-      for (const date of selectedDates) {
-        if (!dateOverrides[date]) {
-          next[date] = session;
-        }
-      }
+      for (const date of targets) next[date] = session;
+      return next;
+    });
+    setDateOverrides((current) => {
+      const next = { ...current };
+      for (const date of targets) next[date] = true;
       return next;
     });
   }
@@ -320,7 +323,23 @@ export default function ApplyLeaveScreen() {
     setDateOverrides((current) => ({ ...current, [civil]: true }));
   }
 
-  function openDateSessionMenu(civil: string) {
+  function applyRange(from: string, to: string) {
+    const session = durationMode === "HALF" ? "FIRST_HALF" : "FULL_DAY";
+    const selectable = enumerateCivilRange(from, to).filter((date) => !isDateUnavailable(date));
+    setSelectedDates((current) => [...new Set([...current, ...selectable])].sort());
+    setDateSessions((current) => {
+      const next = { ...current };
+      for (const date of selectable) {
+        if (!dateOverrides[date]) next[date] = current[date] ?? session;
+      }
+      return next;
+    });
+    setRangeAnchor(null);
+    setWaitingForTo(false);
+  }
+
+  function openHalfPanel(civil: string) {
+    if (durationMode !== "HALF") return;
     const blocked = dateUnavailableReason(civil);
     if (blocked) {
       setDateBlock(blocked);
@@ -328,9 +347,9 @@ export default function ApplyLeaveScreen() {
     }
     if (!selectedDates.includes(civil)) {
       setSelectedDates((current) => [...current, civil].sort());
-      setDateSessions((current) => ({ ...current, [civil]: "FULL_DAY" }));
+      setDateSessions((current) => ({ ...current, [civil]: "FIRST_HALF" }));
     }
-    setSessionDialog({ civil, step: "mode" });
+    setExpandedCivil(civil);
   }
 
   function toggleDate(civil: string) {
@@ -358,13 +377,17 @@ export default function ApplyLeaveScreen() {
       }
       return;
     }
+    if (rangeAnchor && rangeAnchor !== civil) {
+      applyRange(rangeAnchor, civil);
+      return;
+    }
     setSelectedDates((current) => [...current, civil].sort());
     setDateSessions((current) => ({
       ...current,
       [civil]: current[civil] ?? (durationMode === "HALF" ? "FIRST_HALF" : "FULL_DAY"),
     }));
     setRangeAnchor(civil);
-    setWaitingForTo(false);
+    setWaitingForTo(true);
   }
 
   async function submit(kind: "submit" | "draft") {
@@ -592,13 +615,13 @@ export default function ApplyLeaveScreen() {
                 }
                 if (cell.isToday) {
                   return (
-                    <TouchableOpacity key={cell.civil} style={styles.calCell} onPress={() => toggleDate(cell.civil)} onLongPress={() => openDateSessionMenu(cell.civil)} delayLongPress={400}>
+                    <TouchableOpacity key={cell.civil} style={styles.calCell} onPress={() => toggleDate(cell.civil)} onLongPress={() => openHalfPanel(cell.civil)} delayLongPress={400}>
                       <Text style={styles.calTextTodayStr} numberOfLines={1}>{pad2(cell.day)}</Text>
                     </TouchableOpacity>
                   );
                 }
                 return (
-                  <TouchableOpacity key={cell.civil} style={styles.calCell} onPress={() => toggleDate(cell.civil)} onLongPress={() => openDateSessionMenu(cell.civil)} delayLongPress={400}>
+                  <TouchableOpacity key={cell.civil} style={styles.calCell} onPress={() => toggleDate(cell.civil)} onLongPress={() => openHalfPanel(cell.civil)} delayLongPress={400}>
                     <Text style={cell.isWeekend ? styles.calTextWeekend : styles.calText} numberOfLines={1}>{pad2(cell.day)}</Text>
                   </TouchableOpacity>
                 );
@@ -616,6 +639,31 @@ export default function ApplyLeaveScreen() {
             </View>
           </View>
 
+          {sortedDates.length > 0 ? (
+            <View style={styles.capsuleRow}>
+              {sortedDates.map((date) => (
+                <View key={date} style={[styles.capsule, sessionTarget === date && styles.capsuleOn]}>
+                  <TouchableOpacity onPress={() => setSessionTarget(date)}>
+                    <Text style={styles.capsuleText}>{formatLong(date)}</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={() => { toggleDate(date); if (sessionTarget === date) setSessionTarget(null); }} accessibilityLabel={`Remove ${formatLong(date)}`}>
+                    <Text style={styles.capsuleText}>×</Text>
+                  </TouchableOpacity>
+                </View>
+              ))}
+            </View>
+          ) : null}
+          {expandedCivil && durationMode === "HALF" ? (
+            <View style={styles.halfPanel}>
+              <Text style={styles.capsuleText}>{formatLong(expandedCivil)}</Text>
+              <TouchableOpacity style={styles.capsule} onPress={() => setDateSession(expandedCivil, "FIRST_HALF")}>
+                <Text style={styles.capsuleText}>First Half</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.capsule} onPress={() => setDateSession(expandedCivil, "SECOND_HALF")}>
+                <Text style={styles.capsuleText}>Second Half</Text>
+              </TouchableOpacity>
+            </View>
+          ) : null}
           <View style={styles.dateRangeBox}>
             <View style={styles.dateRangeItem}>
               <Text style={styles.dateRangeLabel}>FROM (INCLUSIVE)</Text>
@@ -714,23 +762,6 @@ export default function ApplyLeaveScreen() {
         actions={[{ label: "OK", onPress: () => setDateBlock(null), primary: true }]}
       />
       <ThemedDialog
-        visible={sessionDialog != null}
-        title={sessionDialog ? formatLong(sessionDialog.civil) : "Session"}
-        message={sessionDialog?.step === "half" ? "Choose First Half or Second Half" : "Full Day or Half Day"}
-        onRequestClose={() => setSessionDialog(null)}
-        actions={
-          sessionDialog?.step === "half"
-            ? [
-                { label: "First Half", onPress: () => { if (sessionDialog) setDateSession(sessionDialog.civil, "FIRST_HALF"); setSessionDialog(null); }, primary: true },
-                { label: "Second Half", onPress: () => { if (sessionDialog) setDateSession(sessionDialog.civil, "SECOND_HALF"); setSessionDialog(null); } },
-              ]
-            : [
-                { label: "Full Day", onPress: () => { if (sessionDialog) setDateSession(sessionDialog.civil, "FULL_DAY"); setSessionDialog(null); }, primary: true },
-                { label: "Half Day", onPress: () => setSessionDialog((current) => (current ? { ...current, step: "half" } : null)) },
-              ]
-        }
-      />
-      <ThemedDialog
         visible={durationInfoOpen}
         title="Leave Duration Mode"
         onRequestClose={() => setDurationInfoOpen(false)}
@@ -811,6 +842,11 @@ const styles = StyleSheet.create({
   calTextSelStr: { color: colors.onPrimary, fontSize: 12, fontWeight: '500' },
   calTextSelHalfStr: { color: colors.onSurface, fontSize: 12, fontWeight: '500' },
   halfDot: { width: 5, height: 5, borderRadius: 2.5, marginTop: 2 },
+  capsuleRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  capsule: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 999, backgroundColor: colors.surfaceContainerLowest, borderWidth: 1, borderColor: colors.border },
+  capsuleOn: { borderColor: colors.primary },
+  capsuleText: { fontSize: 12, fontWeight: '600', color: colors.onSurface },
+  halfPanel: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 8 },
   calendarLegend: { flexDirection: 'row', gap: 8, paddingTop: 8, borderTopWidth: 1, borderTopColor: colors.surfaceContainer, paddingHorizontal: 4 },
   legendItem: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 4 },
   legendDot: { width: 12, height: 12, borderRadius: 6 },

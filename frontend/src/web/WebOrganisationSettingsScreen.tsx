@@ -126,39 +126,48 @@ export default function WebOrganisationSettingsScreen() {
         </WebCard>
       </View>
       <WebCard>
-        <Text style={styles.h}>Medical & Calendar Rules</Text>
-        <Text style={styles.meta}>Medical certificate when leave exceeds {settings?.medicalDocExceedsDays ?? 2} days</Text>
-        <Text style={styles.meta}>
-          Weekends {settings?.leaveCountExcludesWeekends ? "excluded" : "included"} · Holidays{" "}
-          {settings?.leaveCountExcludesHolidays ? "excluded" : "included"}
-        </Text>
+        <Text style={styles.h}>Medical Rules</Text>
+        <View style={styles.ruleCard}>
+          <Text style={styles.ruleLabel}>Medical certificate</Text>
+          <Text style={styles.meta}>Required when leave exceeds {settings?.medicalDocExceedsDays ?? 2} days</Text>
+        </View>
+        <Text style={styles.h}>Calendar Rules</Text>
+        <View style={styles.ruleCard}>
+          <Text style={styles.ruleLabel}>Weekends</Text>
+          <Text style={styles.meta}>{settings?.leaveCountExcludesWeekends ? "Excluded from the day count" : "Included in the day count"}</Text>
+        </View>
+        <View style={styles.ruleCard}>
+          <Text style={styles.ruleLabel}>Holidays</Text>
+          <Text style={styles.meta}>{settings?.leaveCountExcludesHolidays ? "Excluded from the day count" : "Included in the day count"}</Text>
+        </View>
         {error ? <Text style={styles.err}>{error}</Text> : null}
         {holidays.map((row) => (
-          <View key={row.holidayId} style={styles.row}>
-            <Text style={styles.meta}>
-              {recurringHolidayLabel(row.holidayDate)} · {row.holidayName}
-            </Text>
+          <View key={row.holidayId} style={styles.ruleCard}>
+            <Text style={styles.ruleLabel}>{row.holidayName}</Text>
+            <Text style={styles.meta}>{recurringHolidayLabel(row.holidayDate)}</Text>
             {canEdit ? (
-              <>
+              <View style={styles.row}>
                 <TouchableOpacity
+                  style={styles.ruleBtn}
                   onPress={() => {
                     setEditingHolidayId(row.holidayId);
                     setHolidayDate(row.holidayDate?.slice(5) ?? "");
                     setHolidayName(row.holidayName);
                   }}
                 >
-                  <Text style={styles.meta}>Change</Text>
+                  <Text style={styles.ruleBtnText}>Change</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
+                  style={styles.ruleBtn}
                   onPress={() => {
                     void deleteHoliday(row.holidayId)
                       .then(() => setHolidays((prev) => prev.filter((item) => item.holidayId !== row.holidayId)))
                       .catch((err) => Alert.alert("Could not remove holiday", apiErrorMessage(err)));
                   }}
                 >
-                  <Text style={styles.meta}>Remove</Text>
+                  <Text style={styles.ruleBtnText}>Remove</Text>
                 </TouchableOpacity>
-              </>
+              </View>
             ) : null}
           </View>
         ))}
@@ -238,7 +247,11 @@ const styles = StyleSheet.create({
   cols: { flexDirection: "row", flexWrap: "wrap", gap: 16 },
   row: { flexDirection: "row", alignItems: "center", gap: 12, flexWrap: "wrap" },
   col: { flexGrow: 1, flexBasis: 280, gap: 8 },
-  h: { fontSize: 16, fontWeight: "700", color: colors.onSurface },
+  h: { fontSize: 16, fontWeight: "700", color: colors.onSurface, marginTop: 4 },
+  ruleCard: { padding: 12, borderRadius: 12, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surfaceContainerLow, gap: 4 },
+  ruleLabel: { fontSize: 13, fontWeight: "700", color: colors.onSurface },
+  ruleBtn: { minHeight: 36, paddingHorizontal: 12, borderRadius: 8, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surfaceContainerLowest, alignItems: "center", justifyContent: "center" },
+  ruleBtnText: { fontSize: 12, fontWeight: "600", color: colors.onSurface },
   hero: { fontSize: 22, fontWeight: "700", color: colors.onSurface },
   meta: { fontSize: 12, color: colors.secondary },
   input: { minHeight: 44, borderWidth: 1, borderColor: colors.border, borderRadius: 8, paddingHorizontal: 10, color: colors.onSurface, backgroundColor: colors.surfaceContainerLow },

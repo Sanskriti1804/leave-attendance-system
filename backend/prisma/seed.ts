@@ -285,8 +285,7 @@ async function main() {
   await ensureLeavePolicies(leaveTypes);
   await ensureOrganisationSettings();
   await ensureHolidays();
-  await ensureSampleLeaves(bob.employeeId, alice.employeeId, leaveTypes, "bob");
-  await ensureSampleLeaves(dana.employeeId, alice.employeeId, leaveTypes, "dana");
+  await clearSeededLeaveApplications();
   await ensureAttendanceAndCorrections({
     bobId: bob.employeeId,
     danaId: dana.employeeId,
@@ -406,6 +405,18 @@ async function ensureHolidays() {
     await prisma.holiday.create({ data: holiday });
     console.log(`Created Holiday: ${holiday.holidayName}`);
   }
+}
+
+async function clearSeededLeaveApplications() {
+  const seeded = await prisma.leaveApplication.findMany({
+    where: { reason: { startsWith: "[seed]" } },
+    select: { leaveId: true },
+  });
+  if (seeded.length === 0) return;
+  await prisma.leaveApplication.deleteMany({
+    where: { leaveId: { in: seeded.map((row) => row.leaveId) } },
+  });
+  console.log(`Removed ${seeded.length} seeded leave application(s).`);
 }
 
 async function ensureSampleLeaves(

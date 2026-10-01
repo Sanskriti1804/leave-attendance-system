@@ -63,6 +63,10 @@ export default function WebLeaveListScreen() {
 
   useEffect(() => {
     void load();
+    if (typeof window === "undefined") return;
+    const onFocus = () => void load();
+    window.addEventListener("focus", onFocus);
+    return () => window.removeEventListener("focus", onFocus);
   }, [load]);
 
   const typeName = (leaveTypeId: number) => types.find((row) => row.leaveTypeId === leaveTypeId)?.name ?? `Type ${leaveTypeId}`;

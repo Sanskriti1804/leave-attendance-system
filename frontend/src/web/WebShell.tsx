@@ -163,7 +163,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 20,
     paddingHorizontal: 12,
-    backgroundColor: colors.navBg,
+    backgroundColor: colors.primary,
     borderRadius: 18,
     borderWidth: 1,
     borderColor: colors.navBorder,

@@ -1,10 +1,10 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from "react-native";
+import React, { useCallback, useMemo, useState } from "react";
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, RefreshControl } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { ScreenGradient, ThemedDialog } from "../../components/ui/AppChrome";
 import { TopNavBar, useTopNavContentInset } from "../../components/ui/AdminComponents";
 import { EmployeeBottomNavBar } from "../../components/ui/EmployeeComponents";
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import { getSession } from "../../../services/auth";
 import { formatDateTimeIST } from "../../utils/date";
 import {
@@ -99,8 +99,10 @@ export default function MyLeaveListScreen() {
   const [busyId, setBusyId] = useState<number | null>(null);
   const [noteText, setNoteText] = useState<string | null>(null);
 
-  const load = useCallback(async () => {
-    setLoading(true);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const load = useCallback(async (silent = false) => {
+    if (!silent) setLoading(true);
     setError(null);
     try {
       const session = await getSession();
@@ -121,8 +123,16 @@ export default function MyLeaveListScreen() {
     }
   }, []);
 
-  useEffect(() => {
-    void load();
+  useFocusEffect(
+    useCallback(() => {
+      void load();
+    }, [load]),
+  );
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await load(true);
+    setRefreshing(false);
   }, [load]);
 
   const typeName = (leaveTypeId: number) =>
@@ -203,7 +213,11 @@ export default function MyLeaveListScreen() {
       <View style={styles.safeArea}>
         <TopNavBar title="Leave List" showBack onBack={() => router.push("/(tabs)")} />
 
-        <ScrollView style={styles.container} contentContainerStyle={[styles.content, { paddingTop: topInset }]}>
+        <ScrollView
+          style={styles.container}
+          contentContainerStyle={[styles.content, { paddingTop: topInset }]}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => void onRefresh()} />}
+        >
           <View style={styles.topRow}>
             <View style={{ flex: 1, paddingRight: 12 }}>
               <View style={{ flexDirection: "row", alignItems: "center" }}>
@@ -445,8 +459,6 @@ const styles = StyleSheet.create({
     gap: 12,
     borderWidth: 1,
     borderColor: colors.glassBorder,
-    borderLeftWidth: 4,
-    borderLeftColor: colors.accent,
   },
   cardHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start" },
   cardInfo: { flex: 1, gap: 4 },
