@@ -1,13 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View,  } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { logout } from "../../../services/auth";
@@ -62,7 +54,7 @@ export default function MoreSettingsScreen() {
 
   return (
     <ScreenGradient>
-      <SafeAreaView style={styles.safe}>
+      <View style={styles.safe}>
         <TopNavBar title={adminNav ? "More" : "Settings"} />
         <ScrollView contentContainerStyle={[styles.scroll, { paddingTop: topInset }]} showsVerticalScrollIndicator={false}>
           {adminNav ? (
@@ -121,7 +113,7 @@ export default function MoreSettingsScreen() {
               <View style={{ flex: 1 }}>
                 <Text style={styles.rowTitle}>Standard Shift</Text>
                 <Text style={styles.rowSub}>
-                  {settings?.workStart ?? "09:00"} - {settings?.workEnd ?? "18:00"} EST
+                  {settings?.workStart ?? "09:00"} - {settings?.workEnd ?? "17:00"} EST
                 </Text>
               </View>
             </View>
@@ -200,7 +192,7 @@ export default function MoreSettingsScreen() {
           onRequestClose={() => setDialog(null)}
           actions={[{ label: "OK", onPress: () => setDialog(null), primary: true }]}
         />
-      </SafeAreaView>
+      </View>
     </ScreenGradient>
   );
 }

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView } from "react-native";
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from "expo-router";
 import { getSession } from "../../../services/auth";
@@ -96,7 +96,7 @@ export default function ProfileSettingsScreen() {
 
   return (
     <ScreenGradient>
-    <SafeAreaView style={styles.safeArea}>
+    <View style={styles.safeArea}>
       <TopNavBar
         title="Profile"
         right={
@@ -205,7 +205,7 @@ export default function ProfileSettingsScreen() {
         </TouchableOpacity>
       </ScrollView>
       <EmployeeBottomNavBar activeRoute="profile" />
-    </SafeAreaView>
+    </View>
     </ScreenGradient>
   );
 }

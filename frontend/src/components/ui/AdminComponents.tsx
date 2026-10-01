@@ -43,7 +43,9 @@ export function TopNavBar({
   title = "ADMIN Dashboard",
   showBack = false,
   right,
+  onBack,
 }: {
+  onBack?: () => void;
   title?: string;
   showBack?: boolean;
   right?: React.ReactNode;
@@ -62,7 +64,7 @@ export function TopNavBar({
         <View style={styles.navRow}>
           <View style={styles.navTitleContainer}>
             {showBack ? (
-              <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
+              <TouchableOpacity style={styles.backBtn} onPress={onBack ? onBack : () => router.back()}>
                 <MaterialIcons name="arrow-back" size={20} color={colors.onSurface} />
               </TouchableOpacity>
             ) : null}

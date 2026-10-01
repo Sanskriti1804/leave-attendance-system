@@ -1,12 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  SafeAreaView,
-} from "react-native";
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity,  } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { EmployeeBottomNavBar } from "../../components/ui/EmployeeComponents";
@@ -43,7 +36,15 @@ export default function EmployeeHomeScreen() {
   useEffect(() => {
     const updateIst = () => {
       const now = new Date();
-      setIstClock(formatTimeIST(now, true));
+      const options: Intl.DateTimeFormatOptions = {
+        timeZone: "Asia/Kolkata",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: false,
+      };
+      const [h, m, s] = new Intl.DateTimeFormat("en-GB", options).format(now).split(":");
+      setIstClock(`${h} hrs ${m} min ${s} sec`);
       setIstDate(formatDateIST(now, "full"));
     };
 
@@ -53,7 +54,7 @@ export default function EmployeeHomeScreen() {
   }, []);
 
   const shiftStart = settings?.workStart ?? "09:00";
-  const shiftEnd = settings?.workEnd ?? "18:00";
+  const shiftEnd = settings?.workEnd ?? "17:00";
   const attendance = dashboard?.attendance ?? null;
   const shiftState: ShiftState = attendance?.checkOut
     ? "completed"
@@ -132,7 +133,7 @@ export default function EmployeeHomeScreen() {
 
   return (
     <ScreenGradient>
-      <SafeAreaView style={styles.safeArea}>
+      <View style={styles.safeArea}>
       <TopNavBar title="Home" />
 
       <ScrollView
@@ -148,8 +149,8 @@ export default function EmployeeHomeScreen() {
           <Text style={styles.istDateText}>
             {istDate || "Wednesday, 15 September 2026"}
           </Text>
-          <Text style={styles.istTimeDisplay}>
-            {istClock || "14:35:27 IST"}
+          <Text style={styles.istTimeDisplay} adjustsFontSizeToFit numberOfLines={1}>
+            {istClock || "14 hrs 35 min 27 sec"}
           </Text>
           <Text style={styles.syncText}>
             Shift {shiftStart} – {shiftEnd}
@@ -385,7 +386,7 @@ export default function EmployeeHomeScreen() {
 
       </ScrollView>
       <EmployeeBottomNavBar activeRoute="home" />
-    </SafeAreaView>
+    </View>
     </ScreenGradient>
   );
 }

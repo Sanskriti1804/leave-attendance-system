@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, ScrollView, SafeAreaView, ActivityIndicator, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator, TouchableOpacity } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { colors } from "../../theme";
 import { ScreenGradient } from "../../components/ui/AppChrome";
@@ -38,7 +38,7 @@ export default function NotificationsScreen() {
 
   return (
     <ScreenGradient>
-      <SafeAreaView style={styles.safe}>
+      <View style={styles.safe}>
         <TopNavBar title={unreadCount ? `Notifications · ${unreadCount} unread` : "Notifications"} />
         <ScrollView contentContainerStyle={[styles.scroll, { paddingTop: topInset }]} showsVerticalScrollIndicator={false}>
           {loading ? <ActivityIndicator color={colors.primary} /> : null}
@@ -84,7 +84,7 @@ export default function NotificationsScreen() {
           })}
         </ScrollView>
         <EmployeeBottomNavBar activeRoute="notifications" />
-      </SafeAreaView>
+      </View>
     </ScreenGradient>
   );
 }

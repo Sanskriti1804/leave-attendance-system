@@ -1,13 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  SafeAreaView,
-  TextInput,
-} from "react-native";
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput,  } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import {
   apiErrorMessage,
@@ -69,7 +61,7 @@ export default function OrganisationSettingsScreen() {
   const [role, setRole] = useState<string>("admin");
   const [settings, setSettings] = useState<OrganisationSettings | null>(null);
   const [workStart, setWorkStart] = useState("09:00");
-  const [workEnd, setWorkEnd] = useState("18:00");
+  const [workEnd, setWorkEnd] = useState("17:00");
   const [grace, setGrace] = useState("15");
   const [maxAdvance, setMaxAdvance] = useState("14");
   const [weeklyOff, setWeeklyOff] = useState<number[]>([6, 7]);
@@ -104,7 +96,7 @@ export default function OrganisationSettingsScreen() {
         }
         setSettings(org);
         setWorkStart(org.workStart ?? "09:00");
-        setWorkEnd(org.workEnd ?? "18:00");
+        setWorkEnd(org.workEnd ?? "17:00");
         setGrace(String(org.graceMinutes ?? 0));
         setMaxAdvance(String(org.maxAdvanceDays ?? 14));
         setWeeklyOff(org.weeklyOffDow?.length ? org.weeklyOffDow : [6, 7]);
@@ -207,7 +199,7 @@ export default function OrganisationSettingsScreen() {
 
   return (
     <ScreenGradient>
-      <SafeAreaView style={styles.safe}>
+      <View style={styles.safe}>
         <TopNavBar title="Organisation Settings" showBack />
         <ScrollView contentContainerStyle={[styles.scroll, { paddingTop: topInset }]} showsVerticalScrollIndicator={false}>
           <View style={styles.card}>
@@ -241,7 +233,7 @@ export default function OrganisationSettingsScreen() {
               value={workEnd}
               onChangeText={setWorkEnd}
               editable={canEdit}
-              placeholder="18:00"
+              placeholder="17:00"
               placeholderTextColor={colors.secondary}
             />
             <Text style={styles.label}>Grace Period (graceMinutes)</Text>
@@ -374,7 +366,7 @@ export default function OrganisationSettingsScreen() {
           onRequestClose={() => setDialog(null)}
           actions={[{ label: "OK", onPress: () => setDialog(null), primary: true }]}
         />
-      </SafeAreaView>
+      </View>
     </ScreenGradient>
   );
 }

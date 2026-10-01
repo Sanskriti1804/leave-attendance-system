@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { View, Text, StyleSheet, ScrollView, SafeAreaView, TextInput, ActivityIndicator, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, ScrollView, TextInput, ActivityIndicator, TouchableOpacity } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { getSession } from "../../../services/auth";
 import {
@@ -163,7 +163,7 @@ export default function PeopleDirectoryScreen() {
 
   return (
     <ScreenGradient>
-      <SafeAreaView style={styles.safe}>
+      <View style={styles.safe}>
         <TopNavBar title="People" />
         <ScrollView contentContainerStyle={[styles.content, { paddingTop: topInset }]}>
           <GlassCard style={styles.search}>
@@ -244,7 +244,7 @@ export default function PeopleDirectoryScreen() {
           ) : null}
         </ThemedDialog>
         <ThemedToast message={toast} />
-      </SafeAreaView>
+      </View>
     </ScreenGradient>
   );
 }

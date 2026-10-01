@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, TextInput, ActivityIndicator } from "react-native";
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, ActivityIndicator } from "react-native";
 import {
   apiErrorMessage,
   createLeaveType,
@@ -42,7 +42,7 @@ export default function LeaveTypesScreen() {
 
   return (
     <ScreenGradient>
-      <SafeAreaView style={styles.safe}>
+      <View style={styles.safe}>
         <TopNavBar title="Leave Types" showBack />
         <ScrollView contentContainerStyle={[styles.scroll, { paddingTop: topInset }]}>
           {loading ? <ActivityIndicator color={colors.primary} /> : null}
@@ -108,7 +108,7 @@ export default function LeaveTypesScreen() {
           onRequestClose={() => setDialog(null)}
           actions={[{ label: "OK", onPress: () => setDialog(null), primary: true }]}
         />
-      </SafeAreaView>
+      </View>
     </ScreenGradient>
   );
 }

@@ -33,7 +33,7 @@ export default function WebEmployeeHomeScreen() {
 
   const attendance = dashboard?.attendance ?? null;
   const shiftStart = settings?.workStart ?? "09:00";
-  const shiftEnd = settings?.workEnd ?? "18:00";
+  const shiftEnd = settings?.workEnd ?? "17:00";
   const worked = workingMinutes(attendance?.checkIn, attendance?.checkOut);
   const todayLabel = formatDateIST(new Date(), "full");
   const role = me?.role ?? "employee";

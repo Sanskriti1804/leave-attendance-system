@@ -343,7 +343,7 @@ async function ensureOrganisationSettings() {
   const settings: Array<{ key: string; value: string; type: string }> = [
     { key: "timezone", value: "America/New_York", type: "string" },
     { key: "workStart", value: "09:00", type: "string" },
-    { key: "workEnd", value: "18:00", type: "string" },
+    { key: "workEnd", value: "17:00", type: "string" },
     { key: "graceMinutes", value: "15", type: "number" },
     { key: "weeklyOffDow", value: JSON.stringify([6, 7]), type: "json" },
     { key: "leaveCountExcludesWeekends", value: "false", type: "boolean" },

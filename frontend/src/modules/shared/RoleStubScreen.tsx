@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, StyleSheet, SafeAreaView } from "react-native";
+import { View, Text, StyleSheet } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { colors } from "../../theme";
 import { GlassCard, RoleBottomNav, ScreenGradient, type AdminNavId, type EmployeeNavId } from "../../components/ui/AppChrome";
@@ -21,7 +21,7 @@ export function RoleStubScreen({
   const topInset = useTopNavContentInset();
   return (
     <ScreenGradient>
-      <SafeAreaView style={styles.safe}>
+      <View style={styles.safe}>
         <TopNavBar title={title} />
         <View style={[styles.body, { paddingTop: topInset }]}>
           <GlassCard style={styles.card}>
@@ -31,7 +31,7 @@ export function RoleStubScreen({
           </GlassCard>
         </View>
         <RoleBottomNav variant={variant} activeRoute={activeRoute} />
-      </SafeAreaView>
+      </View>
     </ScreenGradient>
   );
 }

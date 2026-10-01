@@ -1,56 +1,106 @@
 export const colors = {
-  primary: "#1A1A1A",
-  onPrimary: "#ffffff",
-  secondary: "#5C6B72",
-  background: "#F3EEE6",
-  surface: "#F3EEE6",
-  surfaceContainerLowest: "#FFFcf7",
-  surfaceContainerLow: "#F7F1E8",
-  surfaceContainer: "#EDE4D6",
-  surfaceContainerHigh: "#E3D8C8",
-  surfaceContainerHighest: "#D4C6B2",
-  onSurface: "#161616",
-  onSurfaceVariant: "#5A534C",
-  text: "#161616",
-  textSecondary: "#5C6B72",
-  border: "rgba(22, 22, 22, 0.08)",
-  error: "#B42318",
-  white: "#ffffff",
-  black: "#1A1A1A",
+  // ─────────────────────────────────────────────
+  // Core Emerald + Navy palette
+  // ─────────────────────────────────────────────
+  primary: "#059669",
+  onPrimary: "#FFFFFF",
+
+  secondary: "#334155",
+
+  background: "#F8FAFC",
+  surface: "#FFFFFF",
+
+  surfaceContainerLowest: "#FFFFFF",
+  surfaceContainerLow: "#F8FAFC",
+  surfaceContainer: "#F1F5F9",
+  surfaceContainerHigh: "#E2E8F0",
+  surfaceContainerHighest: "#CBD5E1",
+
+  // ─────────────────────────────────────────────
+  // Text
+  // ─────────────────────────────────────────────
+  onSurface: "#0F172A",
+  onSurfaceVariant: "#334155",
+
+  text: "#0F172A",
+  textSecondary: "#334155",
+
+  // ─────────────────────────────────────────────
+  // Borders
+  // ─────────────────────────────────────────────
+  border: "#E2E8F0",
+
+  // ─────────────────────────────────────────────
+  // Basic colors
+  // ─────────────────────────────────────────────
+  white: "#FFFFFF",
+  black: "#0F172A",
   transparent: "transparent",
-  glass: "rgba(255, 252, 247, 0.88)",
-  glassBorder: "rgba(22, 22, 22, 0.07)",
-  navBg: "#14110E",
-  navInactive: "#B8A99A",
-  navActiveIconBg: "#0F766E",
-  navBorder: "rgba(255, 255, 255, 0.08)",
-  secondaryFixedDim: "#C5CDD8",
-  sessionFullDay: "#1A1A1A",
-  sessionHalfDay: "#C5CDD8",
-  sessionFirstHalf: "#0F766E",
-  sessionSecondHalf: "#2563EB",
-  headerScrim: "rgba(243, 238, 230, 0.94)",
-  accent: "#0F766E",
-  accentMuted: "rgba(15, 118, 110, 0.14)",
-  accentDeep: "#115E59",
-  accentWash: "#E6F4F2",
-  inkWash: "rgba(26, 26, 26, 0.06)",
-  sand: "#E8D9C4",
-  mist: "#D7E4EC",
-  indigoWash: "rgba(37, 99, 235, 0.12)",
-  success: "#067647",
-  successWash: "rgba(6, 118, 71, 0.12)",
-  warning: "#B45309",
-  warningWash: "rgba(180, 83, 9, 0.12)",
+
+  // ─────────────────────────────────────────────
+  // Glass / translucent surfaces
+  // ─────────────────────────────────────────────
+  glass: "rgba(255, 255, 255, 0.92)",
+  glassBorder: "rgba(15, 23, 42, 0.08)",
+
+  // ─────────────────────────────────────────────
+  // Navigation
+  // ─────────────────────────────────────────────
+  navBg: "#0F172A",
+  navInactive: "#94A3B8",
+  navActiveIconBg: "#059669",
+  navBorder: "rgba(255, 255, 255, 0.10)",
+
+  // ─────────────────────────────────────────────
+  // Attendance session colors
+  // ─────────────────────────────────────────────
+  secondaryFixedDim: "#CBD5E1",
+
+  sessionFullDay: "#059669",
+  sessionHalfDay: "#CBD5E1",
+  sessionFirstHalf: "#10B981",
+  sessionSecondHalf: "#0F766E",
+
+  // ─────────────────────────────────────────────
+  // Headers / overlays
+  // ─────────────────────────────────────────────
+  headerScrim: "rgba(248, 250, 252, 0.94)",
+
+  // ─────────────────────────────────────────────
+  // Emerald accents
+  // ─────────────────────────────────────────────
+  accent: "#10B981",
+  accentMuted: "rgba(16, 185, 129, 0.14)",
+  accentDeep: "#047857",
+  accentWash: "#ECFDF5",
+
+  // ─────────────────────────────────────────────
+  // Supporting neutral colors
+  // ─────────────────────────────────────────────
+  inkWash: "rgba(15, 23, 42, 0.06)",
+  sand: "#E2E8F0",
+  mist: "#E0F2FE",
+  indigoWash: "rgba(139, 92, 246, 0.12)",
+
+  // ─────────────────────────────────────────────
+  // Status colors
+  // ─────────────────────────────────────────────
+  success: "#16A34A",
+  successWash: "rgba(22, 163, 74, 0.12)",
+
+  warning: "#F59E0B",
+  warningWash: "rgba(245, 158, 11, 0.12)",
+
+  error: "#DC2626",
 };
 
 export const pageGradient = {
-  colors: ["#E8DCC8", "#F6F1E8", "#D7E8E4", "#E3EAF2"] as const,
+  colors: ["#F8FAFC", "#ECFDF5", "#F8FAFC", "#EFF6FF"] as const,
   locations: [0, 0.34, 0.68, 1] as const,
 };
 
 export const inkGradient = {
-  colors: ["#1A1A1A", "#0F766E"] as const,
+  colors: ["#0F172A", "#059669"] as const,
   locations: [0, 1] as const,
 };
 

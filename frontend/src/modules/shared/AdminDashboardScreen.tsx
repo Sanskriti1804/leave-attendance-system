@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { View, Text, ScrollView, TouchableOpacity, SafeAreaView, TextInput, LayoutAnimation, Platform, UIManager } from "react-native";
+import { View, Text, ScrollView, TouchableOpacity, TextInput, LayoutAnimation, Platform, UIManager } from "react-native";
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from "expo-router";
 import { getSession } from "../../../services/auth";
@@ -98,7 +98,7 @@ export default function AdminDashboardScreen() {
 
   return (
     <ScreenGradient>
-      <SafeAreaView style={{ flex: 1 }}>
+      <View style={{ flex: 1 }}>
         <TopNavBar title="Admin Dashboard" />
         
         <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingTop: topInset, paddingHorizontal: 16, paddingBottom: 112, gap: 18 }}>
@@ -209,7 +209,7 @@ export default function AdminDashboardScreen() {
           </View>
         </ScrollView>
         <BottomNavBar activeRoute="home" />
-      </SafeAreaView>
+      </View>
     </ScreenGradient>
   );
 }

@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, ActivityIndicator } from "react-native";
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { ScreenGradient, ThemedDialog } from "../../components/ui/AppChrome";
 import { TopNavBar, useTopNavContentInset } from "../../components/ui/AdminComponents";
@@ -200,8 +200,8 @@ export default function MyLeaveListScreen() {
 
   return (
     <ScreenGradient>
-      <SafeAreaView style={styles.safeArea}>
-        <TopNavBar title="Leave List" />
+      <View style={styles.safeArea}>
+        <TopNavBar title="Leave List" showBack onBack={() => router.push("/(tabs)")} />
 
         <ScrollView style={styles.container} contentContainerStyle={[styles.content, { paddingTop: topInset }]}>
           <View style={styles.topRow}>
@@ -402,7 +402,7 @@ export default function MyLeaveListScreen() {
           actions={[{ label: "Close", onPress: () => setNoteText(null), primary: true }]}
         />
         <EmployeeBottomNavBar activeRoute="leave" />
-      </SafeAreaView>
+      </View>
     </ScreenGradient>
   );
 }

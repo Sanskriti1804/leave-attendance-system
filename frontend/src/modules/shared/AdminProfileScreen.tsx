@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, TextInput } from "react-native";
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { getSession, logout } from "../../../services/auth";
@@ -102,7 +102,7 @@ export default function AdminProfileScreen() {
 
   return (
     <ScreenGradient>
-      <SafeAreaView style={styles.safe}>
+      <View style={styles.safe}>
         <TopNavBar title="Profile" />
         <ScrollView contentContainerStyle={[styles.scroll, { paddingTop: topInset }]} showsVerticalScrollIndicator={false}>
           {isGuest ? (
@@ -281,7 +281,7 @@ export default function AdminProfileScreen() {
           onRequestClose={() => setDialog(null)}
           actions={[{ label: "OK", onPress: () => setDialog(null), primary: true }]}
         />
-      </SafeAreaView>
+      </View>
     </ScreenGradient>
   );
 }

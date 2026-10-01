@@ -1,14 +1,5 @@
 import React, { useMemo, useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  SafeAreaView,
-  TextInput,
-  ActivityIndicator,
-  TouchableOpacity,
-} from "react-native";
+import { View, Text, StyleSheet, ScrollView, TextInput, ActivityIndicator, TouchableOpacity,  } from "react-native";
 import {
   apiErrorMessage,
   downloadReport,
@@ -67,7 +58,7 @@ export default function ReportsScreen() {
 
   return (
     <ScreenGradient>
-      <SafeAreaView style={styles.safe}>
+      <View style={styles.safe}>
         <TopNavBar title="Reports" />
         <ScrollView
           contentContainerStyle={[styles.scroll, { paddingTop: topInset }]}
@@ -138,7 +129,7 @@ export default function ReportsScreen() {
           ) : null}
         </ScrollView>
         <RoleBottomNav variant="admin" activeRoute="reports" />
-      </SafeAreaView>
+      </View>
     </ScreenGradient>
   );
 }

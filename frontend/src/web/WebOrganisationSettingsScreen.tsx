@@ -43,7 +43,7 @@ export default function WebOrganisationSettingsScreen() {
   const [role, setRole] = useState("admin");
   const [settings, setSettings] = useState<OrganisationSettings | null>(null);
   const [workStart, setWorkStart] = useState("09:00");
-  const [workEnd, setWorkEnd] = useState("18:00");
+  const [workEnd, setWorkEnd] = useState("17:00");
   const [grace, setGrace] = useState("15");
   const [maxAdvance, setMaxAdvance] = useState("14");
   const [weeklyOff, setWeeklyOff] = useState<number[]>([6, 7]);
@@ -70,7 +70,7 @@ export default function WebOrganisationSettingsScreen() {
         if (cancelled) return;
         setSettings(org);
         setWorkStart(org.workStart ?? "09:00");
-        setWorkEnd(org.workEnd ?? "18:00");
+        setWorkEnd(org.workEnd ?? "17:00");
         setGrace(String(org.graceMinutes ?? 0));
         setMaxAdvance(String(org.maxAdvanceDays ?? 14));
         setWeeklyOff(org.weeklyOffDow?.length ? org.weeklyOffDow : [6, 7]);

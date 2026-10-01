@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, ActivityIndicator, TextInput, Modal } from "react-native";
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, TextInput, Modal } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { ScreenGradient } from "../../components/ui/AppChrome";
 import { BottomNavBar, TopNavBar, useTopNavContentInset } from "../../components/ui/AdminComponents";
@@ -162,7 +162,7 @@ export default function AdminLeaveReviewQueueScreen() {
 
   return (
     <ScreenGradient>
-      <SafeAreaView style={styles.safeArea}>
+      <View style={styles.safeArea}>
         <TopNavBar title="Leave Review Queue" />
 
         <ScrollView style={styles.container} contentContainerStyle={[styles.content, { paddingTop: topInset }]}>
@@ -405,7 +405,7 @@ export default function AdminLeaveReviewQueueScreen() {
             </View>
           </View>
         </Modal>
-      </SafeAreaView>
+      </View>
     </ScreenGradient>
   );
 }

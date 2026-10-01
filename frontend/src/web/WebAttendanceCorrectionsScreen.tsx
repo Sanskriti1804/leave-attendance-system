@@ -25,7 +25,7 @@ export default function WebAttendanceCorrectionsScreen() {
   const [date, setDate] = useState(getTodayIST());
   const [type, setType] = useState<CorrectionType>(types[0]);
   const [checkIn, setCheckIn] = useState("09:00");
-  const [checkOut, setCheckOut] = useState("18:00");
+  const [checkOut, setCheckOut] = useState("17:00");
   const [reason, setReason] = useState("");
   const [items, setItems] = useState<AttendanceCorrection[]>([]);
   const [filter, setFilter] = useState<Filter>("ALL");

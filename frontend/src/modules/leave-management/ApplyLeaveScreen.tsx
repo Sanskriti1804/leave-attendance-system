@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, SafeAreaView, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, ActivityIndicator, Alert } from "react-native";
 import { MaterialIcons } from '@expo/vector-icons';
 import { ScreenGradient, ThemedDialog, ThemedToast } from '../../components/ui/AppChrome';
 import { TopNavBar, useTopNavContentInset } from '../../components/ui/AdminComponents';
@@ -433,7 +433,7 @@ export default function ApplyLeaveScreen() {
 
   return (
     <ScreenGradient>
-    <SafeAreaView style={styles.safeArea}>
+    <View style={styles.safeArea}>
       <TopNavBar title="Apply Leave Request" showBack />
 
       <ScrollView style={styles.container} contentContainerStyle={[styles.content, { paddingTop: topInset }]}>
@@ -740,7 +740,7 @@ export default function ApplyLeaveScreen() {
         <Text style={styles.policyText}>First Half (0.5): morning shift.</Text>
         <Text style={styles.policyText}>Second Half (0.5): afternoon shift. Long-press a selected date to override.</Text>
       </ThemedDialog>
-    </SafeAreaView>
+    </View>
     </ScreenGradient>
   );
 }

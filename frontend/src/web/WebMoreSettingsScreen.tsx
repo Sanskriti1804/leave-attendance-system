@@ -45,7 +45,7 @@ export default function WebMoreSettingsScreen() {
         <Text style={styles.section}>Attendance Preferences</Text>
         <Text style={styles.meta}>Timezone: {settings?.timezone ?? "America/New_York (EST)"}</Text>
         <Text style={styles.meta}>
-          Shift: {settings?.workStart ?? "09:00"} - {settings?.workEnd ?? "18:00"} EST
+          Shift: {settings?.workStart ?? "09:00"} - {settings?.workEnd ?? "17:00"} EST
         </Text>
         <Text style={styles.meta}>
           Work week offs: {settings?.weeklyOffDow?.length ? settings.weeklyOffDow.join(", ") : "Monday – Friday 5D"}
