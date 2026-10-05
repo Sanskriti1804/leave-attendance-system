@@ -1,5 +1,5 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from "react-native";
+﻿import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, TextInput } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { getSession } from "../../services/auth";
@@ -40,6 +40,7 @@ export default function WebLeaveListScreen() {
   const [error, setError] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<number | null>(null);
   const [noteText, setNoteText] = useState<string | null>(null);
+  const [notes, setNotes] = useState<Record<number, string>>({});
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -71,6 +72,13 @@ export default function WebLeaveListScreen() {
 
   const typeName = (leaveTypeId: number) => types.find((row) => row.leaveTypeId === leaveTypeId)?.name ?? `Type ${leaveTypeId}`;
   const filtered = useMemo(() => items.filter((row) => matchesFilter(row.status, activeFilter)), [activeFilter, items]);
+  const reviewItems = filtered.filter(
+    (row) => row.reportingManagerEmployeeId === me?.employeeId && row.employeeId !== me?.employeeId,
+  );
+  const myItems = filtered.filter((row) => row.employeeId === me?.employeeId);
+  const otherItems = filtered.filter(
+    (row) => row.employeeId !== me?.employeeId && row.reportingManagerEmployeeId !== me?.employeeId,
+  );
   const count = (filter: string) => items.filter((row) => matchesFilter(row.status, filter)).length;
 
   const filters = [
@@ -115,29 +123,89 @@ export default function WebLeaveListScreen() {
           <Text style={[styles.th, { flex: 0.8 }]}>Days</Text>
           <Text style={[styles.th, { flex: 1.2 }]}>Status</Text>
           <Text style={[styles.th, { flex: 2 }]}>Reason</Text>
-          <Text style={[styles.th, { flex: 1 }]}>Actions</Text>
         </View>
-        {filtered.map((leave) => (
-          <View key={leave.leaveId} style={styles.tr}>
+        {([
+          { title: "Employee Leave Requests", rows: reviewItems },
+          { title: "", rows: myItems },
+          { title: "", rows: otherItems },
+        ] as const).flatMap((section) =>
+          section.rows.length === 0
+            ? []
+            : [
+                section.title ? <Text key={section.title} style={styles.section}>{section.title}</Text> : null,
+                ...section.rows.map((leave) => {
+          const canDecide =
+            leave.status === "SUBMITTED" &&
+            leave.managerApprovalStatus === "PENDING" &&
+            leave.reportingManagerEmployeeId === me?.employeeId &&
+            leave.employeeId !== me?.employeeId;
+          return (
+          <View key={leave.leaveId} style={styles.entry}>
+          <View style={styles.tr}>
             <Text style={[styles.td, { flex: 1.4 }]}>{typeName(leave.leaveTypeId)}</Text>
             <Text style={[styles.td, { flex: 1.6 }]}>
-              {leave.startDate} – {leave.endDate}
+              {leave.startDate} - {leave.endDate}
             </Text>
             <Text style={[styles.td, { flex: 0.8 }]}>{leave.numberOfDays}</Text>
             <Text style={[styles.td, { flex: 1.2 }]}>{leave.status.replaceAll("_", " ")}</Text>
             <View style={{ flex: 2, gap: 4 }}>
               <Text style={styles.td} numberOfLines={2}>{leave.reason}</Text>
+              {leave.managerComments ? <Text style={styles.meta}>Approver note: {leave.managerComments}</Text> : null}
               {leave.hrComments ? (
                 <TouchableOpacity onPress={() => setNoteText(leave.hrComments)}>
                   <Text style={styles.link}>View HR note</Text>
                 </TouchableOpacity>
               ) : null}
             </View>
-            <View style={{ flex: 1, flexDirection: "row", gap: 8, flexWrap: "wrap" }}>
+          </View>
+            <View style={styles.actionLine}>
+              {canDecide ? (
+                <>
+                  <TextInput
+                    value={notes[leave.leaveId] ?? ""}
+                    onChangeText={(value) => setNotes((current) => ({ ...current, [leave.leaveId]: value }))}
+                    placeholder="Approver note"
+                    placeholderTextColor={colors.secondary}
+                    style={styles.noteInput}
+                  />
+                  <TouchableOpacity
+                    disabled={busyId === leave.leaveId}
+                    onPress={async () => {
+                      setBusyId(leave.leaveId);
+                      try {
+                        await managerApproveLeave(leave.leaveId, notes[leave.leaveId]);
+                        await load();
+                      } catch (err) {
+                        setError(apiErrorMessage(err));
+                      } finally {
+                        setBusyId(null);
+                      }
+                    }}
+                  >
+                    <Text style={styles.actionLink}>Approve</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    disabled={busyId === leave.leaveId}
+                    onPress={async () => {
+                      setBusyId(leave.leaveId);
+                      try {
+                        await managerRejectLeave(leave.leaveId, notes[leave.leaveId]);
+                        await load();
+                      } catch (err) {
+                        setError(apiErrorMessage(err));
+                      } finally {
+                        setBusyId(null);
+                      }
+                    }}
+                  >
+                    <Text style={styles.actionLink}>Reject</Text>
+                  </TouchableOpacity>
+                </>
+              ) : null}
               {leave.status === "DRAFT" && leave.employeeId === me?.employeeId ? (
                 <>
                   <TouchableOpacity onPress={() => router.push(`${applyHref}?draftId=${leave.leaveId}` as never)}>
-                    <Text style={styles.link}>Edit</Text>
+                    <Text style={styles.actionLink}>Edit</Text>
                   </TouchableOpacity>
                 <TouchableOpacity
                   disabled={busyId === leave.leaveId}
@@ -153,47 +221,8 @@ export default function WebLeaveListScreen() {
                     }
                   }}
                 >
-                  <Text style={styles.link}>Submit</Text>
+                  <Text style={styles.actionLink}>Submit</Text>
                 </TouchableOpacity>
-                </>
-              ) : null}
-              {leave.status === "SUBMITTED" &&
-              leave.managerApprovalStatus === "PENDING" &&
-              leave.reportingManagerEmployeeId === me?.employeeId &&
-              leave.employeeId !== me?.employeeId ? (
-                <>
-                  <TouchableOpacity
-                    disabled={busyId === leave.leaveId}
-                    onPress={async () => {
-                      setBusyId(leave.leaveId);
-                      try {
-                        await managerApproveLeave(leave.leaveId);
-                        await load();
-                      } catch (err) {
-                        setError(apiErrorMessage(err));
-                      } finally {
-                        setBusyId(null);
-                      }
-                    }}
-                  >
-                    <Text style={styles.link}>Approve</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    disabled={busyId === leave.leaveId}
-                    onPress={async () => {
-                      setBusyId(leave.leaveId);
-                      try {
-                        await managerRejectLeave(leave.leaveId);
-                        await load();
-                      } catch (err) {
-                        setError(apiErrorMessage(err));
-                      } finally {
-                        setBusyId(null);
-                      }
-                    }}
-                  >
-                    <Text style={styles.link}>Reject</Text>
-                  </TouchableOpacity>
                 </>
               ) : null}
               {leave.status === "APPROVED" && leave.employeeId === me?.employeeId ? (
@@ -211,7 +240,7 @@ export default function WebLeaveListScreen() {
                     }
                   }}
                 >
-                  <Text style={styles.link}>Cancel</Text>
+                  <Text style={styles.actionLink}>Cancel</Text>
                 </TouchableOpacity>
               ) : null}
               {(leave.status === "SUBMITTED" || leave.status === "PENDING_HR_REVIEW" || leave.status === "DRAFT") &&
@@ -230,12 +259,15 @@ export default function WebLeaveListScreen() {
                     }
                   }}
                 >
-                  <Text style={styles.link}>Withdraw</Text>
+                  <Text style={styles.actionLink}>Withdraw</Text>
                 </TouchableOpacity>
               ) : null}
             </View>
           </View>
-        ))}
+          );
+        }),
+              ],
+        )}
         {!loading && filtered.length === 0 ? <Text style={styles.meta}>No leave applications for this filter.</Text> : null}
       </WebCard>
       <ThemedDialog
@@ -261,10 +293,15 @@ const styles = StyleSheet.create({
   chipOn: { paddingHorizontal: 12, paddingVertical: 8, borderRadius: 999, backgroundColor: colors.accent },
   chipText: { fontSize: 12, fontWeight: "600", color: colors.onSurface },
   chipOnText: { fontSize: 12, fontWeight: "600", color: colors.onPrimary },
-  tableHead: { flexDirection: "row", paddingBottom: 8, borderBottomWidth: 1, borderBottomColor: colors.surfaceContainerHighest },
+  tableHead: { flexDirection: "row", width: "100%", paddingBottom: 8, borderBottomWidth: 1, borderBottomColor: colors.surfaceContainerHighest },
   th: { fontSize: 11, fontWeight: "700", color: colors.secondary, textTransform: "uppercase" },
-  tr: { flexDirection: "row", paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: colors.surfaceContainerHighest, alignItems: "center" },
+  tr: { flexDirection: "row", width: "100%", paddingVertical: 12, alignItems: "center" },
+  entry: { width: "100%", borderBottomWidth: 1, borderBottomColor: colors.surfaceContainerHighest, paddingBottom: 8 },
+  section: { fontSize: 13, fontWeight: "700", color: colors.onSurface, marginTop: 12, marginBottom: 4 },
+  actionLine: { flexDirection: "row", flexWrap: "wrap", gap: 8, paddingBottom: 10, justifyContent: "flex-end" },
   td: { fontSize: 13, color: colors.onSurface, paddingRight: 8 },
   meta: { fontSize: 12, color: colors.secondary, marginTop: 8 },
   link: { fontSize: 12, fontWeight: "700", color: colors.accentDeep },
+  actionLink: { fontSize: 12, fontWeight: "700", color: colors.onSurface, borderWidth: 1, borderColor: colors.border, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 6, backgroundColor: colors.surfaceContainerLowest, overflow: "hidden" },
+  noteInput: { minWidth: 120, minHeight: 36, borderWidth: 1, borderColor: colors.border, borderRadius: 8, paddingHorizontal: 8, color: colors.onSurface, backgroundColor: colors.surfaceContainerLowest },
 });

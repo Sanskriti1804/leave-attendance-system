@@ -19,6 +19,7 @@ import { getOrganisationSettings } from "../../shared/organisation-settings/serv
 import { createAuditLog } from "../../shared/audit-logs/repository.js";
 import {
   notifyLeaveDecision,
+  notifyHrOfApproverDecision,
   notifyLeaveSubmitted,
   notifyMedicalDocumentRequired,
   safeNotify,
@@ -712,6 +713,7 @@ export async function managerReject(actor: AuthTokenPayload, leaveId: number, bo
       kind: "REJECTED",
     }),
   );
+  await safeNotify(() => notifyHrOfApproverDecision(leaveId, "REJECTED"));
   return toLeaveResponse(updated);
 }
 

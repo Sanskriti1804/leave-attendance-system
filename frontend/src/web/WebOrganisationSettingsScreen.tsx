@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert } from "react-native";
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, Modal, Pressable } from "react-native";
 import {
   apiErrorMessage,
   createHoliday,
@@ -53,6 +53,7 @@ export default function WebOrganisationSettingsScreen() {
   const [holidayDate, setHolidayDate] = useState("");
   const [holidayName, setHolidayName] = useState("");
   const [editingHolidayId, setEditingHolidayId] = useState<number | null>(null);
+  const [holidayOpen, setHolidayOpen] = useState(false);
   const canEdit = role === "admin";
   const isGuest = role === "guest_admin";
 
@@ -141,8 +142,9 @@ export default function WebOrganisationSettingsScreen() {
           <Text style={styles.meta}>{settings?.leaveCountExcludesHolidays ? "Excluded from the day count" : "Included in the day count"}</Text>
         </View>
         {error ? <Text style={styles.err}>{error}</Text> : null}
+        <View style={styles.holidayGrid}>
         {holidays.map((row) => (
-          <View key={row.holidayId} style={styles.ruleCard}>
+          <View key={row.holidayId} style={styles.holidayCard}>
             <Text style={styles.ruleLabel}>{row.holidayName}</Text>
             <Text style={styles.meta}>{recurringHolidayLabel(row.holidayDate)}</Text>
             {canEdit ? (
@@ -153,6 +155,7 @@ export default function WebOrganisationSettingsScreen() {
                     setEditingHolidayId(row.holidayId);
                     setHolidayDate(row.holidayDate?.slice(5) ?? "");
                     setHolidayName(row.holidayName);
+                    setHolidayOpen(true);
                   }}
                 >
                   <Text style={styles.ruleBtnText}>Change</Text>
@@ -171,37 +174,60 @@ export default function WebOrganisationSettingsScreen() {
             ) : null}
           </View>
         ))}
+        </View>
         {canEdit ? (
-          <>
-            <TextInput style={styles.input} value={holidayDate} onChangeText={setHolidayDate} placeholder="MM-DD" placeholderTextColor={colors.secondary} />
-            <TextInput style={styles.input} value={holidayName} onChangeText={setHolidayName} placeholder="Holiday name" placeholderTextColor={colors.secondary} />
-            <TouchableOpacity
-              style={styles.save}
-              onPress={async () => {
-                const storedDate = recurringHolidayDate(holidayDate);
-                if (!storedDate || !holidayName.trim()) {
-                  Alert.alert("Invalid holiday", "Use MM-DD and a holiday name.");
-                  return;
-                }
-                try {
-                  if (editingHolidayId != null) {
-                    await deleteHoliday(editingHolidayId);
-                    setHolidays((prev) => prev.filter((item) => item.holidayId !== editingHolidayId));
-                  }
-                  const created = await createHoliday({ date: storedDate, name: holidayName.trim() });
-                  setHolidays((prev) => [...prev.filter((item) => item.holidayId !== created.holidayId), created].sort((a, b) => (a.holidayDate ?? "").localeCompare(b.holidayDate ?? "")));
-                  setHolidayDate("");
-                  setHolidayName("");
-                  setEditingHolidayId(null);
-                } catch (err) {
-                  Alert.alert("Could not save holiday", apiErrorMessage(err));
-                }
-              }}
-            >
-              <Text style={styles.saveText}>{editingHolidayId != null ? "Save holiday" : "Add holiday"}</Text>
-            </TouchableOpacity>
-          </>
+          <TouchableOpacity
+            style={styles.save}
+            onPress={() => {
+              setEditingHolidayId(null);
+              setHolidayDate("");
+              setHolidayName("");
+              setHolidayOpen(true);
+            }}
+          >
+            <Text style={styles.saveText}>Add holiday</Text>
+          </TouchableOpacity>
         ) : null}
+        <Modal visible={holidayOpen} transparent animationType="fade" onRequestClose={() => setHolidayOpen(false)}>
+          <Pressable style={styles.backdrop} onPress={() => setHolidayOpen(false)}>
+            <Pressable style={styles.dialog} onPress={(event) => event.stopPropagation()}>
+              <View style={styles.dialogHead}>
+                <Text style={styles.ruleLabel}>{editingHolidayId != null ? "Change holiday" : "Add holiday"}</Text>
+                <TouchableOpacity onPress={() => setHolidayOpen(false)}>
+                  <Text style={styles.ruleBtnText}>X</Text>
+                </TouchableOpacity>
+              </View>
+              <TextInput style={styles.input} value={holidayDate} onChangeText={setHolidayDate} placeholder="MM-DD" placeholderTextColor={colors.secondary} />
+              <TextInput style={styles.input} value={holidayName} onChangeText={setHolidayName} placeholder="Holiday name" placeholderTextColor={colors.secondary} />
+              <TouchableOpacity
+                style={styles.save}
+                onPress={async () => {
+                  const storedDate = recurringHolidayDate(holidayDate);
+                  if (!storedDate || !holidayName.trim()) {
+                    Alert.alert("Invalid holiday", "Use MM-DD and a holiday name.");
+                    return;
+                  }
+                  try {
+                    if (editingHolidayId != null) {
+                      await deleteHoliday(editingHolidayId);
+                      setHolidays((prev) => prev.filter((item) => item.holidayId !== editingHolidayId));
+                    }
+                    const created = await createHoliday({ date: storedDate, name: holidayName.trim() });
+                    setHolidays((prev) => [...prev.filter((item) => item.holidayId !== created.holidayId), created].sort((a, b) => (a.holidayDate ?? "").localeCompare(b.holidayDate ?? "")));
+                    setHolidayDate("");
+                    setHolidayName("");
+                    setEditingHolidayId(null);
+                    setHolidayOpen(false);
+                  } catch (err) {
+                    Alert.alert("Could not save holiday", apiErrorMessage(err));
+                  }
+                }}
+              >
+                <Text style={styles.saveText}>OK</Text>
+              </TouchableOpacity>
+            </Pressable>
+          </Pressable>
+        </Modal>
         {canEdit ? (
           <TouchableOpacity
             style={styles.save}
@@ -248,6 +274,8 @@ const styles = StyleSheet.create({
   row: { flexDirection: "row", alignItems: "center", gap: 12, flexWrap: "wrap" },
   col: { flexGrow: 1, flexBasis: 280, gap: 8 },
   h: { fontSize: 16, fontWeight: "700", color: colors.onSurface, marginTop: 4 },
+  holidayGrid: { flexDirection: "row", flexWrap: "wrap", gap: 12 },
+  holidayCard: { padding: 12, borderRadius: 12, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surfaceContainerLow, gap: 4, width: 220, maxWidth: "100%" },
   ruleCard: { padding: 12, borderRadius: 12, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surfaceContainerLow, gap: 4 },
   ruleLabel: { fontSize: 13, fontWeight: "700", color: colors.onSurface },
   ruleBtn: { minHeight: 36, paddingHorizontal: 12, borderRadius: 8, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surfaceContainerLowest, alignItems: "center", justifyContent: "center" },
@@ -263,4 +291,7 @@ const styles = StyleSheet.create({
   err: { color: colors.error, marginTop: 8 },
   save: { marginTop: 12, backgroundColor: colors.accent, borderRadius: 8, padding: 14, alignItems: "center" },
   saveText: { color: colors.onPrimary, fontWeight: "700" },
+  backdrop: { flex: 1, backgroundColor: "rgba(0,0,0,0.35)", justifyContent: "center", alignItems: "center", padding: 24 },
+  dialog: { width: "100%", maxWidth: 420, backgroundColor: colors.surfaceContainerLowest, borderRadius: 12, padding: 16, gap: 12 },
+  dialogHead: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
 });

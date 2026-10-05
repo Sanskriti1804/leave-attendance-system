@@ -110,15 +110,23 @@ export default function PeopleDirectoryScreen() {
       setToast("Guest Admin cannot change reporting relationships.");
       return;
     }
-    if (approverId != null && approverId !== person.employeeId) {
-      setToast("Only one Approver can exist. Remove the current Approver before assigning another.");
+    const currentApprover = items.find(
+      (row) =>
+        row.departmentId === person.departmentId &&
+        row.employeeId !== person.employeeId &&
+        items.some((member) => member.departmentId === person.departmentId && member.managerId === row.employeeId),
+    );
+    if (currentApprover) {
+      setToast("This team already has an Approver. Remove that Approver before assigning another.");
       return;
     }
     setSaving(true);
     try {
-      const settings = await patchOrgSettings({ leaveApproverEmployeeId: person.employeeId });
-      setApproverId(settings.leaveApproverEmployeeId ?? person.employeeId);
-      setToast(`${displayName(person)} is now the Approver.`);
+      const targets = teamMembersForLead(items, person.employeeId, person.departmentId);
+      const updated = await Promise.all(targets.map((row) => patchEmployee(row.employeeId, { managerId: person.employeeId })));
+      setItems((current) => mergeEmployees(current, updated));
+      setApproverId(person.employeeId);
+      setToast(`${displayName(person)} is now the Approver for this team.`);
     } catch (err) {
       setToast(apiErrorMessage(err));
     } finally {
@@ -133,7 +141,9 @@ export default function PeopleDirectoryScreen() {
     }
     setSaving(true);
     try {
-      await patchOrgSettings({ leaveApproverEmployeeId: null });
+      const reports = items.filter((row) => row.managerId === person.employeeId);
+      const updated = await Promise.all(reports.map((row) => patchEmployee(row.employeeId, { managerId: null })));
+      setItems((current) => mergeEmployees(current, updated));
       setApproverId(null);
       setToast(`${displayName(person)} is no longer the Approver.`);
     } catch (err) {

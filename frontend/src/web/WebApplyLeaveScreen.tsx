@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, ActivityIndicator, Alert, Platform } from "react-native";
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, Pressable, ActivityIndicator, Alert, Platform, Modal } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { getSession } from "../../services/auth";
 import { useLocalSearchParams } from "expo-router";
@@ -78,7 +78,8 @@ export default function WebApplyLeaveScreen() {
   const [waitingForTo, setWaitingForTo] = useState(false);
   const [rangeAnchor, setRangeAnchor] = useState<string | null>(null);
   const [expandedCivil, setExpandedCivil] = useState<string | null>(null);
-  const [sessionTarget, setSessionTarget] = useState<string | null>(null);
+  const [menuPos, setMenuPos] = useState<{ x: number; y: number } | null>(null);
+  const [actedCivil, setActedCivil] = useState<string | null>(null);
   const lastWebTap = useRef<{ civil: string; at: number } | null>(null);
   const [durationInfoOpen, setDurationInfoOpen] = useState(false);
   const [dateBlock, setDateBlock] = useState<string | null>(null);
@@ -252,26 +253,32 @@ export default function WebApplyLeaveScreen() {
     year: "numeric",
   });
 
-  function applyDurationMode(mode: DurationMode, half: DaySession = "FIRST_HALF") {
-    setDurationMode(mode);
-    const session = sessionForMode(mode, half);
-    const targets = sessionTarget ? [sessionTarget] : selectedDates;
+  function applySession(dates: string[], session: DaySession) {
+    setDurationMode(session === "FULL_DAY" ? "FULL" : "HALF");
     setDateSessions((current) => {
       const next = { ...current };
-      for (const date of targets) next[date] = session;
+      for (const date of dates) next[date] = session;
       return next;
     });
     setDateOverrides((current) => {
       const next = { ...current };
-      for (const date of targets) next[date] = true;
+      for (const date of dates) next[date] = true;
       return next;
     });
   }
 
-  function requestHalfDayMode() {
+  function requestHalfFor(dates: string[]) {
     Alert.alert("Half Day", "Choose First Half or Second Half", [
-      { text: "First Half", onPress: () => applyDurationMode("HALF", "FIRST_HALF") },
-      { text: "Second Half", onPress: () => applyDurationMode("HALF", "SECOND_HALF") },
+      { text: "First Half", onPress: () => applySession(dates, "FIRST_HALF") },
+      { text: "Second Half", onPress: () => applySession(dates, "SECOND_HALF") },
+      { text: "Cancel", style: "cancel" },
+    ]);
+  }
+
+  function chooseDateSession(date: string) {
+    Alert.alert(formatLong(date), "Choose the day type for this date", [
+      { text: "Full Day", onPress: () => applySession([date], "FULL_DAY") },
+      { text: "Half Day", onPress: () => requestHalfFor([date]) },
       { text: "Cancel", style: "cancel" },
     ]);
   }
@@ -336,6 +343,7 @@ export default function WebApplyLeaveScreen() {
     }
     setDateBlock(null);
     if (selectedDates.includes(civil)) {
+      if (actedCivil === civil) setActedCivil(null);
       setSelectedDates((current) => current.filter((date) => date !== civil));
       setDateSessions((current) => {
         const next = { ...current };
@@ -353,6 +361,7 @@ export default function WebApplyLeaveScreen() {
       }
       return;
     }
+    setActedCivil(civil);
     if (rangeAnchor && rangeAnchor !== civil) {
       applyRange(rangeAnchor, civil);
       return;
@@ -499,6 +508,20 @@ export default function WebApplyLeaveScreen() {
               <Text style={styles.monthBadgeText}>{monthLabel.toUpperCase()}</Text>
             </View>
           </View>
+          {sortedDates.length > 0 ? (
+            <View style={styles.capsuleRow}>
+              {sortedDates.map((date) => (
+                <View key={date} style={styles.capsule}>
+                  <TouchableOpacity onPress={() => chooseDateSession(date)}>
+                    <Text style={styles.capsuleText}>{formatLong(date)}</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={() => toggleDate(date)} accessibilityLabel={`Remove ${formatLong(date)}`}>
+                    <Text style={styles.capsuleText}>×</Text>
+                  </TouchableOpacity>
+                </View>
+              ))}
+            </View>
+          ) : null}
           <View style={styles.calendarBox}>
             <View style={styles.calendarNav}>
               <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
@@ -562,17 +585,9 @@ export default function WebApplyLeaveScreen() {
                 const isHalf = dateSessions[cell.civil] === "FIRST_HALF" || dateSessions[cell.civil] === "SECOND_HALF";
                 if (cell.selected) {
                   return (
-                    <TouchableOpacity
-                      key={cell.civil}
-                      style={[styles.calCell, isHalf ? styles.calTextSelHalf : styles.calTextSelMid]}
-                      onPress={() => pressDate(cell.civil)}
-                      onLongPress={() => openHalfPanel(cell.civil)}
-                      delayLongPress={400}
-                      {...(Platform.OS === "web"
-                        ? { onContextMenu: (event: { preventDefault: () => void }) => { event.preventDefault(); openHalfPanel(cell.civil); } }
-                        : {})}
-                    >
-                      <Text style={isHalf ? styles.calTextSelHalfStr : styles.calTextSelStr} numberOfLines={1}>
+                    <View key={cell.civil} style={[styles.calCell, isHalf ? styles.calTextSelHalf : styles.calTextSelMid, expandedCivil === cell.civil && styles.calCellOpen]}>
+                      <Pressable style={styles.cellHit} onPress={() => toggleDate(cell.civil)} />
+                      <Text pointerEvents="none" style={isHalf ? styles.calTextSelHalfStr : styles.calTextSelStr} numberOfLines={1}>
                         {pad2(cell.day)}
                       </Text>
                       {isHalf ? (
@@ -581,24 +596,29 @@ export default function WebApplyLeaveScreen() {
                             styles.halfDot,
                             {
                               backgroundColor:
-                                dateSessions[cell.civil] === "SECOND_HALF" ? colors.sessionSecondHalf : colors.sessionFirstHalf,
+                                dateSessions[cell.civil] === "SECOND_HALF" ? "#F59E0B" : "#10B981",
                             },
                           ]}
                         />
                       ) : null}
-                    </TouchableOpacity>
+                      <Pressable
+                        style={styles.sessionBtn}
+                        onPress={(event) => {
+                          event.stopPropagation();
+                          setMenuPos({ x: event.nativeEvent.pageX, y: event.nativeEvent.pageY });
+                          setExpandedCivil(expandedCivil === cell.civil ? null : cell.civil);
+                        }}
+                      >
+                        <Text style={styles.sessionBtnText}>▾</Text>
+                      </Pressable>
+                    </View>
                   );
                 }
                 return (
                   <TouchableOpacity
                     key={cell.civil}
                     style={styles.calCell}
-                    onPress={() => pressDate(cell.civil)}
-                    onLongPress={() => openHalfPanel(cell.civil)}
-                    delayLongPress={400}
-                    {...(Platform.OS === "web"
-                      ? { onContextMenu: (event: { preventDefault: () => void }) => { event.preventDefault(); openHalfPanel(cell.civil); } }
-                      : {})}
+                    onPress={() => toggleDate(cell.civil)}
                   >
                     <Text
                       style={cell.isToday ? styles.calTextTodayStr : cell.isWeekend ? styles.calTextWeekend : styles.calText}
@@ -611,41 +631,35 @@ export default function WebApplyLeaveScreen() {
               })}
             </View>
             <View style={styles.calendarLegend}>
-              <TouchableOpacity style={styles.legendItem} onPress={() => applyDurationMode("FULL")}>
+              <TouchableOpacity style={[styles.legendItem, durationMode === "FULL" && styles.legendItemOn]} onPress={() => applySession(selectedDates, "FULL_DAY")}>
                 <View style={[styles.legendDot, { backgroundColor: colors.primary }]} />
                 <Text style={styles.legendText}>Full Day Leave</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.legendItem} onPress={requestHalfDayMode}>
+              <TouchableOpacity style={styles.legendItem} onPress={() => applySession(selectedDates, "FIRST_HALF")}>
                 <View style={[styles.legendDot, { backgroundColor: colors.secondaryFixedDim, borderColor: colors.secondary, borderWidth: 1 }]} />
                 <Text style={styles.legendText}>Half Day Leave</Text>
               </TouchableOpacity>
             </View>
           </View>
-          {sortedDates.length > 0 ? (
-            <View style={styles.capsuleRow}>
-              {sortedDates.map((date) => (
-                <View key={date} style={[styles.capsule, sessionTarget === date && styles.capsuleOn]}>
-                  <TouchableOpacity onPress={() => setSessionTarget(date)}>
-                    <Text style={styles.capsuleText}>{formatLong(date)}</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity onPress={() => { toggleDate(date); if (sessionTarget === date) setSessionTarget(null); }} accessibilityLabel={`Remove ${formatLong(date)}`}>
-                    <Text style={styles.capsuleText}>×</Text>
-                  </TouchableOpacity>
-                </View>
-              ))}
+          <View style={styles.durationResult}>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.durationTitle}>
+                {sortedDates.length} Selected Day{sortedDates.length === 1 ? "" : "s"}
+              </Text>
+              <View style={styles.selectedDayList}>
+                {sortedDates.length > 0 ? (
+                  sortedDates.map((date) => (
+                    <Text key={date} style={styles.durationSubtitle}>{formatLong(date)}</Text>
+                  ))
+                ) : (
+                  <Text style={styles.durationSubtitle}>Tap calendar days</Text>
+                )}
+              </View>
             </View>
-          ) : null}
-          {expandedCivil && durationMode === "HALF" ? (
-            <View style={styles.halfPanel}>
-              <Text style={styles.capsuleText}>{formatLong(expandedCivil)}</Text>
-              <TouchableOpacity style={styles.capsule} onPress={() => setDateSession(expandedCivil, "FIRST_HALF")}>
-                <Text style={styles.capsuleText}>First Half</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.capsule} onPress={() => setDateSession(expandedCivil, "SECOND_HALF")}>
-                <Text style={styles.capsuleText}>Second Half</Text>
-              </TouchableOpacity>
+            <View style={styles.durationBadge}>
+              <Text style={styles.durationBadgeText}>{leaveDayCount.toFixed(1)}</Text>
             </View>
-          ) : null}
+          </View>
           <View style={styles.dateRangeBox}>
             <View style={styles.dateRangeItem}>
               <Text style={styles.dateRangeLabel}>FROM (INCLUSIVE)</Text>
@@ -656,23 +670,6 @@ export default function WebApplyLeaveScreen() {
               <Text style={styles.dateRangeLabel}>TO (INCLUSIVE)</Text>
               <Text style={styles.dateRangeVal}>{toDate ? formatLong(toDate) : "Select date"}</Text>
               <Text style={styles.dateRangeDay}>{toDate ? weekdayName(toDate) : ""}</Text>
-            </View>
-          </View>
-          <View style={styles.durationResult}>
-            <View>
-              <Text style={styles.durationTitle}>
-                {sortedDates.length} Selected Day{sortedDates.length === 1 ? "" : "s"}
-              </Text>
-              <Text style={styles.durationSubtitle}>
-                {sortedDates.length > 0
-                  ? sortedDates.map((date) => formatLong(date)).join(", ")
-                  : fromDate
-                    ? `${formatLong(fromDate)} to Select date`
-                    : "Tap calendar days"}
-              </Text>
-            </View>
-            <View style={styles.durationBadge}>
-              <Text style={styles.durationBadgeText}>{leaveDayCount.toFixed(1)}</Text>
             </View>
           </View>
         </View>
@@ -753,12 +750,37 @@ export default function WebApplyLeaveScreen() {
         <Text style={styles.policyText}>First Half (0.5): morning shift.</Text>
         <Text style={styles.policyText}>Second Half (0.5): afternoon shift. Long-press a selected date to override.</Text>
       </ThemedDialog>
+      <Modal transparent visible={expandedCivil != null} animationType="none" onRequestClose={() => setExpandedCivil(null)}>
+        <View style={styles.menuBackdrop}>
+          <Pressable style={StyleSheet.absoluteFill} onPress={() => setExpandedCivil(null)} />
+          <View style={[styles.sessionMenu, { top: (menuPos?.y ?? 0) + 8, left: Math.max(8, (menuPos?.x ?? 0) - 96) }]}>
+            {(
+              [
+                ["FULL_DAY", "Full Day"],
+                ["FIRST_HALF", "First Half"],
+                ["SECOND_HALF", "Second Half"],
+              ] as const
+            ).map(([session, label]) => (
+              <Pressable
+                key={session}
+                style={styles.sessionMenuItem}
+                onPress={() => {
+                  if (expandedCivil) setDateSession(expandedCivil, session);
+                  setExpandedCivil(null);
+                }}
+              >
+                <Text style={styles.sessionMenuText}>{label}</Text>
+              </Pressable>
+            ))}
+          </View>
+        </View>
+      </Modal>
     </WebShell>
   );
 }
 
 const styles = StyleSheet.create({
-  page: { width: "100%", gap: 12, paddingBottom: 24 },
+  page: { width: "100%", gap: 12, paddingBottom: 24, position: "relative" },
   policyBanner: { flexDirection: "row", alignItems: "center", paddingVertical: 8, paddingHorizontal: 10, backgroundColor: "#ececec", borderRadius: 10, gap: 6 },
   policyText: { fontSize: 12, color: colors.onSurfaceVariant, flex: 1, lineHeight: 16 },
   empCard: { padding: 16, backgroundColor: colors.surfaceContainerLowest, borderRadius: 16, borderWidth: 1, borderColor: colors.glassBorder },
@@ -795,15 +817,17 @@ const styles = StyleSheet.create({
   calendarDayHeaderWeekend: { color: colors.onSurfaceVariant },
   calendarGrid: { flexDirection: "row", flexWrap: "wrap" },
   calCell: { width: "14.28%", minHeight: 36, alignItems: "center", justifyContent: "center", position: "relative" },
+  calCellOpen: { zIndex: 80 },
+  cellHit: { position: "absolute", top: 0, right: 0, bottom: 0, left: 0 },
   dateTip: {
     position: "absolute",
     top: 32,
     left: 0,
-    zIndex: 5,
+    zIndex: 20,
     width: 180,
     opacity: 1,
     backgroundColor: "#FFFFFF",
-    elevation: 6,
+    elevation: 8,
     borderWidth: 1,
     borderColor: colors.glassBorder,
     borderRadius: 8,
@@ -820,13 +844,20 @@ const styles = StyleSheet.create({
   calTextSelStr: { color: colors.onPrimary, fontSize: 12, fontWeight: "500" },
   calTextSelHalfStr: { color: colors.onSurface, fontSize: 12, fontWeight: "500" },
   halfDot: { width: 5, height: 5, borderRadius: 2.5, marginTop: 2 },
+  sessionBtn: { position: "absolute", top: 1, right: 1, width: 14, height: 14, borderRadius: 3, alignItems: "center", justifyContent: "center", backgroundColor: "#FFFFFF", zIndex: 2 },
+  sessionBtnText: { fontSize: 9, lineHeight: 12, color: colors.onSurface, fontWeight: "700" },
+  sessionMenu: { position: "absolute", zIndex: 90, backgroundColor: "#FFFFFF", opacity: 1, borderWidth: 1, borderColor: colors.border, borderRadius: 8, paddingVertical: 4, minWidth: 128, elevation: 8 },
+  sessionMenuItem: { paddingHorizontal: 12, paddingVertical: 10 },
+  sessionMenuText: { fontSize: 13, color: colors.onSurface },
+  menuBackdrop: { flex: 1 },
   capsuleRow: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   capsule: { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 999, backgroundColor: colors.surfaceContainerLowest, borderWidth: 1, borderColor: colors.border },
   capsuleOn: { borderColor: colors.primary },
   capsuleText: { fontSize: 12, fontWeight: "600", color: colors.onSurface },
   halfPanel: { flexDirection: "row", flexWrap: "wrap", alignItems: "center", gap: 8 },
   calendarLegend: { flexDirection: "row", gap: 8, paddingTop: 8, borderTopWidth: 1, borderTopColor: colors.surfaceContainer, paddingHorizontal: 4 },
-  legendItem: { flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 4 },
+  legendItem: { flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 4, borderRadius: 8, paddingVertical: 6 },
+  legendItemOn: { backgroundColor: colors.surfaceContainer },
   legendDot: { width: 12, height: 12, borderRadius: 6 },
   legendText: { fontSize: 12, color: colors.onSurface },
   dateRangeBox: { flexDirection: "row", flexWrap: "wrap", gap: 8, justifyContent: "space-between" },
@@ -834,7 +865,8 @@ const styles = StyleSheet.create({
   dateRangeLabel: { fontSize: 11, fontWeight: "600", color: colors.secondary },
   dateRangeVal: { fontSize: 16, fontWeight: "600", color: colors.onSurface },
   dateRangeDay: { fontSize: 12, color: colors.secondary },
-  durationResult: { backgroundColor: colors.surfaceContainerLow, borderRadius: 12, padding: 12, flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
+  durationResult: { backgroundColor: colors.surfaceContainerLow, borderRadius: 12, padding: 12, flexDirection: "row", justifyContent: "space-between", alignItems: "center", gap: 12 },
+  selectedDayList: { flexDirection: "row", flexWrap: "wrap", gap: 10, marginTop: 6 },
   durationTitle: { fontSize: 18, fontWeight: "600", color: colors.onSurface },
   durationSubtitle: { fontSize: 12, color: colors.onSurfaceVariant, marginTop: 2 },
   durationBadge: { width: 40, height: 40, borderRadius: 20, backgroundColor: colors.primary, alignItems: "center", justifyContent: "center" },

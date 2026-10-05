@@ -107,10 +107,10 @@ export default function WebAdminReviewScreen() {
           <Text style={[styles.th, styles.colDates]}>Dates</Text>
           <Text style={[styles.th, styles.colStatus]}>Status</Text>
           <Text style={[styles.th, styles.colReason]}>Reason</Text>
-          <Text style={[styles.th, styles.colActions]}>Actions</Text>
         </View>
         {queued.map((leave) => (
           <View key={leave.leaveId} style={styles.row}>
+            <View style={styles.rowMain}>
             <View style={[styles.colPerson, styles.personRow]}>
               <UserAvatar employee={employees.find((item) => item.employeeId === leave.employeeId) ?? null} size={32} />
               <View style={{ flex: 1 }}>
@@ -128,8 +128,11 @@ export default function WebAdminReviewScreen() {
               {leave.status === "SUBMITTED" && leave.managerApprovalStatus === "PENDING" ? (
                 <Text style={styles.note}>Approver approval pending</Text>
               ) : null}
-              {leave.status === "PENDING_HR_REVIEW" && leave.managerApprovalStatus === "APPROVED" ? (
-                <Text style={styles.note}>Mentor: Approved</Text>
+              {leave.managerApprovalStatus === "APPROVED" ? (
+                <Text style={styles.note}>Approver: Approved</Text>
+              ) : null}
+              {leave.managerApprovalStatus === "REJECTED" ? (
+                <Text style={styles.note}>Approver: Rejected</Text>
               ) : null}
             </View>
             <View style={styles.colReason}>
@@ -141,8 +144,12 @@ export default function WebAdminReviewScreen() {
                   HR Note: {leave.hrComments.length > 72 ? `${leave.hrComments.slice(0, 72).trimEnd()}...` : leave.hrComments}
                 </Text>
               ) : null}
+              {leave.managerComments ? (
+                <Text style={styles.note} numberOfLines={2}>Approver note: {leave.managerComments}</Text>
+              ) : null}
             </View>
-            <View style={styles.colActions}>
+            </View>
+            <View style={styles.rowActions}>
               {canAct && leave.status === "PENDING_HR_REVIEW" ? (
                 <View style={styles.actionsBox}>
                   <View style={styles.actionRow}>
@@ -303,14 +310,18 @@ const styles = StyleSheet.create({
   },
   th: { fontSize: 11, fontWeight: "700", color: colors.secondary, textTransform: "uppercase", letterSpacing: 0.6 },
   row: {
-    flexDirection: "row",
-    alignItems: "flex-start",
     paddingHorizontal: 12,
     paddingVertical: 14,
     borderBottomWidth: 1,
     borderBottomColor: colors.surfaceContainerHighest,
     gap: 12,
   },
+  rowMain: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 12,
+  },
+  rowActions: { alignItems: "flex-end", gap: 8 },
   colPerson: { flex: 1.3, minWidth: 140, justifyContent: "center", gap: 2 },
   personRow: { flexDirection: "row", alignItems: "center", gap: 8 },
   colDates: { flex: 1.2, minWidth: 130, justifyContent: "center" },

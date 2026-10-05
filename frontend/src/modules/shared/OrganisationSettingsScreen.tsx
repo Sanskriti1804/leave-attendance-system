@@ -297,8 +297,9 @@ export default function OrganisationSettingsScreen() {
           <View style={styles.card}>
             <Text style={styles.cardTitle}>Holiday calendar</Text>
             <Text style={styles.meta}>Configured holidays cannot be selected on Apply Leave.</Text>
+            <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 12 }}>
             {holidays.map((row) => (
-              <View key={row.holidayId} style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
+              <View key={row.holidayId} style={{ width: 220, maxWidth: "100%", flexGrow: 1, gap: 8, padding: 12, borderRadius: 12, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surfaceContainerLow }}>
                 <Text style={styles.infoValue}>
                   {recurringHolidayLabel(row.holidayDate)} · {row.holidayName}
                 </Text>
@@ -320,6 +321,7 @@ export default function OrganisationSettingsScreen() {
                 ) : null}
               </View>
             ))}
+            </View>
             {canEdit ? (
               <>
                 <TextInput

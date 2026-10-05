@@ -481,7 +481,7 @@ const styles = StyleSheet.create({
   cardFooter: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingTop: 4 },
   footerTime: { flexDirection: "row", alignItems: "center", gap: 4, flex: 1 },
   footerTimeText: { fontSize: 12, color: colors.secondary },
-  actionBtn: { flexDirection: "row", alignItems: "center", backgroundColor: colors.surfaceContainer, height: 44, paddingHorizontal: 12, borderRadius: 12, gap: 4 },
+  actionBtn: { flexDirection: "row", alignItems: "center", backgroundColor: colors.surfaceContainerLowest, height: 44, paddingHorizontal: 12, borderRadius: 12, gap: 4, borderWidth: 1, borderColor: colors.border },
   actionBtnText: { fontSize: 12, fontWeight: "500", color: colors.onSurface },
   cardCommentBox: { backgroundColor: colors.surfaceContainer, padding: 12, borderRadius: 8, gap: 4 },
   commentHeader: { flexDirection: "row", alignItems: "center", gap: 8 },
@@ -491,6 +491,6 @@ const styles = StyleSheet.create({
   draftText: { fontSize: 12, color: colors.secondary, fontStyle: "italic", flex: 1 },
   draftBadge: { fontSize: 11, fontWeight: "600", color: colors.secondary, letterSpacing: 0.5 },
   cardFooterRight: { flexDirection: "row", justifyContent: "flex-end", alignItems: "center", paddingTop: 4, gap: 8 },
-  actionBtnPrimary: { flexDirection: "row", alignItems: "center", backgroundColor: colors.accent, height: 44, paddingHorizontal: 16, borderRadius: 8, gap: 4 },
+  actionBtnPrimary: { flexDirection: "row", alignItems: "center", backgroundColor: colors.accent, height: 44, paddingHorizontal: 16, borderRadius: 8, gap: 4, borderWidth: 1, borderColor: colors.accentDeep },
   actionBtnPrimaryText: { fontSize: 12, fontWeight: "500", color: colors.onPrimary },
 });

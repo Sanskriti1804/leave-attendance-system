@@ -140,6 +140,23 @@ export async function markNotificationRead(userId: number, notificationId: numbe
   return toResponse(updated);
 }
 
+export async function notifyHrOfApproverDecision(leaveId: number, kind: "APPROVED" | "REJECTED"): Promise<void> {
+  const admins = await prisma.employee.findMany({
+    where: { role: "admin", obsolete: false },
+    select: { employeeId: true },
+  });
+  const title = kind === "APPROVED" ? "Approver approved leave" : "Approver rejected leave";
+  const message = kind === "APPROVED" ? "An approver approved a leave request." : "An approver rejected a leave request.";
+  for (const admin of admins) {
+    await notifyOnce({
+      userId: admin.employeeId,
+      type: `LEAVE_APR_${kind}_${leaveId}`,
+      title,
+      message,
+    });
+  }
+}
+
 export async function notifyLeaveDecision(params: {
   employeeId: number;
   leaveId: number;
