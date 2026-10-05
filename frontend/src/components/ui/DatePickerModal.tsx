@@ -23,14 +23,17 @@ export function DatePickerModal({
   minYear = 2020,
   maxYear = 2030,
 }: DatePickerModalProps) {
-  const initialDate = useMemo(() => {
-    if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return new Date();
-    const parsed = new Date(value);
-    return isNaN(parsed.getTime()) ? new Date() : parsed;
-  }, [value, visible]);
+  const initialDateParts = useMemo(() => {
+    if (value && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
+      const [y, m, d] = value.split("-").map(Number);
+      return { year: y, month: m - 1, day: d };
+    }
+    const now = new Date();
+    return { year: now.getFullYear(), month: now.getMonth(), day: now.getDate() };
+  }, [value]);
 
-  const [viewYear, setViewYear] = useState(initialDate.getFullYear());
-  const [viewMonth, setViewMonth] = useState(initialDate.getMonth());
+  const [viewYear, setViewYear] = useState(initialDateParts.year);
+  const [viewMonth, setViewMonth] = useState(initialDateParts.month);
   const [selectedDate, setSelectedDate] = useState<string>(value);
   
   const [showMonthDropdown, setShowMonthDropdown] = useState(false);
@@ -38,14 +41,26 @@ export function DatePickerModal({
 
   useEffect(() => {
     if (visible) {
-      const d = initialDate;
-      setViewYear(d.getFullYear());
-      setViewMonth(d.getMonth());
-      setSelectedDate(value);
+      setViewYear(initialDateParts.year);
+      setViewMonth(initialDateParts.month);
+      const mStr = String(initialDateParts.month + 1).padStart(2, "0");
+      const dStr = String(initialDateParts.day).padStart(2, "0");
+      setSelectedDate(value || `${initialDateParts.year}-${mStr}-${dStr}`);
       setShowMonthDropdown(false);
       setShowYearDropdown(false);
     }
-  }, [visible, initialDate, value]);
+  }, [visible, initialDateParts, value]);
+
+  const updateDateForView = (y: number, m: number) => {
+    setViewYear(y);
+    setViewMonth(m);
+    const mStr = String(m + 1).padStart(2, "0");
+    const daysInMonth = new Date(y, m + 1, 0).getDate();
+    const currentDay = selectedDate ? parseInt(selectedDate.split("-")[2] || "1", 10) : 1;
+    const validDay = Math.min(currentDay, daysInMonth);
+    const dStr = String(validDay).padStart(2, "0");
+    setSelectedDate(`${y}-${mStr}-${dStr}`);
+  };
 
   const years = useMemo(() => {
     const y = [];
@@ -82,21 +97,23 @@ export function DatePickerModal({
   }, [viewYear, viewMonth]);
 
   const handlePrevMonth = () => {
-    if (viewMonth === 0) {
-      setViewMonth(11);
-      setViewYear(y => y - 1);
-    } else {
-      setViewMonth(m => m - 1);
+    let nextMonth = viewMonth - 1;
+    let nextYear = viewYear;
+    if (nextMonth < 0) {
+      nextMonth = 11;
+      nextYear -= 1;
     }
+    updateDateForView(nextYear, nextMonth);
   };
 
   const handleNextMonth = () => {
-    if (viewMonth === 11) {
-      setViewMonth(0);
-      setViewYear(y => y + 1);
-    } else {
-      setViewMonth(m => m + 1);
+    let nextMonth = viewMonth + 1;
+    let nextYear = viewYear;
+    if (nextMonth > 11) {
+      nextMonth = 0;
+      nextYear += 1;
     }
+    updateDateForView(nextYear, nextMonth);
   };
 
   if (!visible) return null;
@@ -178,7 +195,14 @@ export function DatePickerModal({
             <View style={[styles.dropdownPopup, { left: 16 }]}>
               <ScrollView style={{ maxHeight: 250 }} showsVerticalScrollIndicator={false}>
                 {MONTHS.map((m, i) => (
-                  <TouchableOpacity key={m} style={[styles.dropdownItem, viewMonth === i && styles.dropdownItemSelected]} onPress={() => { setViewMonth(i); setShowMonthDropdown(false); }}>
+                  <TouchableOpacity
+                    key={m}
+                    style={[styles.dropdownItem, viewMonth === i && styles.dropdownItemSelected]}
+                    onPress={() => {
+                      updateDateForView(viewYear, i);
+                      setShowMonthDropdown(false);
+                    }}
+                  >
                     <Text style={[styles.dropdownItemText, viewMonth === i && styles.dropdownItemTextSelected]}>{m}</Text>
                   </TouchableOpacity>
                 ))}
@@ -190,7 +214,14 @@ export function DatePickerModal({
             <View style={[styles.dropdownPopup, { left: 120 }]}>
               <ScrollView style={{ maxHeight: 250 }} showsVerticalScrollIndicator={false}>
                 {years.map(y => (
-                  <TouchableOpacity key={y} style={[styles.dropdownItem, viewYear === y && styles.dropdownItemSelected]} onPress={() => { setViewYear(y); setShowYearDropdown(false); }}>
+                  <TouchableOpacity
+                    key={y}
+                    style={[styles.dropdownItem, viewYear === y && styles.dropdownItemSelected]}
+                    onPress={() => {
+                      updateDateForView(y, viewMonth);
+                      setShowYearDropdown(false);
+                    }}
+                  >
                     <Text style={[styles.dropdownItemText, viewYear === y && styles.dropdownItemTextSelected]}>{y}</Text>
                   </TouchableOpacity>
                 ))}

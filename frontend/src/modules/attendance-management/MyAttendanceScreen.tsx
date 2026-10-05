@@ -115,6 +115,7 @@ export default function MyAttendanceScreen() {
   const topInset = useTopNavContentInset();
 
   const [month, setMonth] = useState(() => getTodayIST().slice(0, 7));
+  const [selectedDateStr, setSelectedDateStr] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [filter, setFilter] = useState<Filter>("all");
   const [data, setData] = useState<AttendanceHistory | null>(null);
@@ -127,7 +128,7 @@ export default function MyAttendanceScreen() {
     setError(null);
 
     try {
-      setData(await getMyAttendance(month, page));
+      setData(await getMyAttendance(month, page, 50));
     } catch (err) {
       setError(apiErrorMessage(err));
     } finally {
@@ -158,13 +159,13 @@ export default function MyAttendanceScreen() {
 
   const totalPages = Math.max(
     1,
-    Math.ceil((data?.total ?? 0) / (data?.pageSize ?? 10))
+    Math.ceil((data?.total ?? 0) / (data?.pageSize ?? 50))
   );
 
   const [datePickerOpen, setDatePickerOpen] = useState(false);
 
-  // Value for DatePickerModal: first day of current attendance month.
-  const datePickerValue = `${month}-01`;
+  // Value for DatePickerModal: selected date or first day of current attendance month.
+  const datePickerValue = selectedDateStr && selectedDateStr.startsWith(month) ? selectedDateStr : `${month}-01`;
 
   const filterCount = (name: Filter) => {
     const items = data?.items ?? [];
@@ -337,6 +338,18 @@ export default function MyAttendanceScreen() {
             ))}
           </ScrollView>
 
+          {selectedDateStr && selectedDateStr.startsWith(month) ? (
+            <View style={styles.selectedDateBanner}>
+              <MaterialIcons name="event" size={16} color={colors.primary} />
+              <Text style={styles.selectedDateText}>
+                Filter: {dayLabel(selectedDateStr)}
+              </Text>
+              <TouchableOpacity onPress={() => setSelectedDateStr(null)}>
+                <MaterialIcons name="close" size={16} color={colors.secondaryStrong} />
+              </TouchableOpacity>
+            </View>
+          ) : null}
+
           {loading ? (
             <ActivityIndicator
               color={colors.primary}
@@ -360,6 +373,7 @@ export default function MyAttendanceScreen() {
             <AttendanceCard
               key={item.attendanceId}
               item={item}
+              isHighlighted={selectedDateStr === item.attendanceDate}
               onPress={() => setSelected(item)}
             />
           ))}
@@ -423,6 +437,7 @@ export default function MyAttendanceScreen() {
           onClose={() => setDatePickerOpen(false)}
           onSelect={(date) => {
             setMonth(date.slice(0, 7));
+            setSelectedDateStr(date);
             setPage(1);
           }}
           minYear={2020}
@@ -463,9 +478,11 @@ function Metric({
 
 function AttendanceCard({
   item,
+  isHighlighted,
   onPress,
 }: {
   item: AttendanceRecord;
+  isHighlighted?: boolean;
   onPress: () => void;
 }) {
   const workDuration = duration(item.checkIn, item.checkOut);
@@ -479,6 +496,7 @@ function AttendanceCard({
         (item.status === "Weekly Off" ||
           item.status === "Holiday") &&
           styles.restRecord,
+        isHighlighted && styles.highlightedRecord,
       ]}
       onPress={onPress}
       activeOpacity={0.72}
@@ -1171,5 +1189,29 @@ const styles = StyleSheet.create({
   navMeta: {
     fontSize: 11,
     color: colors.secondaryStrong,
+  },
+
+  selectedDateBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: colors.surfaceContainerHigh,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+    marginVertical: 4,
+  },
+
+  selectedDateText: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: colors.text,
+    flex: 1,
+    marginLeft: 6,
+  },
+
+  highlightedRecord: {
+    borderWidth: 2,
+    borderColor: colors.primary,
   },
 });
