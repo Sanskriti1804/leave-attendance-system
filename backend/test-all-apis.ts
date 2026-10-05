@@ -11,18 +11,16 @@ import { createApp } from "./src/app.js";
 import { setEmailTransport } from "./src/modules/shared/services/email.service.js";
 import { env } from "./src/env.js";
 import { prisma } from "./src/modules/shared/db/index.js";
+import { ORGANISATION_SETTING_CATEGORY } from "./src/modules/shared/organisation-settings/repository.js";
 import { hashPassword } from "./src/modules/shared/utils/security.js";
 import { addCalendarDays, isoWeekday, todayInTimeZone } from "./src/modules/shared/utils/dates.js";
 
-function addWorkingDays(civil: string, count: number, holidays: Set<string> = new Set()): string {
+function addWorkingDays(civil: string, count: number, blocked: (date: string) => boolean): string {
   let date = civil;
   let added = 0;
   while (added < count) {
     date = addCalendarDays(date, 1);
-    const dow = isoWeekday(date);
-    if (dow !== 6 && dow !== 7 && !holidays.has(date)) {
-      added += 1;
-    }
+    if (!blocked(date)) added += 1;
   }
   return date;
 }
@@ -91,21 +89,25 @@ async function run(): Promise<void> {
   const passwordHash = await hashPassword(password);
   const today = todayInTimeZone(env.appTimezone);
   const holidayRows = await prisma.holiday.findMany({ select: { holidayDate: true } });
-  const holidays = new Set(
-    holidayRows
-      .map((row) => row.holidayDate.toISOString().slice(0, 10))
-      .filter(Boolean),
-  );
-  const d1 = addWorkingDays(today, 1, holidays);
-  const d2 = addWorkingDays(today, 2, holidays);
-  const d3 = addWorkingDays(today, 3, holidays);
-  const d4 = addWorkingDays(today, 4, holidays);
-  const d5 = addWorkingDays(today, 5, holidays);
-  const d6 = addWorkingDays(today, 6, holidays);
-  const d7 = addWorkingDays(today, 7, holidays);
-  const d8 = addWorkingDays(today, 8, holidays);
-  const d9 = addWorkingDays(today, 9, holidays);
-  const d10 = addWorkingDays(today, 10, holidays);
+  const holidayMonthDays = new Set(holidayRows.map((row) => row.holidayDate.toISOString().slice(5, 10)));
+  const weeklyOffRow = await prisma.configurationSetting.findUnique({
+    where: { settingCategory_settingKey: { settingCategory: ORGANISATION_SETTING_CATEGORY, settingKey: "weeklyOffDow" } },
+  });
+  const weeklyOffDow = new Set<number>(weeklyOffRow ? (JSON.parse(weeklyOffRow.settingValue) as number[]) : []);
+  const blocked = (date: string) => {
+    const dow = isoWeekday(date);
+    return dow === 6 || dow === 7 || weeklyOffDow.has(dow) || holidayMonthDays.has(date.slice(5));
+  };
+  const d1 = addWorkingDays(today, 1, blocked);
+  const d2 = addWorkingDays(today, 2, blocked);
+  const d3 = addWorkingDays(today, 3, blocked);
+  const d4 = addWorkingDays(today, 4, blocked);
+  const d5 = addWorkingDays(today, 5, blocked);
+  const d6 = addWorkingDays(today, 6, blocked);
+  const d7 = addWorkingDays(today, 7, blocked);
+  const d8 = addWorkingDays(today, 8, blocked);
+  const d9 = addWorkingDays(today, 9, blocked);
+  const d10 = addWorkingDays(today, 10, blocked);
   const tooFar = addCalendarDays(today, env.leaveMaxAdvanceDays + 2);
 
   const department = await prisma.department.create({
@@ -182,6 +184,31 @@ async function run(): Promise<void> {
       departmentId: department.departmentId,
       status: "ACTIVE",
     },
+  });
+
+  const priorApprovers = await prisma.configurationSetting.findUnique({
+    where: { settingCategory_settingKey: { settingCategory: ORGANISATION_SETTING_CATEGORY, settingKey: "teamApprovers" } },
+  });
+  const existingApprovers = priorApprovers
+    ? (JSON.parse(priorApprovers.settingValue) as { departmentId: number; employeeId: number }[])
+    : [];
+  const suiteApprovers = [
+    ...existingApprovers.filter((row) => row.departmentId !== department.departmentId),
+    { departmentId: department.departmentId, employeeId: manager.employeeId },
+  ];
+  const suiteApproverJson = JSON.stringify(suiteApprovers);
+  if (suiteApproverJson.length > 100) {
+    throw new Error("Refusing to write teamApprovers beyond the 100-character column");
+  }
+  await prisma.configurationSetting.upsert({
+    where: { settingCategory_settingKey: { settingCategory: ORGANISATION_SETTING_CATEGORY, settingKey: "teamApprovers" } },
+    create: {
+      settingCategory: ORGANISATION_SETTING_CATEGORY,
+      settingKey: "teamApprovers",
+      settingType: "json",
+      settingValue: suiteApproverJson,
+    },
+    update: { settingValue: suiteApproverJson, settingType: "json" },
   });
 
   const app = createApp();
@@ -931,6 +958,16 @@ async function run(): Promise<void> {
     expect("admin GET report csv 200", csvReport.status, 200);
   } finally {
     server.close();
+    if (priorApprovers) {
+      await prisma.configurationSetting.update({
+        where: { settingCategory_settingKey: { settingCategory: ORGANISATION_SETTING_CATEGORY, settingKey: "teamApprovers" } },
+        data: { settingValue: priorApprovers.settingValue, settingType: priorApprovers.settingType },
+      });
+    } else {
+      await prisma.configurationSetting.deleteMany({
+        where: { settingCategory: ORGANISATION_SETTING_CATEGORY, settingKey: "teamApprovers" },
+      });
+    }
     await prisma.notification.deleteMany({
       where: { user: { email: { contains: suffix } } },
     });

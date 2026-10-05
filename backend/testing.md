@@ -24,7 +24,8 @@ npm run seed
 npm start
 ```
 
-Automated suite (needs DB): `npm test`
+Automated suite (needs DB): `npm test`  
+Authorization and CORS checks (needs DB, creates and deletes its own rows): `npm run test:security`
 
 Leave dates must fall in **today … today + 14 calendar days** in `APP_TIMEZONE` (default `Asia/Kolkata`). Use `YYYY-MM-DD`.
 

@@ -56,6 +56,14 @@ export function findEmployeeById(employeeId: number): Promise<EmployeePublic | n
   });
 }
 
+export function findActiveAdmin(): Promise<EmployeePublic | null> {
+  return prisma.employee.findFirst({
+    where: { role: "admin", obsolete: false, status: "ACTIVE" },
+    select: employeePublicSelect,
+    orderBy: { employeeId: "asc" },
+  });
+}
+
 export function findEmployeeByEmail(email: string): Promise<Employee | null> {
   return prisma.employee.findUnique({ where: { email } });
 }

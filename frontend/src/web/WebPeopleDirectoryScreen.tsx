@@ -152,16 +152,18 @@ export default function WebPeopleDirectoryScreen() {
     }
   }
 
-  const groups = useMemo(() => {
+  const { hrPeople, groups } = useMemo(() => {
     const filtered = items.filter((row) => matchesPeopleQuery(row, query, deptName(row.departmentId)));
+    const hr = filtered.filter((row) => row.role === "admin");
     const byDept = new Map<string, EmployeePublic[]>();
     for (const row of filtered) {
+      if (row.role === "admin") continue;
       const name = deptName(row.departmentId);
       const list = byDept.get(name) ?? [];
       list.push(row);
       byDept.set(name, list);
     }
-    return [...byDept.entries()].sort(([a], [b]) => a.localeCompare(b));
+    return { hrPeople: hr, groups: [...byDept.entries()].sort(([a], [b]) => a.localeCompare(b)) };
   }, [departments, items, query]);
 
   return (
@@ -178,6 +180,21 @@ export default function WebPeopleDirectoryScreen() {
       </Text>
       {loading ? <ActivityIndicator color={colors.primary} /> : null}
       {error ? <Text style={styles.meta}>{error}</Text> : null}
+      {hrPeople.length > 0 ? (
+        <WebCard>
+          <Text style={styles.group}>HR · {hrPeople.length}</Text>
+          <View style={styles.grid}>
+            {hrPeople.map((row) => (
+              <TouchableOpacity key={row.employeeId} style={styles.personCard} activeOpacity={0.8} onPress={() => setSelected(row)}>
+                <UserAvatar employee={row} size={40} />
+                <Text style={styles.name}>{displayName(row)}</Text>
+                <Text style={styles.meta}>{row.email}</Text>
+                <Text style={styles.td}>EMP-{row.employeeId} · {row.role.replaceAll("_", " ")}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </WebCard>
+      ) : null}
       {groups.map(([department, people]) => (
         <WebCard key={department}>
           <Text style={styles.group}>{department} · {people.length}</Text>
@@ -195,7 +212,7 @@ export default function WebPeopleDirectoryScreen() {
           </View>
         </WebCard>
       ))}
-      {!loading && groups.length === 0 ? <Text style={styles.meta}>No people match this search.</Text> : null}
+      {!loading && groups.length === 0 && hrPeople.length === 0 ? <Text style={styles.meta}>No people match this search.</Text> : null}
       <ThemedDialog
         visible={selected != null}
         title={selected ? displayName(selected) : ""}

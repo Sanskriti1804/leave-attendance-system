@@ -75,6 +75,7 @@ export default function WebProfileScreen() {
   }, []);
 
   const name = me ? displayName(me) : "—";
+  const approverLabel = managerName.trim() && managerName !== "—" ? managerName : "Not assigned";
 
   return (
     <WebShell title="Profile" variant="employee" activeRoute="profile">
@@ -106,7 +107,7 @@ export default function WebProfileScreen() {
             <Text style={styles.activeTag}>{me?.status ?? "Active"}</Text>
           </View>
           <Row label="Department" value={departmentName} />
-          <Row label="Approver" value={managerName.trim() && managerName !== "—" ? managerName : "Not assigned"} />
+          <Row label="Approver" value={approverLabel} />
           <Row label="Joining Date" value={me?.joiningDate ? `${formatJoining(me.joiningDate)} · Ongoing` : formatJoining(me?.joiningDate)} />
         </WebCard>
         <WebCard style={styles.fullCard}>

@@ -11,7 +11,8 @@
     "seed": "tsx prisma/seed.ts",
     "typecheck": "tsc --noEmit",
     "test": "tsx test-all-apis.ts",
-    "test:apis": "tsx test-all-apis.ts"
+    "test:apis": "tsx test-all-apis.ts",
+    "test:security": "tsx security-authz.ts"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.10.0",

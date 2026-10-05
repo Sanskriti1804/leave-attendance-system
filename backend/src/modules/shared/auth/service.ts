@@ -8,7 +8,7 @@ import {
   hashToken,
   verifyPassword,
 } from "../utils/security.js";
-import { findEmployeeByEmail, findEmployeeById } from "../employees/repository.js";
+import { findActiveAdmin, findEmployeeByEmail, findEmployeeById } from "../employees/repository.js";
 import type { EmployeePublic } from "../employees/repository.js";
 import { getOrganisationSettings } from "../organisation-settings/service.js";
 import { logger } from "../../../logger.js";
@@ -164,9 +164,14 @@ export async function getMe(employeeId: number) {
   }
   const settings = await getOrganisationSettings();
   const approverId = settings.teamApprovers.find((row) => row.departmentId === employee.departmentId)?.employeeId ?? null;
-  const approver = approverId && approverId !== employee.employeeId ? await findEmployeeById(approverId) : null;
-  const managerName = approver
-    ? [approver.firstName, approver.lastName].filter(Boolean).join(" ").trim()
+  const approverRecord =
+    approverId === employee.employeeId
+      ? await findActiveAdmin()
+      : approverId
+        ? await findEmployeeById(approverId)
+        : null;
+  const managerName = approverRecord
+    ? [approverRecord.firstName, approverRecord.lastName].filter(Boolean).join(" ").trim()
     : null;
   return { ...toPublicEmployee(employee), managerName: managerName || null };
 }

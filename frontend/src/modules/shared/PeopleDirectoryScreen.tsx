@@ -152,16 +152,18 @@ export default function PeopleDirectoryScreen() {
     }
   }
 
-  const groups = useMemo(() => {
+  const { hrPeople, groups } = useMemo(() => {
     const filtered = items.filter((row) => matchesPeopleQuery(row, query, deptName(row.departmentId)));
+    const hr = filtered.filter((row) => row.role === "admin");
     const byDept = new Map<string, EmployeePublic[]>();
     for (const row of filtered) {
+      if (row.role === "admin") continue;
       const name = deptName(row.departmentId);
       const list = byDept.get(name) ?? [];
       list.push(row);
       byDept.set(name, list);
     }
-    return [...byDept.entries()].sort(([a], [b]) => a.localeCompare(b));
+    return { hrPeople: hr, groups: [...byDept.entries()].sort(([a], [b]) => a.localeCompare(b)) };
   }, [departments, items, query]);
 
   useEffect(() => {
@@ -190,6 +192,24 @@ export default function PeopleDirectoryScreen() {
           </Text>
           {loading ? <ActivityIndicator color={colors.primary} /> : null}
           {error ? <Text style={styles.meta}>{error}</Text> : null}
+          {hrPeople.length > 0 ? (
+            <View style={styles.group}>
+              <View style={styles.groupHead}>
+                <Text style={styles.groupTitle}>HR</Text>
+                <Text style={styles.groupCount}>{hrPeople.length}</Text>
+              </View>
+              <GlassCard style={styles.grid}>
+                {hrPeople.map((row) => (
+                  <TouchableOpacity key={row.employeeId} style={styles.personCard} activeOpacity={0.8} onPress={() => setSelected(row)}>
+                    <UserAvatar employee={row} size={44} />
+                    <Text style={styles.name} numberOfLines={1}>{displayName(row)}</Text>
+                    <Text style={styles.meta} numberOfLines={1}>{row.email}</Text>
+                    <Text style={styles.meta}>EMP-{row.employeeId}</Text>
+                  </TouchableOpacity>
+                ))}
+              </GlassCard>
+            </View>
+          ) : null}
           {groups.map(([department, people]) => (
             <View key={department} style={styles.group}>
               <View style={styles.groupHead}>
@@ -214,7 +234,7 @@ export default function PeopleDirectoryScreen() {
               </GlassCard>
             </View>
           ))}
-          {!loading && groups.length === 0 ? <Text style={styles.meta}>No people match this search.</Text> : null}
+          {!loading && groups.length === 0 && hrPeople.length === 0 ? <Text style={styles.meta}>No people match this search.</Text> : null}
         </ScrollView>
         <RoleBottomNav variant="admin" activeRoute="people" />
         <ThemedDialog

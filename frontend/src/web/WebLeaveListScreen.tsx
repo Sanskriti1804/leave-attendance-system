@@ -1,4 +1,4 @@
-﻿import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, TextInput, Modal, Pressable } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -78,8 +78,8 @@ export default function WebLeaveListScreen() {
     (row) => row.reportingManagerEmployeeId === me?.employeeId && row.employeeId !== me?.employeeId,
   );
   const myItems = filtered.filter((row) => row.employeeId === me?.employeeId);
-  const otherItems = filtered.filter(
-    (row) => row.employeeId !== me?.employeeId && row.reportingManagerEmployeeId !== me?.employeeId,
+  const isApprover = items.some(
+    (row) => row.reportingManagerEmployeeId === me?.employeeId && row.employeeId !== me?.employeeId,
   );
   const count = (filter: string) => items.filter((row) => matchesFilter(row.status, filter)).length;
 
@@ -118,7 +118,17 @@ export default function WebLeaveListScreen() {
       </View>
       {loading ? <ActivityIndicator color={colors.primary} /> : null}
       {error ? <Text style={styles.meta}>{error}</Text> : null}
-      <WebCard>
+      <View style={isApprover ? styles.cards : undefined}>
+      {(isApprover
+        ? [
+            { key: "employees", title: "Employee Leave Requests", hint: "", rows: reviewItems },
+            { key: "mine", title: "My Leave Requests", hint: `Approver: ${me?.managerName?.trim() || "Not assigned"}`, rows: myItems },
+          ]
+        : [{ key: "all", title: "", hint: "", rows: filtered }]
+      ).map((section) => (
+      <WebCard key={section.key}>
+        {section.title ? <Text style={styles.section}>{section.title}</Text> : null}
+        {section.hint ? <Text style={styles.approverLine}>{section.hint}</Text> : null}
         <View style={styles.tableHead}>
           <Text style={[styles.th, { flex: 1.4 }]}>Type</Text>
           <Text style={[styles.th, { flex: 1.6 }]}>Dates</Text>
@@ -126,16 +136,7 @@ export default function WebLeaveListScreen() {
           <Text style={[styles.th, { flex: 1.2 }]}>Status</Text>
           <Text style={[styles.th, { flex: 2 }]}>Reason</Text>
         </View>
-        {([
-          { title: "Employee Leave Requests", rows: reviewItems },
-          { title: "", rows: myItems },
-          { title: "", rows: otherItems },
-        ] as const).flatMap((section) =>
-          section.rows.length === 0
-            ? []
-            : [
-                section.title ? <Text key={section.title} style={styles.section}>{section.title}</Text> : null,
-                ...section.rows.map((leave) => {
+        {section.rows.map((leave) => {
           const canDecide =
             leave.status === "SUBMITTED" &&
             leave.managerApprovalStatus === "PENDING" &&
@@ -276,11 +277,11 @@ export default function WebLeaveListScreen() {
             </View>
           </View>
           );
-        }),
-              ],
-        )}
-        {!loading && filtered.length === 0 ? <Text style={styles.meta}>No leave applications for this filter.</Text> : null}
+        })}
+        {!loading && section.rows.length === 0 ? <Text style={styles.meta}>No leave applications for this filter.</Text> : null}
       </WebCard>
+      ))}
+      </View>
       <Modal visible={noteTarget != null} transparent animationType="fade" onRequestClose={() => setNoteTarget(null)}>
         <Pressable style={styles.backdrop} onPress={() => setNoteTarget(null)}>
           <Pressable style={styles.dialog} onPress={(event) => event.stopPropagation()}>
@@ -343,7 +344,9 @@ const styles = StyleSheet.create({
   th: { fontSize: 11, fontWeight: "700", color: colors.secondary, textTransform: "uppercase" },
   tr: { flexDirection: "row", width: "100%", paddingVertical: 12, alignItems: "center" },
   entry: { width: "100%", borderBottomWidth: 1, borderBottomColor: colors.surfaceContainerHighest, paddingBottom: 8 },
-  section: { fontSize: 13, fontWeight: "700", color: colors.onSurface, marginTop: 12, marginBottom: 4 },
+  section: { fontSize: 13, fontWeight: "700", color: colors.onSurface, marginBottom: 8 },
+  cards: { gap: 20 },
+  approverLine: { fontSize: 13, color: colors.secondary, marginBottom: 8 },
   actionLine: { flexDirection: "row", flexWrap: "wrap", gap: 8, paddingBottom: 10, justifyContent: "flex-end" },
   actionsBox: { gap: 8, width: "100%", maxWidth: 420 },
   actionRow: { flexDirection: "row", gap: 8 },

@@ -39,4 +39,8 @@ export const env = {
   smtpUser: process.env.SMTP_USER,
   smtpPass: process.env.SMTP_PASS,
   smtpSecure: process.env.SMTP_SECURE === "true",
+  corsOrigins: (process.env.CORS_ORIGIN ?? "")
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean),
 };
