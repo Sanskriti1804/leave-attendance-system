@@ -1,3 +1,4 @@
+import sgMail from "@sendgrid/mail";
 import nodemailer from "nodemailer";
 import { env } from "../../../env.js";
 import { logger } from "../../../logger.js";
@@ -27,41 +28,33 @@ class ConsoleEmailTransport implements EmailTransport {
   async sendMail(options: EmailOptions): Promise<void> {
     logger.warn(
       { to: maskAddress(options.to), reason: "configuration_missing" },
-      "Password reset email was not delivered. Set RESEND_API_KEY in backend/.env and restart the API.",
+      "Password reset email was not delivered. Set SENDGRID_API_KEY in backend/.env and restart the API.",
     );
   }
 }
 
-class ResendEmailTransport implements EmailTransport {
+class SendGridEmailTransport implements EmailTransport {
+  constructor() {
+    sgMail.setApiKey(env.sendgridApiKey ?? "");
+  }
+
   async sendMail(options: EmailOptions): Promise<void> {
-    const response = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${env.resendApiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
+    try {
+      await sgMail.send({
+        to: options.to,
         from: env.emailFrom,
-        to: [options.to],
         subject: options.subject,
         text: options.text,
         html: options.html,
-      }),
-    });
-    if (!response.ok) {
-      let reason = `Resend HTTP ${response.status}`;
-      try {
-        const body = (await response.json()) as { message?: string };
-        if (typeof body.message === "string" && body.message.trim()) {
-          reason = `Resend: ${body.message}`;
-        }
-      } catch {
-        reason = `Resend HTTP ${response.status} with an unreadable error body`;
-      }
-      logger.error({ provider: "resend", status: response.status, reason }, "Password reset email rejected by Resend");
-      throw new Error(reason);
+      });
+    } catch (err) {
+      const failure = err as { code?: number; response?: { body?: { errors?: { message?: string }[] } } };
+      const providerMessage = failure.response?.body?.errors?.map((item) => item.message).filter(Boolean).join("; ");
+      const reason = providerMessage || (err instanceof Error ? err.message : "SendGrid request failed");
+      logger.error({ provider: "sendgrid", status: failure.code, reason }, "Password reset email rejected by SendGrid");
+      throw new Error(`SendGrid: ${reason}`);
     }
-    logger.info({ provider: "resend", to: maskAddress(options.to) }, "Password reset email accepted by Resend");
+    logger.info({ provider: "sendgrid", to: maskAddress(options.to) }, "Password reset email accepted by SendGrid");
   }
 }
 
@@ -90,9 +83,9 @@ class SmtpEmailTransport implements EmailTransport {
 }
 
 function selectTransport(): EmailTransport {
-  if (env.resendApiKey) {
-    logger.info({ provider: "resend", from: env.emailFrom }, "Password reset email provider: Resend");
-    return new ResendEmailTransport();
+  if (env.sendgridApiKey) {
+    logger.info({ provider: "sendgrid", from: env.emailFrom }, "Password reset email provider: SendGrid");
+    return new SendGridEmailTransport();
   }
   if (env.smtpHost) {
     logger.info({ provider: "smtp", host: env.smtpHost }, "Password reset email provider: SMTP");
@@ -100,7 +93,7 @@ function selectTransport(): EmailTransport {
   }
   logger.warn(
     { reason: "configuration_missing" },
-    "Password reset email provider is not configured. Set RESEND_API_KEY in backend/.env and restart the API.",
+    "Password reset email provider is not configured. Set SENDGRID_API_KEY in backend/.env and restart the API.",
   );
   return new ConsoleEmailTransport();
 }
@@ -108,7 +101,7 @@ function selectTransport(): EmailTransport {
 let activeTransport: EmailTransport = selectTransport();
 
 export function isEmailDeliveryConfigured(): boolean {
-  return Boolean(env.resendApiKey || env.smtpHost);
+  return Boolean(env.sendgridApiKey || env.smtpHost);
 }
 
 /**
@@ -143,16 +136,6 @@ function escapeHtml(value: string): string {
  * Sends a password reset email containing the secure single-use reset link.
  */
 export async function sendPasswordResetEmail(to: string, resetLink: string): Promise<void> {
-  const deliverTo =
-    env.nodeEnv !== "production" && env.resendDevInbox && env.resendDevInbox.toLowerCase() !== to.toLowerCase()
-      ? env.resendDevInbox
-      : to;
-  if (deliverTo !== to) {
-    logger.warn(
-      { reason: "resend_test_recipient" },
-      "Resend test sender cannot mail other addresses. Password reset email is being delivered to RESEND_DEV_INBOX. The link still resets the account that requested it.",
-    );
-  }
   const subject = "Reset your LAMS SCG password";
   const safeLink = escapeHtml(resetLink);
   const text = `LAMS SCG\nLeave & Attendance Management System\n\nWe received a request to reset the password for ${to}.\n\nOpen this link to choose a new password. It expires in 15 minutes and can be used once:\n${resetLink}\n\nIf you did not request this, ignore this email. Your password will stay the same.\n\nLAMS SCG`;
@@ -178,7 +161,7 @@ export async function sendPasswordResetEmail(to: string, resetLink: string): Pro
   `;
 
   await sendEmail({
-    to: deliverTo,
+    to,
     subject,
     text,
     html,

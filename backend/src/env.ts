@@ -28,15 +28,12 @@ export const env = {
   leaveDocumentsDir: process.env.LEAVE_DOCUMENTS_DIR ?? "uploads/leave-documents",
   leaveDocumentMaxBytes: Number.parseInt(process.env.LEAVE_DOCUMENT_MAX_BYTES ?? "10485760", 10),
 
-  // Email. Resend is preferred. SMTP is used only when RESEND_API_KEY is absent and SMTP_HOST is set.
-  resendApiKey: process.env.RESEND_API_KEY?.trim() || undefined,
-  resendDevInbox: process.env.RESEND_DEV_INBOX?.trim() || undefined,
+  // Email. SendGrid is preferred. SMTP is used only when SENDGRID_API_KEY is absent and SMTP_HOST is set.
+  sendgridApiKey: process.env.SENDGRID_API_KEY?.trim() || undefined,
   emailFrom:
     process.env.EMAIL_FROM && process.env.EMAIL_FROM !== "noreply@leave-attendance.local"
       ? process.env.EMAIL_FROM
-      : process.env.RESEND_API_KEY?.trim()
-        ? "LAMS SCG <onboarding@resend.dev>"
-        : "noreply@leave-attendance.local",
+      : "noreply@leave-attendance.local",
   smtpHost: process.env.SMTP_HOST?.trim() || undefined,
   smtpPort: process.env.SMTP_PORT ? Number.parseInt(process.env.SMTP_PORT, 10) : undefined,
   smtpUser: process.env.SMTP_USER,
