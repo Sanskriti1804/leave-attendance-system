@@ -1,5 +1,5 @@
 ﻿import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, TextInput } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, TextInput, Modal, Pressable } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { getSession } from "../../services/auth";
@@ -41,6 +41,8 @@ export default function WebLeaveListScreen() {
   const [busyId, setBusyId] = useState<number | null>(null);
   const [noteText, setNoteText] = useState<string | null>(null);
   const [notes, setNotes] = useState<Record<number, string>>({});
+  const [noteTarget, setNoteTarget] = useState<number | null>(null);
+  const [approverNote, setApproverNote] = useState("");
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -160,47 +162,56 @@ export default function WebLeaveListScreen() {
           </View>
             <View style={styles.actionLine}>
               {canDecide ? (
-                <>
-                  <TextInput
-                    value={notes[leave.leaveId] ?? ""}
-                    onChangeText={(value) => setNotes((current) => ({ ...current, [leave.leaveId]: value }))}
-                    placeholder="Approver note"
-                    placeholderTextColor={colors.secondary}
-                    style={styles.noteInput}
-                  />
+                <View style={styles.actionsBox}>
+                  <View style={styles.actionRow}>
+                    <TouchableOpacity
+                      style={styles.approveBtn}
+                      disabled={busyId === leave.leaveId}
+                      onPress={async () => {
+                        setBusyId(leave.leaveId);
+                        try {
+                          await managerApproveLeave(leave.leaveId, notes[leave.leaveId]);
+                          await load();
+                        } catch (err) {
+                          setError(apiErrorMessage(err));
+                        } finally {
+                          setBusyId(null);
+                        }
+                      }}
+                    >
+                      <MaterialIcons name="done-all" size={18} color={colors.onPrimary} />
+                      <Text style={styles.approveBtnText}>{busyId === leave.leaveId ? "..." : "Approve Leave"}</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={styles.rejectBtn}
+                      disabled={busyId === leave.leaveId}
+                      onPress={async () => {
+                        setBusyId(leave.leaveId);
+                        try {
+                          await managerRejectLeave(leave.leaveId, notes[leave.leaveId]);
+                          await load();
+                        } catch (err) {
+                          setError(apiErrorMessage(err));
+                        } finally {
+                          setBusyId(null);
+                        }
+                      }}
+                    >
+                      <MaterialIcons name="close" size={18} color={colors.onSurface} />
+                      <Text style={styles.rejectBtnText}>Reject</Text>
+                    </TouchableOpacity>
+                  </View>
                   <TouchableOpacity
-                    disabled={busyId === leave.leaveId}
-                    onPress={async () => {
-                      setBusyId(leave.leaveId);
-                      try {
-                        await managerApproveLeave(leave.leaveId, notes[leave.leaveId]);
-                        await load();
-                      } catch (err) {
-                        setError(apiErrorMessage(err));
-                      } finally {
-                        setBusyId(null);
-                      }
+                    style={styles.noteBtn}
+                    onPress={() => {
+                      setApproverNote(notes[leave.leaveId] ?? "");
+                      setNoteTarget(leave.leaveId);
                     }}
                   >
-                    <Text style={styles.actionLink}>Approve</Text>
+                    <MaterialIcons name="note-add" size={16} color={colors.secondary} />
+                    <Text style={styles.noteBtnText}>Add Approver Note</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity
-                    disabled={busyId === leave.leaveId}
-                    onPress={async () => {
-                      setBusyId(leave.leaveId);
-                      try {
-                        await managerRejectLeave(leave.leaveId, notes[leave.leaveId]);
-                        await load();
-                      } catch (err) {
-                        setError(apiErrorMessage(err));
-                      } finally {
-                        setBusyId(null);
-                      }
-                    }}
-                  >
-                    <Text style={styles.actionLink}>Reject</Text>
-                  </TouchableOpacity>
-                </>
+                </View>
               ) : null}
               {leave.status === "DRAFT" && leave.employeeId === me?.employeeId ? (
                 <>
@@ -270,6 +281,41 @@ export default function WebLeaveListScreen() {
         )}
         {!loading && filtered.length === 0 ? <Text style={styles.meta}>No leave applications for this filter.</Text> : null}
       </WebCard>
+      <Modal visible={noteTarget != null} transparent animationType="fade" onRequestClose={() => setNoteTarget(null)}>
+        <Pressable style={styles.backdrop} onPress={() => setNoteTarget(null)}>
+          <Pressable style={styles.dialog} onPress={(event) => event.stopPropagation()}>
+            <View style={styles.dialogHead}>
+              <Text style={styles.name}>Add Approver Note for leave #{noteTarget}</Text>
+              <TouchableOpacity onPress={() => setNoteTarget(null)}>
+                <MaterialIcons name="close" size={18} color={colors.secondary} />
+              </TouchableOpacity>
+            </View>
+            <TextInput
+              style={styles.noteInput}
+              value={approverNote}
+              onChangeText={setApproverNote}
+              placeholder="Saved only if you choose Add Approver Note"
+              placeholderTextColor={colors.secondary}
+            />
+            <View style={styles.actionRow}>
+              <TouchableOpacity style={styles.rejectBtn} onPress={() => setNoteTarget(null)}>
+                <Text style={styles.rejectBtnText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.approveBtn}
+                onPress={() => {
+                  if (noteTarget == null) return;
+                  setNotes((current) => ({ ...current, [noteTarget]: approverNote.trim() }));
+                  setNoteTarget(null);
+                  setApproverNote("");
+                }}
+              >
+                <Text style={styles.approveBtnText}>Save note</Text>
+              </TouchableOpacity>
+            </View>
+          </Pressable>
+        </Pressable>
+      </Modal>
       <ThemedDialog
         visible={noteText != null}
         compact
@@ -299,6 +345,17 @@ const styles = StyleSheet.create({
   entry: { width: "100%", borderBottomWidth: 1, borderBottomColor: colors.surfaceContainerHighest, paddingBottom: 8 },
   section: { fontSize: 13, fontWeight: "700", color: colors.onSurface, marginTop: 12, marginBottom: 4 },
   actionLine: { flexDirection: "row", flexWrap: "wrap", gap: 8, paddingBottom: 10, justifyContent: "flex-end" },
+  actionsBox: { gap: 8, width: "100%", maxWidth: 420 },
+  actionRow: { flexDirection: "row", gap: 8 },
+  approveBtn: { flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", backgroundColor: colors.accent, height: 44, borderRadius: 4, gap: 4, paddingHorizontal: 8 },
+  approveBtnText: { color: colors.onPrimary, fontWeight: "700" },
+  rejectBtn: { flex: 1, flexDirection: "row", alignItems: "center", justifyContent: "center", height: 44, borderRadius: 4, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surfaceContainerLowest, gap: 4 },
+  rejectBtnText: { color: colors.onSurface, fontWeight: "700" },
+  noteBtn: { flexDirection: "row", alignItems: "center", justifyContent: "center", height: 44, gap: 4, borderWidth: 1, borderColor: colors.border, borderRadius: 4, backgroundColor: colors.surfaceContainerLowest },
+  noteBtnText: { color: colors.secondary, fontWeight: "700" },
+  backdrop: { flex: 1, backgroundColor: "rgba(0,0,0,0.35)", justifyContent: "center", alignItems: "center", padding: 24 },
+  dialog: { width: "100%", maxWidth: 420, backgroundColor: colors.surfaceContainerLowest, borderRadius: 12, padding: 16, gap: 12 },
+  dialogHead: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", gap: 8 },
   td: { fontSize: 13, color: colors.onSurface, paddingRight: 8 },
   meta: { fontSize: 12, color: colors.secondary, marginTop: 8 },
   link: { fontSize: 12, fontWeight: "700", color: colors.accentDeep },

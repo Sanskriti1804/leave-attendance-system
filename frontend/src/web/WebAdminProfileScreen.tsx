@@ -5,7 +5,6 @@ import { useRouter } from "expo-router";
 import { getSession, logout } from "../../services/auth";
 import { CompactNotifications } from "../components/ui/CompactNotifications";
 import { CompactAudit } from "../components/ui/CompactAudit";
-import { isTeamLead } from "../utils/workforce";
 import { apiErrorMessage, changePassword, displayName, getDepartment, getMe, getOrgSettings, listEmployees, type EmployeePublic, type OrganisationSettings } from "../../services/resources";
 import { colors } from "../theme";
 import { WebCard, WebShell } from "./WebShell";
@@ -87,7 +86,12 @@ export default function WebAdminProfileScreen() {
   }, []);
 
   const isGuest = me?.role === "guest_admin";
-  const showLead = me ? isTeamLead(directory, me.employeeId) : false;
+  const showLead = me?.employeeId != null && (settings?.teamLeadEmployeeIds ?? []).includes(me.employeeId);
+  const showApprover =
+    me?.employeeId != null &&
+    (settings?.teamApprovers ?? []).some(
+      (entry) => entry.employeeId === me.employeeId && entry.departmentId === me.departmentId,
+    );
   const name = me ? displayName(me) : "—";
 
   if (panel === "notifications") {
@@ -146,7 +150,7 @@ export default function WebAdminProfileScreen() {
         </View>
         <Text style={styles.name}>{name}</Text>
         {showLead ? <Text style={styles.activeTag}>Team Lead</Text> : null}
-        {showLead ? <Text style={styles.activeTag}>Approver</Text> : null}
+        {showApprover ? <Text style={styles.activeTag}>Approver</Text> : null}
         {error ? <Text style={styles.label}>{error}</Text> : null}
       </View>
       <View style={styles.stack}>

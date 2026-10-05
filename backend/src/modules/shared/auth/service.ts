@@ -10,6 +10,7 @@ import {
 } from "../utils/security.js";
 import { findEmployeeByEmail, findEmployeeById } from "../employees/repository.js";
 import type { EmployeePublic } from "../employees/repository.js";
+import { getOrganisationSettings } from "../organisation-settings/service.js";
 import { logger } from "../../../logger.js";
 import { isEmailDeliveryConfigured, sendPasswordResetEmail } from "../services/email.service.js";
 import * as authRepository from "./repository.js";
@@ -161,9 +162,11 @@ export async function getMe(employeeId: number) {
   if (!employee || employee.obsolete || employee.status !== "ACTIVE") {
     throw new HttpError(404, "NOT_FOUND", "Employee not found or inactive");
   }
-  const manager = employee.managerId ? await findEmployeeById(employee.managerId) : null;
-  const managerName = manager
-    ? [manager.firstName, manager.lastName].filter(Boolean).join(" ").trim()
+  const settings = await getOrganisationSettings();
+  const approverId = settings.teamApprovers.find((row) => row.departmentId === employee.departmentId)?.employeeId ?? null;
+  const approver = approverId && approverId !== employee.employeeId ? await findEmployeeById(approverId) : null;
+  const managerName = approver
+    ? [approver.firstName, approver.lastName].filter(Boolean).join(" ").trim()
     : null;
   return { ...toPublicEmployee(employee), managerName: managerName || null };
 }

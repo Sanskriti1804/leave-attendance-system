@@ -36,6 +36,8 @@ export type OrganisationSettings = {
   medicalDocExceedsDays?: number;
   maxAdvanceDays: number;
   leaveApproverEmployeeId?: number | null;
+  teamLeadEmployeeIds?: number[];
+  teamApprovers?: { departmentId: number; employeeId: number }[];
 };
 
 export type LeaveType = {

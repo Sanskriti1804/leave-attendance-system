@@ -9,7 +9,6 @@ import {
   getOrgSettings,
   listDepartments,
   listEmployees,
-  patchEmployee,
   patchOrgSettings,
   type Department,
   type EmployeePublic,
@@ -18,7 +17,7 @@ import { colors } from "../../theme";
 import { GlassCard, RoleBottomNav, ScreenGradient, ThemedDialog, ThemedToast } from "../../components/ui/AppChrome";
 import { SCROLL_UNDER_BOTTOM_NAV, TopNavBar, useTopNavContentInset } from "../../components/ui/AdminComponents";
 import { UserAvatar } from "../../components/ui/UserAvatar";
-import { isTeamLead, matchesPeopleQuery, mergeEmployees, reportsOfLead, teamMembersForLead } from "../../utils/workforce";
+import { matchesPeopleQuery } from "../../utils/workforce";
 
 export default function PeopleDirectoryScreen() {
   const topInset = useTopNavContentInset();
@@ -32,6 +31,8 @@ export default function PeopleDirectoryScreen() {
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const [approverId, setApproverId] = useState<number | null>(null);
+  const [teamLeadIds, setTeamLeadIds] = useState<number[]>([]);
+  const [teamApprovers, setTeamApprovers] = useState<{ departmentId: number; employeeId: number }[]>([]);
 
   useEffect(() => {
     let cancelled = false;
@@ -49,6 +50,8 @@ export default function PeopleDirectoryScreen() {
           setItems(people.items);
           setDepartments(depts.items);
           setApproverId(settings?.leaveApproverEmployeeId ?? null);
+          setTeamLeadIds(settings?.teamLeadEmployeeIds ?? []);
+          setTeamApprovers(settings?.teamApprovers ?? []);
         }
       } catch (err) {
         if (!cancelled) {
@@ -75,9 +78,9 @@ export default function PeopleDirectoryScreen() {
     }
     setSaving(true);
     try {
-      const targets = teamMembersForLead(items, lead.employeeId, lead.departmentId);
-      const updated = await Promise.all(targets.map((row) => patchEmployee(row.employeeId, { managerId: lead.employeeId })));
-      setItems((current) => mergeEmployees(current, updated));
+      const nextIds = teamLeadIds.includes(lead.employeeId) ? teamLeadIds : [...teamLeadIds, lead.employeeId];
+      const settings = await patchOrgSettings({ teamLeadEmployeeIds: nextIds });
+      setTeamLeadIds(settings.teamLeadEmployeeIds ?? nextIds);
       setToast(`${displayName(lead)} is now Team Lead for ${deptName(lead.departmentId)}.`);
     } catch (err) {
       setToast(apiErrorMessage(err));
@@ -93,9 +96,9 @@ export default function PeopleDirectoryScreen() {
     }
     setSaving(true);
     try {
-      const reports = reportsOfLead(items, lead.employeeId);
-      const updated = await Promise.all(reports.map((row) => patchEmployee(row.employeeId, { managerId: null })));
-      setItems((current) => mergeEmployees(current, updated));
+      const nextIds = teamLeadIds.filter((id) => id !== lead.employeeId);
+      const settings = await patchOrgSettings({ teamLeadEmployeeIds: nextIds });
+      setTeamLeadIds(settings.teamLeadEmployeeIds ?? nextIds);
       setSelected(null);
       setToast(`${displayName(lead)} is no longer Team Lead.`);
     } catch (err) {
@@ -110,22 +113,19 @@ export default function PeopleDirectoryScreen() {
       setToast("Guest Admin cannot change reporting relationships.");
       return;
     }
-    const currentApprover = items.find(
-      (row) =>
-        row.departmentId === person.departmentId &&
-        row.employeeId !== person.employeeId &&
-        items.some((member) => member.departmentId === person.departmentId && member.managerId === row.employeeId),
-    );
-    if (currentApprover) {
+    const current = teamApprovers.find((row) => row.departmentId === person.departmentId && row.employeeId !== person.employeeId);
+    if (current) {
       setToast("This team already has an Approver. Remove that Approver before assigning another.");
       return;
     }
     setSaving(true);
     try {
-      const targets = teamMembersForLead(items, person.employeeId, person.departmentId);
-      const updated = await Promise.all(targets.map((row) => patchEmployee(row.employeeId, { managerId: person.employeeId })));
-      setItems((current) => mergeEmployees(current, updated));
-      setApproverId(person.employeeId);
+      const next = [
+        ...teamApprovers.filter((row) => row.departmentId !== person.departmentId),
+        { departmentId: person.departmentId, employeeId: person.employeeId },
+      ];
+      const settings = await patchOrgSettings({ teamApprovers: next });
+      setTeamApprovers(settings.teamApprovers ?? next);
       setToast(`${displayName(person)} is now the Approver for this team.`);
     } catch (err) {
       setToast(apiErrorMessage(err));
@@ -141,10 +141,9 @@ export default function PeopleDirectoryScreen() {
     }
     setSaving(true);
     try {
-      const reports = items.filter((row) => row.managerId === person.employeeId);
-      const updated = await Promise.all(reports.map((row) => patchEmployee(row.employeeId, { managerId: null })));
-      setItems((current) => mergeEmployees(current, updated));
-      setApproverId(null);
+      const next = teamApprovers.filter((row) => row.employeeId !== person.employeeId);
+      const settings = await patchOrgSettings({ teamApprovers: next });
+      setTeamApprovers(settings.teamApprovers ?? next);
       setToast(`${displayName(person)} is no longer the Approver.`);
     } catch (err) {
       setToast(apiErrorMessage(err));
@@ -202,8 +201,8 @@ export default function PeopleDirectoryScreen() {
                   <TouchableOpacity key={row.employeeId} style={styles.personCard} activeOpacity={0.8} onPress={() => setSelected(row)}>
                     <UserAvatar employee={row} size={44} />
                     <Text style={styles.name} numberOfLines={1}>{displayName(row)}</Text>
-                    {isTeamLead(items, row.employeeId) ? <Text style={styles.leadTag}>Team Lead</Text> : null}
-                    {approverId === row.employeeId ? <Text style={styles.leadTag}>Approver</Text> : null}
+                    {teamLeadIds.includes(row.employeeId) ? <Text style={styles.leadTag}>Team Lead</Text> : null}
+                    {teamApprovers.some((entry) => entry.employeeId === row.employeeId) ? <Text style={styles.leadTag}>Approver</Text> : null}
                     <Text style={styles.meta} numberOfLines={1}>
                       {row.role.replaceAll("_", " ")} · EMP-{row.employeeId}
                     </Text>
@@ -228,10 +227,10 @@ export default function PeopleDirectoryScreen() {
                   { label: "Close", onPress: () => setSelected(null) },
                   ...(canAssign
                     ? [
-                        isTeamLead(items, selected.employeeId)
+                        teamLeadIds.includes(selected.employeeId)
                           ? { label: saving ? "Saving…" : "Remove Team Lead", onPress: () => void removeTeamLead(selected), primary: true }
                           : { label: saving ? "Saving…" : "Team Lead", onPress: () => void designateTeamLead(selected), primary: true },
-                        approverId === selected.employeeId
+                        teamApprovers.some((entry) => entry.departmentId === selected.departmentId && entry.employeeId === selected.employeeId)
                           ? { label: saving ? "Saving…" : "Remove Approver", onPress: () => void removeApprover(selected) }
                           : { label: saving ? "Saving…" : "Approver", onPress: () => void designateApprover(selected) },
                       ]
@@ -242,13 +241,17 @@ export default function PeopleDirectoryScreen() {
         >
           {selected ? (
             <View style={{ gap: 6 }}>
-              {isTeamLead(items, selected.employeeId) ? <Text style={styles.leadTag}>Team Lead</Text> : null}
-              {approverId === selected.employeeId ? <Text style={styles.leadTag}>Approver</Text> : null}
+              {teamLeadIds.includes(selected.employeeId) ? <Text style={styles.leadTag}>Team Lead</Text> : null}
+              {teamApprovers.some((entry) => entry.employeeId === selected.employeeId) ? <Text style={styles.leadTag}>Approver</Text> : null}
               <Text style={styles.meta}>{selected.email}</Text>
               <Text style={styles.meta}>{deptName(selected.departmentId)}</Text>
               <Text style={styles.meta}>{selected.role.replaceAll("_", " ")} · EMP-{selected.employeeId}</Text>
               <Text style={styles.meta}>
-                Reporting manager: {selected.managerId ? displayName(items.find((row) => row.employeeId === selected.managerId) ?? null) : "—"}
+                Approver: {(() => {
+                  const entry = teamApprovers.find((row) => row.departmentId === selected.departmentId);
+                  const approver = entry ? items.find((row) => row.employeeId === entry.employeeId) : null;
+                  return approver ? displayName(approver) : "Not assigned";
+                })()}
               </Text>
             </View>
           ) : null}

@@ -15,6 +15,10 @@ export const updateOrganisationSettingsBodySchema = z
     medicalDocExceedsDays: z.number().int().min(1).optional(),
     maxAdvanceDays: z.number().int().min(1).optional(),
     leaveApproverEmployeeId: z.number().int().positive().nullable().optional(),
+    teamLeadEmployeeIds: z.array(z.number().int().positive()).optional(),
+    teamApprovers: z
+      .array(z.object({ departmentId: z.number().int().positive(), employeeId: z.number().int().positive() }))
+      .optional(),
   })
   .refine((body) => Object.values(body).some((value) => value !== undefined), {
     message: "At least one field is required",

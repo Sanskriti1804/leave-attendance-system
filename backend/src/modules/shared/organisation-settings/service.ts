@@ -15,6 +15,8 @@ export type OrganisationSettings = {
   medicalDocExceedsDays: number;
   maxAdvanceDays: number;
   leaveApproverEmployeeId: number | null;
+  teamLeadEmployeeIds: number[];
+  teamApprovers: { departmentId: number; employeeId: number }[];
 };
 
 const DEFAULTS: OrganisationSettings = {
@@ -29,6 +31,8 @@ const DEFAULTS: OrganisationSettings = {
   medicalDocExceedsDays: 2,
   maxAdvanceDays: env.leaveMaxAdvanceDays,
   leaveApproverEmployeeId: null,
+  teamLeadEmployeeIds: [],
+  teamApprovers: [],
 };
 
 type SettingType = "string" | "number" | "boolean" | "json";
@@ -45,6 +49,8 @@ const KEY_TYPES: Record<keyof OrganisationSettings, SettingType> = {
   medicalDocExceedsDays: "number",
   maxAdvanceDays: "number",
   leaveApproverEmployeeId: "number",
+  teamLeadEmployeeIds: "json",
+  teamApprovers: "json",
 };
 
 function parseValue(row: ConfigurationSetting): unknown {
@@ -71,7 +77,12 @@ function serializeValue(value: unknown, type: SettingType): string {
 }
 
 function toOrganisationSettings(rows: ConfigurationSetting[]): OrganisationSettings {
-  const settings: OrganisationSettings = { ...DEFAULTS, weeklyOffDow: [...DEFAULTS.weeklyOffDow] };
+  const settings: OrganisationSettings = {
+    ...DEFAULTS,
+    weeklyOffDow: [...DEFAULTS.weeklyOffDow],
+    teamLeadEmployeeIds: [...DEFAULTS.teamLeadEmployeeIds],
+    teamApprovers: [...DEFAULTS.teamApprovers],
+  };
   for (const row of rows) {
     if (!(row.settingKey in KEY_TYPES)) {
       continue;
@@ -85,6 +96,26 @@ function toOrganisationSettings(rows: ConfigurationSetting[]): OrganisationSetti
     if (key === "leaveApproverEmployeeId") {
       const id = Number(parsed);
       settings.leaveApproverEmployeeId = Number.isInteger(id) && id > 0 ? id : null;
+      continue;
+    }
+    if (key === "teamLeadEmployeeIds") {
+      settings.teamLeadEmployeeIds = Array.isArray(parsed)
+        ? parsed.filter((id): id is number => Number.isInteger(id) && id > 0)
+        : [];
+      continue;
+    }
+    if (key === "teamApprovers") {
+      settings.teamApprovers = Array.isArray(parsed)
+        ? parsed.flatMap((row) => {
+            if (!row || typeof row !== "object") return [];
+            const departmentId = Number((row as { departmentId?: unknown }).departmentId);
+            const employeeId = Number((row as { employeeId?: unknown }).employeeId);
+            if (!Number.isInteger(departmentId) || departmentId <= 0 || !Number.isInteger(employeeId) || employeeId <= 0) {
+              return [];
+            }
+            return [{ departmentId, employeeId }];
+          })
+        : [];
       continue;
     }
     (settings[key] as unknown) = parsed;

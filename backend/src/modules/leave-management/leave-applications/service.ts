@@ -354,16 +354,14 @@ async function persistLeave(
 
 async function reportingManagerForSubmit(employee: {
   employeeId: number;
-  managerId: number | null;
+  departmentId: number;
 }): Promise<number | null> {
-  const [reportCount, settings] = await Promise.all([
-    prisma.employee.count({ where: { managerId: employee.employeeId, obsolete: false } }),
-    getOrganisationSettings(),
-  ]);
-  if (reportCount > 0 || settings.leaveApproverEmployeeId === employee.employeeId) {
+  const settings = await getOrganisationSettings();
+  const approverId = settings.teamApprovers.find((row) => row.departmentId === employee.departmentId)?.employeeId ?? null;
+  if (approverId == null || approverId === employee.employeeId) {
     return null;
   }
-  return employee.managerId;
+  return approverId;
 }
 
 async function applySubmitTransitions(
@@ -475,7 +473,7 @@ export async function createDraft(actor: AuthTokenPayload, body: LeaveApplicatio
       leaveTypeId: body.leaveTypeId,
       reason: body.reason,
       prepared,
-      reportingManagerEmployeeId: employee.managerId,
+      reportingManagerEmployeeId: await reportingManagerForSubmit(employee),
       status: "DRAFT",
       managerApprovalStatus: null,
     });
@@ -546,7 +544,7 @@ export async function updateDraft(actor: AuthTokenPayload, leaveId: number, body
       leaveTypeId: merged.leaveTypeId,
       reason: merged.reason,
       prepared,
-      reportingManagerEmployeeId: employee.managerId,
+      reportingManagerEmployeeId: await reportingManagerForSubmit(employee),
       status: "DRAFT",
       managerApprovalStatus: null,
     });

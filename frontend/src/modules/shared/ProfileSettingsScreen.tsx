@@ -72,7 +72,7 @@ export default function ProfileSettingsScreen() {
           }
         }
         if (!cancelled) {
-          setManagerName(profile?.managerName?.trim() || (profile?.managerId ? "—" : "Not assigned"));
+          setManagerName(profile?.managerName?.trim() || "Not assigned");
         }
       } catch (err) {
         if (!cancelled) {
@@ -92,7 +92,7 @@ export default function ProfileSettingsScreen() {
   const joiningDate = me?.joiningDate ? formatJoining(me.joiningDate) : "—";
   const status = me?.status ?? (loading ? "—" : "—");
   const deptValue = me?.departmentId ? departmentName : "—";
-  const teamLeadName = me?.managerId ? managerName : "Not assigned";
+  const teamLeadName = managerName.trim() && managerName !== "—" ? managerName : "Not assigned";
 
   return (
     <ScreenGradient>

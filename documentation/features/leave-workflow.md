@@ -54,7 +54,7 @@ LV-APP-18 HR absence. Who may cancel/withdraw already approved leave.
 
 ## Change History
 
-2026-10-05 — Leave list drops the My Leave Requests heading and uses a hyphen between dates. Apply Leave shows From/To and Selected Days under the calendar. Full Day and Half Day apply to every selected date. A second Approver in the same team is blocked. Approver rejection notifies Admin.
+2026-10-05 — Team Lead is a tag in organisation settings and does not set the leave approver. Approver still sets each teammate's managerId, which is copied onto a leave at submit and is not changed when the team approver changes later. Apply Leave shows From/To and Selected Days under the calendar. Full Day and Half Day apply to every selected date. A second Approver in the same team is blocked. Approver rejection notifies Admin.
 
 2026-10-05 — Leave lists put existing row actions under each entry. Team Approver assignment sets `managerId` for that department's members (existing reporting-manager path). Approver notes use `managerComments`. Calendar holiday add/change opens a dialog. Apply Leave selected dates have a per-date session menu. All leave application rows were deleted for a clean test slate. APIs and calculations unchanged.
 

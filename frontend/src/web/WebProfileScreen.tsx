@@ -63,7 +63,7 @@ export default function WebProfileScreen() {
           }
         }
         if (!cancelled) {
-          setManagerName(profile?.managerName?.trim() || (profile?.managerId ? "—" : "Not assigned"));
+          setManagerName(profile?.managerName?.trim() || "Not assigned");
         }
       } catch (err) {
         if (!cancelled) setError(apiErrorMessage(err));
@@ -106,7 +106,7 @@ export default function WebProfileScreen() {
             <Text style={styles.activeTag}>{me?.status ?? "Active"}</Text>
           </View>
           <Row label="Department" value={departmentName} />
-          <Row label="Approver" value={me?.managerId ? managerName : "Not assigned"} />
+          <Row label="Approver" value={managerName.trim() && managerName !== "—" ? managerName : "Not assigned"} />
           <Row label="Joining Date" value={me?.joiningDate ? `${formatJoining(me.joiningDate)} · Ongoing` : formatJoining(me?.joiningDate)} />
         </WebCard>
         <WebCard style={styles.fullCard}>

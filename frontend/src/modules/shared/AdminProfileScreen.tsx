@@ -21,8 +21,6 @@ import { UserAvatar } from "../../components/ui/UserAvatar";
 import { pickAndSaveProfilePhoto } from "../../../services/profilePhoto";
 import { CompactNotifications } from "../../components/ui/CompactNotifications";
 import { CompactAudit } from "../../components/ui/CompactAudit";
-import { isTeamLead } from "../../utils/workforce";
-
 function formatJoining(value: string | null | undefined): string {
   if (!value) {
     return "—";
@@ -98,7 +96,12 @@ export default function AdminProfileScreen() {
 
   const isGuest = me?.role === "guest_admin";
   const name = me ? displayName(me) : "—";
-  const showLead = me ? isTeamLead(directory, me.employeeId) : false;
+  const showLead = me?.employeeId != null && (settings?.teamLeadEmployeeIds ?? []).includes(me.employeeId);
+  const showApprover =
+    me?.employeeId != null &&
+    (settings?.teamApprovers ?? []).some(
+      (entry) => entry.employeeId === me.employeeId && entry.departmentId === me.departmentId,
+    );
 
   return (
     <ScreenGradient>
@@ -130,7 +133,7 @@ export default function AdminProfileScreen() {
                 <Text style={styles.activeTagText}>Team Lead</Text>
               </View>
             ) : null}
-            {showLead ? (
+            {showApprover ? (
               <View style={styles.activeTag}>
                 <Text style={styles.activeTagText}>Approver</Text>
               </View>
