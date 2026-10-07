@@ -30,8 +30,8 @@ Roles are Confirmed (AUTH-09). The guest = read-only matrix is **Proposed**.
 
 **API implemented.** Email/password (AUTH-10 Confirmed; TTL/provisioning Open).
 
-1. `POST /api/v1/auth/login` — bcrypt + pepper; returns access token, refresh token, user (id, email, role). Login is rate-limited.
-2. Later calls send `Authorization: Bearer <access>`. Server loads role from the token/DB — **never** from the client body.
+1. `POST /api/v1/auth/login` — bcrypt + pepper; sets `HttpOnly` cookies `lams_access` and `lams_refresh`; JSON returns `{ expiresIn, user }` only. Login is rate-limited.
+2. Later calls send the cookies (`credentials: include`). `Authorization: Bearer` is still accepted. Server loads role from the token/DB — **never** from the client body.
 3. `POST /auth/refresh` rotates the refresh token. `POST /auth/logout` ends the session. `GET /auth/me` is the current user + employee.
 4. Forgot/reset password and change-password exist on the API. Forgot always looks like success (no email enumeration).
 

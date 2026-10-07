@@ -42,7 +42,7 @@ async function request(
   method: string,
   pathName: string,
   options: { body?: unknown; token?: string; raw?: boolean } = {},
-): Promise<{ status: number; json: Json; text: string }> {
+): Promise<{ status: number; json: Json; text: string; cookies: string[] }> {
   const headers: Record<string, string> = {};
   if (options.token) {
     headers.authorization = `Bearer ${options.token}`;
@@ -64,7 +64,8 @@ async function request(
       json = {};
     }
   }
-  return { status: res.status, json, text };
+  const cookies = typeof res.headers.getSetCookie === "function" ? res.headers.getSetCookie() : [];
+  return { status: res.status, json, text, cookies };
 }
 
 function expect(
@@ -240,12 +241,18 @@ async function run(): Promise<void> {
     expect("login wrong password 401", wrongPw.status, 401);
     expect("login INVALID_CREDENTIALS", errorCode(wrongPw.json), "INVALID_CREDENTIALS");
 
+    function authCookie(cookies: string[], name: string): string {
+      const row = cookies.find((item) => item.startsWith(`${name}=`));
+      if (!row) return "";
+      return decodeURIComponent(row.split(";")[0].slice(name.length + 1));
+    }
+
     async function login(email: string, pw = password) {
       const res = await request(base, "POST", "/api/v1/auth/login", { body: { email, password: pw } });
       expect(`login ${email} 200`, res.status, 200, JSON.stringify(res.json));
       return {
-        access: String(res.json.accessToken ?? ""),
-        refresh: String(res.json.refreshToken ?? ""),
+        access: authCookie(res.cookies, "lams_access"),
+        refresh: authCookie(res.cookies, "lams_refresh"),
       };
     }
 
@@ -270,15 +277,15 @@ async function run(): Promise<void> {
       body: { refreshToken: adminSess.refresh },
     });
     expect("refresh 200", refreshed.status, 200);
-    expect("refresh rotates token", refreshed.json.refreshToken === adminSess.refresh, false);
+    expect("refresh rotates token", authCookie(refreshed.cookies, "lams_refresh") === adminSess.refresh, false);
 
     const reuseRefresh = await request(base, "POST", "/api/v1/auth/refresh", {
       body: { refreshToken: adminSess.refresh },
     });
     expect("old refresh rejected", reuseRefresh.status, 401);
 
-    adminSess.access = String(refreshed.json.accessToken);
-    adminSess.refresh = String(refreshed.json.refreshToken);
+    adminSess.access = authCookie(refreshed.cookies, "lams_access");
+    adminSess.refresh = authCookie(refreshed.cookies, "lams_refresh");
 
     const forgotUnknown = await request(base, "POST", "/api/v1/auth/forgot-password", {
       body: { email: `missing.${suffix}@example.com` },
@@ -359,8 +366,8 @@ async function run(): Promise<void> {
     expect("new password after change 200", loginNew.status, 200);
 
     const logout = await request(base, "POST", "/api/v1/auth/logout", {
-      body: { refreshToken: String(loginNew.json.refreshToken) },
-      token: String(loginNew.json.accessToken),
+      body: { refreshToken: authCookie(loginNew.cookies, "lams_refresh") },
+      token: authCookie(loginNew.cookies, "lams_access"),
     });
     expect("logout 204", logout.status, 204);
 
@@ -489,7 +496,7 @@ async function run(): Promise<void> {
       body: { email: `hire.${suffix}@example.com`, password: "Employee2Pass123!" },
     });
     expect("login created hire 200", hireLogin.status, 200);
-    const hireToken = String(hireLogin.json.accessToken ?? "");
+    const hireToken = authCookie(hireLogin.cookies, "lams_access");
 
     console.log("\n=== Org settings ===");
     const orgGet = await request(base, "GET", "/api/v1/org-settings", { token: empSess.access });

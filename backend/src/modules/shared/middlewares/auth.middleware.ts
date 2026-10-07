@@ -2,6 +2,7 @@ import type { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import { findEmployeeById } from "../employees/repository.js";
 import { HttpError } from "../utils/http-error.js";
+import { ACCESS_COOKIE, readCookie } from "../auth/cookies.js";
 import { verifyAccessToken } from "../utils/security.js";
 
 export async function authenticate(
@@ -10,14 +11,12 @@ export async function authenticate(
   next: NextFunction,
 ): Promise<void> {
   try {
-    const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      throw new HttpError(401, "UNAUTHORIZED", "Authorization token is missing or malformed");
-    }
-
-    const token = authHeader.slice(7).trim();
+    const header = req.headers.authorization;
+    const token = header?.startsWith("Bearer ")
+      ? header.slice(7).trim()
+      : readCookie(req, ACCESS_COOKIE);
     if (!token) {
-      throw new HttpError(401, "UNAUTHORIZED", "Authorization token is missing");
+      throw new HttpError(401, "UNAUTHORIZED", "Authorization token is missing or malformed");
     }
 
     let payload;

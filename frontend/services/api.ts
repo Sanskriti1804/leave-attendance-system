@@ -50,7 +50,7 @@ export async function apiRequest<T>(path: string, init: ApiRequestInit = {}): Pr
   const url = `${getApiBaseUrl()}${path.startsWith("/") ? path : `/${path}`}`;
   let response: Response;
   try {
-    response = await fetch(url, { ...init, headers, body });
+    response = await fetch(url, { ...init, headers, body, credentials: "include" });
   } catch {
     throw new Error(
       `Cannot reach the API at ${getApiBaseUrl()}. Check EXPO_PUBLIC_API_URL and that the backend is running.`,

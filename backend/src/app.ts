@@ -25,11 +25,15 @@ export function createApp() {
   const app = express();
   app.use(helmet());
   app.use(
-    env.corsOrigins.length > 0
-      ? cors({ origin: env.corsOrigins })
-      : env.nodeEnv === "production"
-        ? cors({ origin: false })
-        : cors(),
+    cors({
+      origin:
+        env.corsOrigins.length > 0
+          ? env.corsOrigins
+          : env.nodeEnv === "production"
+            ? false
+            : true,
+      credentials: true,
+    }),
   );
   app.use(express.json({ limit: "1mb" }));
   app.use(pinoHttp({ logger }));

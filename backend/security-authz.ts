@@ -45,7 +45,7 @@ async function request(
   method: string,
   pathName: string,
   options: { body?: unknown; token?: string } = {},
-): Promise<{ status: number; json: Json; text: string }> {
+): Promise<{ status: number; json: Json; text: string; cookies: string[] }> {
   const headers: Record<string, string> = {};
   if (options.token) headers.authorization = `Bearer ${options.token}`;
   let body: string | undefined;
@@ -63,13 +63,15 @@ async function request(
       json = {};
     }
   }
-  return { status: res.status, json, text };
+  const cookies = typeof res.headers.getSetCookie === "function" ? res.headers.getSetCookie() : [];
+  return { status: res.status, json, text, cookies };
 }
 
 async function login(base: string, email: string, password: string): Promise<string> {
   const res = await request(base, "POST", "/api/v1/auth/login", { body: { email, password } });
   assert.equal(res.status, 200, `login ${email}`);
-  return String(res.json.accessToken);
+  const row = res.cookies.find((item) => item.startsWith("lams_access="));
+  return row ? decodeURIComponent(row.split(";")[0].slice("lams_access=".length)) : "";
 }
 
 function probeCors(nodeEnv: string, corsOrigin: string, requestOrigin: string): { status: number; allowOrigin: string | null } {
@@ -359,7 +361,8 @@ async function run(): Promise<void> {
     if (env.nodeEnv !== "production") {
       const dev = await fetch(`${base}/health/health`, { headers: { origin: "https://evil.example" } });
       expect("development still answers health 200", dev.status, 200);
-      expect("development still allows any browser origin", dev.headers.get("access-control-allow-origin"), "*");
+      expect("development reflects the requesting origin", dev.headers.get("access-control-allow-origin"), "https://evil.example");
+      expect("development allows credentials", dev.headers.get("access-control-allow-credentials"), "true");
     }
     const closed = probeCors("production", "", "https://evil.example");
     expect("production without CORS_ORIGIN health 200", closed.status, 200);

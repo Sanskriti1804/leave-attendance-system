@@ -51,6 +51,8 @@ Session TTL; invite vs temporary password; self-approval of own leave by admin (
 
 ## Change History
 
+2026-10-07 — Web session tokens moved to `HttpOnly` cookies. Login/refresh JSON no longer includes tokens. The client stores only email, user, and a cookie flag.
+
 2026-09-23 — Password reset emails use SMTP when `SMTP_HOST` is set. The link opens `/reset-password` on Web and Android. Token stays 15 minutes and single-use.
 
 2026-09-22 — Client uses existing `POST /auth/refresh` when access tokens expire; Remember me controls persistence; failed splash `/me` goes to login.

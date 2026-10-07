@@ -18,7 +18,7 @@ Separate **Confirmed** requirements from **Proposed** engineering controls.
 
 ## Proposed (not signed)
 
-- HTTPS; Bearer JWT; server checks `exp`.
+- HTTPS; JWT in `HttpOnly` cookies (`SameSite=Lax`; `Secure` when `NODE_ENV=production`); Bearer still accepted; server checks `exp`.
 - Express authorization plus Postgres RLS. Do not rely on RLS alone if using the service role.
 - Private Storage bucket; upload via Express service role; signed download after authz.
 - Magic-byte + allowlist on uploads; technical cap **10 MiB until MED-06** (TD-17).

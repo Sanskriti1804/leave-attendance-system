@@ -6,11 +6,12 @@ export type Credentials = {
 };
 
 export type AuthSession = {
-  token: string;
+  token?: string;
   refreshToken?: string;
   email: string;
   user?: unknown;
   persist?: boolean;
+  cookie?: boolean;
 };
 
 const SESSION_KEY = "lams.auth.session";
@@ -35,7 +36,10 @@ function parseSession(raw: string | null): AuthSession | null {
   }
   try {
     const parsed = JSON.parse(raw) as AuthSession;
-    if (!parsed?.token) {
+    if (parsed?.token || parsed?.refreshToken) {
+      return null;
+    }
+    if (!parsed?.cookie && !parsed?.email) {
       return null;
     }
     return parsed;
@@ -47,15 +51,19 @@ function parseSession(raw: string | null): AuthSession | null {
 function readWebSession(): AuthSession | null {
   try {
     if (canUseStorage("localStorage")) {
-      const stored = parseSession(localStorage.getItem(SESSION_KEY));
+      const raw = localStorage.getItem(SESSION_KEY);
+      const stored = parseSession(raw);
+      if (raw && !stored) localStorage.removeItem(SESSION_KEY);
       if (stored) {
-        return { ...stored, persist: stored.persist !== false };
+        return { ...stored, persist: stored.persist !== false, cookie: true };
       }
     }
     if (canUseStorage("sessionStorage")) {
-      const stored = parseSession(sessionStorage.getItem(SESSION_KEY));
+      const raw = sessionStorage.getItem(SESSION_KEY);
+      const stored = parseSession(raw);
+      if (raw && !stored) sessionStorage.removeItem(SESSION_KEY);
       if (stored) {
-        return { ...stored, persist: false };
+        return { ...stored, persist: false, cookie: true };
       }
     }
   } catch {
@@ -149,17 +157,20 @@ async function writeNativeSession(session: AuthSession | null): Promise<void> {
 
 function persistSession(session: AuthSession | null): void {
   currentSession = session;
+  const webSession = session?.cookie
+    ? { email: session.email, user: session.user, persist: session.persist !== false, cookie: true }
+    : null;
   try {
     if (canUseStorage("localStorage")) {
-      if (!session || session.persist === false) {
+      if (!webSession || webSession.persist === false) {
         localStorage.removeItem(SESSION_KEY);
       } else {
-        localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+        localStorage.setItem(SESSION_KEY, JSON.stringify(webSession));
       }
     }
     if (canUseStorage("sessionStorage")) {
-      if (session && session.persist === false) {
-        sessionStorage.setItem(SESSION_KEY, JSON.stringify(session));
+      if (webSession && webSession.persist === false) {
+        sessionStorage.setItem(SESSION_KEY, JSON.stringify(webSession));
       } else {
         sessionStorage.removeItem(SESSION_KEY);
       }
@@ -167,7 +178,7 @@ function persistSession(session: AuthSession | null): void {
   } catch {
     // Native runtimes without web storage keep the in-memory session only.
   }
-  void writeNativeSession(session);
+  void writeNativeSession(session?.cookie ? webSession : null);
 }
 
 export async function login(credentials: Credentials, options?: { persist?: boolean }): Promise<AuthSession> {
@@ -176,8 +187,6 @@ export async function login(credentials: Credentials, options?: { persist?: bool
   }
 
   const result = await apiRequest<{
-    accessToken: string;
-    refreshToken?: string;
     user?: unknown;
   }>(authPath("/login"), {
     method: "POST",
@@ -185,11 +194,10 @@ export async function login(credentials: Credentials, options?: { persist?: bool
   });
 
   persistSession({
-    token: result.accessToken,
-    refreshToken: result.refreshToken,
     email: credentials.email,
     user: result.user,
     persist: options?.persist !== false,
+    cookie: true,
   });
   return currentSession!;
 }
@@ -202,9 +210,9 @@ export async function login(credentials: Credentials, options?: { persist?: bool
 export async function passLogin(): Promise<AuthSession> {
   await new Promise((resolve) => setTimeout(resolve, 200));
   persistSession({
-    token: "dev-pass-token",
     email: "developer@local",
     persist: false,
+    cookie: true,
   });
   return currentSession!;
 }
@@ -213,10 +221,10 @@ export async function logout(): Promise<void> {
   await hydrate();
   const session = currentSession;
   try {
-    if (session?.token && session.token !== "dev-pass-token") {
+    if (session?.cookie && session.email !== "developer@local") {
       await authorizedRequest(authPath("/logout"), {
         method: "POST",
-        body: session.refreshToken ? { refreshToken: session.refreshToken } : {},
+        body: {},
       });
     }
   } catch {
@@ -233,7 +241,7 @@ export async function getSession(): Promise<AuthSession | null> {
 async function refreshAccessToken(): Promise<boolean> {
   await hydrate();
   const session = currentSession;
-  if (!session?.refreshToken || session.token === "dev-pass-token") {
+  if (!session?.cookie || session.email === "developer@local") {
     return false;
   }
   if (refreshInFlight) {
@@ -241,19 +249,14 @@ async function refreshAccessToken(): Promise<boolean> {
   }
   refreshInFlight = (async () => {
     try {
-      const result = await apiRequest<{
-        accessToken: string;
-        refreshToken?: string;
-        user?: unknown;
-      }>(authPath("/refresh"), {
+      const result = await apiRequest<{ user?: unknown }>(authPath("/refresh"), {
         method: "POST",
-        body: { refreshToken: session.refreshToken },
+        body: {},
       });
       persistSession({
         ...session,
-        token: result.accessToken,
-        refreshToken: result.refreshToken ?? session.refreshToken,
         user: result.user ?? session.user,
+        cookie: true,
       });
       return true;
     } catch {
@@ -273,9 +276,6 @@ function shouldRefresh(err: unknown): boolean {
 export async function authorizedRequest<T>(path: string, init: ApiRequestInit = {}): Promise<T> {
   await hydrate();
   const headers = new Headers(init.headers);
-  if (currentSession?.token) {
-    headers.set("Authorization", `Bearer ${currentSession.token}`);
-  }
   try {
     return await apiRequest<T>(path, { ...init, headers });
   } catch (err) {
@@ -283,30 +283,23 @@ export async function authorizedRequest<T>(path: string, init: ApiRequestInit = 
       throw err;
     }
     const refreshed = await refreshAccessToken();
-    if (!refreshed || !currentSession?.token) {
+    if (!refreshed) {
       throw err;
     }
-    const retryHeaders = new Headers(init.headers);
-    retryHeaders.set("Authorization", `Bearer ${currentSession.token}`);
-    return apiRequest<T>(path, { ...init, headers: retryHeaders });
+    return apiRequest<T>(path, { ...init, headers: new Headers(init.headers) });
   }
 }
 
 export async function authorizedFetch(path: string, init: RequestInit = {}): Promise<Response> {
   await hydrate();
   const headers = new Headers(init.headers);
-  if (currentSession?.token) {
-    headers.set("Authorization", `Bearer ${currentSession.token}`);
-  }
   const { getApiBaseUrl } = await import("./api");
   const url = `${getApiBaseUrl()}${path.startsWith("/") ? path : `/${path}`}`;
-  let response = await fetch(url, { ...init, headers });
-  if (response.status === 401 && currentSession?.refreshToken) {
+  let response = await fetch(url, { ...init, headers, credentials: "include" });
+  if (response.status === 401 && currentSession?.cookie) {
     const refreshed = await refreshAccessToken();
-    if (refreshed && currentSession?.token) {
-      const retryHeaders = new Headers(init.headers);
-      retryHeaders.set("Authorization", `Bearer ${currentSession.token}`);
-      response = await fetch(url, { ...init, headers: retryHeaders });
+    if (refreshed) {
+      response = await fetch(url, { ...init, headers: new Headers(init.headers), credentials: "include" });
     }
   }
   return response;
