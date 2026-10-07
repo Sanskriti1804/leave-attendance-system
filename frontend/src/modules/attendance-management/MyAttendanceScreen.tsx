@@ -15,6 +15,7 @@ import { useRouter } from "expo-router";
 import {
   apiErrorMessage,
   getMyAttendance,
+  listHolidays,
   type AttendanceHistory,
   type AttendanceRecord,
 } from "../../../services/resources";
@@ -101,12 +102,34 @@ function statusText(status: string): string {
   return status.replaceAll("-", " ").replaceAll("_", " ");
 }
 
+/**
+ * Exception filter: Strictly days where the employee forgot either check-in or check-out
+ * (one timestamp exists and the other is missing).
+ */
 function isException(item: AttendanceRecord): boolean {
   return (
+    (item.checkIn !== null && item.checkOut === null) ||
+    (item.checkIn === null && item.checkOut !== null) ||
+    item.status === "Missing Check-In" ||
+    item.status === "Missing Check-Out"
+  );
+}
+
+/**
+ * Absent filter: Days where check-in and check-out are BOTH missing, or status is Absent
+ * (excluding Weekly Off, Holiday, and On Leave).
+ */
+function isAbsent(item: AttendanceRecord): boolean {
+  if (
+    item.status === "Weekly Off" ||
+    item.status === "Holiday" ||
+    item.status === "On Leave"
+  ) {
+    return false;
+  }
+  return (
     item.status === "Absent" ||
-    item.status === "Half-Day" ||
-    item.lateMinutes > 0 ||
-    (item.checkIn !== null && item.checkOut === null)
+    (item.checkIn === null && item.checkOut === null)
   );
 }
 
@@ -116,12 +139,28 @@ export default function MyAttendanceScreen() {
 
   const [month, setMonth] = useState(() => getTodayIST().slice(0, 7));
   const [selectedDateStr, setSelectedDateStr] = useState<string | null>(null);
+  const [holidayDates, setHolidayDates] = useState<Set<string>>(new Set());
   const [page, setPage] = useState(1);
   const [filter, setFilter] = useState<Filter>("all");
   const [data, setData] = useState<AttendanceHistory | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selected, setSelected] = useState<AttendanceRecord | null>(null);
+
+  useEffect(() => {
+    listHolidays()
+      .then((res) => {
+        const dates = new Set<string>();
+        for (const h of res.items) {
+          if (h.holidayDate) {
+            dates.add(h.holidayDate);
+            dates.add(h.holidayDate.slice(5));
+          }
+        }
+        setHolidayDates(dates);
+      })
+      .catch(() => {});
+  }, []);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -152,6 +191,7 @@ export default function MyAttendanceScreen() {
       (data?.items ?? []).filter((item) => {
         if (filter === "all") return true;
         if (filter === "exceptions") return isException(item);
+        if (filter === "Absent") return isAbsent(item);
         return item.status === filter;
       }),
     [data, filter]
@@ -172,6 +212,7 @@ export default function MyAttendanceScreen() {
 
     if (name === "all") return data?.total ?? 0;
     if (name === "exceptions") return items.filter(isException).length;
+    if (name === "Absent") return items.filter(isAbsent).length;
 
     return items.filter((item) => item.status === name).length;
   };
@@ -442,6 +483,7 @@ export default function MyAttendanceScreen() {
           }}
           minYear={2020}
           maxYear={Number(getTodayIST().slice(0, 4)) + 1}
+          holidayDates={holidayDates}
         />
 
         <EmployeeBottomNavBar activeRoute="attendance" />

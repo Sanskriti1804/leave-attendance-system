@@ -10,6 +10,7 @@ export interface DatePickerModalProps {
   onSelect: (date: string) => void;
   minYear?: number;
   maxYear?: number;
+  holidayDates?: Set<string>;
 }
 
 const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
@@ -22,6 +23,7 @@ export function DatePickerModal({
   onSelect,
   minYear = 2020,
   maxYear = 2030,
+  holidayDates,
 }: DatePickerModalProps) {
   const initialDateParts = useMemo(() => {
     if (value && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
@@ -158,6 +160,8 @@ export function DatePickerModal({
           <View style={styles.daysGrid}>
             {calendarDays.map((item, index) => {
               const isSelected = item.currentMonth && item.dateStr === selectedDate;
+              const monthDay = item.dateStr ? item.dateStr.slice(5) : "";
+              const isHoliday = item.currentMonth && !!holidayDates && (holidayDates.has(item.dateStr) || holidayDates.has(monthDay));
               return (
                 <TouchableOpacity
                   key={index}
@@ -168,6 +172,7 @@ export function DatePickerModal({
                   <Text style={[
                     styles.dayText, 
                     !item.currentMonth && styles.dayTextDisabled,
+                    isHoliday && !isSelected && styles.dayTextHoliday,
                     isSelected && styles.dayTextSelected
                   ]}>
                     {item.day}
@@ -315,6 +320,10 @@ const styles = StyleSheet.create({
   dayTextDisabled: {
     color: colors.secondary,
     opacity: 0.5,
+  },
+  dayTextHoliday: {
+    color: "#D32F2F",
+    fontWeight: "700",
   },
   dayTextSelected: {
     color: colors.onPrimary,
